@@ -9,6 +9,9 @@ router.use('/order', order);
 var pricing = require("./pricing");
 router.use('/pricing', pricing);
 
+var branchRouter = require("./branch");
+router.use("/branch" , branchRouter);
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   	res.send({"status": "In home page"});
