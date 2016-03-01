@@ -7,7 +7,7 @@ var SubBranchModel = require("./branch/subBranch");
 var RegionModel = require("./region/region");
 
 var Region = sequelize.define("region" , {    
-    name: Sequalize.STRING
+    name: Sequelize.STRING
 });
 var RegionalBranch = sequelize.define("regionalBranch" ,{
     label: Sequelize.STRING,
@@ -20,7 +20,6 @@ var SubBranch = sequelize.define("subBranch" , {
     position: Sequelize.GEOMETRY
 });
 
-//Region.hasOne(RegionalBranch);
 RegionalBranch.belongsTo(Region);
 
 RegionalBranch.hasMany(SubBranch);
@@ -28,29 +27,10 @@ RegionalBranch.hasMany(SubBranch);
 sequelize.sync({"force":true}).then(function(){
     
     // Create the initial data for branches
-    
     var branchData = require("./branch/data");
-    /* 
-    for(I = 0 ; I< branchData["regionalBranches"].length ; I++){
-        
-        var aRegionalBranch = branchData["regionalBranches"][I];
-        
-        RegionalBranch.findAll({
-            where:{
-                label: aRegionalBranch["label"]
-            }
-        }).then(function(rBranches){     
-               
-            
-                            
-            
-        });
-                                
-    }*/
     
     return 
-    sequelize
-    .transaction(function(t){  
+    sequelize.transaction(function(t){      
                       
         return
         Promise.map(branchData["regionData"] , function(aRegion){
@@ -61,45 +41,26 @@ sequelize.sync({"force":true}).then(function(){
                     "name": aRegion["name"]
                 } , { transaction:t }
             ).then(function(aRegionInstance){
-        
-                //return 
-                //Promise.map(branchData["regionalBranches"] , function(aRegionalBranch){
-                
-                /*
-                {
-                    "Region": aRegionalBranch["Region"],
-                    "label": aRegionalBranch["label"],
-                    "branchType": aRegionalBranch["branchType"]
-                }
-                */
-                    aRegion["regionalBranch"]["regionId"] = aRegionInstance.getId();
-                                                               
+
+                aRegion["regionalBranch"]["regionId"] = aRegionInstance.getId();
+                                                            
+                return 
+                RegionalBranch.create( aRegion["regionalBranch"] , {  
+                    include:[ SubBranch ],
+                    transaction:t
+                })
+                .then(function(regionalBranchInstance){
+                    
                     return 
-                    RegionalBranch.create( aRegion["regionalBranch"] , {  
-                        //include:[ SubBranch ],
-                        transaction:t
-                    })
-                    .then(function(regionalBranchInstance){
+                    Promise.map(aRegion["regionalBranch"]["SubBranches"] , function(aSubBranch){
                         
-                        p1 = Promise.map(aRegion["regionalBranch"]["SubBranches"] , function(aSubBranch){
-                            
-                            aSubBranch["regionalBranchId"] = regionalBranchInstance.getId();
-                            
-                            return 
-                            SubBranch
-                            .create(aSubBranch, { transaction:t });
-                            //.then(function(aSubBrancInstance){                       
-                            //        return regionalBranchInstance.addSubBranch(aSubBrancInstance);
-                            // });                                                                                                                                                
-                        });
+                        aSubBranch["regionalBranchId"] = regionalBranchInstance.getId();
                         
-                       //p2 = regionalBranchInstance.setRegion(aRegionInstance);
-                       
-                       return new Promise.all([p1]);
-                    });
-                
-                //});            
-                        
+                        return 
+                        SubBranch
+                        .create(aSubBranch, { transaction:t });                                                                                                                                                                            
+                    });                    
+                });                                   
             });
         });        
     });

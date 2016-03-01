@@ -1,7 +1,7 @@
-var Sequalize  = require("sequelize");
+var Sequelize  = require("sequelize");
 
 RegionModel = {    
-    name: Sequalize.STRING
+    name: Sequelize.STRING
 }
 
 module.exports = RegionModel;
