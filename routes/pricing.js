@@ -1,8 +1,102 @@
 var express = require("express");
 var router = express.Router();
+var productModel = require("../models/priceModel");
+var multer = require("multer");
+var upload = multer();
 
-router.get('/', function(req, res){
-	res.send({"status": "In product pricing page"});
+router.post('/create', upload.array(),  function(req, res){
+
+	//TO DO: check if price, product name and unit exists
+
+	var data = {
+		"product_name": req.body.product_name,
+		"price": parseFloat(req.body.price),
+		"unit": req.body.unit
+	};
+
+	console.log(data);
+
+	if(req.body.threshold_unit && req.body.threshold_price) {
+		data["threshold_unit"] = req.body.threshold_unit;
+		data["threshold_price"] = parseFloat(req.body.threshold_price);
+	}
+
+	productModel.create(data).catch(function(error){
+		if(error){
+			console.log(error);
+			res.send({
+				"status": "error",
+				"data": "Error in creating new entry"
+			});
+		}
+	}).then(function(product){
+		if(product){
+			res.send({
+				"status": "success",
+				"data": data
+			});
+		}
+	});
+});
+
+router.post('/update',upload.array(), function(req, res){
+
+	if(!req.body.old_product_name){
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "No product defined"
+			}
+		});
+		return;
+	}
+
+	productModel.findOne({where: {product_name: req.body.old_product_name}}).catch(function(err){
+		if(err){
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Cannot update this entry"
+				}
+			});
+		}
+
+	}).then(function(product){
+		
+		if(product){
+			if(req.body.product_name) product.product_name = req.body.product_name;
+			if(req.body.price) product.price = parseFloat(req.body.price);
+			if(req.body.unit) product.unit = req.body.unit;
+			if(req.body.threshold_unit) product.threshold_unit = req.body.threshold_unit;
+			if(req.body.threshold_price) product.threshold_price = parseFloat(req.body.threshold_price);
+
+			product.save().catch(function(err){
+				if(err){
+					res.send({
+						"status": "error",
+						"data": {
+							"message": "Error while updating"
+						}
+					});
+				}
+			}).then(function(new_product){
+				if(new_product){
+					res.send({
+						"status": "success",
+						data: new_product
+					});
+				}
+			});
+		}
+		else{
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Cannot find this product"
+				}
+			});
+		}
+	});
 });
 
 module.exports = router;
