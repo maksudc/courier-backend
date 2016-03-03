@@ -46,7 +46,7 @@ router.post('/update',upload.array(), function(req, res){
 		res.send({
 			"status": "error",
 			"data": {
-				"message": "No product defined"
+				"message": "No id given"
 			}
 		});
 		return;
@@ -84,8 +84,51 @@ router.post('/update',upload.array(), function(req, res){
 				if(new_product){
 					res.send({
 						"status": "success",
-						data: new_product
+						"data": new_product
 					});
+				}
+			});
+		}
+		else{
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Cannot find this product"
+				}
+			});
+		}
+	});
+});
+
+router.post('/delete', upload.array(), function(req, res){
+	if(!req.body.id){
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "No id defined"
+			}
+		});
+		return;
+	}
+
+	productModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
+		if(err){
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Error while deleting this entry"
+				}
+			});
+
+			return;
+		}
+	}).then(function(product){
+		if(product){
+			product.destroy();
+			res.send({
+				"status": "success",
+				"data": {
+					"message": "Product deleted"
 				}
 			});
 		}
