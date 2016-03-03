@@ -22,6 +22,29 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+var epilogue = require("epilogue");
+var sequelize = require('./models/connect');
+
+epilogue.initialize({
+    app: app,
+    sequelize: sequelize  
+});
+
+var regionResource = epilogue.resource({
+    model: sequelize.Region,
+    endpoints:["/regions" , "/regions/:id"],    
+});
+
+var regionalBranchResource = epilogue.resource({
+    model: sequelize.RegionalBranch,
+    endpoints:["/regionalBranches" , "/regionalBranches/:id"],
+});
+
+var regionalBranchResource = epilogue.resource({
+    model: sequelize.RegionalBranch,
+    endpoints:["/subBranches" , "/subBranches/:id"],
+});
+
 app.use('/', routes);
 app.use('/users', users);
 
@@ -57,5 +80,10 @@ app.use(function(err, req, res, next) {
 });   
     
 }
+
+//app.use(regionResource.controllers);
+
+//app.use(regionResource.use);
+//regionResource.use(app.routes);
 
 module.exports = app;

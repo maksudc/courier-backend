@@ -1,5 +1,5 @@
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize('dak_harkara', 'dak_harkara', '6hNWSTUyBPrEv9hP');
+var sequelize = sequelize || new Sequelize('dak_harkara', 'dak_harkara', '6hNWSTUyBPrEv9hP');
 var Promise = require("bluebird");
 
 var RegionalBranchModel = require("./branch/regionalBranch");
@@ -24,13 +24,13 @@ RegionalBranch.belongsTo(Region);
 
 RegionalBranch.hasMany(SubBranch);
 
-sequelize.sync().then(function(){
+sequelize.sync().then(function(){        
     
     // Create the initial data for branches
     
-    var branchData = require("./branch/data");
+    //var branchData = require("./branch/data");
     
-    var ps = [];
+    //var ps = [];
        
     /*
     for(I = 0 ; I< branchData["regionData"].length ; I++ ) {
@@ -118,3 +118,6 @@ sequelize.sync().then(function(){
 });
 
 module.exports = sequelize;
+module.exports.Region = Region;
+module.exports.RegionalBranch = RegionalBranch;
+module.exports.SubBranch = SubBranch;

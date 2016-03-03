@@ -5,12 +5,14 @@ var router = express.Router();
 var order = require("./order");
 router.use('/order', order);
 
-
 var pricing = require("./pricing");
 router.use('/pricing', pricing);
 
 var branchRouter = require("./branch");
 router.use("/branch" , branchRouter);
+
+var regionRouter = require("./region");
+router.use("/region" , regionRouter);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
