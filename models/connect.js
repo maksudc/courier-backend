@@ -24,32 +24,75 @@ RegionalBranch.belongsTo(Region);
 
 RegionalBranch.hasMany(SubBranch);
 
-sequelize.sync({"force":true}).then(function(){
+sequelize.sync().then(function(){
     
     // Create the initial data for branches
+    
     var branchData = require("./branch/data");
     
-    return 
-    sequelize.transaction(function(t){      
-                      
-        return
-        Promise.map(branchData["regionData"] , function(aRegion){
+    var ps = [];
+       
+    /*
+    for(I = 0 ; I< branchData["regionData"].length ; I++ ) {
             
-            return 
-            Region.create(
+            var aRegion = branchData["regionData"][I];
+            
+             
+            p = Region.create(
+                {
+                    "name": aRegion["name"]
+                }// , { transaction:t }
+            ).then(function(aRegionInstance){
+                               
+                aRegion["regionalBranch"]["Region"] = aRegionInstance;
+                aRegion["regionalBranch"]["SubBranchs"] = aRegion["regionalBranch"]["SubBranches"];
+                delete aRegion["regionalBranch"]["SubBranches"];
+                                                                            
+                return 
+                RegionalBranch.create( aRegion["regionalBranch"] , {  
+                    include:[ SubBranch ],
+                    //transaction:t
+                })                                                  
+            }).then(function(regionalBranchInstance){
+
+                    return 
+                    Promise.map(aRegion["regionalBranch"]["SubBranches"] , function(aSubBranch){
+                        
+                        aSubBranch["regionalBranchId"] = regionalBranchInstance["id"];
+                                                 
+                        SubBranch
+                        .create(
+                            aSubBranch//, { transaction:t }
+                        );                                                                                                                                                                            
+                    });                    
+                });
+            
+            ps.push(p);                                   
+        }        
+    */
+    /*return 
+    sequelize.transaction(function(t){      
+                
+        
+        for(I = 0 ; I< branchData["regionData"].length ; I++ ) {
+            
+            var aRegion = branchData["regionData"][I];
+            
+             
+            p = Region.create(
                 {
                     "name": aRegion["name"]
                 } , { transaction:t }
             ).then(function(aRegionInstance){
-
+                               
                 aRegion["regionalBranch"]["regionId"] = aRegionInstance.getId();
                                                             
                 return 
                 RegionalBranch.create( aRegion["regionalBranch"] , {  
                     include:[ SubBranch ],
                     transaction:t
-                })
-                .then(function(regionalBranchInstance){
+                })                                                  
+            }).then(function(regionalBranchInstance){
                     
                     return 
                     Promise.map(aRegion["regionalBranch"]["SubBranches"] , function(aSubBranch){
@@ -60,10 +103,13 @@ sequelize.sync({"force":true}).then(function(){
                         SubBranch
                         .create(aSubBranch, { transaction:t });                                                                                                                                                                            
                     });                    
-                });                                   
-            });
-        });        
-    });
+                });
+            
+            ps.push(p);                                   
+        }
+        
+        return Promise.all(ps);                      
+    });*/
     /*.then(function(result){
         
                     
