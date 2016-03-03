@@ -1,7 +1,8 @@
 var sequelize = require("./connect");
 var Sequelize = require("sequelize");
 var products = sequelize.define('products', {
-	product_name: {type: Sequelize.STRING, primaryKey: true},
+	uuid: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV1},
+	product_name: {type: Sequelize.STRING, allowNull: false},
 	unit: {type: Sequelize.STRING, allowNull: false},
 	price: {type: Sequelize.FLOAT, allowNull: false},
 	threshold_unit: {type: Sequelize.STRING},

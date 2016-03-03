@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var Sequelize = require("sequelize");
 var productModel = require("../models/priceModel");
 var multer = require("multer");
 var upload = multer();
@@ -41,7 +42,7 @@ router.post('/create', upload.array(),  function(req, res){
 
 router.post('/update',upload.array(), function(req, res){
 
-	if(!req.body.old_product_name){
+	if(!req.body.id){
 		res.send({
 			"status": "error",
 			"data": {
@@ -51,7 +52,7 @@ router.post('/update',upload.array(), function(req, res){
 		return;
 	}
 
-	productModel.findOne({where: {product_name: req.body.old_product_name}}).catch(function(err){
+	productModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
 		if(err){
 			res.send({
 				"status": "error",
