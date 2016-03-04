@@ -89,4 +89,117 @@ router.post('/create', upload.array(), function(req, res){
 
 });
 
+router.post('/update', upload.array(), function(req, res){
+	if(!req.body.id){
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "Required id parameter missing"
+			}
+		});
+		return;
+	}
+	else if(!req.body.product_id && !req.body.amount){
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "Required product_id or amount"
+			}
+		});
+		return;	
+	}
+
+	itemModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
+
+		if(err){
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Cannot get this item, an error occurred"
+				}
+			});
+		}
+
+	}).then(function(item){
+		if(item){
+			
+			if(req.body.amount) item.amount = parseFloat(req.body.amount);
+			if(req.body.product_id) item.product_id = req.body.product_id;
+
+			item.save().catch(function(err){
+				
+				if(err){
+					res.send({
+						"status": "error",
+						"data": {
+							"message": "Cannot get this item, an error occurred"
+						}
+					});
+				}
+
+			}).then(function(item){
+				
+				res.send({
+					"status": "success",
+					"data": item
+				});
+
+			});
+		}
+		else{
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Cannot find the designated itemModel"
+				}
+			});
+		}
+	});
+});
+
+router.post('/delete', upload.array(), function(req, res){
+	if(!req.body.id){
+		
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "id required"
+			}
+		});
+		return;
+
+	}
+
+	itemModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
+		if(err){
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Error while deleting this entry"
+				}
+			});
+
+			return;
+		}
+	}).then(function(item){
+		if(item){
+			item.destroy();
+			res.send({
+				"status": "success",
+				"data": {
+					"message": "item deleted"
+				}
+			});
+		}
+		else{
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Cannot find this item"
+				}
+			});
+		}
+	});
+});
+
 module.exports = router;
