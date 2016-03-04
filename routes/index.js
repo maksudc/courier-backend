@@ -7,6 +7,8 @@ router.use('/order', order);
 
 var pricing = require("./pricing");
 router.use('/pricing', pricing);
+var item = require("./item");
+router.use('/item', item);
 
 var branchRouter = require("./branch");
 router.use("/branch" , branchRouter);

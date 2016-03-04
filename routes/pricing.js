@@ -8,14 +8,21 @@ var upload = multer();
 router.post('/create', upload.array(),  function(req, res){
 
 	//TO DO: check if price, product name and unit exists
+	if(!req.body.product_name || !req.body.price || !req.body.unit){
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "Not enough information given"
+			}
+		});
+		return;
+	}
 
 	var data = {
 		"product_name": req.body.product_name,
 		"price": parseFloat(req.body.price),
 		"unit": req.body.unit
 	};
-
-	console.log(data);
 
 	if(req.body.threshold_unit && req.body.threshold_price) {
 		data["threshold_unit"] = req.body.threshold_unit;
