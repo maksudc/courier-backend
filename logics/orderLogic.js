@@ -1,11 +1,13 @@
 var sequelize = require("../models/connect");
 var orderModel = require("../models/orderModel");
 var item = require("../models/itemModel");
-var product = require("../models/priceModel");
 
 var findOne = function(id, next){
 	next("in findOne");
 };
+exports.findOne = findOne;
+
+
 
 var createDraft = function(data, next){
 	/*
@@ -17,7 +19,10 @@ var createDraft = function(data, next){
 
 	var message = "";
 
-	if(!data.sender) message = "Sender required";
+	console.log(data);
+
+	if(!data) message = "No information provied!";
+	else if(!data.sender) message = "Sender required";
 	else if(!data.receiver) message = "Receiver required";
 	else if(!data.items) message = "Items required";
 
@@ -39,6 +44,7 @@ var createDraft = function(data, next){
 
 	orderModel.create(data).catch(function(err){
 		if(err){
+			console.log(err);
 			next({
 				"status": "error",
 				"data": {
@@ -67,5 +73,8 @@ var createDraft = function(data, next){
 	});
 
 };
+exports.createDraft = createDraft;
 
-exports.findOne = findOne;
+
+
+

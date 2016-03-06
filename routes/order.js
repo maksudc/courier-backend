@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-var order = require("../logics/orderLogic");
+var orderLogic = require("../logics/orderLogic");
 var multer = require("multer");
 var upload = multer();
 
@@ -22,7 +22,9 @@ router.get('/:id', function(req, res){
 });
 
 router.post('/create', upload.array(), function(req, res){
-	
+	orderLogic.createDraft(req.body, function(data){
+		res.send(data);
+	});
 });
 
 module.exports = router;

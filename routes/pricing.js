@@ -4,6 +4,7 @@ var Sequelize = require("sequelize");
 var productModel = require("../models/priceModel");
 var multer = require("multer");
 var upload = multer();
+var pricingLogic = require("../logics/pricingLogic");
 
 router.post('/create', upload.array(),  function(req, res){
 
@@ -148,6 +149,31 @@ router.post('/delete', upload.array(), function(req, res){
 			});
 		}
 	});
+});
+
+router.get('/:id', function(req, res){
+	if(!req.params.id){
+		res.send({"status": "error", "data": {"message": "Id required"}});
+		return;
+	}
+
+	pricingLogic.findOneById(req.params.id, function(data){
+		if(data.data){
+			res.send({
+				"status": "success",
+				"data": data.data
+			});
+		}
+		else{
+			res.send({
+				"status": "error",
+				"data": {
+					"message": "Product not found!"
+				}
+			});
+		}
+	});
+
 });
 
 module.exports = router;
