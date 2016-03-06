@@ -190,7 +190,7 @@ router.post('/delete', upload.array(), function(req, res){
 
 	}
 
-	itemModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
+	itemModel.findOne({where: {uuid: req.body.id}, attributes: ['uuid']}).catch(function(err){
 		if(err){
 			res.send({
 				"status": "error",
@@ -198,6 +198,7 @@ router.post('/delete', upload.array(), function(req, res){
 					"message": "Error while deleting this entry"
 				}
 			});
+			console.log(err);
 
 			return;
 		}
