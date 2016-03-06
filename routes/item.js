@@ -121,7 +121,7 @@ router.post('/update', upload.array(), function(req, res){
 		return;	
 	}
 
-	itemModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
+	itemModel.findOne({where: {uuid: req.body.id}, attributes: ['uuid', 'amount', 'productUuid']}).catch(function(err){
 
 		if(err){
 			res.send({
@@ -130,6 +130,7 @@ router.post('/update', upload.array(), function(req, res){
 					"message": "Cannot get this item, an error occurred"
 				}
 			});
+			return;
 		}
 
 	}).then(function(item){
@@ -138,7 +139,7 @@ router.post('/update', upload.array(), function(req, res){
 			if(req.body.amount) item.amount = parseFloat(req.body.amount);
 			if(req.body.product_id) item.product_id = req.body.product_id;
 
-			pricingLogic.calculatePrice(item.product_id, item.amount, function(price){
+			pricingLogic.calculatePrice(item.productUuid, item.amount, function(price){
 
 				item.price = parseFloat(price);
 				item.save().catch(function(err){
@@ -150,6 +151,7 @@ router.post('/update', upload.array(), function(req, res){
 								"message": "Cannot get this item, an error occurred"
 							}
 						});
+						return;
 					}
 
 				}).then(function(item){
@@ -158,6 +160,7 @@ router.post('/update', upload.array(), function(req, res){
 						"status": "success",
 						"data": item
 					});
+					return;
 
 				});
 
