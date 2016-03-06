@@ -3,9 +3,9 @@ var Sequelize = require("sequelize");
 var productModel = require("../models/priceModel");
 
 var findOneById = function(id, next){
-	
+
 	if(!id){
-		next({"status": "error", "data": null });
+		next({"status": "error", "message":"id required!", "data": null });
 		return;
 	}
 
@@ -28,9 +28,33 @@ var findOneById = function(id, next){
 
 exports.findOneById = findOneById;
 
-var calculatePrice = function(ids, next){
-	/*ids: array of uuid of items*/
-	itemModel.find({where: {uuid: ids}}).then(function(items){
+var calculatePrice = function(id, amount, next){
+	/*id: uuid of product, amount: float
+		return: price
+	*/
+	if(!id || !amount){
+		next(false);
+		console.log("No id or amount");
+		return;
+	}
+
+	findOneById(id, function(product){
+
+		var productPrice = parseFloat(product.data.price);
+		var threshold_unit = 0;
+		var threshold_price = 0;
+		
+		if(product.threshold_unit){
+			threshold_unit = parseFloat(product.threshold_unit);
+			threshold_price = parseFloat(product.threshold_price);
+		}
+
+		if(amount > threshold_unit){
+			next(threshold_price + (amount - threshold_unit)*productPrice);
+		}
+		else next(threshold_price);
+
+		return;
 		
 	});
 };

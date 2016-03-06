@@ -4,6 +4,7 @@ var Sequelize = require("sequelize");
 var itemModel = require("../models/itemModel");
 var multer = require("multer");
 var upload = multer();
+var pricingLogic = require("../logics/pricingLogic");
 
 router.get('/:id', function(req, res){
 	if(!req.params.id){
@@ -59,32 +60,43 @@ router.post('/create', upload.array(), function(req, res){
 		"productUuid": req.body.product_id
 	};
 
-	itemModel.create(data).catch(function(err){
-		if(err){
-			console.log(err);
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot create this item, an error occurred"
-				}
-			});
+	pricingLogic.calculatePrice(data.productUuid, data.amount, function(price){
+
+		if(!price){
+			res.send({"status": "error", "data": {"message": "Cannot calculate price"}});
+			return;
 		}
 
-	}).then(function(item){
-		if(item){
-			res.send({
-				"status": "success",
-				"data": item
-			});
-		}
-		else{
-			res.send({
-				"status": "error",
-				"data":{
-					"message": "Sorry, cannot create item"
-				} 
-			});
-		}
+		data["price"] = parseFloat(price);
+
+		itemModel.create(data).catch(function(err){
+			if(err){
+				console.log(err);
+				res.send({
+					"status": "error",
+					"data": {
+						"message": "Cannot create this item, an error occurred"
+					}
+				});
+			}
+
+		}).then(function(item){
+			if(item){
+				res.send({
+					"status": "success",
+					"data": item
+				});
+			}
+			else{
+				res.send({
+					"status": "error",
+					"data":{
+						"message": "Sorry, cannot create item"
+					} 
+				});
+			}
+		});
+
 	});
 
 });
@@ -126,22 +138,27 @@ router.post('/update', upload.array(), function(req, res){
 			if(req.body.amount) item.amount = parseFloat(req.body.amount);
 			if(req.body.product_id) item.product_id = req.body.product_id;
 
-			item.save().catch(function(err){
-				
-				if(err){
-					res.send({
-						"status": "error",
-						"data": {
-							"message": "Cannot get this item, an error occurred"
-						}
-					});
-				}
+			pricingLogic.calculatePrice(item.product_id, item.amount, function(price){
 
-			}).then(function(item){
-				
-				res.send({
-					"status": "success",
-					"data": item
+				item.price = parseFloat(price);
+				item.save().catch(function(err){
+					
+					if(err){
+						res.send({
+							"status": "error",
+							"data": {
+								"message": "Cannot get this item, an error occurred"
+							}
+						});
+					}
+
+				}).then(function(item){
+					
+					res.send({
+						"status": "success",
+						"data": item
+					});
+
 				});
 
 			});
