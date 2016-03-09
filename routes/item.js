@@ -20,6 +20,11 @@ router.get('/:id', function(req, res){
 
 router.post('/create', upload.array(), function(req, res){
 	
+	if(!req.body){
+		res.send({"status": "error", "message": "No information", "data": null});
+		return;
+	}
+
 	itemLogic.createOne(req.body, function(data){
 		if(data){
 			res.send(data);
@@ -30,79 +35,19 @@ router.post('/create', upload.array(), function(req, res){
 });
 
 router.post('/update', upload.array(), function(req, res){
-	if(!req.body.id){
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "Required id parameter missing"
-			}
-		});
+	
+	if(!req.body){
+		res.send({"status": "error", "message": "No information", "data": null});
 		return;
 	}
-	else if(!req.body.product_id && !req.body.amount){
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "Required product_id or amount"
-			}
-		});
-		return;	
-	}
 
-	itemModel.findOne({where: {uuid: req.body.id}, attributes: ['uuid', 'amount', 'productUuid']}).catch(function(err){
-
-		if(err){
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot get this item, an error occurred"
-				}
-			});
-			return;
+	itemLogic.updateOne(req.body, function(data){
+		if(data){
+			res.send(data);
 		}
-
-	}).then(function(item){
-		if(item){
-			
-			if(req.body.amount) item.amount = parseFloat(req.body.amount);
-			if(req.body.product_id) item.product_id = req.body.product_id;
-
-			productLogic.calculatePrice(item.productUuid, item.amount, function(price){
-
-				item.price = parseFloat(price);
-				item.save().catch(function(err){
-					
-					if(err){
-						res.send({
-							"status": "error",
-							"data": {
-								"message": "Cannot get this item, an error occurred"
-							}
-						});
-						return;
-					}
-
-				}).then(function(item){
-					
-					res.send({
-						"status": "success",
-						"data": item
-					});
-					return;
-
-				});
-
-			});
-		}
-		else{
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot find the designated itemModel"
-				}
-			});
-		}
+		else res.send({"status": "error", "message": "Cannot create item"});
 	});
+
 });
 
 router.post('/delete', upload.array(), function(req, res){
