@@ -171,3 +171,37 @@ var updateOne = function(data, next){
 };
 
 exports.updateOne = updateOne;
+
+var deleteOne = function(data, next){
+
+	if(!data.id){
+		next({"status": "error", "message": "No id defined", "data": null});
+		return;
+	}
+
+	productModel.findOne({where: {uuid: data.id}}).catch(function(err){
+		
+		if(err){
+			next({"status": "error", "message": "Error while deleting this entry", "data": null});
+			return;
+		}
+
+	}).then(function(product){
+		
+		if(product){
+			
+			product.destroy();
+			next({"status": "success", "data": null, "message": "Product deleted"});
+			return;
+
+		}
+		else{
+			
+			next({"status": "error","data": null, "message": "Cannot find this product"});
+			return;
+
+		}
+	});
+};
+
+exports.deleteOne = deleteOne;

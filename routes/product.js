@@ -8,6 +8,11 @@ var productLogic = require("../logics/productLogic");
 
 router.post('/create', upload.array(),  function(req, res){
 
+	if(!req.body){
+		res.send({"status": "error", "message": "No information", "data": null});
+		return;
+	}
+
 	productLogic.createOne(req.body, function(data){
 		if(data){
 			res.send(data);
@@ -19,6 +24,11 @@ router.post('/create', upload.array(),  function(req, res){
 
 router.post('/update',upload.array(), function(req, res){
 
+	if(!req.body){
+		res.send({"status": "error", "message": "No information", "data": null});
+		return;
+	}
+
 	productLogic.updateOne(req.body, function(data){
 		if(data){
 			res.send(data);
@@ -29,46 +39,19 @@ router.post('/update',upload.array(), function(req, res){
 });
 
 router.post('/delete', upload.array(), function(req, res){
-	if(!req.body.id){
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "No id defined"
-			}
-		});
+
+	if(!req.body){
+		res.send({"status": "error", "message": "No information", "data": null});
 		return;
 	}
-
-	productModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
-		if(err){
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Error while deleting this entry"
-				}
-			});
-
-			return;
+	
+	productLogic.deleteOne(req.body, function(data){
+		if(data){
+			res.send(data);
 		}
-	}).then(function(product){
-		if(product){
-			product.destroy();
-			res.send({
-				"status": "success",
-				"data": {
-					"message": "Product deleted"
-				}
-			});
-		}
-		else{
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot find this product"
-				}
-			});
-		}
+		else res.send({"status": "error", "message": "Cannot delete product", "data": null});
 	});
+
 });
 
 router.get('/:id', function(req, res){
