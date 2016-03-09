@@ -37,14 +37,14 @@ var createOne = function(data, next){
 		"productUuid": data.product_id
 	};
 
-	productLogic.calculatePrice(data.productUuid, data.amount, function(price){
+	productLogic.calculatePrice(data.productUuid, data.amount, function(priceData){
 
-		if(!price){
-			next({"status": "error", "data": null, "message": "Cannot calculate price"});
+		if(priceData.status == "error"){
+			next({"status": "error", "message": priceData.message});
 			return;
 		}
 
-		data["price"] = parseFloat(price);
+		data["price"] = parseFloat(priceData.price);
 
 		itemModel.create(data).catch(function(err){
 			if(err){

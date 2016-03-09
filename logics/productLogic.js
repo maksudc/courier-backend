@@ -33,28 +33,31 @@ var calculatePrice = function(id, amount, next){
 		return: price
 	*/
 	if(!id || !amount){
-		next(false);
+		next({"status": "error", "message": "Not enough information given"});
 		console.log("No id or amount");
 		return;
 	}
 
 	findOneById(id, function(product){
 
-		var productPrice = parseFloat(product.data.price);
-		var threshold_unit = 0;
-		var threshold_price = 0;
-		
-		if(product.threshold_unit){
-			threshold_unit = parseFloat(product.threshold_unit);
-			threshold_price = parseFloat(product.threshold_price);
-		}
+		if(product.data){
+			var productPrice = parseFloat(product.data.price);
+			var threshold_unit = 0;
+			var threshold_price = 0;
+			
+			if(product.threshold_unit){
+				threshold_unit = parseFloat(product.threshold_unit);
+				threshold_price = parseFloat(product.threshold_price);
+			}
 
-		if(amount > threshold_unit){
-			next(threshold_price + (amount - threshold_unit)*productPrice);
-		}
-		else next(threshold_price);
+			if(amount > threshold_unit){
+				next({"status": "success", "price" :threshold_price + (amount - threshold_unit)*productPrice});
+			}
+			else next({"status": "success", "price" :threshold_price});
 
-		return;
+			return;
+		}
+		else next({"status": "error", "message": "No product found by this product id"});
 		
 	});
 };
