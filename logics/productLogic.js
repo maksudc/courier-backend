@@ -1,6 +1,6 @@
 var sequelize = require("../models/connect");
 var Sequelize = require("sequelize");
-var productModel = require("../models/priceModel");
+var productModel = require("../models/productModel");
 
 var findOneById = function(id, next){
 
@@ -60,3 +60,43 @@ var calculatePrice = function(id, amount, next){
 };
 
 exports.calculatePrice = calculatePrice;
+
+var createOne = function(data, next){
+	if(!data.product_name || !data.price || !data.unit){
+		next({"status": "error", "message": "Not enough information given", "data": null});
+		return;
+	}
+
+	var productData = {
+		"product_name": data.product_name,
+		"price": parseFloat(data.price),
+		"unit": data.unit //unit is string, i.e: kg, meter, etc
+	};
+
+	if((data.threshold_unit && !data.threshold_price) || (!data.threshold_unit && data.threshold_price)){
+		next({"status": "error", "message": "Threshold price and unit must be both empty or full"});
+		return;
+	}
+	else if(data.threshold_unit && data.threshold_price) {
+		productData["threshold_unit"] = data.threshold_unit;
+		productData["threshold_price"] = parseFloat(data.threshold_price);
+	}
+
+	productModel.create(productData).catch(function(error){
+		
+		if(error){
+			console.log(error);
+			next({ "status": "error", "message": "Error in creating new entry", "data": null});
+			return;
+		}
+
+	}).then(function(product){
+		
+		if(product){
+			next({"status": "success", "data": data});
+		}
+
+	});
+};
+
+exports.createOne = createOne;

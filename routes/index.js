@@ -2,15 +2,21 @@ var express = require('express');
 var router = express.Router();
 
 //Other routes
-var order = require("./order");
-router.use('/order', order);
-
+// var order = require("./order");
+// router.use('/order', order);
 var pricing = require("./pricing");
 router.use('/pricing', pricing);
 var item = require("./item");
 router.use('/item', item);
 var order = require("./order");
 router.use('/order', order);
+var product = require("./product");
+router.use('/product', product);
+
+// var item = require("./item");
+// router.use('/item', item);
+// var order = require("./order");
+// router.use('/order', order);
 
 var branchRouter = require("./branch");
 router.use("/branch" , branchRouter);

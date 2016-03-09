@@ -1,51 +1,20 @@
 var express = require("express");
 var router = express.Router();
 var Sequelize = require("sequelize");
-var productModel = require("../models/priceModel");
+var productModel = require("../models/productModel");
 var multer = require("multer");
 var upload = multer();
-var pricingLogic = require("../logics/pricingLogic");
+var productLogic = require("../logics/productLogic");
 
 router.post('/create', upload.array(),  function(req, res){
 
-	//TO DO: check if price, product name and unit exists
-	if(!req.body.product_name || !req.body.price || !req.body.unit){
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "Not enough information given"
-			}
-		});
-		return;
-	}
-
-	var data = {
-		"product_name": req.body.product_name,
-		"price": parseFloat(req.body.price),
-		"unit": req.body.unit
-	};
-
-	if(req.body.threshold_unit && req.body.threshold_price) {
-		data["threshold_unit"] = req.body.threshold_unit;
-		data["threshold_price"] = parseFloat(req.body.threshold_price);
-	}
-
-	productModel.create(data).catch(function(error){
-		if(error){
-			console.log(error);
-			res.send({
-				"status": "error",
-				"data": "Error in creating new entry"
-			});
+	productLogic.createOne(req.body, function(data){
+		if(data){
+			res.send(data);
 		}
-	}).then(function(product){
-		if(product){
-			res.send({
-				"status": "success",
-				"data": data
-			});
-		}
+		else res.send({"status": "error", "message": "Cannot create product", "data": null});
 	});
+
 });
 
 router.post('/update',upload.array(), function(req, res){
