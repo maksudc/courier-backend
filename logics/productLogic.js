@@ -100,3 +100,74 @@ var createOne = function(data, next){
 };
 
 exports.createOne = createOne;
+
+var updateOne = function(data, next){
+
+	if(!data.id){
+		next({"status": "error", "message": "No id given", "data": null});
+		return;
+	}
+
+	productModel.findOne({where: {uuid: data.id}}).catch(function(err){
+		if(err)
+			next({"status": "error", "message": "Cannot update this entry", "data": null});
+		else 
+			next({"status": "error", "message": "Cannot update this entry, unknown error", "data": null});
+
+		return;
+
+	}).then(function(product){
+		
+		if(product){
+			if(data.product_name) product.product_name = data.product_name;
+			if(data.price) product.price = parseFloat(data.price);
+			if(data.unit) product.unit = data.unit;
+			
+			if(data.threshold_unit){
+				if(product.threshold_price || data.threshold_price)
+					product.threshold_unit = data.threshold_unit;
+				else {
+					next({
+						"status": "error",
+						"message": "Threshold price and unit must be present at the same time",
+						"data": null
+					});
+					return;
+				}
+			}
+
+			if(data.threshold_price){
+				if(product.threshold_unit || data.threshold_unit)
+					product.threshold_price = parseFloat(data.threshold_price);
+				else{
+					next({
+						"status": "error",
+						"message": "Threshold price and unit must be present at the same time",
+						"data": null
+					});
+					return;
+				}
+			}
+
+			product.save().catch(function(err){
+				
+				if(err){
+					next({"status": "error", "message": "Error while updating", "data": null});
+					return;
+				}
+
+			}).then(function(new_product){
+				if(new_product){
+					next({"status": "success", "data": new_product});
+					return;
+				}
+			});
+		}
+		else{
+			next({"status": "error", "message": "Cannot find this product", "data": null});
+		}
+	});
+
+};
+
+exports.updateOne = updateOne;

@@ -19,62 +19,13 @@ router.post('/create', upload.array(),  function(req, res){
 
 router.post('/update',upload.array(), function(req, res){
 
-	if(!req.body.id){
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "No id given"
-			}
-		});
-		return;
-	}
-
-	productModel.findOne({where: {uuid: req.body.id}}).catch(function(err){
-		if(err){
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot update this entry"
-				}
-			});
+	productLogic.updateOne(req.body, function(data){
+		if(data){
+			res.send(data);
 		}
-
-	}).then(function(product){
-		
-		if(product){
-			if(req.body.product_name) product.product_name = req.body.product_name;
-			if(req.body.price) product.price = parseFloat(req.body.price);
-			if(req.body.unit) product.unit = req.body.unit;
-			if(req.body.threshold_unit) product.threshold_unit = req.body.threshold_unit;
-			if(req.body.threshold_price) product.threshold_price = parseFloat(req.body.threshold_price);
-
-			product.save().catch(function(err){
-				if(err){
-					res.send({
-						"status": "error",
-						"data": {
-							"message": "Error while updating"
-						}
-					});
-				}
-			}).then(function(new_product){
-				if(new_product){
-					res.send({
-						"status": "success",
-						"data": new_product
-					});
-				}
-			});
-		}
-		else{
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot find this product"
-				}
-			});
-		}
+		else res.send({"status": "error", "message": "Cannot update product", "data": null});
 	});
+
 });
 
 router.post('/delete', upload.array(), function(req, res){
