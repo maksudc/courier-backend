@@ -1,6 +1,7 @@
 var sequelize = require("../models/connect");
 var Sequelize = require("sequelize");
 var productModel = require("../models/productModel");
+var _ = require('lodash');
 
 var findOneById = function(id, next){
 
@@ -28,13 +29,38 @@ var findOneById = function(id, next){
 
 exports.findOneById = findOneById;
 
+var findManyById = function(ids, next){
+
+	if(Object.prototype.toString.call(ids) != '[object Array]'){
+		next({"status": "error", "message":"id required!", "data": null });
+		return;
+	}
+
+	productModel.findAll({where: {uuid: ids}}).catch(function(err){
+		if(err){
+			next({"status": "error", "message": "Unknown error", "data": null });
+			return;
+		}
+	}).then(function(products){
+		if(products){
+			next({"status": "success", data: products});
+			return;
+		}
+		else{
+			next({"status": "error", "message": "No product found by this id", "data": null});
+			return;
+		}
+	});
+};
+
+exports.findManyById = findManyById;
+
 var calculatePrice = function(id, amount, next){
 	/*id: uuid of product, amount: float
 		return: price
 	*/
 	if(!id || !amount){
 		next({"status": "error", "message": "Not enough information given"});
-		console.log("No id or amount");
 		return;
 	}
 
@@ -64,6 +90,52 @@ var calculatePrice = function(id, amount, next){
 
 exports.calculatePrice = calculatePrice;
 
+var calculateMultiplePrice = function(data, next){
+	//must create array of ids
+	var ids = [];
+	_.forEach(data, function(item){
+		if(ids.indexOf(item.product_id) < 0)
+			ids.push(item.product_id);
+	});
+
+	findManyById(ids, function(products){
+
+		var pricingData = {};
+		if(products.data){
+			
+			_.forEach(products.data, function(product){
+				if(!pricingData[product.dataValues.uuid]){
+					pricingData[product.dataValues.uuid] = {
+						"price": parseFloat(product.dataValues.price),
+						"threshold_unit": parseInt(product.dataValues.threshold_unit),
+						"threshold_price": parseFloat(product.dataValues.threshold_price)
+					}
+				}
+			});
+
+			_.forEach(data, function(item){
+				if(!pricingData[item.product_id]["threshold_unit"]){
+					item["price"] = pricingData[item.product_id]["price"]*item["amount"];
+				}
+				else{
+					if(item.amount > pricingData[item.product_id]["threshold_unit"]){
+						item["price"] = pricingData[item.product_id]["threshold_price"] + 
+							(item.amount - pricingData[item.product_id]["threshold_unit"])*pricingData[item.product_id]["price"];
+					}
+					else item["price"] = pricingData[item.product_id]["threshold_price"];
+				}
+			});
+
+			next({"status": "success", data: data});
+			return;
+		}
+		else next({"status": "error", "message": "No product found by these product ids"});
+		
+	});
+};
+
+exports.calculateMultiplePrice = calculateMultiplePrice;
+
 var createOne = function(data, next){
 	if(!data.product_name || !data.price || !data.unit){
 		next({"status": "error", "message": "Not enough information given", "data": null});
@@ -88,7 +160,6 @@ var createOne = function(data, next){
 	productModel.create(productData).catch(function(error){
 		
 		if(error){
-			console.log(error);
 			next({ "status": "error", "message": "Error in creating new entry", "data": null});
 			return;
 		}

@@ -86,33 +86,8 @@ var createMany = function(data, next){
 		data[i]["price"] = 20;
 	}
 
-	console.log(data);
-
-	productLogic.calculatePrice(data.productUuid, data.amount, function(priceData){
-
-		if(priceData.status == "error"){
-			next({"status": "error", "message": priceData.message});
-			return;
-		}
-
-		data["price"] = parseFloat(priceData.price);
-
-		itemModel.create(data).catch(function(err){
-			if(err){
-				console.log(err);
-				next({"status": "error", "data": null, "message": "Cannot create this item, an error occurred"});
-				return;
-			}
-
-		}).then(function(item){
-			if(item){
-				next({"status": "success","data": item});
-			}
-			else{
-				next({"status": "error","data": null, "message": "Sorry, cannot create item"});
-			}
-		});
-
+	productLogic.calculateMultiplePrice(data, function(priceData){
+		next(priceData);
 	});
 
 };
