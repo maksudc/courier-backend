@@ -16,7 +16,7 @@ var createDraft = function(data, next){
 		2. create data
 		3. save to databse
 	*/
-	itemLogic.createMany(data, function(data){
+	itemLogic.create(data.item_list, function(data){
 		if(data){
 			next(data);
 		}

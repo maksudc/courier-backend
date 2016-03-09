@@ -2,6 +2,7 @@ var sequelize = require("../models/connect");
 var Sequelize = require("sequelize");
 var productLogic = require("../logics/productLogic");
 var itemModel = require("../models/itemModel");
+var _ = require('lodash');
 
 var findOneById = function(id, next){
 
@@ -27,6 +28,7 @@ var findOneById = function(id, next){
 exports.findOneById = findOneById;
 
 var createOne = function(data, next){
+	
 	if(!data.amount || !data.product_id){
 		next({"status": "error", "data": null, "message": "Not enough information given"});
 		return;
@@ -65,14 +67,85 @@ var createOne = function(data, next){
 	});
 };
 
+exports.createOne = createOne;
+
 var createMany = function(data, next){
-	console.log(Object.prototype.toString.call( data ));
+
+	var missingIndex = _.findIndex(data, function(item){ 
+		return !item.amount || !item.product_id; 
+	});
+
+	console.log("missingIndex: " + missingIndex.toString());
+	
+	if(missingIndex > -1) {
+		next({"status": "error", "message": "amount or id is missing at index " + missingIndex.toString() + " of item list"});
+		return;
+	};
+
+	for(var i=0;i<data.length;i++){
+		data[i]["price"] = 20;
+	}
+
 	console.log(data);
+
+	productLogic.calculatePrice(data.productUuid, data.amount, function(priceData){
+
+		if(priceData.status == "error"){
+			next({"status": "error", "message": priceData.message});
+			return;
+		}
+
+		data["price"] = parseFloat(priceData.price);
+
+		itemModel.create(data).catch(function(err){
+			if(err){
+				console.log(err);
+				next({"status": "error", "data": null, "message": "Cannot create this item, an error occurred"});
+				return;
+			}
+
+		}).then(function(item){
+			if(item){
+				next({"status": "success","data": item});
+			}
+			else{
+				next({"status": "error","data": null, "message": "Sorry, cannot create item"});
+			}
+		});
+
+	});
+
 };
 
 exports.createMany = createMany;
 
-exports.createOne = createOne;
+var create = function(data, next){
+	if(!data){
+		next({"status": "error", "message": "No data found"});
+	}
+	else if(Object.prototype.toString.call(data) != '[object Array]'){
+		next({"status": "error", "message": "Expecting array of items"});	
+	}
+	else{
+		if(data.length < 1){
+			next({"status": "error", "message": "Zero items not acceptable"});			
+		}
+		else if(data.length == 1){
+			console.log("Create one");
+			createOne(data[0], function(itemData){
+				next(itemData);
+			});
+		}
+		else{
+			console.log("Create many");
+			createMany(data, function(itemData){
+				next(itemData);
+			});
+		}
+	}
+};
+
+exports.create = create;
 
 var updateOne = function(data, next){
 
