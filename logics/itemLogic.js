@@ -74,7 +74,7 @@ var updateOne = function(data, next){
 		return;
 	}
 	else if(!data.product_id && !data.amount){
-		next({"status": "error", "message": "Required product_id or amount"});
+		next({"status": "error", "message": "Required product_id and amount"});
 		return;	
 	}
 
@@ -124,3 +124,38 @@ var updateOne = function(data, next){
 };
 
 exports.updateOne = updateOne;
+
+var deleteOne = function(data, next){
+
+	if(!data.id){
+		
+		next({"status": "error", "message": "id required"});
+		return;
+
+	}
+
+	itemModel.findOne({where: {uuid: data.id}, attributes: ['uuid']}).catch(function(err){
+		
+		if(err){
+			next({"status": "error", "message": "Error while deleting this entry"});
+			console.log(err);
+			return;
+		}
+
+	}).then(function(item){
+		
+		if(item){
+			item.destroy();
+			next({"status": "success", "message": "item deleted"});
+			return;
+		}
+		else{
+			next({"status": "error", "message": "Cannot find this item"});
+			return;
+		}
+
+	});
+
+};
+
+exports.deleteOne = deleteOne;

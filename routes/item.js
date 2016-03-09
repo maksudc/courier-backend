@@ -45,55 +45,25 @@ router.post('/update', upload.array(), function(req, res){
 		if(data){
 			res.send(data);
 		}
-		else res.send({"status": "error", "message": "Cannot create item"});
+		else res.send({"status": "error", "message": "Cannot update item"});
 	});
 
 });
 
 router.post('/delete', upload.array(), function(req, res){
-	if(!req.body.id){
-		
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "id required"
-			}
-		});
+	
+	if(!req.body){
+		res.send({"status": "error", "message": "No information", "data": null});
 		return;
-
 	}
 
-	itemModel.findOne({where: {uuid: req.body.id}, attributes: ['uuid']}).catch(function(err){
-		if(err){
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Error while deleting this entry"
-				}
-			});
-			console.log(err);
-
-			return;
+	itemLogic.deleteOne(req.body, function(data){
+		if(data){
+			res.send(data);
 		}
-	}).then(function(item){
-		if(item){
-			item.destroy();
-			res.send({
-				"status": "success",
-				"data": {
-					"message": "item deleted"
-				}
-			});
-		}
-		else{
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot find this item"
-				}
-			});
-		}
+		else res.send({"status": "error", "message": "Cannot delete item"});
 	});
+
 });
 
 module.exports = router;
