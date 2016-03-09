@@ -60,21 +60,11 @@ router.get('/:id', function(req, res){
 		return;
 	}
 
-	pricingLogic.findOneById(req.params.id, function(data){
-		if(data.data){
-			res.send({
-				"status": "success",
-				"data": data.data
-			});
+	productLogic.findOneById(req.params.id, function(data){
+		if(data){
+			res.send(data);
 		}
-		else{
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Product not found!"
-				}
-			});
-		}
+		else res.send({"status": "error", "message": "Cannot getthis product", "data": null});
 	});
 
 });

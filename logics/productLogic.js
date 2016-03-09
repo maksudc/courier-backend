@@ -11,7 +11,7 @@ var findOneById = function(id, next){
 
 	productModel.findOne({where: {uuid: id}}).catch(function(err){
 		if(err){
-			next({"status": "error", "data": null });
+			next({"status": "error", "message": "Unknown error", "data": null });
 			return;
 		}
 	}).then(function(product){
