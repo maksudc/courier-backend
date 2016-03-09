@@ -4,99 +4,27 @@ var Sequelize = require("sequelize");
 var itemModel = require("../models/itemModel");
 var multer = require("multer");
 var upload = multer();
-var pricingLogic = require("../logics/pricingLogic");
+var productLogic = require("../logics/productLogic");
+var itemLogic = require("../logics/itemLogic");
 
 router.get('/:id', function(req, res){
-	if(!req.params.id){
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "id required"
-			}
-		});
-		return;
-	}
 
-	itemModel.findOne({where: {uuid: req.params.id}}).catch(function(err){
-
-		if(err){
-			res.send({
-				"status": "error",
-				"data": {
-					"message": "Cannot get this item, an error occurred"
-				}
-			});
+	itemLogic.findOneById(req.params.id, function(data){
+		if(data){
+			res.send(data);
 		}
-
-	}).then(function(item){
-		if(item){
-			res.send({
-				"status": "success",
-				"data": item
-			});
-		}
-		else{
-			res.send({
-				"status": "success",
-				"data": null
-			});
-		}
+		else res.send({"status": "error", "message": "Cannot find item", "data": null});
 	});
+
 });
 
 router.post('/create', upload.array(), function(req, res){
-	if(!req.body.amount || !req.body.product_id){
-		res.send({
-			"status": "error",
-			"data": {
-				"message": "Not enough information given"
-			}
-		});
-		return;
-	}
-
-	var data = {
-		"amount": parseFloat(req.body.amount),
-		"productUuid": req.body.product_id
-	};
-
-	pricingLogic.calculatePrice(data.productUuid, data.amount, function(price){
-
-		if(!price){
-			res.send({"status": "error", "data": {"message": "Cannot calculate price"}});
-			return;
+	
+	itemLogic.createOne(req.body, function(data){
+		if(data){
+			res.send(data);
 		}
-
-		data["price"] = parseFloat(price);
-
-		itemModel.create(data).catch(function(err){
-			if(err){
-				console.log(err);
-				res.send({
-					"status": "error",
-					"data": {
-						"message": "Cannot create this item, an error occurred"
-					}
-				});
-			}
-
-		}).then(function(item){
-			if(item){
-				res.send({
-					"status": "success",
-					"data": item
-				});
-			}
-			else{
-				res.send({
-					"status": "error",
-					"data":{
-						"message": "Sorry, cannot create item"
-					} 
-				});
-			}
-		});
-
+		else res.send({"status": "error", "message": "Cannot create item", "data": null});
 	});
 
 });
@@ -139,7 +67,7 @@ router.post('/update', upload.array(), function(req, res){
 			if(req.body.amount) item.amount = parseFloat(req.body.amount);
 			if(req.body.product_id) item.product_id = req.body.product_id;
 
-			pricingLogic.calculatePrice(item.productUuid, item.amount, function(price){
+			productLogic.calculatePrice(item.productUuid, item.amount, function(price){
 
 				item.price = parseFloat(price);
 				item.save().catch(function(err){

@@ -1,6 +1,6 @@
 var sequelize = require("./connect");
 var Sequelize = require("sequelize");
-var product = require("./priceModel");
+var product = require("./productModel");
 
 
 

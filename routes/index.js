@@ -13,8 +13,8 @@ router.use('/order', order);
 var product = require("./product");
 router.use('/product', product);
 
-// var item = require("./item");
-// router.use('/item', item);
+var item = require("./item");
+router.use('/item', item);
 // var order = require("./order");
 // router.use('/order', order);
 
