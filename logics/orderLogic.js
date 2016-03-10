@@ -120,5 +120,28 @@ var updateDraft = function(data, next){
 
 exports.updateDraft = updateDraft;
 
+var deleteDraft = function(data, next){
+	
+	if(!data.id){
+		next({"status": "error", "message": "Id required"});
+		return;
+	}
+
+	findOne(data.id, function(orderData){
+		if(orderData.status == 'success'){
+			itemLogic.deleteByOrderId(data.id, function(deleteData){
+				if(deleteData.status == 'success'){
+					// orderData.data.destroy();
+					// next({"status": "success", "id": data.id, "message": "Order deleted"});
+				}
+			});
+		}
+		else next(orderData);
+	});
+
+};
+
+exports.deleteDraft = deleteDraft;
+
 
 

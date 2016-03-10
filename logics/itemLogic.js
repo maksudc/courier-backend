@@ -27,6 +27,45 @@ var findOneById = function(id, next){
 
 exports.findOneById = findOneById;
 
+var findManyByIds = function(ids, next){
+
+};
+
+exports.findManyByIds = findManyByIds;
+
+var findByOrderId = function(orderId, next){
+	
+	if(!orderId){
+		next({"status": "error", "message": "Id required"});
+		return;
+	}
+
+	itemModel.findAll({where: {orderUuid: orderId}}).catch(function(err){
+
+		if(err){
+			next({"status": "error", "message": "Error while fetching items of order"});
+			return;
+		}
+
+	}).then(function(itemList){
+		if(itemList){
+			
+			var newItemList = [];
+			_.forEach(itemList, function(item){
+				newItemList.push(item.dataValues);
+			});
+
+			next({"status": "success", "data": newItemList});
+		}
+		else{
+			next({"status": "error", "message": "No item found"});
+		}
+	});
+
+};
+
+exports.findByOrderId = findByOrderId;
+
 var createOne = function(data, next){
 	
 	if(!data.amount || !data.product_id || !data.orderUuid){
@@ -229,3 +268,23 @@ var deleteOne = function(data, next){
 };
 
 exports.deleteOne = deleteOne;
+
+var deleteByIds = function(ids, next){
+
+};
+
+var deleteByOrderId = function(id, next){
+	
+	itemModel.destroy({where: {orderUuid: id}}).catch(function(err){
+		if(err){
+			next({"status": "error", "message": "Error while deleting itemList"});
+			return;
+		}
+	}).then(function(deletedRows){
+		console.log(deletedRows);
+		next({"status": "success", "message": "items deleted"});
+	});
+
+};
+
+exports.deleteByOrderId = deleteByOrderId;
