@@ -1,12 +1,28 @@
 var sequelize = require("../models/connect");
 var Sequelize = require("sequelize");
 var orderModel = require("../models/orderModel");
-var itemModel = require("../models/itemModel");
 var itemLogic = require("../logics/itemLogic");
 var _ = require("lodash");
 
 var findOne = function(id, next){
-	next("in findOne");
+	if(!id){
+		next({"status":"error", "message": "Id required"});
+		return;
+	}
+
+	orderModel.findOne({where: {uuid: id}}).catch(function(err){
+		if(err){
+			next({"status":"error", "message": "Error occurred while searching order"});
+			return;
+		}
+	}).then(function(order){
+		if(order){
+			next({"status": "success", "data": order});
+		}
+		else{
+			next({"status": "error", "message": "Cannot find any order by this id"});
+		}
+	});
 };
 exports.findOne = findOne;
 
@@ -76,6 +92,33 @@ var createDraft = function(postData, next){
 
 exports.createDraft = createDraft;
 
+var updateDraft = function(data, next){
+	if(!data.id){
+		next({"status": "error", "message": "Id required"});
+		return;
+	}
+
+	console.log("Update order");
+
+	findOne(data.id, function(orderData){
+		if(orderData.status == 'success'){
+			if(data.sender) orderData.data["sender"] = data.sender;
+			if(data.sender_addr) orderData.data["sender_addr"] = data.sender_addr;
+			if(data.receiver) orderData.data["receiver"] = data.receiver;
+			if(data.receiver_addr) orderData.data["receiver_addr"] = data.receiver_addr;
+
+			console.log(orderData.data);
+
+			orderData.data.save();
+			next({"status": "success", data: orderData.data});
+		}
+		else next(orderData);
+	});
+
+
+};
+
+exports.updateDraft = updateDraft;
 
 
 

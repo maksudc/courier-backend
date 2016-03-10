@@ -31,6 +31,18 @@ router.post('/createDraft', upload.array(), function(req, res){
 	});
 });
 
+
+router.post('/updateDraft', upload.array(), function(req, res){
+	/*
+	when client creates an order. requried and accessible parameters are:
+	sender, sender_addr, receiver, receiver_addr and list of items
+	*/
+	console.log("In update draft");
+	orderLogic.updateDraft(req.body, function(data){
+		res.send(data);
+	});
+});
+
 module.exports = router;
 
 
