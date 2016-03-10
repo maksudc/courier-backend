@@ -25,11 +25,12 @@ var order = sequelize.define('order', {
 		defaultValue: 'draft', 
 		allowNull: false
 	},
-	deliveryStatus: {
+	deliveryType: {
 		type: Sequelize.ENUM('home', 'branch'),
 		defaultValue: 'branch',
 		allowNull: false
 	},
+	packetized :{type: Sequelize.BOOLEAN},	//TO track multiple items not in one packet but under same order
 	vd : {type: Sequelize.BOOLEAN},
 	vd_id: {type: Sequelize.STRING},
 	vd_price: {type: Sequelize.INTEGER}
@@ -37,10 +38,10 @@ var order = sequelize.define('order', {
 
 
 product.hasOne(item, { foreignKey: 'productUuid' });
-order.hasOne(item, { foreignKey: 'orderUuid' });
+order.hasOne(item, { foreignKey: 'orderUuid'});
 
 product.sync();
-item.sync();
 order.sync();
+item.sync();
 
 module.exports = order;

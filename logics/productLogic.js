@@ -113,23 +113,44 @@ var calculateMultiplePrice = function(data, next){
 				}
 			});
 
+			var newPrices = [];
+
 			_.forEach(data, function(item){
+				var singleForm = false;
+				var amount;
+				if(item["single"]){
+					singleForm = true;
+					amount = parseInt(item["amount"]);
+					item["amount"] = 1;
+				}
+
 				if(!pricingData[item.product_id]["threshold_unit"]){
 					item["price"] = pricingData[item.product_id]["price"]*item["amount"];
 				}
 				else{
 					if(item.amount > pricingData[item.product_id]["threshold_unit"]){
 						item["price"] = pricingData[item.product_id]["threshold_price"] + 
-							(item.amount - pricingData[item.product_id]["threshold_unit"])*pricingData[item.product_id]["price"];
+							(item.amount - pricingData[item.product_id]["threshold_unit"]) * 
+								pricingData[item.product_id]["price"];
 					}
 					else item["price"] = pricingData[item.product_id]["threshold_price"];
 				}
 
 				item["productUuid"] = item["product_id"];
 				delete item["product_id"];
+				
+				if(!singleForm){
+					newPrices.push(item);
+				}
+				else{
+					for(var i=0; i<amount; i++){
+						newPrices.push(item);
+					}
+				}
+
 			});
 
-			next({"status": "success", data: data});
+			next({"status": "success", data: newPrices});
 			return;
 		}
 		else next({"status": "error", "message": "No product found by these product ids"});

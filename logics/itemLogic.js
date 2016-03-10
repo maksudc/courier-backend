@@ -74,6 +74,8 @@ var createMany = function(data, next){
 	var missingIndex = _.findIndex(data, function(item){
 		return !item.amount || !item.product_id; 
 	});
+
+
 	
 	if(missingIndex > -1) {
 		next({"status": "error", "message": "amount or id is missing at index " + missingIndex.toString() + " of item list"});
