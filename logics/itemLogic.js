@@ -81,8 +81,24 @@ var createMany = function(data, next){
 	};
 
 	productLogic.calculateMultiplePrice(data, function(priceData){
-		next(priceData);
-		return;
+		if(priceData.status != 'success'){
+			next(data);
+		}
+		else{
+			itemModel.bulkCreate(priceData.data).catch(function(err){
+				if(err){
+					next({"status": "error", "message": "error while creating items"});
+					return;
+				}
+			}).then(function(items){
+				if(items){
+					next({"status": "success", data: items});
+				}
+				else {
+					next({"status": "errror", "message": "cannot create these items. Check them properly"});
+				}
+			});
+		}
 	});
 
 };
