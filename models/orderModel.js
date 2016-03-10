@@ -37,11 +37,34 @@ var order = sequelize.define('order', {
 });
 
 
+var moneyOrder = sequelize.define('moneyOrder', {
+	uuid: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV1},
+	receive_time: {type: Sequelize.DATE},
+	delivery_time: {type: Sequelize.DATE},
+	sender: {type: Sequelize.STRING, allowNull: false}, //sender mobile
+	receiver: {type: Sequelize.STRING, allowNull: false}, //receiver mobile
+	entry_branch: {type: Sequelize.STRING}, //where the moeney is received
+	exit_exit: {type: Sequelize.STRING}, //where the money is to be sent
+	sender_operator: {type: Sequelize.STRING}, //operator who received this product
+	payment: {type: Sequelize.INTEGER}, //cost of the order
+	payment_status: {type: Sequelize.ENUM('unpaid', 'paid'), defaultValue: 'paid'}, //status of payment
+	receiver_operator: {type: Sequelize.STRING}, //operator who took the money,
+	status: {
+		type: Sequelize.ENUM('draft', 'received', 'ready', 'delivered'),
+		defaultValue: 'draft', 
+		allowNull: false
+	},
+	vd: {type: Sequelize.BOOLEAN},
+	amount: {type: Sequelize.INTEGER}
+});
+
+
 product.hasOne(item, { foreignKey: 'productUuid' });
 order.hasOne(item, { foreignKey: 'orderUuid'});
 
 product.sync();
 order.sync();
 item.sync();
+moneyOrder.sync();
 
 module.exports = order;
