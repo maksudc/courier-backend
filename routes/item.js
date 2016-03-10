@@ -66,4 +66,20 @@ router.post('/delete', upload.array(), function(req, res){
 
 });
 
+router.post('/addItems', upload.array(), function(req, res){
+	
+	if(!req.body){
+		res.send({"status": "error", "message": "Not enought information given", "data": null});
+		return;
+	}
+
+	itemLogic.addItems(req.body, function(data){
+		if(data){
+			res.send(data);
+		}
+		else res.send({"status": "error", "message": "Cannot delete item"});
+	});
+
+});
+
 module.exports = router;

@@ -131,8 +131,8 @@ var deleteDraft = function(data, next){
 		if(orderData.status == 'success'){
 			itemLogic.deleteByOrderId(data.id, function(deleteData){
 				if(deleteData.status == 'success'){
-					// orderData.data.destroy();
-					// next({"status": "success", "id": data.id, "message": "Order deleted"});
+					orderData.data.destroy();
+					next({"status": "success", "id": data.id, "message": "Order deleted"});
 				}
 			});
 		}

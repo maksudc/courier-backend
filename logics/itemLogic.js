@@ -1,6 +1,7 @@
 var sequelize = require("../models/connect");
 var Sequelize = require("sequelize");
 var productLogic = require("../logics/productLogic");
+var orderLogic = require("../logics/orderLogic");
 var itemModel = require("../models/itemModel");
 var _ = require('lodash');
 
@@ -112,12 +113,11 @@ exports.createOne = createOne;
 var createMany = function(data, next){
 
 	var missingIndex = _.findIndex(data, function(item){
-		return !item.amount || !item.product_id; 
+		return !item.amount || !item.product_id || !item.orderUuid; 
 	});
-
-
 	
 	if(missingIndex > -1) {
+		console.log(data[missingIndex]);
 		next({"status": "error", "message": "amount or id is missing at index " + missingIndex.toString() + " of item list"});
 		return;
 	};
@@ -281,10 +281,43 @@ var deleteByOrderId = function(id, next){
 			return;
 		}
 	}).then(function(deletedRows){
-		console.log(deletedRows);
 		next({"status": "success", "message": "items deleted"});
 	});
 
 };
 
 exports.deleteByOrderId = deleteByOrderId;
+
+var addItems = function(data, next){
+
+	if(!data.orderUuid){
+		
+		next({"status": "error", "message": "order id required"});
+		return;
+
+	}
+
+	orderLogic.findOne(data.orderUuid, function(orderData){
+		if(orderData.data.dataValues){
+
+			_.forEach(data.item_list, function(item){
+				item["orderUuid"] = data.orderUuid;
+			});
+
+			create(data.item_list, function(createdItemList){
+				console.log(createdItemList);
+				if(createdItemList){
+					next({"status": "success", data: createdItemList.data});
+				}
+				else{
+					next(createdItemList);
+				}
+			});
+		}
+		else{
+			next({"status": "error", "message": "No order found by this id"});
+		}
+	});
+};
+
+exports.addItems = addItems;
