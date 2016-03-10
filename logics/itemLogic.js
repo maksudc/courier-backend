@@ -71,23 +71,18 @@ exports.createOne = createOne;
 
 var createMany = function(data, next){
 
-	var missingIndex = _.findIndex(data, function(item){ 
+	var missingIndex = _.findIndex(data, function(item){
 		return !item.amount || !item.product_id; 
 	});
-
-	console.log("missingIndex: " + missingIndex.toString());
 	
 	if(missingIndex > -1) {
 		next({"status": "error", "message": "amount or id is missing at index " + missingIndex.toString() + " of item list"});
 		return;
 	};
 
-	for(var i=0;i<data.length;i++){
-		data[i]["price"] = 20;
-	}
-
 	productLogic.calculateMultiplePrice(data, function(priceData){
 		next(priceData);
+		return;
 	});
 
 };
@@ -112,9 +107,9 @@ var create = function(data, next){
 			});
 		}
 		else{
-			console.log("Create many");
 			createMany(data, function(itemData){
 				next(itemData);
+				return;
 			});
 		}
 	}

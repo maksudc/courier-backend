@@ -1,6 +1,5 @@
 var sequelize = require("./connect");
 var Sequelize = require("sequelize");
-var product = require("./productModel");
 
 
 
@@ -9,9 +8,5 @@ var item = sequelize.define('item', {
 	amount: {type: Sequelize.FLOAT},
 	price: {type: Sequelize.FLOAT, allowNull: false}
 });
-
-product.hasOne(item);
-
-item.sync();
 
 module.exports = item;

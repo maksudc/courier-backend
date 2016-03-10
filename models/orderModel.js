@@ -1,8 +1,7 @@
 var sequelize = require("./connect");
 var Sequelize = require("sequelize");
 var item = require("./itemModel");
-
-
+var product = require("./productModel");
 
 
 var order = sequelize.define('order', {
@@ -18,7 +17,7 @@ var order = sequelize.define('order', {
 	exit_hub: {type: Sequelize.STRING}, //where the order is right now
 	current_hub: {type: Sequelize.STRING}, //where the product is to be delivered
 	operator: {type: Sequelize.STRING}, //operator who received this product
-	payment: {type: Sequelize.FLOAT, allowNull: false}, //cost of the order
+	payment: {type: Sequelize.FLOAT}, //cost of the order
 	payment_status: {type: Sequelize.ENUM('unpaid', 'paid'), defaultValue: 'paid'}, //status of payment
 	receiver_operator: {type: Sequelize.STRING}, //operator who took the money,
 	status: {
@@ -36,9 +35,12 @@ var order = sequelize.define('order', {
 	vd_price: {type: Sequelize.INTEGER}
 });
 
-order.hasMany(item);
-item.hasOne(order);
 
+product.hasOne(item, { foreignKey: 'productUuid' });
+order.hasOne(item, { foreignKey: 'orderUuid' });
+
+product.sync();
+item.sync();
 order.sync();
 
 module.exports = order;

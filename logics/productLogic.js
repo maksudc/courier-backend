@@ -124,6 +124,9 @@ var calculateMultiplePrice = function(data, next){
 					}
 					else item["price"] = pricingData[item.product_id]["threshold_price"];
 				}
+
+				item["productUuid"] = item["product_id"];
+				delete item["product_id"];
 			});
 
 			next({"status": "success", data: data});

@@ -9,6 +9,4 @@ var products = sequelize.define('products', {
 	threshold_price: {type: Sequelize.FLOAT}
 });
 
-products.sync();
-
 module.exports = products;
