@@ -29,14 +29,15 @@ exports.findOneById = findOneById;
 
 var createOne = function(data, next){
 	
-	if(!data.amount || !data.product_id){
+	if(!data.amount || !data.product_id || !data.orderUuid){
 		next({"status": "error", "data": null, "message": "Not enough information given"});
 		return;
 	}
 
 	var data = {
 		"amount": parseFloat(data.amount),
-		"productUuid": data.product_id
+		"productUuid": data.product_id,
+		"orderUuid": data.orderUuid
 	};
 
 	productLogic.calculatePrice(data.productUuid, data.amount, function(priceData){
