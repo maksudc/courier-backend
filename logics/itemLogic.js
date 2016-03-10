@@ -159,6 +159,7 @@ var updateOne = function(data, next){
 			
 			if(data.amount) item.amount = parseFloat(data.amount);
 			if(data.product_id) item.product_id = data.product_id;
+			if(data.orderUuid) item.orderUuid = data.orderUuid;
 
 			productLogic.calculatePrice(item.productUuid, item.amount, function(priceData){
 
