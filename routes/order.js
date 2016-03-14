@@ -68,6 +68,13 @@ router.post('/createByOperator', upload.array(), function(req, res){
 	});
 });
 
+
+router.post('/deliverOrder', upload.array(), function(req, res){
+	orderLogic.deliverOrder(req.body.id, function(data){
+		res.send(data);
+	});
+});
+
 module.exports = router;
 
 

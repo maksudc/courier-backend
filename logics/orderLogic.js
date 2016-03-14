@@ -202,6 +202,42 @@ exports.receiveOrder = receiveOrder;
 
 
 
+var deliverOrder = function(id, next){
+	findOne(id, function(orderData){
+		if(orderData.status == 'success'){
+
+			if(orderData.data.payment_status == 'unpaid'){
+				next({"status": "error", "message": "Sorry, please clear the payment first"});
+				return;
+			}
+
+			orderData.data.status = 'delivered';
+			orderData.data.delivery_operator = 'adfadfadfdasfdafasdfawfe';
+			orderData.data.delivery_time = new Date();
+			orderData.data.save().catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
+			}).then(function(newOrderData){
+				if(newOrderData){
+					next({"status": "success", "data": newOrderData.dataValues});
+				}
+				else{
+					next({"status": "error", "message": "Unknown error while saving status"});
+				}
+
+				return;
+			});
+		}
+		else next(orderData);
+	});
+}
+
+exports.deliverOrder = deliverOrder;
+
+
+
 var createByOperator = function(postData, next){
 
 	/*For first release:
