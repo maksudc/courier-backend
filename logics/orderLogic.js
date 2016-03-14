@@ -176,7 +176,8 @@ var receiveOrder = function(id, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 			orderData.data.status = 'received';
-			orderData.data.receiver_operator = 'fh74t85';			
+			orderData.data.receiver_operator = 'fh74t85';
+			orderData.data.receive_time = new Date();
 			orderData.data.save().catch(function(err){
 				if(err){
 					next({"status": "error", "message": "Error while saving status"});
