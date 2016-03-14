@@ -201,7 +201,6 @@ var receiveOrder = function(id, next){
 exports.receiveOrder = receiveOrder;
 
 
-
 var deliverOrder = function(id, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
@@ -210,7 +209,12 @@ var deliverOrder = function(id, next){
 				next({"status": "error", "message": "Sorry, please clear the payment first"});
 				return;
 			}
+			else if(orderData.data.status == 'delivered'){
+				next({"status": "error", "message": "Sorry, this order is already delivered"});
+				return;
+			}
 
+			//This block will be under else if block of status == 'reached'
 			orderData.data.status = 'delivered';
 			orderData.data.delivery_operator = 'adfadfadfdasfdafasdfawfe';
 			orderData.data.delivery_time = new Date();
@@ -235,6 +239,41 @@ var deliverOrder = function(id, next){
 }
 
 exports.deliverOrder = deliverOrder;
+
+
+
+var receivePayment = function(id, next){
+	findOne(id, function(orderData){
+		if(orderData.status == 'success'){
+
+			if(orderData.data.payment_status == 'paid'){
+				next({"status": "error", "message": "Sorry, this order is already paid"});
+				return;
+			}
+
+			orderData.data.payment_status = 'paid';
+			orderData.data.payment_operator = 'qwedsafsag4w';
+			orderData.data.save().catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
+			}).then(function(newOrderData){
+				if(newOrderData){
+					next({"status": "success", "data": newOrderData.dataValues});
+				}
+				else{
+					next({"status": "error", "message": "Unknown error while saving status"});
+				}
+
+				return;
+			});
+		}
+		else next(orderData);
+	});
+}
+
+exports.receivePayment = receivePayment;
 
 
 
@@ -324,7 +363,7 @@ var createByOperator = function(postData, next){
 		receiveOrder(order.uuid, function(newOrderData){
 			console.log(newOrderData);
 			if(newOrderData && newOrderData.status == 'success'){
-				order = newOrderData;
+				order = newOrderData.data;
 				next({"status": "success", "data": order});
 				receiveThisOrder(null);
 			}

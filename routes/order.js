@@ -75,6 +75,14 @@ router.post('/deliverOrder', upload.array(), function(req, res){
 	});
 });
 
+
+router.post('/receivePayment', upload.array(), function(req, res){
+	orderLogic.receivePayment(req.body.id, function(data){
+		res.send(data);
+	});
+});
+
+
 module.exports = router;
 
 

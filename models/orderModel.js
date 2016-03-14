@@ -20,7 +20,7 @@ var order = sequelize.define('order', {
 	next_hub: {type: Sequelize.STRING}, //Next destination of this product, In 2nd release, branch id
 	receiver_operator: {type: Sequelize.STRING}, //operator who received this product
 	payment: {type: Sequelize.FLOAT}, //cost of the order
-	payment_status: {type: Sequelize.ENUM('unpaid', 'paid'), defaultValue: 'paid'}, //status of payment
+	payment_status: {type: Sequelize.ENUM('unpaid', 'paid'), defaultValue: 'unpaid'}, //status of payment
 	delivery_operator: {type: Sequelize.STRING}, //operator who delivered this product. In 2nd release, operator id
 	payment_operator: {type: Sequelize.STRING}, //operator who took the money,In 2nd release, operator id
 	status: {
