@@ -18,11 +18,11 @@ var order = sequelize.define('order', {
 	exit_branch: {type: Sequelize.STRING}, //where the order is right now , In 2nd release, branch id
 	current_hub: {type: Sequelize.STRING}, //where the product is to be delivered, In 2nd release, branch id
 	next_hub: {type: Sequelize.STRING}, //Next destination of this product, In 2nd release, branch id
-	operator: {type: Sequelize.STRING}, //operator who received this product
+	receiver_operator: {type: Sequelize.STRING}, //operator who received this product
 	payment: {type: Sequelize.FLOAT}, //cost of the order
 	payment_status: {type: Sequelize.ENUM('unpaid', 'paid'), defaultValue: 'paid'}, //status of payment
 	delivery_operator: {type: Sequelize.STRING}, //operator who delivered this product. In 2nd release, operator id
-	receiver_operator: {type: Sequelize.STRING}, //operator who took the money,In 2nd release, operator id
+	payment_operator: {type: Sequelize.STRING}, //operator who took the money,In 2nd release, operator id
 	status: {
 		type: Sequelize.ENUM('draft', 'confirmed', 'received', 'travelling', 'reached', 'delivered'),
 		defaultValue: 'draft', 

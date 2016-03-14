@@ -53,11 +53,14 @@ var createDraft = function(postData, next){
 
 	var draftOrder = {
 		sender: postData.sender,
-		receiver: postData.receiver
+		receiver: postData.receiver,
+		entry_branch: postData["entry_branch"],
+		exit_branch: postData["exit_branch"]
 	};
 
 	if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
 	if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
+	if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
 
 	orderModel.create(draftOrder).catch(function(err){
 		if(err){
@@ -142,6 +145,62 @@ var deleteDraft = function(data, next){
 
 exports.deleteDraft = deleteDraft;
 
+
+var confirmOrder = function(id, next){
+	findOne(id, function(orderData){
+		if(orderData.status == 'success'){
+			orderData.data.status = 'confirmed';
+			orderData.data.save().catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
+			}).then(function(newOrderData){
+				if(newOrderData){
+					next({"status": "success", "data": newOrderData.dataValues});
+				}
+				else{
+					next({"status": "error", "message": "Unknown error while saving status"});
+				}
+
+				return;
+			});
+		}
+	});
+}
+
+exports.confirmOrder = confirmOrder;
+
+
+var receiveOrder = function(id, next){
+	findOne(id, function(orderData){
+		if(orderData.status == 'success'){
+			orderData.data.status = 'received';
+			orderData.data.receiver_operator = 'fh74t85';			
+			orderData.data.save().catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
+			}).then(function(newOrderData){
+				if(newOrderData){
+					next({"status": "success", "data": newOrderData.dataValues});
+				}
+				else{
+					next({"status": "error", "message": "Unknown error while saving status"});
+				}
+
+				return;
+			});
+		}
+		else next(orderData);
+	});
+}
+
+exports.receiveOrder = receiveOrder;
+
+
+
 var createByOperator = function(postData, next){
 
 	/*For first release:
@@ -165,11 +224,14 @@ var createByOperator = function(postData, next){
 
 		var draftOrder = {
 			sender: postData.sender,
-			receiver: postData.receiver
+			receiver: postData.receiver,
+			entry_branch: postData["entry_branch"],
+			exit_branch: postData["exit_branch"]
 		};
 
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
 		if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
+		if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
 
 		orderModel.create(draftOrder).catch(function(err){
 			if(err){
@@ -211,18 +273,34 @@ var createByOperator = function(postData, next){
 
 		itemLogic.createMany(postData.item_list, function(tempItemList){
 			if(tempItemList && tempItemList.status == 'success'){
-				next({"status": "error", data: order});
 				addItems(null);
 			}
 			else if(tempItemList && tempItemList.status == 'error'){
 				errorData = tempItemList;
+				addItems("Cannot insert items");
 			}
 
+		});
+
+	}, function(receiveThisOrder){
+
+		receiveOrder(order.uuid, function(newOrderData){
+			console.log(newOrderData);
+			if(newOrderData && newOrderData.status == 'success'){
+				order = newOrderData;
+				next({"status": "success", "data": order});
+				receiveThisOrder(null);
+			}
+			else{
+				errorData = newOrderData;
+				receiveThisOrder("Error while confirming this order");
+			}
 		});
 
 	}], function(err){
 		if(err){
 			next(errorData);
+			return;
 		}
 	});
 };
