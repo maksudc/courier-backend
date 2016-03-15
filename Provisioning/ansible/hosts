@@ -1,0 +1,5 @@
+[webservers]
+139.162.38.146:22 ansible_user=root ansible_ssh_pass=D1kH1rk1r1
+[testservers]
+#192.168.1.100:22 ansible_user=vagrant  ansible_ssh_pass=vagrant
+  
