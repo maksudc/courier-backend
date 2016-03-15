@@ -21,7 +21,11 @@ router.get('/:id', function(req, res){
 	});
 });
 
-router.post('/create', upload.array(), function(req, res){
+router.post('/createDraft', upload.array(), function(req, res){
+	/*
+	when client creates an order. requried and accessible parameters are:
+	sender, sender_addr, receiver, receiver_addr
+	*/
 	orderLogic.createDraft(req.body, function(data){
 		res.send(data);
 	});

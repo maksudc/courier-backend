@@ -1,6 +1,6 @@
 var sequelize = require("../models/connect");
 var orderModel = require("../models/orderModel");
-var item = require("../models/itemModel");
+var itemLogic = require("../logics/itemLogic");
 
 var findOne = function(id, next){
 	next("in findOne");
@@ -16,6 +16,14 @@ var createDraft = function(data, next){
 		2. create data
 		3. save to databse
 	*/
+	itemLogic.createMany(data, function(data){
+		if(data){
+			next(data);
+		}
+		else next({"status": "error", "message": "Cannot crate list of items"});
+	});
+
+	return;
 
 	var message = "";
 
@@ -27,12 +35,7 @@ var createDraft = function(data, next){
 	else if(!data.items) message = "Items required";
 
 	if(message != ""){
-		next({
-			"status": "error",
-			"data": {
-				"message": message
-			}
-		});
+		next({"status": "error", "message": message});
 		return;
 	}
 
@@ -45,29 +48,16 @@ var createDraft = function(data, next){
 	orderModel.create(data).catch(function(err){
 		if(err){
 			console.log(err);
-			next({
-				"status": "error",
-				"data": {
-					"message": "Error occured while creating order"
-				}
-			});
+			next({"status": "error","message": "Error occured while creating order"});
 			return;		
 		}
 	}).then(function(order){
 		if(order){
-			next({
-				"status": "success",
-				"data": order
-			});
+			next({"status": "success","data": order});
 			return;	
 		}
 		else{
-			next({
-				"status": "error",
-				"data": {
-					"message": "No order created!!!"
-				}
-			});
+			next({"status": "error", "message": "No order created!!!"});
 			return;		
 		}
 	});

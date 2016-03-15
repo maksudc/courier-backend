@@ -65,6 +65,13 @@ var createOne = function(data, next){
 	});
 };
 
+var createMany = function(data, next){
+	console.log(Object.prototype.toString.call( data ));
+	console.log(data);
+};
+
+exports.createMany = createMany;
+
 exports.createOne = createOne;
 
 var updateOne = function(data, next){

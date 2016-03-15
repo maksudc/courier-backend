@@ -11,7 +11,9 @@ var order = sequelize.define('order', {
 	receive_time: {type: Sequelize.DATE},
 	delivery_time: {type: Sequelize.DATE},
 	sender: {type: Sequelize.STRING, allowNull: false}, //sender mobile
+	sender_addr:{type: Sequelize.STRING},
 	receiver: {type: Sequelize.STRING, allowNull: false}, //receiver mobile
+	receiver_addr: {type: Sequelize.STRING},
 	entry_hub: {type: Sequelize.STRING}, //where the order is received
 	exit_hub: {type: Sequelize.STRING}, //where the order is right now
 	current_hub: {type: Sequelize.STRING}, //where the product is to be delivered
@@ -23,7 +25,15 @@ var order = sequelize.define('order', {
 		type: Sequelize.ENUM('draft', 'confirmed', 'received', 'travelling', 'reached', 'delivered'),
 		defaultValue: 'draft', 
 		allowNull: false
-	}
+	},
+	deliveryStatus: {
+		type: Sequelize.ENUM('home', 'branch'),
+		defaultValue: 'branch',
+		allowNull: false
+	},
+	vd : {type: Sequelize.BOOLEAN},
+	vd_id: {type: Sequelize.STRING},
+	vd_price: {type: Sequelize.INTEGER}
 });
 
 order.hasMany(item);
