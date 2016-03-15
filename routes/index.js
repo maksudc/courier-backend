@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var product = require("../models/priceModel");
 
 //Other routes
 var order = require("./order");
@@ -17,6 +18,11 @@ router.use("/region" , regionRouter);
 /* GET home page. */
 router.get('/', function(req, res, next) {
   	res.send({"status": "In home page"});
+  	product.create({
+  		productName: "dummy",
+  		unit: "KG",
+  		price: 100
+  	});
 });
 
 module.exports = router;
