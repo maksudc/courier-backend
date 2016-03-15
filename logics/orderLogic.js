@@ -2,7 +2,9 @@ var sequelize = require("../models/connect");
 var Sequelize = require("sequelize");
 var orderModel = require("../models/orderModel");
 var itemLogic = require("../logics/itemLogic");
+var productLogic = require("../logics/productLogic");
 var _ = require("lodash");
+var async = require("async");
 
 var findOne = function(id, next){
 	if(!id){
@@ -59,7 +61,6 @@ var createDraft = function(postData, next){
 
 	orderModel.create(draftOrder).catch(function(err){
 		if(err){
-			console.log(err);
 			next({"status": "error","message": "Error occured while creating order"});
 			return;		
 		}
@@ -98,7 +99,6 @@ var updateDraft = function(data, next){
 		return;
 	}
 
-	console.log("Update order");
 
 	findOne(data.id, function(orderData){
 		if(orderData.status == 'success'){
@@ -107,7 +107,6 @@ var updateDraft = function(data, next){
 			if(data.receiver) orderData.data["receiver"] = data.receiver;
 			if(data.receiver_addr) orderData.data["receiver_addr"] = data.receiver_addr;
 
-			console.log(orderData.data);
 
 			orderData.data.save();
 			next({"status": "success", data: orderData.data});
@@ -142,6 +141,93 @@ var deleteDraft = function(data, next){
 };
 
 exports.deleteDraft = deleteDraft;
+
+var createByOperator = function(postData, next){
+
+	/*For first release:
+	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
+	var createdProducts = {}, itemList, order, errorData;
+
+	async.series([function(createDraft){
+
+		var message = "";
+
+		if(!postData) message = "No information provied!";
+		else if(!postData.sender) message = "Sender required";
+		else if(!postData.receiver) message = "Receiver required";
+		else if(!postData.item_list) message = "Items required";
+
+		if(message != ""){
+			next({"status": "error", "message": message});
+			return;
+		}
+
+
+		var draftOrder = {
+			sender: postData.sender,
+			receiver: postData.receiver
+		};
+
+		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
+		if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
+
+		orderModel.create(draftOrder).catch(function(err){
+			if(err){
+				errorData = err;
+				createDraft("Cannot create draft order");
+			}
+		}).then(function(tempOrder){
+			if(tempOrder && tempOrder.dataValues){
+				order = tempOrder.dataValues;
+				createDraft(null);
+			}
+			else {
+				createDraft("Cannot create order");
+			}
+		});
+
+
+	}, function(createProducts){
+
+		_.forEach(postData.item_list, function(item){
+			item["unitPrice"] = parseFloat(item["price"])/parseFloat(item["amount"]);
+		});
+
+		productLogic.createMany(postData.item_list, function(tempProductList){
+			if(tempProductList && tempProductList.status == 'success'){
+				_.forEach(tempProductList.data, function(product){
+					createdProducts[product.product_name] = product.uuid;
+				});
+				createProducts(null);
+			}
+		});
+
+	}, function(addItems){
+
+		_.forEach(postData.item_list, function(item){
+			item["orderUuid"] = order.uuid;
+			item["product_id"] = createdProducts[item.product_name];
+		});
+
+		itemLogic.createMany(postData.item_list, function(tempItemList){
+			if(tempItemList && tempItemList.status == 'success'){
+				next({"status": "error", data: order});
+				addItems(null);
+			}
+			else if(tempItemList && tempItemList.status == 'error'){
+				errorData = tempItemList;
+			}
+
+		});
+
+	}], function(err){
+		if(err){
+			next(errorData);
+		}
+	});
+};
+
+exports.createByOperator = createByOperator;
 
 
 

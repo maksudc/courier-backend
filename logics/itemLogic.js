@@ -3,6 +3,7 @@ var Sequelize = require("sequelize");
 var productLogic = require("../logics/productLogic");
 var orderLogic = require("../logics/orderLogic");
 var itemModel = require("../models/itemModel");
+var productModel = require("../models/productModel");
 var _ = require('lodash');
 
 var findOneById = function(id, next){
@@ -112,6 +113,8 @@ exports.createOne = createOne;
 
 var createMany = function(data, next){
 
+	
+	//final release: items will be created with predefined price
 	var missingIndex = _.findIndex(data, function(item){
 		return !item.amount || !item.product_id || !item.orderUuid; 
 	});
@@ -122,6 +125,7 @@ var createMany = function(data, next){
 		return;
 	};
 
+	
 	productLogic.calculateMultiplePrice(data, function(priceData){
 		if(priceData.status != 'success'){
 			next(data);
@@ -134,7 +138,11 @@ var createMany = function(data, next){
 				}
 			}).then(function(items){
 				if(items){
-					next({"status": "success", data: items});
+					var tempItems = [];
+					_.forEach(items, function(tempItem){
+						tempItems.push(tempItem.dataValues);
+					});
+					next({"status": "success", data: tempItems});
 				}
 				else {
 					next({"status": "errror", "message": "cannot create these items. Check them properly"});

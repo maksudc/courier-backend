@@ -161,6 +161,7 @@ var calculateMultiplePrice = function(data, next){
 exports.calculateMultiplePrice = calculateMultiplePrice;
 
 var createOne = function(data, next){
+	//error checking
 	if(!data.product_name || !data.price || !data.unit){
 		next({"status": "error", "message": "Not enough information given", "data": null});
 		return;
@@ -198,6 +199,68 @@ var createOne = function(data, next){
 };
 
 exports.createOne = createOne;
+
+
+
+var createMany = function(data, next){
+
+	var productData = [];
+
+	var errorIndex = _.findIndex(data, function(singleProduct){
+		if(!singleProduct.product_name || !singleProduct.price || !singleProduct.unit){
+			next({"status": "error", "message": "Not enough information given for products", "data": null});
+			return true;
+		}
+		else{
+			console.log(singleProduct);
+			var tempData = {
+				"product_name": singleProduct.product_name,
+				"unit": singleProduct.unit //unit is string, i.e: kg, meter, etc
+			};
+
+			if(singleProduct["unitPrice"]) tempData["price"] = parseFloat(singleProduct["unitPrice"]);
+			else tempData["price"] = parseFloat(singleProduct.price);
+
+			if((singleProduct.threshold_unit && !singleProduct.threshold_price) || (!singleProduct.threshold_unit && singleProduct.threshold_price)){
+				next({"status": "error", "message": "Threshold price and unit must be both empty or full"});
+				return;
+			}
+			else if(singleProduct.threshold_unit && singleProduct.threshold_price) {
+				tempData["threshold_unit"] = singleProduct.threshold_unit;
+				tempData["threshold_price"] = parseFloat(singleProduct.threshold_price);
+			}
+
+			productData.push(tempData);
+		}
+	});
+
+	if(errorIndex > -1) return;
+
+	productModel.bulkCreate(productData).catch(function(error){
+		
+		if(error){
+			next({ "status": "error", "message": "Error in creating new entry", "data": null});
+			return;
+		}
+
+	}).then(function(productList){
+		
+		if(productList){
+			var tempProductList = [];
+			_.forEach(productList, function(tempProduct){tempProductList.push(tempProduct.dataValues);});
+			next({"status": "success", "data": tempProductList});
+		}
+		else{
+			next({"status": "error", "message": "Cannot create multiple products"});
+		}
+
+	});
+};
+
+exports.createMany = createMany;
+
+
+
 
 var updateOne = function(data, next){
 

@@ -52,6 +52,22 @@ router.post('/deleteDraft', upload.array(), function(req, res){
 	});
 });
 
+router.post('/createByOperator', upload.array(), function(req, res){
+	/*When operator creates an order. 
+	1st release.....
+		{
+			item_list: [
+				product_name: ...
+				price: ...
+				unit: ...
+			]
+		}
+	*/
+	orderLogic.createByOperator(req.body, function(data){
+		res.send(data);
+	});
+});
+
 module.exports = router;
 
 
