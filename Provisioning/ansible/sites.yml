@@ -1,27 +1,34 @@
 ---
 - hosts: all #testservers
   vars:
-    USER_EMAIL: amsaslink@gmail.com
-    USER_NAME: "amsaslink"
-    USER_PASSWORD: "zCYrES7LNrZhj4#Y"
-    APP_NAME: "AmsaslinkImageManagerServer"
-    SETTINGS_MODULE_PATH: "AmsaslinkImageManagerServer.settings"
-    SETTINGS_MODULE_DIR: "/home/amsaslink/AmsaslinkImageManagerServer"
-    DIRECTORY: "/home/amsaslink/AmsaslinkImageManagerServer"
-    VIRTUALENV_DIRECTORY: "/home/amsaslink/AmsaslinkImageManagerServer/env"
-    SSH_KEY_DIRECTORY: "/home/amsaslink/.ssh"
-    APP_CONTAINER_DIRECTORY: "/home/amsaslink"
+    USER_EMAIL: dakharkara@gmail.com
+    USER_NAME: "dakharkara"
+    USER_PASSWORD: "4NQzebcHNUVJTjPB"
+    
+    APP_NAME: "courierwebapp"
+    DIRECTORY: "/home/dakharkara/courierwebapp"
+    SSH_KEY_DIRECTORY: "/home/dakharkara/.ssh"
+    APP_CONTAINER_DIRECTORY: "/home/dakharkara"
 
+    MYSQL_ROOT_PASSWORD: dKpwBaUEys65nRbp
+    DATABASE_NAME: dak_harkara
+    
+    APP_MYSQL_USER: dak_harkara
+    APP_MYSQL_PASSWORD: 6hNWSTUyBPrEv9hP
+    
   remote_user: root
   become: yes
-  roles:
-      - ansible-pip
-
+  
   tasks:
+    ######### Installing mysql instance ##################
     - name: Update the instance
-      sudo: yes
+      become: yes
       apt: update-cache=yes
-
+      
+    - name: Installing MysqlDb for ansible mysql installation
+      become: yes
+      apt: name=MySQL-python update_cache=yes
+    
     - name: Install the git
       sudo: yes
       apt:
@@ -47,7 +54,7 @@
       copy:
         src="key_files/id_rsa"
         dest="{{ SSH_KEY_DIRECTORY }}/id_rsa"
-        owner="amsaslink"
+        owner="{{ USER_NAME }}"
         mode=0755
 
     - name: Transfer the public key
@@ -55,7 +62,7 @@
       copy:
         src="key_files/id_rsa.pub"
         dest="{{ SSH_KEY_DIRECTORY }}/id_rsa.pub"
-        owner="amsaslink"
+        owner="{{ USER_NAME }}"
         mode=0755
 
     - name: Config the eamil of the git user
@@ -73,7 +80,7 @@
     - name: Clone the repository in project Directory
       sudo: yes
       git:
-        repo=git@bitbucket.org:amsaslink/amsaslinkimagemanagerserver.git
+        repo=git@bitbucket.org:courier-handler/courierwebapp.git
         dest={{ DIRECTORY }}
         accept_hostkey=yes
         key_file="{{  SSH_KEY_DIRECTORY }}/id_rsa"
@@ -84,274 +91,64 @@
     - name: Add the permission for the directory
       become: yes
       command: chmod -R 755 {{ DIRECTORY }}
-
-    - name: Add the permission for the directory
+      
+    ######### Mysql Set up ##############
+    - name: Set the root password for mysql
       become: yes
-      command: chmod -R 777 "{{ DIRECTORY }}/db"
-
-    - name : Install vitualenv
+      mysql_user: name=root password={{ MYSQL_ROOT_PASSWORD }} update_password=always
+    
+    - name: Install MySQL for production ready server      
       become: yes
-      shell: pip install virtualenv
-      args:
-        chdir: "{{ DIRECTORY }}"
-
-
-    # Installing the libjpeg modules for proper image processing
-    # sudo apt-get install libjpeg-dev libfreetype6 libfreetype6-dev zlib1g zlib1g-dev
-    - name: install the jpeg lib
+      mysql_db: name={{ DATABASE_NAME }} state=present login_user=root login_password={{ MYSQL_ROOT_PASSWORD }}            
+          
+    #- name: Removes anonymous user account for localhost
+    #  mysql_user: name='' host=localhost state=absent              
+    
+    #- name: Removes anonymous user account for localhost
+    #  mysql_user: name='' host_all=yes state=absent 
+    
+    - name: Creating the database user for this application
       become: yes
-      apt:
-        name="{{ item }}"
-        state=present
-      with_items:
-        - flex
-        - bison
-        - binutils-doc
-        - autoconf
-        - build-essential
-        - libxml2-dev
-        - libxslt1-dev
-        - python-dev
-        - libjpeg-dev
-        - libfreetype6
-        - libfreetype6-dev
-        - libpng-dev
-        - zlib1g
-        - zlib1g-dev
-        - libmemcached-dev
+      mysql_user: name={{ APP_MYSQL_USER }} password={{ APP_MYSQL_PASSWORD }} priv={{ DATABASE_NAME }}.*:ALL update_password=always login_user=root login_password={{ MYSQL_ROOT_PASSWORD }}          
 
-    - name: Symlink proper lib resources
+    ##### Install nodejs ######
+    - name: install the nodejs deb
       become: yes
-      #command: sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib
-      file:
-        src='/usr/lib/x86_64-linux-gnu/libjpeg.so'
-        dest='/usr/lib/libjpeg.so'
-        state=link
-      ignore_errors: yes
-
-    - name: Symlink proper lib resources
+      apt: name=nodejs update-cache=yes
+    
+    - name: install the nodejs deb
       become: yes
-      #command: sudo ln -s /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib
-      file:
-        src='/usr/lib/x86_64-linux-gnu/libfreetype.so'
-        dest='/usr/lib/libfreetype.so'
-        state=link
-      ignore_errors: yes
-
-    - name: Symlink proper lib resources
+      apt: name=npm update-cache=yes
+         
+    ###### Nodejs process Manager ########
+    - name: install the PM2
       become: yes
-      #command: sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib
-      file:
-        src='/usr/lib/x86_64-linux-gnu/libz.so'
-        dest='/usr/lib/libz.so'
-        state=link
-      ignore_errors: yes
-
-    #- name: Change the permission of the folder For adding rquirements
-    #  become: yes
-    #  command: chmod -R 777 {{ DIRECTORY }}
-
-    - name: Create the virtualenv
-      become: yes
-      shell: virtualenv env --no-site-packages
-      args:
-        chdir: "{{ DIRECTORY }}"
-        creates: "{{ VIRTUALENV_DIRECTORY }}/bin/activate"
-      #ignore_errors: yes
-
-    - name: Change the permission of the folder For adding rquirements
-      become: yes
-      command: chmod -R 777 "{{ VIRTUALENV_DIRECTORY }}"
-
-
-    - name: "Copy virtualenv wrapper file"
-      template:
-        src=pyvenv
-        dest="{{ VIRTUALENV_DIRECTORY }}/bin/pyvenv"
-
-    - name: give the executable permission
-      become: yes
-      command: chmod a+x "{{ VIRTUALENV_DIRECTORY }}/bin/pyvenv"
-
-    - name: give the executable permission
-      become: yes
-      command: chmod 777 "{{ VIRTUALENV_DIRECTORY }}/bin/pyvenv"
-
-################# After virtualenv ###############################
+      npm: name=pm2 global=yes   
+    
+    - name: start the process for the app
+      command: pm2 stop all
+      
+    - name: start the process for the app
+      command: "pm2 start {{ DIRECTORY }}/bin/www"
+    
 - hosts: all #testservers
   remote_user: root
 
   vars:
-
-    DIRECTORY: "/home/amsaslink/AmsaslinkImageManagerServer"
-    SETTINGS_MODULE_PATH: "AmsaslinkImageManagerServer.settings"
-    SETTINGS_MODULE_DIR: "/home/amsaslink/AmsaslinkImageManagerServer"
-    VIRTUALENV_DIRECTORY: "/home/amsaslink/AmsaslinkImageManagerServer/env"
-    SSH_KEY_DIRECTORY: "/home/amsaslink/.ssh"
-    APP_CONTAINER_DIRECTORY: "/home/amsaslink"
-
-    #ansible_python_interpreter: "/home/amsaslink/AmsaslinkImageManagerServer/env/bin/pyvenv"
-
-  tasks:
-
-    #- name: Install the requirements
-    #  shell: pip install -r requirements.txt
-    #  args:
-    #    chdir: "{{ DIRECTORY }}"
-    #  ignore_errors: yes
-
-    #- name: Install the requirements txt file
-    #  pip:
-    #    chdir={{ DIRECTORY }}
-    #    virtualenv=env
-    #    virtualenv_site_packages=no
-    #    requirements=requirements.txt
-    #    state=present
-    #  ignore_errors: yes
-
-    - name: set up user_service virtualenv
-      shell: chdir={{ DIRECTORY }} if [ ! -d env ]; then virtualenv env; fi
-
-    - name: set up user_service python requirements
-      command: chdir={{ DIRECTORY }} env/bin/pip install -r requirements.txt
-
-    - name: Migrate the django
-      django_manage:
-        command=migrate
-        app_path="{{ DIRECTORY }}"
-        settings="{{ SETTINGS_MODULE_PATH }}"
-        pythonpath="{{ SETTINGS_MODULE_DIR }}"
-        virtualenv="{{ VIRTUALENV_DIRECTORY }}"
-
-    - name: Create the static directory where nginx points to
-      become: yes
-      shell: chdir={{ DIRECTORY }} if [ ! -d static ]; then mkdir static; fi
-
-    - name: Collect static the django
-      become: yes
-      django_manage:
-        command=collectstatic
-        app_path="{{ DIRECTORY }}"
-        settings="{{ SETTINGS_MODULE_PATH }}"
-        pythonpath="{{ SETTINGS_MODULE_DIR }}"
-        virtualenv="{{ VIRTUALENV_DIRECTORY }}"
-
-
-    - name: give the executable permission on static folder
-      become: yes
-      command: chmod 755 "{{ DIRECTORY }}/static"
-
-    #- name: Run the server
-    #  django_manage:
-    #    command="runserver"
-    #    app_path="{{ DIRECTORY }}"
-    #    settings="{{ SETTINGS_MODULE_PATH }}"
-    #    pythonpath="{{ SETTINGS_MODULE_DIR }}"
-    #    virtualenv="{{ VIRTUALENV_DIRECTORY }}"
-    # Need to integrate the uwsgi and nginx for properly configuring the instance
-########################################
-
-- hosts: all #testservers
-  remote_user: root
-  vars:
-    USER_EMAIL: amsaslink@gmail.com
-    USER_NAME: "amsaslink"
-    USER_PASSWORD: "zCYrES7LNrZhj4#Y"
-
-    DIRECTORY: "/home/amsaslink/AmsaslinkImageManagerServer"
-    VIRTUALENV_DIRECTORY: "/home/amsaslink/AmsaslinkImageManagerServer/env"
-    APP_NAME: "AmsaslinkImageManagerServer"
-
-    GUNICORN_SERVER_PORT: 8000
-    GUNICORN_SERVER_HOST: "0.0.0.0"
-
-    GUNICORN_SUPERVISOR_APP_NAME: "gunicorn_imageserver"
-    GUNICORN_WSGI_MODULE: "{{ APP_NAME }}'.'setup"
-    GUNICORN_SUPERVISOR_APP_LOCAL_CONFIG: "templates/gunicorn.imageserver.amsaslink.com.conf.j2"
-    GUNICORN_SUPERVISOR_APP_CONFIG: "/etc/supervisor/conf.d/gunicorn.imageserver.amsaslink.com.conf"
-
-    GUNICORN_APP_LOG_DIR: "/var/log/gunicorn"
-    GUNICORN_APP_OUT_FILE: "{{ GUNICORN_APP_LOG_DIR }}/imageserver.amsaslink.com.out.log"
-    GUNICORN_APP_ERR_FILE: "{{ GUNICORN_APP_LOG_DIR }}/imageserver.amsaslink.com.err.log"
-
-    SUPERVISORD_CONF_LOCAL: "templates/supervisord.conf.j2"
-    SUPERVISORD_CONF_REMOTE: "/etc/supervisor/supervisord.conf"
-
-  tasks:
-    #- name: Install gunicorn
-    #  pip:
-    #    chdir={{ DIRECTORY }}
-    #    name=gunicorn
-    #    state=present
-    #    virtualenv=env
-    #    virtualenv_site_packages=no
-    #  ignore_errors: yes
-
-    - name: set up user_service virtualenv
-      shell: chdir={{ DIRECTORY }} if [ ! -d env ]; then virtualenv env; fi
-
-    - name: set up user_service python gunicorn
-      command: chdir={{ DIRECTORY }} env/bin/pip install gunicorn
-
-    - name: Create the log directory and files
-      become: yes
-      file:
-        path={{ GUNICORN_APP_LOG_DIR }}
-        mode=0777
-        state=directory
-        recurse=yes
-
-    - name: Install the supervisor from apt
-      become: yes
-      apt:
-        name=supervisor
-        state=present
-
-    - name: transfer the supervisor conf file
-      become: yes
-      template:
-        src={{ GUNICORN_SUPERVISOR_APP_LOCAL_CONFIG }}
-        dest={{ GUNICORN_SUPERVISOR_APP_CONFIG }}
-
-    - name: transfer the supervisor conf file
-      become: yes
-      template:
-        src={{ SUPERVISORD_CONF_LOCAL }}
-        dest={{ SUPERVISORD_CONF_REMOTE }}
-
-    - name: Symlink supervisor conf with the global /etc directory
-      become: yes
-      file:
-        src={{ SUPERVISORD_CONF_REMOTE }}
-        dest="/etc/supervisord.conf"
-        state=link
-      ignore_errors: yes
-
-    - name: Install and manage supervisord
-      become: yes
-      supervisorctl:
-        name={{ GUNICORN_SUPERVISOR_APP_NAME }}
-        state=restarted
-        config={{ SUPERVISORD_CONF_REMOTE }}
-
-- hosts: all #testservers
-  remote_user: root
-
-  vars:
-    DIRECTORY: "/home/amsaslink/AmsaslinkImageManagerServer"
-    APP_NAME: "AmsaslinkImageManagerServer"
+    DIRECTORY: "/home/dakharkara/courierwebapp"
+    APP_NAME: "courierwebapp"
     STATIC_DIRECTORY: "{{ DIRECTORY }}/static/"
 
     PROTOCOL: "http"
     PORT: 80
     HOST: "0.0.0.0"
 
-    DOMAIN_NAME: "imagemanager.amsaslink.com"
+    DOMAIN_NAME: "omexcourier.com"
     MAX_BODY_SIZE: "1024m"
 
     FORWARDED_PROTOCOL: "http"
     FORWARDED_HOST: "localhost"
-    FORWARDED_PORT: "8000"
+    FORWARDED_PORT: "8080"
 
     VIRTUAL_HOST_NAME: "{{ DOMAIN_NAME }}"
     VIRTUAL_HOST_IP: "127.0.0.10"
@@ -366,24 +163,20 @@
     - name: transfer the file to config directory of nginx
       become: yes
       template:
-        src="templates/imagemanager.amsaslink.com.j2"
-        dest="/etc/nginx/sites-available/imagemanager.amsaslink.com"
+        src="templates/omexcourier.com.j2"
+        dest="/etc/nginx/sites-available/omexcourier.com"
         force=yes
 
     - name: Remove any symlinked file from previously enabled config
       become: yes
       file:
-        src="/etc/nginx/sites-available/imagemanager.amsaslink.com"
-        dest="/etc/nginx/sites-enabled/imagemanager.amsaslink.com"
+        src="/etc/nginx/sites-available/omexcourier.com"
+        dest="/etc/nginx/sites-enabled/omexcourier.com"
         state=link
       ignore_errors: yes
 
     - name: Enable 80 PORT
       command: 'sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT'
-      ignore_errors: yes
-
-    - name: Enable 80 PORT
-      command: 'sudo iptables -A INPUT -p tcp --dport 8000 -j ACCEPT'
       ignore_errors: yes
 
     - name: Edit the hosts file
