@@ -3,6 +3,8 @@ var Sequelize = require("sequelize");
 var orderModel = require("../models/orderModel");
 var itemLogic = require("../logics/itemLogic");
 var productLogic = require("../logics/productLogic");
+var regionalBranch = require("./regionalBranchLogic");
+var subBranch = require("./subBranchLogic");
 var _ = require("lodash");
 var async = require("async");
 
@@ -276,6 +278,23 @@ var receivePayment = function(id, next){
 exports.receivePayment = receivePayment;
 
 
+function findBranch(branchType, branchId, next){
+
+	if(branchType == 'regional-branch'){
+		regionalBranch.findOneById(branchId, function(branchData){
+			return next(branchData);
+		});
+	}
+	else if(branchType == 'sub-branch'){
+		subBranch.findOneById(branchId, function(branchData){
+			return next(branchData);
+		});	
+	}
+	else {
+		return next({"status": "error", "message": "branch type did not match"});
+	}
+
+};
 
 var createByOperator = function(postData, next){
 
@@ -283,7 +302,35 @@ var createByOperator = function(postData, next){
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
 	var createdProducts = {}, itemList, order, errorData;
 
-	async.series([function(createDraft){
+	async.series([function(testBranches){
+
+		if(!postData["exit_branch_type"] || !postData["exit_branch_id"] || !postData["entry_branch_type"] || !postData["entry_branch_id"]){
+			errorData = {"status": "error", "message": "Not enought branch information"};
+			findEntryBranch(errorData);
+		}
+		else {
+			findBranch(postData["entry_branch_type"], postData["entry_branch_id"], function(entryBranchData){
+				if(entryBranchData.status == 'success'){
+					findBranch(postData["exit_branch_type"], postData["exit_branch_id"], function(exitBranchData){
+						if(exitBranchData.status == 'success'){
+							testBranches(null);
+						}
+						else{
+							errorData = exitBranchData;
+							errorData.message = errorData.message + " for exit branch";
+							testBranches(exitBranchData);
+						}
+					});
+				}
+				else{
+					errorData = entryBranchData;
+					errorData.message = errorData.message + " for entry branch";
+					testBranches(errorData);
+				}
+			});
+		}
+
+	},function(createDraft){
 
 		var message = "";
 
@@ -301,8 +348,10 @@ var createByOperator = function(postData, next){
 		var draftOrder = {
 			sender: postData.sender,
 			receiver: postData.receiver,
-			entry_branch: postData["entry_branch"],
-			exit_branch: postData["exit_branch"]
+			entry_branch: postData["entry_branch_id"],
+			exit_branch: postData["exit_branch_id"],
+			entry_branch_type: postData["entry_branch_type"],
+			exit_branch_type: postData["exit_branch_type"]
 		};
 
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
