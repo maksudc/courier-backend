@@ -28,7 +28,18 @@ var findOne = function(id, next){
 		}
 	});
 };
+
+
 exports.findOne = findOne;
+
+
+var findAllOrders = function(next){
+
+	orderModel.findAll().catch(function(err){}).then(function(orderList){});
+
+};
+
+exports.findAllOrders = findAllOrders;
 
 
 
@@ -357,6 +368,7 @@ var createByOperator = function(postData, next){
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
 		if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
 		if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
+		if(postData.payment) draftOrder["payment"] = parseFloat(postData.payment);
 
 		orderModel.create(draftOrder).catch(function(err){
 			if(err){
@@ -433,4 +445,49 @@ var createByOperator = function(postData, next){
 exports.createByOperator = createByOperator;
 
 
+var orderDetail = function(id, next){
 
+	if(!id){
+		next({"status": "error", "message": "Id required"});
+		return;
+	}
+
+	var errorData, orderDetails = {"status": ""};
+
+	async.series([function(findOrder){
+
+		findOne(id, function(orderData){
+			if(orderData.status == "success"){
+				orderDetails["data"] = {};
+				orderDetails["data"]["orderData"] = orderData.data;
+				findOrder(null);
+			}
+			else{
+				errorData = orderData;
+				findOrder(orderData);
+			}
+		});
+
+	}, function(getItems){
+
+		itemLogic.findByOrderId(id, function(itemList){
+			if(itemList.status == "success"){
+				orderDetails["data"]["items"] = itemList.data;
+				return next(orderDetails);
+			}
+			else{
+				errorData = itemList;
+				findOrder(errorData);
+			}
+		});
+
+	}], function(err){
+		if(err){
+			if(errorData) return next(errorData);
+			else return next({"status": "error", "message": "Unknown error"});
+		}
+	});
+
+};
+
+exports.orderDetail = orderDetail;
