@@ -1,0 +1,12 @@
+---
+- name: ensure phpmyadmin ppa repository is installed
+  apt_repository:
+    repo: "ppa:nijel/phpmyadmin"
+    update_cache: yes
+
+- name: ensure phpmyadmin package is installed
+  apt:
+    name: phpmyadmin
+
+- include: nginx.yml
+- include: config.yml
