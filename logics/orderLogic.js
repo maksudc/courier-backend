@@ -35,7 +35,18 @@ exports.findOne = findOne;
 
 var findAllOrders = function(next){
 
-	orderModel.findAll().catch(function(err){}).then(function(orderList){});
+	orderModel.findAll().catch(function(err){
+		if(err){
+			return next({"status": "error", "message": "Error while getting all orders"});
+		}
+	}).then(function(orderList){
+		if(orderList){
+			return next({"status": "success", data: orderList});
+		}
+		else{
+			return next({"status": "success", "message": "No order found!!!"});
+		}
+	});
 
 };
 

@@ -5,7 +5,7 @@ var multer = require("multer");
 var upload = multer();
 
 
-router.get('/:id', function(req, res){
+router.get('/getOrder/:id', function(req, res){
 	if(!req.params.id){
 		res.send({
 			"status": "error",
@@ -27,6 +27,12 @@ router.get('/:id', function(req, res){
 });
 
 
+router.get('/showAll', function(req, res){
+
+	orderLogic.findAllOrders(function(data){
+		res.send(data);
+	});
+});
 
 router.post('/createDraft', upload.array(), function(req, res){
 	/*
