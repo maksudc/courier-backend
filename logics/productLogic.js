@@ -92,6 +92,7 @@ exports.calculatePrice = calculatePrice;
 
 var calculateMultiplePrice = function(data, next){
 	//must create array of ids
+	console.log("This is called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	var ids = [];
 	_.forEach(data, function(item){
 		if(ids.indexOf(item.product_id) < 0)
@@ -105,11 +106,13 @@ var calculateMultiplePrice = function(data, next){
 			
 			_.forEach(products.data, function(product){
 				if(!pricingData[product.dataValues.uuid]){
-					pricingData[product.dataValues.uuid] = {
-						"price": parseFloat(product.dataValues.price),
-						"threshold_unit": parseInt(product.dataValues.threshold_unit),
-						"threshold_price": parseFloat(product.dataValues.threshold_price)
-					}
+					// pricingData[product.dataValues.uuid] = {
+					// 	"price": parseFloat(product.dataValues.price),
+					// 	"threshold_unit": parseInt(product.dataValues.threshold_unit),
+					// 	"threshold_price": parseFloat(product.dataValues.threshold_price)
+					// }
+
+					pricingData[product.dataValues.uuid] = product.dataValues;
 				}
 			});
 
@@ -136,6 +139,7 @@ var calculateMultiplePrice = function(data, next){
 					else item["price"] = pricingData[item.product_id]["threshold_price"];
 				}
 
+				item["product_name"] = pricingData[item.product_id]["product_name"];
 				item["productUuid"] = item["product_id"];
 				delete item["product_id"];
 				

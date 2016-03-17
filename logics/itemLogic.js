@@ -131,6 +131,7 @@ var createMany = function(data, next){
 			next(data);
 		}
 		else{
+			console.log(priceData.data);
 			itemModel.bulkCreate(priceData.data).catch(function(err){
 				if(err){
 					next({"status": "error", "message": "error while creating items"});
