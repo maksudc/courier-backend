@@ -14,6 +14,9 @@ router.use('/order', order);
 var branchRouter = require("./branch");
 router.use("/branch" , branchRouter);
 
+var routeRouter = require("./branchRoute");
+router.use("/routes" , routeRouter);
+
 var regionRouter = require("./region");
 router.use("/region" , regionRouter);
 
