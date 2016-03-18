@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: mjanser
+  description: Installs phpMyAdmin
+  license: MIT
+  min_ansible_version: 1.9
+  platforms:
+  - name: Ubuntu
+    versions:
+    - trusty
+  categories:
+  - web
+  - database
+dependencies: []

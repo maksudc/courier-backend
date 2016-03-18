@@ -1,0 +1,13 @@
+<?php
+
+/* Server parameters */
+$cfg['Servers'][$i]['host'] = '{{ phpmyadmin_server_host }}';
+$cfg['Servers'][$i]['connect_type'] = 'tcp';
+$cfg['Servers'][$i]['extension'] = 'mysqli';
+
+/* Authentication type */
+$cfg['Servers'][$i]['auth_type'] = '{{ phpmyadmin_server_auth_type }}';
+$cfg['Servers'][$i]['user'] = '{{ phpmyadmin_server_user }}';
+$cfg['Servers'][$i]['password'] = '{{ phpmyadmin_server_password }}';
+
+$cfg['VersionCheck'] = false;
