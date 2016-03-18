@@ -47,6 +47,6 @@ order.hasOne(item, { foreignKey: 'orderUuid'});
 
 product.sync();
 order.sync();
-item.sync();
+item.sync({force: true});
 
 module.exports = order;
