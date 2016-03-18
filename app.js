@@ -41,7 +41,7 @@ var regionalBranchResource = epilogue.resource({
 });
 
 var regionalBranchResource = epilogue.resource({
-    model: sequelize.RegionalBranch,
+    model: sequelize.SubBranch,
     endpoints:["/subBranches" , "/subBranches/:id"],
 });
 
