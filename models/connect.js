@@ -1,5 +1,5 @@
 var Sequelize = require('sequelize');
-var sequelize = sequelize || new Sequelize('dak_harkara', 'dak_harkara', '6hNWSTUyBPrEv9hP');
+var sequelize = sequelize || new Sequelize('dak_harkara', 'root', '1234');
 var Promise = require("bluebird");
 
 var RegionalBranchModel = require("./branch/regionalBranch");

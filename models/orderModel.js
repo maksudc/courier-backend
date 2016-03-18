@@ -15,7 +15,9 @@ var order = sequelize.define('order', {
 	receiver: {type: Sequelize.STRING, allowNull: false}, //receiver mobile
 	receiver_addr: {type: Sequelize.STRING},
 	entry_branch: {type: Sequelize.STRING}, //where the order is received, In 2nd release, branch id
+	entry_branch_type: {type: Sequelize.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
 	exit_branch: {type: Sequelize.STRING}, //where the order is right now , In 2nd release, branch id
+	exit_branch_type: {type: Sequelize.ENUM('regional-branch', 'sub-branch')},
 	current_hub: {type: Sequelize.STRING}, //where the product is to be delivered, In 2nd release, branch id
 	next_hub: {type: Sequelize.STRING}, //Next destination of this product, In 2nd release, branch id
 	receiver_operator: {type: Sequelize.STRING}, //operator who received this product
