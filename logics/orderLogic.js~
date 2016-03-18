@@ -328,7 +328,7 @@ var createByOperator = function(postData, next){
 
 		if(!postData["exit_branch_type"] || !postData["exit_branch_id"] || !postData["entry_branch_type"] || !postData["entry_branch_id"]){
 			errorData = {"status": "error", "message": "Not enought branch information"};
-			testBranches(errorData);
+			findEntryBranch(errorData);
 		}
 		else {
 			findBranch(postData["entry_branch_type"], postData["entry_branch_id"], function(entryBranchData){
