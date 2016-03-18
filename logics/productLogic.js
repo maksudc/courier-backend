@@ -211,12 +211,12 @@ var createMany = function(data, next){
 	var productData = [];
 
 	var errorIndex = _.findIndex(data, function(singleProduct){
-		if(!singleProduct.product_name || !singleProduct.price || !singleProduct.unit){
+
+		if(!singleProduct["product_name"] || !singleProduct["price"].toString() || !singleProduct["unit"]){
 			next({"status": "error", "message": "Not enough information given for products", "data": null});
 			return true;
 		}
 		else{
-			console.log(singleProduct);
 			var tempData = {
 				"product_name": singleProduct.product_name,
 				"unit": singleProduct.unit //unit is string, i.e: kg, meter, etc

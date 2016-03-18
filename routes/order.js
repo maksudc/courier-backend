@@ -3,6 +3,10 @@ var router = express.Router();
 var orderLogic = require("../logics/orderLogic");
 var multer = require("multer");
 var upload = multer();
+var bodyParser = require('body-parser');
+
+router.use(bodyParser.json()); // for parsing application/json
+router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 
 router.get('/getOrder/:id', function(req, res){
@@ -77,6 +81,7 @@ router.post('/createByOperator', upload.array(), function(req, res){
 		}
 	*/
 	orderLogic.createByOperator(req.body, function(data){
+		console.log(data);
 		res.send(data);
 	});
 });

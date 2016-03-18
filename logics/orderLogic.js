@@ -8,6 +8,7 @@ var subBranch = require("./subBranchLogic");
 var _ = require("lodash");
 var async = require("async");
 
+
 var findOne = function(id, next){
 	if(!id){
 		next({"status":"error", "message": "Id required"});
@@ -323,17 +324,24 @@ var createByOperator = function(postData, next){
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
 	var createdProducts = {}, itemList, order, errorData;
+	console.log(postData);
 
 	async.series([function(testBranches){
 
 		if(!postData["exit_branch_type"] || !postData["exit_branch_id"] || !postData["entry_branch_type"] || !postData["entry_branch_id"]){
-			errorData = {"status": "error", "message": "Not enought branch information"};
+			var message;
+			if(!postData["exit_branch_type"]) message = "Exit branch type not definded";
+			else if(!postData["exit_branch_id"]) message = "Exit branch id not definded";
+			else if(!postData["entry_branch_type"]) message = "Entry branch type not definded";
+			else if(!postData["entry_branch_id"]) message = "Entry branch id not definded";
+
+			errorData = {"status": "error", "message": message};
 			testBranches(errorData);
 		}
 		else {
-			findBranch(postData["entry_branch_type"], postData["entry_branch_id"], function(entryBranchData){
+			findBranch(postData["entry_branch_type"], parseInt(postData["entry_branch_id"]), function(entryBranchData){
 				if(entryBranchData.status == 'success'){
-					findBranch(postData["exit_branch_type"], postData["exit_branch_id"], function(exitBranchData){
+					findBranch(postData["exit_branch_type"], parseInt(postData["exit_branch_id"]), function(exitBranchData){
 						if(exitBranchData.status == 'success'){
 							testBranches(null);
 						}
@@ -397,7 +405,8 @@ var createByOperator = function(postData, next){
 		});
 
 
-	}, function(createProducts){
+	}, function(createProductList){
+		console.log("creating product items");
 
 		_.forEach(postData.item_list, function(item){
 			item["unitPrice"] = parseFloat(item["price"])/parseFloat(item["amount"]);
@@ -408,11 +417,16 @@ var createByOperator = function(postData, next){
 				_.forEach(tempProductList.data, function(product){
 					createdProducts[product.product_name] = product.uuid;
 				});
-				createProducts(null);
+				createProductList(null);
+			}
+			else {
+				errorData = tempProductList;
+				createProductList(errorData);
 			}
 		});
 
 	}, function(addItems){
+		console.log("Adding items");
 
 		_.forEach(postData.item_list, function(item){
 			item["orderUuid"] = order.uuid;
@@ -431,6 +445,7 @@ var createByOperator = function(postData, next){
 		});
 
 	}, function(receiveThisOrder){
+		console.log("Setting status as received");
 
 		receiveOrder(order.uuid, function(newOrderData){
 			console.log(newOrderData);
