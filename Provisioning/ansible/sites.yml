@@ -279,6 +279,7 @@
        APP_CONTAINER_DIRECTORY: "/home/dakharkara"
            
        DOMAIN_NAME: "omexcourier.com"
+       ALIAS_DOMAIN_NAME: "www.omexcourier.com"
         
        MAX_BODY_SIZE: "1024m"
         
@@ -287,6 +288,8 @@
        WEBCLIENT_PORT: "8002"
 
        VIRTUAL_HOST_NAME: "{{ DOMAIN_NAME }}"
+       ALIAS_VIRTUAL_HOST_NAME: "www.omexcourier.com"
+       
        VIRTUAL_HOST_IP: "127.0.0.10"
        
        
@@ -353,8 +356,8 @@
       become: yes
       lineinfile:
         dest=/etc/hosts       
-        regexp="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }}"        
-        line="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }}"
+        regexp="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }} {{ ALIAS_VIRTUAL_HOST_NAME }}"        
+        line="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }} {{ ALIAS_VIRTUAL_HOST_NAME }}"
         owner=root
         group=root
         mode=0644
