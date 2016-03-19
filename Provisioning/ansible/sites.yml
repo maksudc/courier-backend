@@ -17,9 +17,7 @@
     
     APP_MYSQL_USER: dak_harkara
     APP_MYSQL_PASSWORD: 6hNWSTUyBPrEv9hP
-    
-    
-    
+        
   remote_user: root
   become: yes
   
@@ -161,7 +159,8 @@
       ignore_errors: yes
       
     - name: start the process for the app
-      command: "pm2 start {{ DIRECTORY }}/bin/www"
+      become: yes
+      shell: "PORT=8000 pm2 start {{ DIRECTORY }}/bin/www"
 
      
 - hosts: all #testservers
@@ -185,9 +184,9 @@
     FORWARDED_HOST: "localhost"
     FORWARDED_PORT: "8000"
     
-    WEBCLIENT_PROTOCOL:"http"
+    WEBCLIENT_PROTOCOL: "http"
     WEBCLIENT_HOST: "localhost"
-    WEBCLIENT_PORT:"8002"
+    WEBCLIENT_PORT: "8002"
 
     VIRTUAL_HOST_NAME: "{{ DOMAIN_NAME }}"
     VIRTUAL_HOST_IP: "127.0.0.10"
@@ -204,33 +203,7 @@
 
     - name: Stop nginx
       become: yes
-      service: name=nginx state=stopped
-    
-    - name: transfer the file to config directory of nginx
-      become: yes
-      template:
-        src="templates/omexcourier.com.j2"
-        dest="/etc/nginx/sites-available/omexcourier.com"
-        force=yes
-    
-    - name: Remove any symlinked file from previously enabled config
-      become: yes
-      file:
-        src="/etc/nginx/sites-available/omexcourier.com"
-        dest="/etc/nginx/sites-enabled/omexcourier.com"
-        state=link
-      ignore_errors: yes
-    
-    - name: Edit the hosts file
-      become: yes
-      lineinfile:
-        dest=/etc/hosts
-        regexp="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }}"        
-        line="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }}"
-        owner=root
-        group=root
-        mode=0644
-        state=present
+      service: name=nginx state=stopped    
           
     - name: transfer the file to config directory of nginx
       become: yes
@@ -301,26 +274,33 @@
       
     - name: Reload the nginx
       service: name=nginx state=reloaded enabled=yes      
-      
-
-##### Deploy application server #########      
+           
 - hosts: all
-  remote_user: root
+  remote_user: root  
   vars:
-       APPLICATION_DIRECTORY: "/home/dakharkara/courierwebapp"
+       APPLICATION_DIRECTORY: "/home/dakharkara/courierwebclient"
        SSH_KEY_DIRECTORY: "/home/dakharkara/.ssh"
        APP_CONTAINER_DIRECTORY: "/home/dakharkara"
     
-       WEBCLIENT_PROTOCOL:"http"
+       DOMAIN_NAME: "omexcourier.com"
+        
+       MAX_BODY_SIZE: "1024m"
+        
+       WEBCLIENT_PROTOCOL: "http"
        WEBCLIENT_HOST: "localhost"
-       WEBCLIENT_PORT:"8002"
+       WEBCLIENT_PORT: "8002"
+
+       VIRTUAL_HOST_NAME: "{{ DOMAIN_NAME }}"
+       VIRTUAL_HOST_IP: "127.0.0.10"
+       
        
   tasks:
+  
     - name: Clone the repository in project Directory
       become: yes
       git:
         repo=git@bitbucket.org:courier-handler/courierwebclient.git
-        dest={{ APPLICATION_DIRECTORY }}
+        dest="{{ APPLICATION_DIRECTORY }}"
         accept_hostkey=yes
         key_file="{{  SSH_KEY_DIRECTORY }}/id_rsa"
         update=yes
@@ -329,7 +309,7 @@
  
     - name: Add the permission for the directory
       become: yes
-      command: chmod -R 755 {{ APPLICATION_DIRECTORY }            
+      command: chmod -R 755 {{ APPLICATION_DIRECTORY }}            
     
     #### INstall Npm dependencies in package.json ####    
     - name: install the application nodejs packages depencies
@@ -341,7 +321,35 @@
       npm: path={{ APPLICATION_DIRECTORY }}   global=yes state=present
       
     - name: start the process for the app
-      command: "PORT={{ WEBCLIENT_PORT }} pm2 start {{ APPLICATION_DIRECTORY }}/bin/www"
+      become: yes
+      shell: "PORT={{ WEBCLIENT_PORT }} pm2 start {{ APPLICATION_DIRECTORY }}/bin/www"
+      ignore_errors: true
+      
+    - name: transfer the file to config directory of nginx
+      become: yes
+      template:
+        src="templates/omexcourier.com.j2"
+        dest="/etc/nginx/sites-available/omexcourier.com"
+        force=yes
+    
+    - name: Remove any symlinked file from previously enabled config
+      become: yes
+      file:
+        src="/etc/nginx/sites-available/omexcourier.com"
+        dest="/etc/nginx/sites-enabled/omexcourier.com"
+        state=link
+      ignore_errors: yes
+    
+    - name: Edit the hosts file
+      become: yes
+      lineinfile:
+        dest=/etc/hosts
+        regexp="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }}"        
+        line="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }}"
+        owner=root
+        group=root
+        mode=0644
+        state=present
     
     - name: Restart the nginx
       become: yes
