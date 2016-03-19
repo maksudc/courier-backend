@@ -3,8 +3,13 @@ var router = express.Router();
 var orderLogic = require("../logics/orderLogic");
 var multer = require("multer");
 var upload = multer();
+var bodyParser = require('body-parser');
 
-router.get('/:id', function(req, res){
+router.use(bodyParser.json()); // for parsing application/json
+router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
+
+router.get('/getOrder/:id', function(req, res){
 	if(!req.params.id){
 		res.send({
 			"status": "error",
@@ -15,9 +20,21 @@ router.get('/:id', function(req, res){
 		return;
 	}
 
-	order.findOne(req.body.id, function(data){
-		//TO DO: find order by id
-		res.send({"status": "In order page"});
+	// order.findOne(req.body.id, function(data){
+	// 	//TO DO: find order by id
+	// 	res.send({"status": "In order page"});
+	// });
+
+	orderLogic.orderDetail(req.params.id, function(data){
+		res.send(data);
+	});
+});
+
+
+router.get('/showAll', function(req, res){
+
+	orderLogic.findAllOrders(function(data){
+		res.send(data);
 	});
 });
 
@@ -64,6 +81,7 @@ router.post('/createByOperator', upload.array(), function(req, res){
 		}
 	*/
 	orderLogic.createByOperator(req.body, function(data){
+		console.log(data);
 		res.send(data);
 	});
 });
@@ -78,6 +96,13 @@ router.post('/deliverOrder', upload.array(), function(req, res){
 
 router.post('/receivePayment', upload.array(), function(req, res){
 	orderLogic.receivePayment(req.body.id, function(data){
+		res.send(data);
+	});
+});
+
+
+router.post('/orderDetail/:id', function(req, res){
+	orderLogic.orderDetail(req.params.id, function(data){
 		res.send(data);
 	});
 });
