@@ -165,6 +165,9 @@
     - name: start the process for the app
       become: yes
       shell: "pm2 start {{ DIRECTORY }}/bin/www -f --name api_process"
+      environment:
+        PORT: "{{ FORWARDED_PORT }}"
+        
 
      
 - hosts: all #testservers
@@ -335,6 +338,10 @@
       command: "pm2 start bin/www -f --name application_process"
       args:
         chdir: "{{ APPLICATION_DIRECTORY }}"
+      environment:
+        PORT: "{{ WEBCLIENT_PORT }}"
+        NODE_ENV: "prod"
+        
       ignore_errors: true
       
     - name: transfer the file to config directory of nginx
