@@ -1,10 +1,11 @@
-var sequelize = require("../models/connect");
-var Sequelize = require("sequelize");
-var orderModel = require("../models/orderModel");
-var itemLogic = require("../logics/itemLogic");
-var productLogic = require("../logics/productLogic");
+var DB = require("../models/index");
+var sequelize = DB.sequelize;
+var Sequelize = DB.Sequelize;
+var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranch = require("./subBranchLogic");
+var itemLogic = require("../logics/itemLogic");
+var productLogic = require("../logics/productLogic");
 var _ = require("lodash");
 var async = require("async");
 
@@ -90,7 +91,7 @@ var createDraft = function(postData, next){
 	orderModel.create(draftOrder).catch(function(err){
 		if(err){
 			next({"status": "error","message": "Error occured while creating order"});
-			return;		
+			return;
 		}
 	}).then(function(order){
 		if(order){
@@ -113,7 +114,7 @@ var createDraft = function(postData, next){
 		}
 		else{
 			next({"status": "error", "message": "No order created!!!"});
-			return;		
+			return;
 		}
 	});
 
@@ -148,7 +149,7 @@ var updateDraft = function(data, next){
 exports.updateDraft = updateDraft;
 
 var deleteDraft = function(data, next){
-	
+
 	if(!data.id){
 		next({"status": "error", "message": "Id required"});
 		return;
@@ -311,7 +312,7 @@ function findBranch(branchType, branchId, next){
 	else if(branchType == 'sub-branch'){
 		subBranch.findOneById(branchId, function(branchData){
 			return next(branchData);
-		});	
+		});
 	}
 	else {
 		return next({"status": "error", "message": "branch type did not match"});

@@ -1,5 +1,7 @@
-var regionalBranchModel = require("../models/connect").RegionalBranch;
-var Sequelize = require("sequelize");
+var DB = require("../models/index");
+var sequelize = DB.sequelize;
+var Sequelize = DB.Sequelize;
+var regionalBranchModel = sequelize.models.regionalBranch;
 
 var findOneById = function(id, next){
 	if(!id){

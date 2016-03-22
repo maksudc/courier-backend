@@ -5,13 +5,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+var DB = require('./models/index');
+var sequelize = DB.sequelize;
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
-
 var cors = require('cors');
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,25 +28,24 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 var epilogue = require("epilogue");
-var sequelize = require('./models/connect');
 
 epilogue.initialize({
     app: app,
-    sequelize: sequelize  
+    sequelize: sequelize
 });
 
 var regionResource = epilogue.resource({
-    model: sequelize.Region,
-    endpoints:["/regions" , "/regions/:id"],    
+    model: sequelize.models.region,
+    endpoints:["/regions" , "/regions/:id"],
 });
 
 var regionalBranchResource = epilogue.resource({
-    model: sequelize.RegionalBranch,
+    model: sequelize.models.regionalBranch,
     endpoints:["/regionalBranches" , "/regionalBranches/:id"],
 });
 
 var regionalBranchResource = epilogue.resource({
-    model: sequelize.SubBranch,
+    model: sequelize.models.subBranch,
     endpoints:["/subBranches" , "/subBranches/:id"],
 });
 
@@ -72,7 +72,7 @@ if (app.get('env') === 'development') {
     });
   });
 }else{
- 
+
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
@@ -81,8 +81,8 @@ app.use(function(err, req, res, next) {
     message: err.message,
     error: {}
   });
-});   
-    
+});
+
 }
 
 //app.use(regionResource.controllers);

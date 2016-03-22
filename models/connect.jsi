@@ -1,4 +1,4 @@
-var Sequelize = require('sequelize');
+/*var Sequelize = require('sequelize');
 var sequelize = sequelize || new Sequelize('dak_harkara', 'dak_harkara', '6hNWSTUyBPrEv9hP');
 var Promise = require("bluebird");
 
@@ -28,4 +28,16 @@ sequelize.sync();
 module.exports = sequelize;
 module.exports.Region = Region;
 module.exports.RegionalBranch = RegionalBranch;
-module.exports.SubBranch = SubBranch;
+module.exports.SubBranch = SubBranch;*/
+var DB = require("./index");
+var Sequelize = DB.Sequelize;
+var sequelize = DB.sequelize;
+var models = DB.models;
+
+//sequelize.sync();
+
+module.exports = sequelize;
+/*
+module.exports.Region = models.region;
+module.exports.SubBranch = models.subBranch;
+module.exports.RegionalBranch = models.regionalBranch;*/

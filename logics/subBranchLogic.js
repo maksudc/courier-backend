@@ -1,5 +1,7 @@
-var SubBranchModel = require("../models/connect").SubBranch;
-var Sequelize = require("sequelize");
+var DB = require("../models/index");
+var sequelize = DB.sequelize;
+var Sequelize = DB.Sequelize;
+var SubBranchModel = sequelize.models.subBranch;
 
 var findOneById = function(id, next){
 	if(!id){

@@ -1,6 +1,8 @@
-var sequelize = require("../models/connect");
-var Sequelize = require("sequelize");
-var productModel = require("../models/productModel");
+var DB = require("../models/index");
+var sequelize = DB.sequelize;
+var Sequelize = DB.Sequelize;
+var productModel = sequelize.models.products;
+
 var _ = require('lodash');
 
 var findOneById = function(id, next){
@@ -70,7 +72,7 @@ var calculatePrice = function(id, amount, next){
 			var productPrice = parseFloat(product.data.price);
 			var threshold_unit = 0;
 			var threshold_price = 0;
-			
+
 			if(product.threshold_unit){
 				threshold_unit = parseFloat(product.threshold_unit);
 				threshold_price = parseFloat(product.threshold_price);
@@ -84,7 +86,7 @@ var calculatePrice = function(id, amount, next){
 			return;
 		}
 		else next({"status": "error", "message": "No product found by this product id"});
-		
+
 	});
 };
 
@@ -103,7 +105,7 @@ var calculateMultiplePrice = function(data, next){
 
 		var pricingData = {};
 		if(products.data){
-			
+
 			_.forEach(products.data, function(product){
 				if(!pricingData[product.dataValues.uuid]){
 					// pricingData[product.dataValues.uuid] = {
@@ -132,8 +134,8 @@ var calculateMultiplePrice = function(data, next){
 				}
 				else{
 					if(item.amount > pricingData[item.product_id]["threshold_unit"]){
-						item["price"] = pricingData[item.product_id]["threshold_price"] + 
-							(item.amount - pricingData[item.product_id]["threshold_unit"]) * 
+						item["price"] = pricingData[item.product_id]["threshold_price"] +
+							(item.amount - pricingData[item.product_id]["threshold_unit"]) *
 								pricingData[item.product_id]["price"];
 					}
 					else item["price"] = pricingData[item.product_id]["threshold_price"];
@@ -142,7 +144,7 @@ var calculateMultiplePrice = function(data, next){
 				item["product_name"] = pricingData[item.product_id]["product_name"];
 				item["productUuid"] = item["product_id"];
 				delete item["product_id"];
-				
+
 				if(!singleForm){
 					newPrices.push(item);
 				}
@@ -158,7 +160,7 @@ var calculateMultiplePrice = function(data, next){
 			return;
 		}
 		else next({"status": "error", "message": "No product found by these product ids"});
-		
+
 	});
 };
 
@@ -187,14 +189,14 @@ var createOne = function(data, next){
 	}
 
 	productModel.create(productData).catch(function(error){
-		
+
 		if(error){
 			next({ "status": "error", "message": "Error in creating new entry", "data": null});
 			return;
 		}
 
 	}).then(function(product){
-		
+
 		if(product){
 			next({"status": "success", "data": data});
 		}
@@ -241,14 +243,14 @@ var createMany = function(data, next){
 	if(errorIndex > -1) return;
 
 	productModel.bulkCreate(productData).catch(function(error){
-		
+
 		if(error){
 			next({ "status": "error", "message": "Error in creating new entry", "data": null});
 			return;
 		}
 
 	}).then(function(productList){
-		
+
 		if(productList){
 			var tempProductList = [];
 			_.forEach(productList, function(tempProduct){tempProductList.push(tempProduct.dataValues);});
@@ -276,18 +278,18 @@ var updateOne = function(data, next){
 	productModel.findOne({where: {uuid: data.id}}).catch(function(err){
 		if(err)
 			next({"status": "error", "message": "Cannot update this entry", "data": null});
-		else 
+		else
 			next({"status": "error", "message": "Cannot update this entry, unknown error", "data": null});
 
 		return;
 
 	}).then(function(product){
-		
+
 		if(product){
 			if(data.product_name) product.product_name = data.product_name;
 			if(data.price) product.price = parseFloat(data.price);
 			if(data.unit) product.unit = data.unit;
-			
+
 			if(data.threshold_unit){
 				if(product.threshold_price || data.threshold_price)
 					product.threshold_unit = data.threshold_unit;
@@ -315,7 +317,7 @@ var updateOne = function(data, next){
 			}
 
 			product.save().catch(function(err){
-				
+
 				if(err){
 					next({"status": "error", "message": "Error while updating", "data": null});
 					return;
@@ -345,23 +347,23 @@ var deleteOne = function(data, next){
 	}
 
 	productModel.findOne({where: {uuid: data.id}}).catch(function(err){
-		
+
 		if(err){
 			next({"status": "error", "message": "Error while deleting this entry", "data": null});
 			return;
 		}
 
 	}).then(function(product){
-		
+
 		if(product){
-			
+
 			product.destroy();
 			next({"status": "success", "data": null, "message": "Product deleted"});
 			return;
 
 		}
 		else{
-			
+
 			next({"status": "error","data": null, "message": "Cannot find this product"});
 			return;
 

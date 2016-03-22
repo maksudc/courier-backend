@@ -1,9 +1,12 @@
-var sequelize = require("../models/connect");
-var Sequelize = require("sequelize");
+var DB = require("../models/index");
+var sequelize = DB.sequelize;
+var Sequelize = DB.Sequelize;
+var itemModel = sequelize.models.item;
+var productModel = sequelize.models.products;
+
 var productLogic = require("../logics/productLogic");
 var orderLogic = require("../logics/orderLogic");
-var itemModel = require("../models/itemModel");
-var productModel = require("../models/productModel");
+
 var _ = require('lodash');
 
 var findOneById = function(id, next){
@@ -16,7 +19,7 @@ var findOneById = function(id, next){
 		}
 
 	}).then(function(item){
-		
+
 		if(item){
 			next({"status": "success","data": item});
 		}
@@ -36,7 +39,7 @@ var findManyByIds = function(ids, next){
 exports.findManyByIds = findManyByIds;
 
 var findByOrderId = function(orderId, next){
-	
+
 	if(!orderId){
 		next({"status": "error", "message": "Id required"});
 		return;
@@ -51,7 +54,7 @@ var findByOrderId = function(orderId, next){
 
 	}).then(function(itemList){
 		if(itemList){
-			
+
 			var newItemList = [];
 			_.forEach(itemList, function(item){
 				newItemList.push(item.dataValues);
@@ -69,7 +72,7 @@ var findByOrderId = function(orderId, next){
 exports.findByOrderId = findByOrderId;
 
 var createOne = function(data, next){
-	
+
 	if(!data.amount || !data.product_id || !data.orderUuid){
 		next({"status": "error", "data": null, "message": "Not enough information given"});
 		return;
@@ -113,19 +116,19 @@ exports.createOne = createOne;
 
 var createMany = function(data, next){
 
-	
+
 	//final release: items will be created with predefined price
 	var missingIndex = _.findIndex(data, function(item){
-		return !item.amount || !item.product_id || !item.orderUuid; 
+		return !item.amount || !item.product_id || !item.orderUuid;
 	});
-	
+
 	if(missingIndex > -1) {
 		console.log(data[missingIndex]);
 		next({"status": "error", "message": "amount or id is missing at index " + missingIndex.toString() + " of item list"});
 		return;
 	};
 
-	
+
 	productLogic.calculateMultiplePrice(data, function(priceData){
 		if(priceData.status != 'success'){
 			next(data);
@@ -161,11 +164,11 @@ var create = function(data, next){
 		next({"status": "error", "message": "No data found"});
 	}
 	else if(Object.prototype.toString.call(data) != '[object Array]'){
-		next({"status": "error", "message": "Expecting array of items"});	
+		next({"status": "error", "message": "Expecting array of items"});
 	}
 	else{
 		if(data.length < 1){
-			next({"status": "error", "message": "Zero items not acceptable"});			
+			next({"status": "error", "message": "Zero items not acceptable"});
 		}
 		else if(data.length == 1){
 			console.log("Create one");
@@ -192,7 +195,7 @@ var updateOne = function(data, next){
 	}
 	else if(!data.product_id && !data.amount){
 		next({"status": "error", "message": "Required product_id and amount"});
-		return;	
+		return;
 	}
 
 	itemModel.findOne({where: {uuid: data.id}, attributes: ['uuid', 'amount', 'productUuid']}).catch(function(err){
@@ -204,7 +207,7 @@ var updateOne = function(data, next){
 
 	}).then(function(item){
 		if(item){
-			
+
 			if(data.amount) item.amount = parseFloat(data.amount);
 			if(data.product_id) item.product_id = data.product_id;
 			if(data.orderUuid) item.orderUuid = data.orderUuid;
@@ -218,14 +221,14 @@ var updateOne = function(data, next){
 
 				item.price = parseFloat(priceData.price);
 				item.save().catch(function(err){
-					
+
 					if(err){
 						next({"status": "error", "message": "Cannot get this item, an error occurred"});
 						return;
 					}
 
 				}).then(function(item){
-					
+
 					next({"status": "success","data": item});
 					return;
 
@@ -246,14 +249,14 @@ exports.updateOne = updateOne;
 var deleteOne = function(data, next){
 
 	if(!data.id){
-		
+
 		next({"status": "error", "message": "id required"});
 		return;
 
 	}
 
 	itemModel.findOne({where: {uuid: data.id}, attributes: ['uuid']}).catch(function(err){
-		
+
 		if(err){
 			next({"status": "error", "message": "Error while deleting this entry"});
 			console.log(err);
@@ -261,7 +264,7 @@ var deleteOne = function(data, next){
 		}
 
 	}).then(function(item){
-		
+
 		if(item){
 			item.destroy();
 			next({"status": "success", "message": "item deleted"});
@@ -283,7 +286,7 @@ var deleteByIds = function(ids, next){
 };
 
 var deleteByOrderId = function(id, next){
-	
+
 	itemModel.destroy({where: {orderUuid: id}}).catch(function(err){
 		if(err){
 			next({"status": "error", "message": "Error while deleting itemList"});
@@ -300,7 +303,7 @@ exports.deleteByOrderId = deleteByOrderId;
 var addItems = function(data, next){
 
 	if(!data.orderUuid){
-		
+
 		next({"status": "error", "message": "order id required"});
 		return;
 

@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 var Sequelize = require("sequelize");
-var itemModel = require("../models/itemModel");
 var multer = require("multer");
 var upload = multer();
 var productLogic = require("../logics/productLogic");
@@ -19,7 +18,7 @@ router.get('/:id', function(req, res){
 });
 
 router.post('/create', upload.array(), function(req, res){
-	
+
 	if(!req.body){
 		res.send({"status": "error", "message": "No information", "data": null});
 		return;
@@ -35,7 +34,7 @@ router.post('/create', upload.array(), function(req, res){
 });
 
 router.post('/update', upload.array(), function(req, res){
-	
+
 	if(!req.body){
 		res.send({"status": "error", "message": "No information", "data": null});
 		return;
@@ -51,7 +50,7 @@ router.post('/update', upload.array(), function(req, res){
 });
 
 router.post('/delete', upload.array(), function(req, res){
-	
+
 	if(!req.body){
 		res.send({"status": "error", "message": "No information", "data": null});
 		return;
@@ -67,7 +66,7 @@ router.post('/delete', upload.array(), function(req, res){
 });
 
 router.post('/addItems', upload.array(), function(req, res){
-	
+
 	if(!req.body){
 		res.send({"status": "error", "message": "Not enought information given", "data": null});
 		return;
