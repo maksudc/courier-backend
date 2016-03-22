@@ -6,7 +6,7 @@ var RegionalBranchModel = require("./branch/regionalBranch");
 var SubBranchModel = require("./branch/subBranch");
 var RegionModel = require("./region/region");
 
-var Region = sequelize.define("region" , {    
+var Region = sequelize.define("region" , {
     name: Sequelize.STRING
 });
 var RegionalBranch = sequelize.define("regionalBranch" ,{
@@ -21,7 +21,6 @@ var SubBranch = sequelize.define("subBranch" , {
 });
 
 RegionalBranch.belongsTo(Region);
-
 RegionalBranch.hasMany(SubBranch);
 
 sequelize.sync();

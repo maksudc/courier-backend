@@ -27,7 +27,7 @@ var order = sequelize.define('order', {
 	payment_operator: {type: Sequelize.STRING}, //operator who took the money,In 2nd release, operator id
 	status: {
 		type: Sequelize.ENUM('draft', 'confirmed', 'received', 'travelling', 'reached', 'delivered'),
-		defaultValue: 'draft', 
+		defaultValue: 'draft',
 		allowNull: false
 	},
 	deliveryType: {
