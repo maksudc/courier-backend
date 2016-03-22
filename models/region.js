@@ -15,7 +15,7 @@ module.exports = function(sequelize , DataTypes){
 
     classMethods: {
         associate: function(models){
-          RegionModel.hasMany(models.regionalBranch , { foreignKey: "regionId" });
+          //RegionModel.hasMany(models.regionalBranch , { foreignKey: "regionId" });
         }
     }
   });

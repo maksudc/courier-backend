@@ -28,18 +28,18 @@ module.exports = function(sequelize , DataTypes){
 
   var BranchRoute = sequelize.define("branchRoute",{
       //uuid: { type: Sequelize.UUID , primaryKey:true , defaultValue:Sequelize.UUIDV1 },
-      midNodes: { type: DataTypes , allowNull:true },
+      midNodes: { type: DataTypes.TEXT , allowNull:true },
       /*sourceId:{
-          type: Sequelize.INTEGER,
+          type: DataTypes.INTEGER,
           references:{
-              model: sequelize.RegionalBranch,
+              model: sequelize.models.regionalBranch,
               key: "id"
           },
       },
       destinationId:{
-          type: Sequelize.INTEGER,
+          type: DataTypes.INTEGER,
           references:{
-              model: sequelize.RegionalBranch,
+              model: sequelize.models.regionalBranch,
               key: "id"
           }
       }*/

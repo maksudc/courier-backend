@@ -59,7 +59,7 @@ module.exports = function(sequelize, DataTypes) {
 			associate: function(models){
 
 				//product.hasOne(models.item, { foreignKey: 'productUuid' });
-				order.hasOne(models.item, { foreignKey: 'orderUuid'});
+				//order.hasOne(models.item, { foreignKey: 'orderUuid'});
 				//ShipmentModel.hasMany(order , {foreignKey: 'shipmentUuid'});
 				order.belongsTo(models.shipment , {foreignKey: 'shipmentUuid'});
 

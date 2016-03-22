@@ -36,7 +36,7 @@ module.exports = function(sequelize , DataTypes){
       trackableId:{ type:DataTypes.UUID , alowNull:false },
       status: { type: DataTypes.ENUM('active' , 'deactive') , defaultValue:"active" ,allowNull:true },
       currentGeoLocation: { type: DataTypes.GEOMETRY , allowNull:true },
-      parentTrackerId: {
+      /*parentTrackerId: {
 
         type: DataTypes.UUID ,
         defaultValue: null,
@@ -45,7 +45,7 @@ module.exports = function(sequelize , DataTypes){
           model: GenericTracker,
           key: "uuid"
         }
-      },
+      },*/
       hasChild: { type: DataTypes.BOOLEAN , defaultValue: false }
   } , {
 
@@ -67,6 +67,7 @@ module.exports = function(sequelize , DataTypes){
           constraints: false,
           as: 'orderItem'
         });
+        GenericTracker.hasMany(GenericTracker , { foreignKey:"parentTrackerId" });
       }
     }
   });

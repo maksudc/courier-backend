@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var DB = require('./models/index');
 var sequelize = DB.sequelize;
+sequelize.sync();
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
