@@ -6,10 +6,15 @@ var router = express.Router();
 // router.use('/order', order);
 var product = require("./product");
 router.use('/product', product);
+
 var item = require("./item");
 router.use('/item', item);
+
 var order = require("./order");
 router.use('/order', order);
+
+var shipmentRouter = require("./shipment");
+router.use('/shipment' , shipmentRouter);
 
 var branchRouter = require("./branch");
 router.use("/branch" , branchRouter);

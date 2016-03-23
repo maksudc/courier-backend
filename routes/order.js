@@ -70,7 +70,7 @@ router.post('/deleteDraft', upload.array(), function(req, res){
 });
 
 router.post('/createByOperator', upload.array(), function(req, res){
-	/*When operator creates an order. 
+	/*When operator creates an order.
 	1st release.....
 		{
 			item_list: [
@@ -109,5 +109,3 @@ router.post('/orderDetail/:id', function(req, res){
 
 
 module.exports = router;
-
-

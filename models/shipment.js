@@ -27,6 +27,7 @@ module.exports = function(sequelize, DataTypes) {
         // associations can be defined here
         ShipmentModel.hasMany(models.order , {
           foreignKey: "shipmentUuid",
+          as: "orders"
         });
 
         ShipmentModel.hasOne(models.genericTracker , {
@@ -34,7 +35,8 @@ module.exports = function(sequelize, DataTypes) {
           constraints: false,
           scope:{
             trackableType: 'shipment'
-          }
+          },
+          as: 'tracker'
         });
       }
     }
