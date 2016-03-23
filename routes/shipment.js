@@ -27,7 +27,52 @@ router.post("/createWithOrders" , upload.array() , function(req , res){
     }
     res.send(data);
   });
-
 });
 
-module.exports = router
+/**
+  @param id ( UUID ) required: uuid of the shipment to retrieve
+  @param ?limit ( INTEGER ) : customizable limit for pagination
+            default: 10
+  @param ?pageNo ( INETEGER ): pageNo after limit which needs to be fetched ( 1 based indexing )
+            default: 1
+  @param ?includeOrders ( BOOLEAN ): whether or not to include orders in nested manner for each shipment result
+            default: false
+  @return response ( JSONObject ):
+            status ( STRING ): "success"/"error",
+            data ( JSONObject ): shipment model structure
+            message ( STRING ): if error happened it contains the details of the error
+**/
+router.get("/details/:id" , function(req , res){
+
+  queryVars = req.query;
+  console.log(queryVars);
+
+  shipmentLogic.getShipmentDetails(req.params.id , queryVars , function(data){
+    res.send(data);
+  });
+});
+
+/**
+  @param id ( UUID ) required: uuid of the shipment to retrieve
+  @param ?limit ( INTEGER ) : customizable limit for pagination
+            default: 10
+  @param ?pageNo ( INETEGER ): pageNo after limit which needs to be fetched ( 1 based indexing )
+            default: 1
+  @param ?includeOrders ( BOOLEAN ): whether or not to include orders in nested manner for each shipment result
+            default: false
+  @return response ( JSONObject ):
+            status ( STRING ): "success"/"error",
+            data ( JSONArray ): shipment model structure
+            message ( STRING ): if error happened it contains the details of the error
+**/
+router.get("/all/" , function(req , res){
+
+  queryVars = req.query;
+  console.log(queryVars);
+
+  shipmentLogic.getShipments(queryVars , function(data){
+    res.send(data);
+  });
+});
+
+module.exports = router;

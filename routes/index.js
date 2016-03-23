@@ -14,7 +14,7 @@ var order = require("./order");
 router.use('/order', order);
 
 var shipmentRouter = require("./shipment");
-router.use('/shipment' , shipmentRouter);
+router.use('/shipments' , shipmentRouter);
 
 var branchRouter = require("./branch");
 router.use("/branch" , branchRouter);
