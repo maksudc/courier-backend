@@ -25,9 +25,9 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
         // associations can be defined here
-        /*ShipmentModel.hasMany(models.order , {
-          foreignKey: "shipmentUuid"
-        });*/
+        ShipmentModel.hasMany(models.order , {
+          foreignKey: "shipmentUuid",
+        });
 
         ShipmentModel.hasOne(models.genericTracker , {
           foreignKey: "trackableId",

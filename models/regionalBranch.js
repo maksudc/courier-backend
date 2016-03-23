@@ -19,7 +19,9 @@ module.exports = function(sequelize , DataTypes){
       associate: function(models){
 
         RegionalBranch.belongsTo(models.region ,{ foreignKey: "regionId" });
-        //RegionalBranch.hasMany(models.subBranch , { foreignKey: "regionalBranchId" });
+        RegionalBranch.hasMany(models.subBranch , { foreignKey: "regionalBranchId" });
+        RegionalBranch.hasMany(models.branchRoute , { foreignKey: "sourceId" });
+        RegionalBranch.hasMany(models.branchRoute , { foreignKey: "destinationId" });
       }
     }
   });
