@@ -22,6 +22,14 @@ module.exports = function(sequelize , DataTypes){
         RegionalBranch.hasMany(models.subBranch , { foreignKey: "regionalBranchId" });
         RegionalBranch.hasMany(models.branchRoute , { foreignKey: "sourceId" });
         RegionalBranch.hasMany(models.branchRoute , { foreignKey: "destinationId" });
+        RegionalBranch.hasMany(models.genericTracker , {
+          foreignKey: "currentBranchId",
+          constraints: false,
+          scope:{
+            branchType: "regional"
+          },
+          as: 'currentTrackers'
+        });
       }
     }
   });

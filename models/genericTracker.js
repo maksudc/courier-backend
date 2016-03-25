@@ -36,19 +36,10 @@ module.exports = function(sequelize , DataTypes){
       trackableId:{ type:DataTypes.UUID , alowNull:false },
       status: { type: DataTypes.ENUM('active' , 'deactive') , defaultValue:"active" ,allowNull:true },
       currentGeoLocation: { type: DataTypes.GEOMETRY , allowNull:true },
-      /*parentTrackerId: {
 
-        type: DataTypes.UUID ,
-        defaultValue: null,
-        allowNull: true,
-        references:{
-          model: GenericTracker,
-          key: "uuid"
-        }
-      },*/
       hasChild: { type: DataTypes.BOOLEAN , defaultValue: false },
-      branchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
-      branchId:{ type: DataTypes.INTEGER }
+      currentBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
+      currentBranchId:{ type: DataTypes.INTEGER }
   } , {
 
     classMethods: {
@@ -70,6 +61,18 @@ module.exports = function(sequelize , DataTypes){
           as: 'orderItem'
         });
         GenericTracker.hasMany(GenericTracker , { foreignKey:"parentTrackerId" });
+
+        GenericTracker.belongsTo(models.regionalBranch , {
+          foreignKey: "currentBranchId",
+          constraints: false,
+          as: 'regionalBranch'
+        });
+
+        GenericTracker.belongsTo(models.subBranch , {
+          foreignKey: "currentBranchId",
+          constraints: false,
+          as: 'subBranch'
+        });
       }
     }
   });

@@ -18,6 +18,14 @@ module.exports = function(sequelize , DataTypes){
       associate: function(models){
 
         SubBranch.belongsTo(models.regionalBranch , { foreignKey: "regionalBranchId" });
+        SubBranch.hasMany(models.genericTracker , {
+          foreignKey: "currentBranchId",
+          constraints: false,
+          scope:{
+            currentBranchType: "sub"
+          },
+          as: "currentTrackers"
+        });
       }
     }
   });
