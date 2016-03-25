@@ -78,6 +78,8 @@ var updateCurrentLocation = function(trackerId , branchType , branchId , next){
 };
 
 
+
+
 exports.getTracker = getTracker;
 exports.getTrackers = getTrackers;
 exports.getTrackerCurrentBranch = getTrackerCurrentBranch;
