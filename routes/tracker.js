@@ -22,4 +22,10 @@ router.get("/:id/currentBranch" , function(req ,res){
   });
 });
 
+router.put("/:id/currentBranch" , function(req , res){
+  trackerLogic.updateCurrentLocation(req.params.id , req.body.branchType , req.body.branchId , function(data){
+    res.send(data);
+  });
+});
+
 module.exports = router;

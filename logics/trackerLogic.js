@@ -62,8 +62,23 @@ var getTrackerCurrentBranch = function(trackerId , next){
   });
 };
 
+var updateCurrentLocation = function(trackerId , branchType , branchId , next){
+
+  genericTracker
+  .update(
+    { currentBranchType:branchType , currentBranchId:branchId } ,
+    { where:{ uuid:trackerId } }
+  )
+  .then(function(numRowsAffected){
+    next({ status:"success" , data:numRowsAffected , message:null });
+  })
+  .catch(function(err){
+    next({ status:"error" , data:null , message:err });
+  });
+};
 
 
 exports.getTracker = getTracker;
 exports.getTrackers = getTrackers;
 exports.getTrackerCurrentBranch = getTrackerCurrentBranch;
+exports.updateCurrentLocation = updateCurrentLocation;
