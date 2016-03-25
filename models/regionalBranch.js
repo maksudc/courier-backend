@@ -30,6 +30,15 @@ module.exports = function(sequelize , DataTypes){
           },
           as: 'currentTrackers'
         });
+
+        RegionalBranch.hasMany(models.trackerLog , {
+          foreignKey: "branchId",
+          constraints: false,
+          scope:{
+            branchType: "regional"
+          },
+          as:"trackerLogs"
+        });
       }
     }
   });
