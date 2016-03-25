@@ -77,8 +77,13 @@ var updateCurrentLocation = function(trackerId , branchType , branchId , next){
   });
 };
 
-
-
+/**
+  @todo:  Create new tracker api
+  @todo:  Disable a tracker
+  @// TODO: Update a tracker object ( Disable a tracker or update the reference )
+  @todo:  parent trackerId set
+  @todo:  parent trackerId get
+**/
 
 exports.getTracker = getTracker;
 exports.getTrackers = getTrackers;

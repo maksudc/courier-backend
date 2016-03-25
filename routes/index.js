@@ -22,6 +22,9 @@ router.use("/branch" , branchRouter);
 var trackerRouter = require("./tracker");
 router.use("/trackers" , trackerRouter);
 
+var trackerLogRouter = require("./trackerLog");
+router.use("/trackerLogs" , trackerLogRouter);
+
 var routeRouter = require("./branchRoute");
 router.use("/routes" , routeRouter);
 
