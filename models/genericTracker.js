@@ -46,7 +46,9 @@ module.exports = function(sequelize , DataTypes){
           key: "uuid"
         }
       },*/
-      hasChild: { type: DataTypes.BOOLEAN , defaultValue: false }
+      hasChild: { type: DataTypes.BOOLEAN , defaultValue: false },
+      branchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
+      branchId:{ type: DataTypes.INTEGER }
   } , {
 
     classMethods: {
