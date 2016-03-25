@@ -30,34 +30,38 @@ var getTrackers = function(next){
 
 var getTrackerCurrentBranch = function(trackerId , next){
 
-  getTracker(trackerId , function(response){
+  genericTracker
+  .findOne({ where: { uuid: trackerId } })
+  .then(function(result){
+    //next({ status: "success" , data:result , message:null });
+    if(result.currentBranchType == "sub"){
 
-    if(response.status == "success"){
-
-      branchFetchFunc = null;
-      if(response.data.currentBranchType == "sub"){
-        branchFetchFunc = response.data.getSubBranch;
-      }else if(response.data.currentBranchType == "regional"){
-        branchFetchFunc = response.data.getRegionalBranch;
-      }
-
-      branchFetchFunc()
-      .then(function(currentBranch){
-
-          returnData = {
-            currentBranch: {}
-          };
-          _.assignIn(returnData , response.data);
-          _.assignIn(returnData.currentBranch , currentBranch);
-
-          next({ status: "success" , data: returnData , message:null });
+      result
+      .getSubBranch()
+      .then(function(subBranch){
+        next({ status:"success" , data: subBranch , message:null });
       })
       .catch(function(err){
-          next({ status: "error" , data: null , message:err });
+        next({ status:"error" , data:null , message:err });
+      });
+
+    }else if(result.currentBranchType == "regional"){
+
+      result
+      .getRegionalBranch()
+      .then(function(regionalBranch){
+        next({ status:"success" , data: regionalBranch , message:null });
+      })
+      .catch(function(err){
+        next({ status:"error" , data:null , message:err });
       });
     }
+  })
+  .catch(function(err){
+    next({ status:"error" , data:null , message: err });
   });
-}
+};
 
 exports.getTracker = getTracker;
 exports.getTrackers = getTrackers;
+exports.getTrackerCurrentBranch = getTrackerCurrentBranch;
