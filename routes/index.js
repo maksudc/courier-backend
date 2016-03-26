@@ -31,6 +31,8 @@ router.use("/routes" , routeRouter);
 var regionRouter = require("./region");
 router.use("/region" , regionRouter);
 
+router.use("/admin", require("./admin"));
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   	res.send({"status": "In home page"});

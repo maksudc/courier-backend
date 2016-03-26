@@ -16,7 +16,6 @@ module.exports = function(sequelize , DataTypes){
 
 		classMethods: {
 			associate: function(models){
-
 				products.hasOne(models.item , { foreignKey: 'productUuid' });
 			}
 		}
