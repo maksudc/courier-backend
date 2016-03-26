@@ -4,7 +4,7 @@ var trackerLogic = require("../logics/trackerLogic");
 
 router.get("/" , function(req , res){
 
-  trackerLogic.getTrackers(function(data){
+  trackerLogic.getTrackers(req.query , function(data){
       res.send(data);
   });
 });
@@ -24,6 +24,12 @@ router.get("/:id/currentBranch" , function(req ,res){
 
 router.put("/:id/currentBranch" , function(req , res){
   trackerLogic.updateCurrentLocation(req.params.id , req.body.branchType , req.body.branchId , function(data){
+    res.send(data);
+  });
+});
+
+router.post("/" , function(req , res){
+  trackerLogic.createTracker(req.body , function(data){
     res.send(data);
   });
 });

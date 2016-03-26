@@ -60,7 +60,9 @@ module.exports = function(sequelize , DataTypes){
           constraints: false,
           as: 'orderItem'
         });
-        GenericTracker.hasMany(GenericTracker , { foreignKey:"parentTrackerId" });
+        
+        GenericTracker.belongsTo(GenericTracker , { foreignKey:"parentTrackerId" , as:'parentTracker' });
+        GenericTracker.hasMany(GenericTracker , { foreignKey:"parentTrackerId" , as:'childTrackers' });
 
         GenericTracker.hasMany(models.trackerLog , { foreignKey: "trackerId" , name:"logsForTracker" });
 

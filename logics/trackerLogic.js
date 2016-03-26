@@ -16,10 +16,50 @@ var getTracker = function(trackerId , next){
   });
 };
 
-var getTrackers = function(next){
+var getTrackers = function(params , next){
+
+  paginationClause = {
+    limit: 10,
+    offset:0
+  };
+
+  console.log(params);
+
+  if(params.limit){
+    paginationClause.limit = parseInt(params.limit);
+  }
+  if(params.page){
+    paginationClause.offset = (parseInt(params.page)-1) * paginationClause.limit;
+  }
+
+  whereClause = {};
+  if(params.status){
+    whereClause.status = params.status;
+  }
+  if(params.trackableType){
+    whereClause.trackableType = params.trackableType;
+  }
+  if(params.trackableId){
+    whereClause.trackableId = params.trackableId;
+  }
+  if(params.currentBranchType){
+    whereClause.currentBranchType = params.currentBranchType;
+  }
+  if(params.currentBranchId){
+    whereClause.currentBranchId = params.currentBranchId;
+  }
+  if(params.parentTrackerId){
+    whereClause.parentTrackerId = params.parentTrackerId;
+  }
+
+  queryParam = {};
+  _.assignIn(queryParam , paginationClause);
+  _.assignIn(queryParam , { where:whereClause });
+
+  console.log(queryParam);
 
   genericTracker
-  .findAll()
+  .findAll(queryParam)
   .then(function(results){
     next({ status:"success" , data:results , message:null });
   })
@@ -77,6 +117,18 @@ var updateCurrentLocation = function(trackerId , branchType , branchId , next){
   });
 };
 
+var createTracker = function(postData , next){
+
+  genericTracker
+  .create(postData)
+  .then(function(result){
+    next({ status:"success" , data:result , message:null });
+  })
+  .catch(function(err){
+    next({ status:"error" , data:null , message:err });
+  });
+};
+
 /**
   @todo:  Create new tracker api
   @todo:  Disable a tracker
@@ -89,3 +141,4 @@ exports.getTracker = getTracker;
 exports.getTrackers = getTrackers;
 exports.getTrackerCurrentBranch = getTrackerCurrentBranch;
 exports.updateCurrentLocation = updateCurrentLocation;
+exports.createTracker = createTracker;
