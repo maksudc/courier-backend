@@ -31,6 +31,24 @@ module.exports = function(sequelize , DataTypes){
           as: 'currentTrackers'
         });
 
+        RegionalBranch.hasMany(models.genericTracker , {
+          foreignKey: "sourceBranchId",
+          constraints: false,
+          scope:{
+            branchType: "regional"
+          },
+          as: 'sourceTrackers'
+        });
+
+        RegionalBranch.hasMany(models.genericTracker , {
+          foreignKey: "destinationBranchId",
+          constraints: false,
+          scope:{
+            branchType: "regional"
+          },
+          as: 'destinationTrackers'
+        });
+
         RegionalBranch.hasMany(models.trackerLog , {
           foreignKey: "branchId",
           constraints: false,

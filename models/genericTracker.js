@@ -39,7 +39,13 @@ module.exports = function(sequelize , DataTypes){
 
       hasChild: { type: DataTypes.BOOLEAN , defaultValue: false },
       currentBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
-      currentBranchId:{ type: DataTypes.INTEGER }
+      currentBranchId:{ type: DataTypes.INTEGER },
+
+      sourceBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
+      sourceBranchId:{ type: DataTypes.INTEGER },
+
+      destinationBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
+      destinationBranchId:{ type: DataTypes.INTEGER },
   } , {
 
     classMethods: {
@@ -60,7 +66,7 @@ module.exports = function(sequelize , DataTypes){
           constraints: false,
           as: 'orderItem'
         });
-        
+
         GenericTracker.belongsTo(GenericTracker , { foreignKey:"parentTrackerId" , as:'parentTracker' });
         GenericTracker.hasMany(GenericTracker , { foreignKey:"parentTrackerId" , as:'childTrackers' });
 
@@ -77,6 +83,31 @@ module.exports = function(sequelize , DataTypes){
           constraints: false,
           as: 'subBranch'
         });
+
+        GenericTracker.belongsTo(models.regionalBranch , {
+          foreignKey: "sourceBranchId",
+          constraints: false,
+          as: 'sourceRegionalBranch'
+        });
+
+        GenericTracker.belongsTo(models.subBranch , {
+          foreignKey: "sourceBranchId",
+          constraints: false,
+          as: 'sourceSubBranch'
+        });
+
+        GenericTracker.belongsTo(models.regionalBranch , {
+          foreignKey: "destinationBranchId",
+          constraints: false,
+          as: 'destinationRegionalBranch'
+        });
+
+        GenericTracker.belongsTo(models.subBranch , {
+          foreignKey: "destinationBranchId",
+          constraints: false,
+          as: 'destinationSubBranch'
+        });
+
       }
     }
   });
