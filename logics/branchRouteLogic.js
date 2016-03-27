@@ -4,6 +4,7 @@ var Sequelize = DB.Sequelize;
 var RouteModel = sequelize.models.branchRoute;
 var RegionalBranchModel = sequelize.models.regionalBranch;
 var SubBranchModel = sequelize.models.subBranch;
+var _ = require("lodash");
 
 var Promise = require("bluebird");
 
@@ -122,4 +123,41 @@ var getFullRouteBetween = function(sourceSubBranchId , destinationSubBranchId , 
     })*/
 };
 
+var newRoute = function(postData , next){
+
+  sourceId = postData.sourceId;
+  destinationId = postData.destinationId;
+
+  RouteModel
+  .findOne({ where: { sourceId:sourceId , destinationId:destinationId } })
+  .then(function(result){
+    if(result){
+      return  result.destroy();
+    }
+  })
+  .then(function(result){
+    routeData = {};
+    _.assignIn(routeData , postData);
+
+    if(postData.midNodes){
+
+      nodes = [];
+      for(I = 0 ;I < postData.midNodes.length ; I++){
+        nodes.push(parseInt(postData.midNodes[I]));
+      }
+      _.assignIn(routeData , { 'midNodes': JSON.stringify(nodes)  });
+    }
+    
+    return RouteModel.create(routeData);
+  })
+  .then(function(result){
+    next({ status:"success" , data:result , message:null });
+  })
+  .catch(function(err){
+    console.log(err);
+    next({ status:"error" , data:null , message:err });
+  });
+};
+
 exports.getFullRouteBetween = getFullRouteBetween;
+exports.newRoute = newRoute;

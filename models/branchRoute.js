@@ -29,6 +29,8 @@ module.exports = function(sequelize , DataTypes){
   var BranchRoute = sequelize.define("branchRoute",{
       //uuid: { type: Sequelize.UUID , primaryKey:true , defaultValue:Sequelize.UUIDV1 },
       midNodes: { type: DataTypes.TEXT , allowNull:true },
+      sourceId: { type: DataTypes.INTEGER },
+      destinationId: { type:DataTypes.INTEGER }
       /*sourceId:{
           type: DataTypes.INTEGER,
           references:{

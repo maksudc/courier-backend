@@ -4,46 +4,46 @@
     USER_EMAIL: dakharkara@gmail.com
     USER_NAME: "dakharkara"
     USER_PASSWORD: "4NQzebcHNUVJTjPB"
-    
+
     APP_NAME: "courierwebapp"
     DIRECTORY: "/home/dakharkara/courierwebapp"
     SSH_KEY_DIRECTORY: "/home/dakharkara/.ssh"
     APP_CONTAINER_DIRECTORY: "/home/dakharkara"
 
-    
+
     mysql_root_password: dKpwBaUEys65nRbp
-    MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"    
+    MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
     DATABASE_NAME: dak_harkara
-    
+
     APP_MYSQL_USER: dak_harkara
     APP_MYSQL_PASSWORD: 6hNWSTUyBPrEv9hP
-    
+
     FORWARDED_HOST: "localhost"
     FORWARDED_PORT: "8000"
-        
+
   remote_user: root
   become: yes
-  
+
   roles:
       - ansible-pip
       - ansible-role-mysql
-  
+
   tasks:
     ######### Installing mysql instance ##################
     - name: Update the instance
       become: yes
       apt: update-cache=yes
-      
+
     - name: download dependencies
       apt: name={{ item }} state=present
       with_items:
         - python-dev
         - libmysqlclient-dev
-      
+
     - name: Installing MysqlDb for ansible mysql installation
       become: yes
       pip: name=MySQL-python state=present
-    
+
     - name: Install the git
       sudo: yes
       apt:
@@ -106,31 +106,31 @@
     - name: Add the permission for the directory
       become: yes
       command: chmod -R 755 {{ DIRECTORY }}
-      
+
     ######### Mysql Set up ##############
     - name: Set the root password for mysql
       become: yes
       mysql_user: name=root password={{ MYSQL_ROOT_PASSWORD }} update_password=always
-    
-    - name: Install MySQL for production ready server      
+
+    - name: Install MySQL for production ready server
       become: yes
-      mysql_db: name={{ DATABASE_NAME }} state=present login_user=root login_password={{ MYSQL_ROOT_PASSWORD }}            
-          
+      mysql_db: name={{ DATABASE_NAME }} state=present login_user=root login_password={{ MYSQL_ROOT_PASSWORD }}
+
     #- name: Removes anonymous user account for localhost
-    #  mysql_user: name='' host=localhost state=absent              
-    
+    #  mysql_user: name='' host=localhost state=absent
+
     #- name: Removes anonymous user account for localhost
-    #  mysql_user: name='' host_all=yes state=absent 
-    
+    #  mysql_user: name='' host_all=yes state=absent
+
     - name: Creating the database user for this application
       become: yes
-      mysql_user: name={{ APP_MYSQL_USER }} password={{ APP_MYSQL_PASSWORD }} priv={{ DATABASE_NAME }}.*:ALL update_password=always login_user=root login_password={{ MYSQL_ROOT_PASSWORD }}          
+      mysql_user: name={{ APP_MYSQL_USER }} password={{ APP_MYSQL_PASSWORD }} priv={{ DATABASE_NAME }}.*:ALL update_password=always login_user=root login_password={{ MYSQL_ROOT_PASSWORD }}
 
     ##### Install nodejs ######
     - name: install the nodejs deb
       become: yes
       apt: name=nodejs update-cache=yes
-    
+
     - name: Symlink fr older node
       become: yes
       file:
@@ -138,38 +138,44 @@
         dest="/usr/bin/node"
         state=link
       ignore_errors: yes
-    
+
     - name: install the npm deb
       become: yes
       apt: name=npm update-cache=yes
-    
+
     #### INstall Npm dependencies in package.json ####
-    
+
     - name: install the application nodejs packages depencies
-      become: yes 
+      become: yes
       npm: path={{ DIRECTORY }}   global=no state=present
-    
+
     - name: install the application nodejs packages depencies
-      become: yes 
+      become: yes
       npm: path={{ DIRECTORY }}   global=yes state=present
+
+    - name: Run the pending migration if any
+      command: " {{ DIRECTORY }}/node_modules/sequelize-cli/bin/sequelize db:migrate "
+      args:
+        chdir: "{{ DIRECTORY }}"
+      ignore_errors: true
     ###### Nodejs process Manager ########
     - name: install the PM2
       become: yes
-      npm: name=pm2 global=yes   
-    
+      npm: name=pm2 global=yes
+
     - name: stop the process for the app
       become: yes
       command: pm2 delete api_process
       ignore_errors: yes
-      
+
     - name: start the process for the app
       become: yes
       shell: "pm2 start {{ DIRECTORY }}/bin/www -f --name api_process"
       environment:
         PORT: "{{ FORWARDED_PORT }}"
-        
 
-     
+
+
 - hosts: all #testservers
   remote_user: root
 
@@ -183,15 +189,15 @@
     HOST: "0.0.0.0"
 
     API_DOMAIN_NAME: "api.omexcourier.com"
-    
+
     MAX_BODY_SIZE: "1024m"
 
     FORWARDED_PROTOCOL: "http"
     FORWARDED_HOST: "localhost"
     FORWARDED_PORT: "8000"
-    
+
     API_VIRTUAL_HOST_NAME: "{{ API_DOMAIN_NAME }}"
-    API_VIRTUAL_HOST_IP: "127.0.0.11"    
+    API_VIRTUAL_HOST_IP: "127.0.0.11"
 
     #ansible_python_interpreter: "{{ DIRECTORY }}/env/bin/pyvenv"
 
@@ -202,8 +208,8 @@
 
     - name: Stop nginx
       become: yes
-      service: name=nginx state=stopped    
-          
+      service: name=nginx state=stopped
+
     - name: transfer the file to config directory of nginx
       become: yes
       template:
@@ -218,21 +224,21 @@
         dest="/etc/nginx/sites-enabled/api.omexcourier.com"
         state=link
       ignore_errors: yes
-    
+
     - name: Edit the hosts file
       become: yes
       lineinfile:
         dest=/etc/hosts
-        regexp="{{ API_VIRTUAL_HOST_IP }} {{ API_VIRTUAL_HOST_NAME }}"       
+        regexp="{{ API_VIRTUAL_HOST_IP }} {{ API_VIRTUAL_HOST_NAME }}"
         line="{{ API_VIRTUAL_HOST_IP }} {{ API_VIRTUAL_HOST_NAME }}"
         owner=root
         group=root
         mode=0644
         state=present
-        
+
     - name: Enable 80 PORT
       command: 'sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT'
-      ignore_errors: yes               
+      ignore_errors: yes
 
     - name: Restart the nginx
       become: yes
@@ -240,7 +246,7 @@
         name=nginx
         state=reloaded
         enabled=yes
-        
+
     - name: Restart the nginx
       become: yes
       service:
@@ -254,11 +260,11 @@
     - name: Install php5-fpm
       become: yes
       apt: name=php5-fpm state=present update-cache=yes
-    
+
     - name: Reload the php5-fpm server
       become: yes
       service: name=php5-fpm state=reloaded enabled=yes
-    
+
     - name: Restart the php5-fpm server
       become: yes
       service: name=php5-fpm state=restarted enabled=yes
@@ -269,70 +275,70 @@
     - { role: mjanser.phpmyadmin }
   tasks:
     - name: Symlink the phpmyadmin
-      file: src="/usr/share/phpmyadmin" dest="/usr/share/nginx/html/phpmyadmin" state=link 
-      
+      file: src="/usr/share/phpmyadmin" dest="/usr/share/nginx/html/phpmyadmin" state=link
+
     - name: Reload the nginx
-      service: name=nginx state=reloaded enabled=yes      
-           
+      service: name=nginx state=reloaded enabled=yes
+
 - hosts: all
-  remote_user: root  
+  remote_user: root
   vars:
        APPLICATION_DIRECTORY: "/home/dakharkara/courierwebclient"
        SSH_KEY_DIRECTORY: "/home/dakharkara/.ssh"
        APP_CONTAINER_DIRECTORY: "/home/dakharkara"
-           
+
        DOMAIN_NAME: "omexcourier.com"
        ALIAS_DOMAIN_NAME: "www.omexcourier.com"
-        
+
        MAX_BODY_SIZE: "1024m"
-        
+
        WEBCLIENT_PROTOCOL: "http"
        WEBCLIENT_HOST: "localhost"
        WEBCLIENT_PORT: "8002"
 
        VIRTUAL_HOST_NAME: "{{ DOMAIN_NAME }}"
        ALIAS_VIRTUAL_HOST_NAME: "www.omexcourier.com"
-       
+
        VIRTUAL_HOST_IP: "127.0.0.10"
-       
-       
+
+
   tasks:
-  
+
     - name: Clone the repository in project Directory
       become: yes
       git:
         repo=git@bitbucket.org:courier-handler/courierwebclient.git
-        dest="{{ APPLICATION_DIRECTORY }}"        
+        dest="{{ APPLICATION_DIRECTORY }}"
         accept_hostkey=yes
         key_file="{{  SSH_KEY_DIRECTORY }}/id_rsa"
         update=yes
         force=yes
         version='universal-layout'
- 
+
     - name: Add the permission for the directory
       become: yes
-      command: chmod -R 755 {{ APPLICATION_DIRECTORY }}            
-    
-    #### INstall Npm dependencies in package.json ####    
+      command: chmod -R 755 {{ APPLICATION_DIRECTORY }}
+
+    #### INstall Npm dependencies in package.json ####
     - name: install the application nodejs packages depencies
-      become: yes 
+      become: yes
       npm: path={{ APPLICATION_DIRECTORY }}   global=no state=present
-    
+
     - name: install the application nodejs packages depencies
-      become: yes 
+      become: yes
       npm: path={{ APPLICATION_DIRECTORY }}   global=yes state=present
-      
+
     - name: create bundle.js
       become: yes
       command: "npm run gen-dist"
       args:
-        chdir: "{{ APPLICATION_DIRECTORY }}"        
-        
+        chdir: "{{ APPLICATION_DIRECTORY }}"
+
     - name: stop the process for the app
       become: yes
       command: pm2 delete application_process
       ignore_errors: yes
-      
+
     - name: start the process for the app
       become: yes
       command: "pm2 start bin/www -f --name application_process"
@@ -341,16 +347,16 @@
       environment:
         PORT: "{{ WEBCLIENT_PORT }}"
         NODE_ENV: "prod"
-        
+
       ignore_errors: true
-      
+
     - name: transfer the file to config directory of nginx
       become: yes
       template:
         src="templates/omexcourier.com.j2"
         dest="/etc/nginx/sites-available/omexcourier.com"
         force=yes
-    
+
     - name: Remove any symlinked file from previously enabled config
       become: yes
       file:
@@ -358,25 +364,25 @@
         dest="/etc/nginx/sites-enabled/omexcourier.com"
         state=link
       ignore_errors: yes
-    
+
     - name: Edit the hosts file
       become: yes
       lineinfile:
-        dest=/etc/hosts       
-        regexp="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }} {{ ALIAS_VIRTUAL_HOST_NAME }}"        
+        dest=/etc/hosts
+        regexp="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }} {{ ALIAS_VIRTUAL_HOST_NAME }}"
         line="{{ VIRTUAL_HOST_IP }} {{ VIRTUAL_HOST_NAME }} {{ ALIAS_VIRTUAL_HOST_NAME }}"
         owner=root
         group=root
         mode=0644
         state=present
-    
+
     - name: Restart the nginx
       become: yes
       service:
         name=nginx
         state=reloaded
-        enabled=yes  
-        
+        enabled=yes
+
     - name: Restart the nginx
       become: yes
       service:
