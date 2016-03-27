@@ -9,8 +9,7 @@ var passport = require('passport');
 var passportLocal = require('passport-local');
 var Auth = require('./logics/authentication/auth');
 var redis = require('redis');
-var redisStore = require('connect-redis')(expressSession);  
-var redisClient = redis.createClient();
+var redisStore = require('connect-redis')(expressSession);
 
 var DB = require('./models/index');
 var sequelize = DB.sequelize;
@@ -31,19 +30,21 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+
 app.use(cookieParser());
 
 //session saving
-app.use(expressSession({
-    secret: process.env.SESSION_SECRET || 'secret',
-    store: new redisStore({ host: 'localhost', port: 6379, client: redisClient }),
-    saveUninitialized: false, // don't create session until something stored,
-    resave: false,
-    cookie: { maxAge: 60*60000 }
-}));
+// app.use(expressSession({
+//     secret: process.env.SESSION_SECRET || 'secret',
+//     // store: new redisStore({ host: 'localhost', port: 6379, client: redisClient }),
+//     saveUninitialized: false, // don't create session until something stored,
+//     resave: false
+//     // cookie: { maxAge: 60*60000 }
+// }));
 
-app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.initialize());
+//app.use(passport.session());
 
 //passport initialization
 Auth.setup(passport);

@@ -3,10 +3,12 @@ var router = express.Router();
 var orderLogic = require("../logics/orderLogic");
 var multer = require("multer");
 var upload = multer();
+var passport = require('passport');
 var bodyParser = require('body-parser');
 
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
 
 
 router.get('/getOrder/:id', function(req, res){
@@ -31,7 +33,9 @@ router.get('/getOrder/:id', function(req, res){
 });
 
 
-router.get('/showAll', function(req, res){
+router.get('/showAll', passport.authenticate('basic', { session: false }), function(req, res){
+
+	console.log("FAfdafadsf");
 
 	orderLogic.findAllOrders(function(data){
 		res.send(data);
