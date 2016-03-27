@@ -11,7 +11,7 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 
 
 
-router.get('/getOrder/:id', function(req, res){
+router.get('/getOrder/:id', passport.authenticate('basic', { session: false }), function(req, res){
 	if(!req.params.id){
 		res.send({
 			"status": "error",
@@ -34,8 +34,6 @@ router.get('/getOrder/:id', function(req, res){
 
 
 router.get('/showAll', passport.authenticate('basic', { session: false }), function(req, res){
-
-	console.log("FAfdafadsf");
 
 	orderLogic.findAllOrders(function(data){
 		res.send(data);
