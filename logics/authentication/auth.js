@@ -12,6 +12,7 @@ exports.setup = function(passport){
         }
         //for future use of user database
         else if(user.type == 'user') done(null, {mobile: user.mobile, type: 'admin'});
+        else done(null, false);
     });
 
     passport.deserializeUser(function(user, done){
