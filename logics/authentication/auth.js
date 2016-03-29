@@ -6,6 +6,7 @@ var permissionModel = require('../../models/permission');
 exports.setup = function(passport){
 
     passport.serializeUser(function(user, done){
+      
         //insert this user object to redis and then replace the user.email with redis id
         if(user.type == 'admin'){
             done(null, {email: user.email, type: 'admin'});
@@ -17,7 +18,6 @@ exports.setup = function(passport){
 
     passport.deserializeUser(function(user, done){
 
-        console.log("deserializeUser");
         if(user.type == 'admin') {
             adminLogic.findAdmin(user.email, function(err, admin){
                 if(err) {
@@ -39,41 +39,9 @@ exports.setup = function(passport){
         }
     });
 
-	// passport.use(new passportLocal.Strategy({
- //        usernameField : "email" ,
- //        passwordField : "password" ,
- //        passReqToCallback : true ,
- //    } , function(req , email , password , done){
 
- //        //if the requested email is not a valid email address
- //        if(email.length == 0)
- //        {
- //            req.flash("error" , "You have to give a valid email address");
- //            return done(null , false);
- //        }
-
- //        if(password.length==0)
- //        {
- //            req.flash("error" , "Password cannot be blank");
- //            return done(null , false);
- //        }
-
- //        adminLogic.checkLogin(email, password, function(err, admin){
- //            if(err) {
- //                done(err);
- //            }
- //            else if(admin){
- //                done(null, {email: admin.email, type: 'admin'});
- //            }
- //            else done("Username and password did not match", false);
- //        });
-
-
- //    } ));
     passport.use(new passportHTTP.BasicStrategy(function(email, password, done){
        //if the requested email is not a valid email address
-       console.log(email);
-       console.log(password);
        if(email.length == 0)
        {
            req.flash("error" , "You have to give a valid email address");

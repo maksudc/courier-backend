@@ -8,7 +8,6 @@ var bodyParser = require('body-parser');
 
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-router.use(passport.authenticate('basic', { session: false }));
 
 router.get('/getOrder/:id', function(req, res){
 	if(!req.params.id){
