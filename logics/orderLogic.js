@@ -329,37 +329,7 @@ var createByOperator = function(postData, next){
 
 	async.series([function(testBranches){
 
-		if(!postData["exit_branch_type"] || !postData["exit_branch_id"] || !postData["entry_branch_type"] || !postData["entry_branch_id"]){
-			var message;
-			if(!postData["exit_branch_type"]) message = "Exit branch type not definded";
-			else if(!postData["exit_branch_id"]) message = "Exit branch id not definded";
-			else if(!postData["entry_branch_type"]) message = "Entry branch type not definded";
-			else if(!postData["entry_branch_id"]) message = "Entry branch id not definded";
-
-			errorData = {"status": "error", "message": message};
-			testBranches(errorData);
-		}
-		else {
-			findBranch(postData["entry_branch_type"], parseInt(postData["entry_branch_id"]), function(entryBranchData){
-				if(entryBranchData.status == 'success'){
-					findBranch(postData["exit_branch_type"], parseInt(postData["exit_branch_id"]), function(exitBranchData){
-						if(exitBranchData.status == 'success'){
-							testBranches(null);
-						}
-						else{
-							errorData = exitBranchData;
-							errorData.message = errorData.message + " for exit branch";
-							testBranches(exitBranchData);
-						}
-					});
-				}
-				else{
-					errorData = entryBranchData;
-					errorData.message = errorData.message + " for entry branch";
-					testBranches(errorData);
-				}
-			});
-		}
+		testBranches(null);
 
 	},function(createDraft){
 

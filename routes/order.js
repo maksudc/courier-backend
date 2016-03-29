@@ -75,6 +75,8 @@ router.post('/createByOperator', upload.array(), function(req, res){
 			]
 		}
 	*/
+
+	console.log("*************************************************************");
 	orderLogic.createByOperator(req.body, function(data){
 		console.log(data);
 		res.send(data);
