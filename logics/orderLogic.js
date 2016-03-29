@@ -329,6 +329,12 @@ var createByOperator = function(postData, next){
 
 	async.series([function(testBranches){
 
+		/*
+		On 30th march, we assumed that there will be only one parameter named exit_branch_id 
+		which will be regional branch. entry branch must be read from operator table (his working branch)
+		In future, exit_branch_id may come from regionalBranch or subBranch table. If anything wrong happens 
+		then, blame munna
+		*/
 		testBranches(null);
 
 	},function(createDraft){
