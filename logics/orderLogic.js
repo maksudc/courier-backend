@@ -3,7 +3,7 @@ var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
-var subBranch = require("./subBranchLogic");
+var subBranchLogic = require("./subBranchLogic");
 var itemLogic = require("../logics/itemLogic");
 var productLogic = require("../logics/productLogic");
 var _ = require("lodash");
@@ -310,7 +310,7 @@ function findBranch(branchType, branchId, next){
 		});
 	}
 	else if(branchType == 'sub-branch'){
-		subBranch.findOneById(branchId, function(branchData){
+		subBranchLogic.findOneById(branchId, function(branchData){
 			return next(branchData);
 		});
 	}
@@ -335,7 +335,22 @@ var createByOperator = function(postData, next){
 		In future, exit_branch_id may come from regionalBranch or subBranch table. If anything wrong happens 
 		then, blame munna
 		*/
-		testBranches(null);
+
+		subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
+			if(branch.status == "error") testBranches(data.message);
+			else {
+				postData["exit_branch"] = branch.data.id;
+				postData["exit_branch_type"] = "sub-branch";
+
+				/*setting some dummy data for entry branch type and entry branch id.
+				 This will be read from req.user*/
+
+				postData["entry_branch"] = "2";
+				postData["entry_branch_type"] = "sub-branch";
+
+				testBranches(null);
+			}
+		});
 
 	},function(createDraft){
 
@@ -355,8 +370,8 @@ var createByOperator = function(postData, next){
 		var draftOrder = {
 			sender: postData.sender,
 			receiver: postData.receiver,
-			entry_branch: postData["entry_branch_id"],
-			exit_branch: postData["exit_branch_id"],
+			entry_branch: postData["entry_branch"],
+			exit_branch: postData["exit_branch"],
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"]
 		};
@@ -383,7 +398,6 @@ var createByOperator = function(postData, next){
 
 
 	}, function(createProductList){
-		console.log("creating product items");
 
 		_.forEach(postData.item_list, function(item){
 			item["unitPrice"] = parseFloat(item["price"])/parseFloat(item["amount"]);
@@ -403,7 +417,6 @@ var createByOperator = function(postData, next){
 		});
 
 	}, function(addItems){
-		console.log("Adding items");
 
 		_.forEach(postData.item_list, function(item){
 			item["orderUuid"] = order.uuid;
@@ -422,10 +435,9 @@ var createByOperator = function(postData, next){
 		});
 
 	}, function(receiveThisOrder){
-		console.log("Setting status as received");
 
 		receiveOrder(order.uuid, function(newOrderData){
-			console.log(newOrderData);
+			
 			if(newOrderData && newOrderData.status == 'success'){
 				order = newOrderData.data;
 				next({"status": "success", "data": order});
