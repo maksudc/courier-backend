@@ -325,7 +325,6 @@ var createByOperator = function(postData, next){
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
 	var createdProducts = {}, itemList, order, errorData;
-	console.log(postData);
 
 	async.series([function(testBranches){
 
@@ -360,6 +359,8 @@ var createByOperator = function(postData, next){
 		else if(!postData.sender) message = "Sender required";
 		else if(!postData.receiver) message = "Receiver required";
 		else if(!postData.item_list) message = "Items required";
+		else if(!postData.total_price) message = "Price not set!";
+		else if(parseInt(postData.total_price) <= 0) message = "Price cannot be zero or less!";
 
 		if(message != ""){
 			next({"status": "error", "message": message});
@@ -371,9 +372,10 @@ var createByOperator = function(postData, next){
 			sender: postData.sender,
 			receiver: postData.receiver,
 			entry_branch: postData["entry_branch"],
-			exit_branch: postData["exit_branch"],
+			exit_branch: postData["exit_branch_id"],
 			entry_branch_type: postData["entry_branch_type"],
-			exit_branch_type: postData["exit_branch_type"]
+			exit_branch_type: postData["exit_branch_type"],
+			payment: parseInt(postData["total_price"])
 		};
 
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
