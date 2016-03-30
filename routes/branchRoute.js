@@ -19,7 +19,7 @@ router.get("/from/:sourceSubBranchId/to/:destinationSubBranchId" , function(req 
     });
 });
 
-router.post("/" , function(req , res){
+router.post("/" , upload.array(), function(req , res){
 
   branchRouteLogic.newRoute(req.body , function(data){
     res.send(data);

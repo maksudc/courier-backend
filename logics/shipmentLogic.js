@@ -210,11 +210,24 @@ var exportToShipment = function( postData , next){
   branchType = postData.BranchType;
   branchId = postData.branchId;
 
+  if(!startDate || !endDate || !branchType || !branchId ){
+    next({ status:"error" , data:null , message:"Bad parameters" , params: postData });
+  }
 
+  order.findAll({
+    where:{
+      entry_branch_type: branchType + "-branch",
+      entry_branch_id: branchId,
+    },
+    group:["order.exit_branch_type" , "order.exit_branch_id"]
+  })
+  .then(function(results){
 
-  order.findAll({});
+  });
 };
+
 
 exports.createShipmentWithOrders = createShipmentWithOrders;
 exports.getShipmentDetails = getShipmentDetails;
 exports.getShipments = getShipments;
+export.exportToShipment = exportToShipment;
