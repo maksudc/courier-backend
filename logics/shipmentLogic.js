@@ -203,6 +203,18 @@ var getShipments = function(params , next){
   });
 };
 
+var exportToShipment = function( postData , next){
+
+  startDate = postData.startDate;
+  endDate = postData.endDate;
+  branchType = postData.BranchType;
+  branchId = postData.branchId;
+
+
+
+  order.findAll({});
+};
+
 exports.createShipmentWithOrders = createShipmentWithOrders;
 exports.getShipmentDetails = getShipmentDetails;
 exports.getShipments = getShipments;

@@ -128,6 +128,12 @@ var newRoute = function(postData , next){
   sourceId = postData.sourceId;
   destinationId = postData.destinationId;
 
+  if(!sourceId || !destinationId || !postData.midNodes){
+
+    next({ status:"error" , data:null , message:"Bad paramter" , params:postData });
+    return;
+  }
+
   RouteModel
   .findOne({ where: { sourceId:sourceId , destinationId:destinationId } })
   .then(function(result){
@@ -147,7 +153,7 @@ var newRoute = function(postData , next){
       }
       _.assignIn(routeData , { 'midNodes': JSON.stringify(nodes)  });
     }
-    
+
     return RouteModel.create(routeData);
   })
   .then(function(result){
