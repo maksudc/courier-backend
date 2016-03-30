@@ -134,6 +134,8 @@ var newRoute = function(postData , next){
     return;
   }
 
+  midNodes  = JSON.parse(postData.midNodes);
+
   RouteModel
   .findOne({ where: { sourceId:sourceId , destinationId:destinationId } })
   .then(function(result){
@@ -145,11 +147,11 @@ var newRoute = function(postData , next){
     routeData = {};
     _.assignIn(routeData , postData);
 
-    if(postData.midNodes){
+    if(midNodes){
 
       nodes = [];
-      for(I = 0 ;I < postData.midNodes.length ; I++){
-        nodes.push(parseInt(postData.midNodes[I]));
+      for(I = 0 ;I < midNodes.length ; I++){
+        nodes.push(parseInt(midNodes[I]));
       }
       _.assignIn(routeData , { 'midNodes': JSON.stringify(nodes)  });
     }
