@@ -2,6 +2,9 @@ var express = require("express");
 var router = express.Router();
 var trackerLogic = require("../logics/trackerLogic");
 
+router.use(bodyParser.json()); // for parsing application/json
+router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
 router.get("/" , function(req , res){
 
   trackerLogic.getTrackers(req.query , function(data){
@@ -28,15 +31,15 @@ router.put("/:id/currentBranch" , function(req , res){
   });
 });
 
-router.post("/" , function(req , res){
-  trackerLogic.createTracker(req.body , function(data){
+router.get("/for" , function(req, res){
+
+  trackerLogic.getTrackerForTrackable(req.query , function(data){
     res.send(data);
   });
 });
 
-router.get("/for" , function(req, res){
-
-  trackerLogic.getTrackerForTrackable(req.query , function(data){
+router.post("/" , function(req , res){
+  trackerLogic.createTracker(req.body , function(data){
     res.send(data);
   });
 });

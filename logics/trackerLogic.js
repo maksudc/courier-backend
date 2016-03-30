@@ -32,7 +32,7 @@ var getTrackerForTrackable = function(params , next){
   queryParam = {};
   //_.assignIn(queryParam , paginationClause);
   _.assignIn(queryParam , { where:whereClause });
-
+  
   genericTracker
   .findOne(queryParam)
   .then(function(result){
