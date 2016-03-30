@@ -42,5 +42,26 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
 
+  ShipmentModel.hook("afterCreate" , function(shipmentItem , options){
+
+    shipmentItem
+    .getTracker()
+    .then(function(currentTrackerItem){
+      if(!currentTrackerItem){
+        var trackerData = {};
+        trackerData.trackableType = "shipment";
+        trackerData.trackableId = shipmentItem.uuid ;
+
+        sequelize.models.genericTracker
+        .create(trackerData)
+        .then(function(trackerItem){
+
+          console.log(" Tracker Attached to shipment with uuid:  " + trackerItem.uuid);
+        });
+      }
+    });
+
+  });
+
   return ShipmentModel;
 };
