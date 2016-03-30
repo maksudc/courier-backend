@@ -15,10 +15,12 @@ order.sync();
 item.sync();
 module.exports = order;
 */
+var _ = require("lodash");
 
 module.exports = function(sequelize, DataTypes) {
 
 	var order = sequelize.define('order', {
+
 		uuid: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV1},
 		type: {type: DataTypes.ENUM('general', 'value_delivery'), defaultValue: 'general', allowNull: false},
 		confirm_time: {type: DataTypes.DATE},
@@ -68,10 +70,51 @@ module.exports = function(sequelize, DataTypes) {
 					constraints: false,
 					scope:{
 						trackableType: "order"
-					}
+					},
+					as: 'tracker'
 				});
 			}
 		}
+	});
+
+	order.hook("afterCreate" , function(order , options){
+		/**
+			* Create a tracker item corresponding to the order
+		**/
+		order
+		.getTracker()
+		.then(function(currentTrackerItem){
+			if(!currentTrackerItem){
+
+				var trackerData = {};
+
+				if(order.entry_branch_type == "regional-branch"){
+					trackerData.sourceBranchType = "regional";
+				}else{
+					trackerData.sourceBranchType = "sub";
+				}
+				trackerData.sourceBranchId = parseInt(order.entry_branch);
+
+				if(order.exit_branch_type == "regional-branch"){
+					trackerData.destinationBranchType = "regional";
+				}else{
+					trackerData.destinationBranchType = "sub";
+				}
+				trackerData.destinationBranchId = parseInt(order.exit_branch);
+
+				trackerData.currentBranchType = trackerData.sourceBranchType;
+				trackerData.currentBranchId = trackerData.sourceBranchId;
+
+				trackerData.trackableType = "order";
+				trackerData.trackableId = order.uuid;
+
+				sequelize.models.genericTracker
+				.create(trackerData)
+				.then(function(trackerItem){
+					 console.log("Tracker Attached to the order with uuid: "+ trackerItem.uuid);
+				});
+			}
+		});
 	});
 
 	return order;
