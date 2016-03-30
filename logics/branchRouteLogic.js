@@ -134,7 +134,7 @@ var newRoute = function(postData , next){
     return;
   }
 
-  midNodes  = JSON.parse(postData.midNodes);
+  var midNodes  = JSON.parse(postData.midNodes);
 
   RouteModel
   .findOne({ where: { sourceId:sourceId , destinationId:destinationId } })

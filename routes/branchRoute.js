@@ -21,6 +21,8 @@ router.get("/from/:sourceSubBranchId/to/:destinationSubBranchId" , function(req 
 
 router.post("/" , upload.array(), function(req , res){
 
+  console.log(req.body);
+
   branchRouteLogic.newRoute(req.body , function(data){
     res.send(data);
   });

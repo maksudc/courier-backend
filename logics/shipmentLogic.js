@@ -230,4 +230,4 @@ var exportToShipment = function( postData , next){
 exports.createShipmentWithOrders = createShipmentWithOrders;
 exports.getShipmentDetails = getShipmentDetails;
 exports.getShipments = getShipments;
-export.exportToShipment = exportToShipment;
+exports.exportToShipment = exportToShipment;
