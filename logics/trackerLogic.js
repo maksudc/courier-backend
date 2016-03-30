@@ -16,6 +16,34 @@ var getTracker = function(trackerId , next){
   });
 };
 
+var getTrackerForTrackable = function(params , next){
+
+  whereClause = {};
+
+  if(params.trackableType){
+    whereClause.trackableType = params.trackableType;
+  }
+  if(params.trackableId){
+    whereClause.trackableId = params.trackableId;
+  }
+  if(params.parentTrackerId){
+    whereClause.parentTrackerId = params.parentTrackerId;
+  }
+  queryParam = {};
+  //_.assignIn(queryParam , paginationClause);
+  _.assignIn(queryParam , { where:whereClause });
+
+  genericTracker
+  .findOne(queryParam)
+  .then(function(result){
+    next({ status:"success" , data:result , message:null });
+  })
+  .catch(function(err){
+    next({ status:"error" , data:null , message: err });
+  });
+
+};
+
 var getTrackers = function(params , next){
 
   paginationClause = {
@@ -142,3 +170,4 @@ exports.getTrackers = getTrackers;
 exports.getTrackerCurrentBranch = getTrackerCurrentBranch;
 exports.updateCurrentLocation = updateCurrentLocation;
 exports.createTracker = createTracker;
+exports.getTrackerForTrackable = getTrackerForTrackable;

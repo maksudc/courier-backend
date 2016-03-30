@@ -34,4 +34,11 @@ router.post("/" , function(req , res){
   });
 });
 
+router.get("/for" , function(req, res){
+
+  trackerLogic.getTrackerForTrackable(req.query , function(data){
+    res.send(data);
+  });
+});
+
 module.exports = router;
