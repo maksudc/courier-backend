@@ -21,10 +21,13 @@ router.post("/regional" , upload.array() , function(req , res){
 
   if(!postData.label){
     res.send({ status:"error" , data:null , message:"Label not specified" });
+    return;
   }
   if(!postData.regonId){
     postData.regionId = null;
   }
+
+  postData.branchType = "regional";
 
   regionalBranch
   .create(postData)
@@ -42,8 +45,10 @@ router.post("/sub" , upload.array() , function(req , res){
 
   if(!postData.label){
     res.send({ status:"error" , data:null , message:"Label not specified" });
+    return;
   }
 
+  postData.branchType = "sub";
   subBranch
   .create(postData)
   .then(function(result){
