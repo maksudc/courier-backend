@@ -3,7 +3,7 @@ var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
-var subBranch = require("./subBranchLogic");
+var subBranchLogic = require("./subBranchLogic");
 var itemLogic = require("../logics/itemLogic");
 var productLogic = require("../logics/productLogic");
 var _ = require("lodash");
@@ -310,7 +310,7 @@ function findBranch(branchType, branchId, next){
 		});
 	}
 	else if(branchType == 'sub-branch'){
-		subBranch.findOneById(branchId, function(branchData){
+		subBranchLogic.findOneById(branchId, function(branchData){
 			return next(branchData);
 		});
 	}
@@ -325,41 +325,31 @@ var createByOperator = function(postData, next){
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
 	var createdProducts = {}, itemList, order, errorData;
-	console.log(postData);
 
 	async.series([function(testBranches){
 
-		if(!postData["exit_branch_type"] || !postData["exit_branch_id"] || !postData["entry_branch_type"] || !postData["entry_branch_id"]){
-			var message;
-			if(!postData["exit_branch_type"]) message = "Exit branch type not definded";
-			else if(!postData["exit_branch_id"]) message = "Exit branch id not definded";
-			else if(!postData["entry_branch_type"]) message = "Entry branch type not definded";
-			else if(!postData["entry_branch_id"]) message = "Entry branch id not definded";
+		/*
+		On 30th march, we assumed that there will be only one parameter named exit_branch_id 
+		which will be regional branch. entry branch must be read from operator table (his working branch)
+		In future, exit_branch_id may come from regionalBranch or subBranch table. If anything wrong happens 
+		then, blame munna
+		*/
 
-			errorData = {"status": "error", "message": message};
-			testBranches(errorData);
-		}
-		else {
-			findBranch(postData["entry_branch_type"], parseInt(postData["entry_branch_id"]), function(entryBranchData){
-				if(entryBranchData.status == 'success'){
-					findBranch(postData["exit_branch_type"], parseInt(postData["exit_branch_id"]), function(exitBranchData){
-						if(exitBranchData.status == 'success'){
-							testBranches(null);
-						}
-						else{
-							errorData = exitBranchData;
-							errorData.message = errorData.message + " for exit branch";
-							testBranches(exitBranchData);
-						}
-					});
-				}
-				else{
-					errorData = entryBranchData;
-					errorData.message = errorData.message + " for entry branch";
-					testBranches(errorData);
-				}
-			});
-		}
+		subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
+			if(branch.status == "error") testBranches(data.message);
+			else {
+				postData["exit_branch"] = branch.data.id;
+				postData["exit_branch_type"] = "sub-branch";
+
+				/*setting some dummy data for entry branch type and entry branch id.
+				 This will be read from req.user*/
+
+				postData["entry_branch"] = "2";
+				postData["entry_branch_type"] = "sub-branch";
+
+				testBranches(null);
+			}
+		});
 
 	},function(createDraft){
 
@@ -369,6 +359,8 @@ var createByOperator = function(postData, next){
 		else if(!postData.sender) message = "Sender required";
 		else if(!postData.receiver) message = "Receiver required";
 		else if(!postData.item_list) message = "Items required";
+		else if(!postData.total_price) message = "Price not set!";
+		else if(parseInt(postData.total_price) <= 0) message = "Price cannot be zero or less!";
 
 		if(message != ""){
 			next({"status": "error", "message": message});
@@ -379,10 +371,11 @@ var createByOperator = function(postData, next){
 		var draftOrder = {
 			sender: postData.sender,
 			receiver: postData.receiver,
-			entry_branch: postData["entry_branch_id"],
+			entry_branch: postData["entry_branch"],
 			exit_branch: postData["exit_branch_id"],
 			entry_branch_type: postData["entry_branch_type"],
-			exit_branch_type: postData["exit_branch_type"]
+			exit_branch_type: postData["exit_branch_type"],
+			payment: parseInt(postData["total_price"])
 		};
 
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
@@ -407,7 +400,6 @@ var createByOperator = function(postData, next){
 
 
 	}, function(createProductList){
-		console.log("creating product items");
 
 		_.forEach(postData.item_list, function(item){
 			item["unitPrice"] = parseFloat(item["price"])/parseFloat(item["amount"]);
@@ -427,7 +419,6 @@ var createByOperator = function(postData, next){
 		});
 
 	}, function(addItems){
-		console.log("Adding items");
 
 		_.forEach(postData.item_list, function(item){
 			item["orderUuid"] = order.uuid;
@@ -446,10 +437,9 @@ var createByOperator = function(postData, next){
 		});
 
 	}, function(receiveThisOrder){
-		console.log("Setting status as received");
 
 		receiveOrder(order.uuid, function(newOrderData){
-			console.log(newOrderData);
+			
 			if(newOrderData && newOrderData.status == 'success'){
 				order = newOrderData.data;
 				next({"status": "success", "data": order});
