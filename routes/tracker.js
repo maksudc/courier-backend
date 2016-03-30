@@ -14,6 +14,13 @@ router.get("/" , function(req , res){
   });
 });
 
+router.get("/for" , function(req, res){
+
+  trackerLogic.getTrackerForTrackable(req.query , function(data){
+    res.send(data);
+  });
+});
+
 router.get("/:id" , function(req , res){
 
   trackerLogic.getTracker(req.params.id , function(data){
@@ -29,13 +36,6 @@ router.get("/:id/currentBranch" , function(req ,res){
 
 router.put("/:id/currentBranch" , function(req , res){
   trackerLogic.updateCurrentLocation(req.params.id , req.body.branchType , req.body.branchId , function(data){
-    res.send(data);
-  });
-});
-
-router.get("/for" , function(req, res){
-
-  trackerLogic.getTrackerForTrackable(req.query , function(data){
     res.send(data);
   });
 });

@@ -32,16 +32,22 @@ var getTrackerForTrackable = function(params , next){
   queryParam = {};
   //_.assignIn(queryParam , paginationClause);
   _.assignIn(queryParam , { where:whereClause });
-  
+
   genericTracker
   .findOne(queryParam)
   .then(function(result){
-    next({ status:"success" , data:result , message:null });
+
+    console.log(result);
+
+    if(result){
+        next({ status:"success" , data:result , message:null });
+    }else{
+      next({ status:"error" , data:{} , message:"No tracker attached for this trackable" });
+    }
   })
   .catch(function(err){
     next({ status:"error" , data:null , message: err });
   });
-
 };
 
 var getTrackers = function(params , next){
