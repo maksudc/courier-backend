@@ -44,7 +44,7 @@ router.post("/sub" , upload.array() , function(req , res){
     res.send({ status:"error" , data:null , message:"Label not specified" });
   }
 
-  regionalBranch
+  subBranch
   .create(postData)
   .then(function(result){
     res.send({ status:"success" , data:result , message:null });
