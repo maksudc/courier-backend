@@ -399,34 +399,19 @@ var createByOperator = function(postData, next){
 		});
 
 
-	}, function(createProductList){
-
-		_.forEach(postData.item_list, function(item){
-			item["unitPrice"] = parseFloat(item["price"])/parseFloat(item["amount"]);
-		});
-
-		productLogic.createMany(postData.item_list, function(tempProductList){
-			if(tempProductList && tempProductList.status == 'success'){
-				_.forEach(tempProductList.data, function(product){
-					createdProducts[product.product_name] = product.uuid;
-				});
-				createProductList(null);
-			}
-			else {
-				errorData = tempProductList;
-				createProductList(errorData);
-			}
-		});
-
 	}, function(addItems){
 
 		_.forEach(postData.item_list, function(item){
 			item["orderUuid"] = order.uuid;
-			item["product_id"] = createdProducts[item.product_name];
+			item["entry_branch"] = parseInt(order.entry_branch);
+			item["entry_branch_type"] = order.entry_branch_type;
+			item["exit_branch"] = parseInt(order.exit_branch);
+			item["exit_branch_type"] = order.exit_branch_type;
 		});
 
 		itemLogic.createMany(postData.item_list, function(tempItemList){
 			if(tempItemList && tempItemList.status == 'success'){
+				next({"status": "success", "data": order});
 				addItems(null);
 			}
 			else if(tempItemList && tempItemList.status == 'error'){
@@ -434,21 +419,6 @@ var createByOperator = function(postData, next){
 				addItems("Cannot insert items");
 			}
 
-		});
-
-	}, function(receiveThisOrder){
-
-		receiveOrder(order.uuid, function(newOrderData){
-			
-			if(newOrderData && newOrderData.status == 'success'){
-				order = newOrderData.data;
-				next({"status": "success", "data": order});
-				receiveThisOrder(null);
-			}
-			else{
-				errorData = newOrderData;
-				receiveThisOrder("Error while confirming this order");
-			}
 		});
 
 	}], function(err){

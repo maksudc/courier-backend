@@ -119,7 +119,7 @@ var createMany = function(data, next){
 
 	//final release: items will be created with predefined price
 	var missingIndex = _.findIndex(data, function(item){
-		return !item.amount || !item.product_id || !item.orderUuid;
+		return !item.amount || !item.product_name || !item.orderUuid;
 	});
 
 	if(missingIndex > -1) {
@@ -129,6 +129,9 @@ var createMany = function(data, next){
 	};
 
 
+
+	//Product model is not needed
+	/*
 	productLogic.calculateMultiplePrice(data, function(priceData){
 		if(priceData.status != 'success'){
 			next(data);
@@ -152,6 +155,25 @@ var createMany = function(data, next){
 					next({"status": "errror", "message": "cannot create these items. Check them properly"});
 				}
 			});
+		}
+	});
+	*/
+
+	itemModel.bulkCreate(data).catch(function(err){
+		if(err){
+			next({"status": "error", "message": "error while creating items"});
+			return;
+		}
+	}).then(function(items){
+		if(items){
+			var tempItems = [];
+			_.forEach(items, function(tempItem){
+				tempItems.push(tempItem.dataValues);
+			});
+			next({"status": "success", data: tempItems});
+		}
+		else {
+			next({"status": "errror", "message": "cannot create these items. Check them properly"});
 		}
 	});
 
