@@ -22,6 +22,10 @@ module.exports = function(sequelize , DataTypes){
 		amount: {type: DataTypes.FLOAT},
 		price: {type: DataTypes.FLOAT, allowNull: false},
 		product_name: {type: DataTypes.STRING},
+		length: {type: DataTypes.INTEGER},
+		width: {type: DataTypes.INTEGER},
+		height: {type: DataTypes.INTEGER},
+		weight: {type: DataTypes.FLOAT},
 		entry_branch: {type: DataTypes.INTEGER}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
 		exit_branch: {type: DataTypes.INTEGER}, //where the order is right now , In 2nd release, branch id
