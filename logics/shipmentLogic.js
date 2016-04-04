@@ -10,14 +10,21 @@ var HttpStatus = require("http-status-codes");
 
 var createShipmentWithOrders = function(postData , next){
 
-    if(!postData.name || !postData.orders){
+    if( Object.keys(postData).length===0 || !postData.name || !postData.orders){
       next({ status:"error", statusCode:HttpStatus.BAD_REQUEST , message:"Name and orders are both needed" });
     }
 
     shipmentBaseData = {
       name: postData.name,
-      status: postData.status
     };
+
+    if(postData.status){
+      _.assignIn(shipmentBaseData , { status: postData.status });
+    }
+    if(postData.shipmentType){
+      _.assignIn(shipmentBaseData , { shipmentType:postData.shipmentType });
+    }
+
     var shipmentInstance = null;
 
     var orders = JSON.parse(postData.orders);
@@ -306,6 +313,24 @@ var getShipments = function(params , next){
   });*/
 };
 
+var shipmentUpdate = function(shipmentId , postData , next){
+
+  if( Object.keys(postData).length === 0 ){
+    next({ status:"error" , statusCode: HttpStatus.BAD_REQUEST , message:"Empty data. Atleast one field must be changed to process." });
+    return;
+  }
+
+  shipment.update(postData , {
+    where: { uuid: shipmentId }
+  })
+  .then(function(result){
+    next({ status:"success" , statusCode:HttpStatus.OK , data:result , message:null });
+  })
+  .catch(function(err){
+    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message: err });
+  });
+};
+
 var exportToShipment = function( postData , next){
 
   startDate = postData.startDate;
@@ -334,3 +359,4 @@ exports.createShipmentWithOrders = createShipmentWithOrders;
 exports.getShipmentDetails = getShipmentDetails;
 exports.getShipments = getShipments;
 exports.exportToShipment = exportToShipment;
+exports.shipmentUpdate = shipmentUpdate;
