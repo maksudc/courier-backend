@@ -6,8 +6,13 @@ var Sequelize = DB.Sequelize;
 var shipment = sequelize.models.shipment;
 var order = sequelize.models.order;
 var _=require("lodash");
+var HttpStatus = require("http-status-codes");
 
 var createShipmentWithOrders = function(postData , next){
+
+    if(!postData.name || !postData.orders){
+      next({ status:"error", statusCode:HttpStatus.BAD_REQUEST , message:"Name and orders are both needed" });
+    }
 
     shipmentBaseData = {
       name: postData.name,
@@ -15,14 +20,16 @@ var createShipmentWithOrders = function(postData , next){
     };
     var shipmentInstance = null;
 
+    var orders = JSON.parse(postData.orders);
+
     shipment
     .create(shipmentBaseData)
     .then(function(sInstance){
 
       shipmentInstance = sInstance;
       promises = [];
-      for(I = 0 ; I< postData.orders.length ; I++ ){
-          promises.push(order.findOne({ where: { uuid: postData.orders[I] } }));
+      for(I = 0 ; I< orders.length ; I++ ){
+          promises.push(order.findOne({ where: { uuid: orders[I] } }));
       }
       //shipmentInstance
 
@@ -37,13 +44,12 @@ var createShipmentWithOrders = function(postData , next){
       return Promise.all(promises);
     })
     .then(function(results){
-
-      console.log(results);
-      next({ status:"success" , data: shipmentInstance });
+      //console.log(results);
+      next({ status:"success" , statusCode: HttpStatus.OK , data: shipmentInstance });
     })
     .catch(function(err){
       console.log(err);
-      next({ status:"error",  "message": JSON.stringify(err) , data:null });
+      next({ status:"error", statusCode: HttpStatus.INTERNAL_SERVER_ERROR ,  "message": JSON.stringify(err) , data:null });
     });
 };
 
@@ -62,8 +68,28 @@ function extractParams(params){
 
   queryOptions = {
     offset: offset,
-    limit: limit
+    limit: limit,
+    where:{}
   };
+
+  if(params.status){
+    _.assignIn(queryOptions.where , { status: params.status } );
+  }
+  if(params.shipmentType){
+    _.assignIn(queryOptions.where , { shipmentType: params.shipmentType } );
+  }
+  if(params.sourceBranchType){
+    _.assignIn(queryOptions.where , { sourceBranchType: params.sourceBranchType } );
+  }
+  if(params.sourceBranchId){
+    _.assignIn(queryOptions.where , { sourceBranchId: params.sourceBranchId } );
+  }
+  if(params.destinationBranchType){
+    _.assignIn(queryOptions.where , { destinationBranchType: params.destinationBranchType } );
+  }
+  if(params.destinationBranchId){
+    _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
+  }
 
   assoc = null;
   includeOrders =  0;
@@ -79,7 +105,7 @@ function extractParams(params){
 var getShipmentDetails = function(shipmentId , params , next){
 
     queryParams = extractParams(params);
-    queryParams.queryOptions.where = { uuid: shipmentId };
+    _.assignIn(queryParams.queryOptions.where , { uuid: shipmentId });
 
     var shipmentInstance = null;
 
@@ -104,19 +130,19 @@ var getShipmentDetails = function(shipmentId , params , next){
             _.assignIn(data , { shipment: shipmentInstance } );
             _.assignIn(data , { orders:orders }  );
 
-            next({ status:"success" , data:data , message:null });
+            next({ status:"success" , statusCode:HttpStatus.OK , data:data , message:null });
           });
         }else{
 
           data = {};
           _.assignIn(data , { shipment:shipmentInstance });
           _.assignIn(data , { orders:null });
-          next({ status:"success" , data:data , message:null });
+          next({ status:"success", statusCode:HttpStatus.OK , data:data , message:null });
         }
       //}
     })
     .catch(function(err){
-      next({ status:"error" , message:err , data:null });
+      next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:err , data:null });
     });
 
 };
@@ -181,10 +207,10 @@ var getShipments = function(params , next){
       Promise
       .all(promises)
       .then(function(results){
-        next({ status:"success" , data:results , message:null });
+        next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
       })
       .catch(function(err){
-        next({ status:"error" , data:null, message:err });
+        next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null, message:err });
       });
 
     }else{
@@ -194,12 +220,12 @@ var getShipments = function(params , next){
           orders:null
         });
       }
-      next({ status:"success" , data:datas });
+      next({ status:"success" , statusCode:HttpStatus.OK ,  data:datas });
     }
   })
   .catch(function(err){
     console.log(err);
-    next({ status:"error" , data:null , message:err });
+    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 };
 

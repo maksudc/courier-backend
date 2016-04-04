@@ -4,6 +4,7 @@ var multer = require("multer");
 var upload = multer();
 var bodyParser = require('body-parser');
 var shipmentLogic = require("../logics/shipmentLogic");
+var HttpStatus = require("http-status-codes");
 
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -13,7 +14,7 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
   @param name ( STRING ): name of the shipment , maybe auto generated based on date , random num and fixed string shipment
                           name can also incorporate source and destination names
   @param status ( Status ): current status of the shipment
-  @param orders ( ARRAY ): collection of order ids in the same order they appeared on the system. Usually the order is determined by their
+  @param orders ( JSON_ARRAY ): collection of order ids in the same order they appeared on the system. Usually the order is determined by their
                            creation time .
                            It indicates the orders which will be included in this shipment process.
   @return res ( JSON ): {  'status'=> 'success'/'error', 'message'=>'' ,'data':newlyCreatedShipment  }
@@ -22,8 +23,8 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 router.post("/createWithOrders" , upload.array() , function(req , res){
 
   shipmentLogic.createShipmentWithOrders(req.body , function(data){
-    if(!data){
-      res.send({ status: "error" , message:"Something went wrong" });
+    if(data.statusCode){
+      res.status(data.statusCode);
     }
     res.send(data);
   });
@@ -45,9 +46,11 @@ router.post("/createWithOrders" , upload.array() , function(req , res){
 router.get("/details/:id" , function(req , res){
 
   queryVars = req.query;
-  console.log(queryVars);
-
+  //console.log(queryVars);
   shipmentLogic.getShipmentDetails(req.params.id , queryVars , function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
     res.send(data);
   });
 });
@@ -71,12 +74,14 @@ router.get("/all/" , function(req , res){
   console.log(queryVars);
 
   shipmentLogic.getShipments(queryVars , function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
     res.send(data);
   });
 });
 
 router.post("/export" , function(req , res){
-
 
 });
 
