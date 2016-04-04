@@ -28,6 +28,7 @@ module.exports = function(sequelize, DataTypes) {
 		delivery_time: {type: DataTypes.DATE},
 		sender: {type: DataTypes.STRING, allowNull: false}, //sender mobile
 		sender_addr:{type: DataTypes.STRING},
+		nid:{type: DataTypes.STRING},
 		receiver: {type: DataTypes.STRING, allowNull: false}, //receiver mobile
 		receiver_addr: {type: DataTypes.STRING},
 		entry_branch: {type: DataTypes.STRING}, //where the order is received, In 2nd release, branch id
