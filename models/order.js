@@ -27,7 +27,8 @@ module.exports = function(sequelize, DataTypes) {
 		receive_time: {type: DataTypes.DATE},
 		delivery_time: {type: DataTypes.DATE},
 		sender: {type: DataTypes.STRING, allowNull: false}, //sender mobile
-		sender_addr:{type: DataTypes.STRING},
+		sender_addr: {type: DataTypes.STRING},
+		verification_code: {type: DataTypes.INTEGER, defaultValue: Math.floor(Math.random()*10000)},
 		nid:{type: DataTypes.STRING},
 		receiver: {type: DataTypes.STRING, allowNull: false}, //receiver mobile
 		receiver_addr: {type: DataTypes.STRING},
