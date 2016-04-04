@@ -9,6 +9,17 @@ var HttpStatus = require("http-status-codes");
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
+
+router.delete("/:id" , upload.array() , function(req , res){
+
+    shipmentLogic.deleteShipment(req.params.id  , req.body , function(data){
+      if(data.statusCode){
+        res.status(data.statusCode);
+      }
+      res.send(data);
+    });
+});
+
 /**
   @description Update a shipment from shipment Name
   @param name ( STRING ): name of the shipment , maybe auto generated based on date , random num and fixed string shipment

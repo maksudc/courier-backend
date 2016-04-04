@@ -354,9 +354,28 @@ var exportToShipment = function( postData , next){
   });
 };
 
+var deleteShipment = function(shipmentId , params , next){
+
+  queryParams = { where: { uuid: shipmentId  }};
+
+  if(Object.keys(params).length > 0){
+    _.assignIn(queryParams , params);
+  }
+
+  shipment
+  .destroy(queryParams)
+  .then(function(affectedRows){
+    next({ status:"success" , statusCode:HttpStatus.OK , data:affectedRows , message:null });
+  })
+  .catch(function(err){
+    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:err , data:null });
+  });
+};
+
 
 exports.createShipmentWithOrders = createShipmentWithOrders;
 exports.getShipmentDetails = getShipmentDetails;
 exports.getShipments = getShipments;
 exports.exportToShipment = exportToShipment;
 exports.shipmentUpdate = shipmentUpdate;
+exports.deleteShipment = deleteShipment;
