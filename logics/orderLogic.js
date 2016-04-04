@@ -382,6 +382,7 @@ var createByOperator = function(postData, next){
 		if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
 		if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
 		if(postData.payment) draftOrder["payment"] = parseFloat(postData.payment);
+		if(postData.nid) draftOrder["nid"] = postData.nid;
 
 		orderModel.create(draftOrder).catch(function(err){
 			if(err){
