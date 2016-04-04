@@ -157,27 +157,58 @@ var getShipments = function(params , next){
 
   shipment
   .findAll(queryParams.queryOptions)
+  .map(function(shipmentItem){
+
+    if( params.includeOrders && parseInt(params.includeOrders) > 0){
+
+      return order
+      .findAll({ where: { shipmentUuid: shipmentItem.uuid } })
+      .then(function(orders){
+
+        data = {};
+        if(orders && orders.length > 0){
+          //console.log(datas.length + " Data are there  ");
+          //console.log();
+          _.assignIn(data , { shipment:shipmentItem });
+          _.assignIn( data , { orders:orders });
+          //datas.push(data);
+          //console.log(JSON.stringify(data));
+        }else{
+          _.assignIn(data , { shipment: shipmentItem });
+          _.assignIn( data , { orders:[] });
+        }
+        return data;
+      });
+
+    }else{
+
+      data = {};
+      _.assignIn(data , { shipment:shipmentItem });
+      _.assignIn( data , { orders:null });
+
+      return data;
+    }
+  })
+  .then(function(results){
+    //console.log(results);
+    next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
+  })
+  .catch(function(err){
+    console.log(err);
+    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
+  });
+  /*
   .then(function(results){
 
     shipments  = results;
 
     if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
-      promises = [];
-      for(I = 0 ;I < results.length; I++){
+      return
+      Promise
+      .map(results , function(shipmentItem){
 
-        shipmentItem = results[I];
-
-        /*dataTemplate = {
-          shipment: results[I] ,
-          orders:[]
-        };
-        datas.push(dataTemplate);
-        */
-        reverseIndex[results[I].uuid] = I;
-
-        orderPromise =
-        order
+        return order
         .findAll({ where: { shipmentUuid: shipmentItem.uuid } })
         .then(function(orders){
 
@@ -188,10 +219,54 @@ var getShipments = function(params , next){
             console.log(index);
             //console.log(datas.length + " Data are there  ");
             //console.log();
-            _.assignIn(data , { shipment: results[index] });
+            _.assignIn(data , { shipment:shipmentItem });
             _.assignIn( data , { orders:orders });
             //datas.push(data);
             console.log(JSON.stringify(data));
+          }else{
+            _.assignIn(data , { shipment: shipmentItem });
+            _.assignIn( data , { orders:[] });
+          }
+          return data;
+        })
+      })
+      .then(function(results){
+        console.log(results);
+        next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
+      });
+
+      ////
+      promises = [];
+      for(I = 0 ;I < results.length; I++){
+
+        shipmentItem = results[I];
+
+        //dataTemplate = {
+        //  shipment: results[I] ,
+        //  orders:[]
+        //};
+        //datas.push(dataTemplate);
+        //
+        reverseIndex[results[I].uuid] = I;
+
+        orderPromise =
+        order
+        .findAll({ where: { shipmentUuid: results[I].uuid } })
+        .then(function(orders){
+
+          data = {};
+          if(orders && orders.length > 0){
+
+            index = reverseIndex[orders[0].shipmentUuid];
+            console.log(index);
+            //console.log(datas.length + " Data are there  ");
+            //console.log();
+            _.assignIn(data , { shipment: shipments[index] });
+            _.assignIn( data , { orders:orders });
+            //datas.push(data);
+            console.log(JSON.stringify(data));
+          }else{
+            _.assignIn(data , { shipment: shipmentItem });
           }
           return data;
         })
@@ -207,11 +282,13 @@ var getShipments = function(params , next){
       Promise
       .all(promises)
       .then(function(results){
+
         next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
       })
       .catch(function(err){
         next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null, message:err });
       });
+      //////
 
     }else{
       for(I = 0 ; I< results.length ; I++){
@@ -226,7 +303,7 @@ var getShipments = function(params , next){
   .catch(function(err){
     console.log(err);
     next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
-  });
+  });*/
 };
 
 var exportToShipment = function( postData , next){
