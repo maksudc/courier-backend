@@ -104,8 +104,9 @@ router.post('/orderDetail/:id', function(req, res){
 
 
 router.post('/confirmOrder', upload.array(), function(req, res){
+	console.log(req.body);
 
-	orderLogic.confirmOrder(req.body.id, function(data){
+	orderLogic.confirmOrder(req.body.id, req.body.code, function(data){
 		res.send(data);
 	});
 });

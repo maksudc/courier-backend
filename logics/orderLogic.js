@@ -172,10 +172,17 @@ var deleteDraft = function(data, next){
 exports.deleteDraft = deleteDraft;
 
 
-var confirmOrder = function(id, next){
+var confirmOrder = function(id, code, next){
 	findOne(id, function(orderData){
-		if(orderData.status == 'success'){
+
+		if(orderData.status == 'success' && orderData.data.status == 'draft'){
+			if(isNaN(parseInt(code)) || !isFinite(code))
+				return next({"status": "error", "message": "Invalid verification code!!!"});
+			else if(parseInt(code) != parseInt(orderData.data.verification_code)){
+				return next({"status": "error", "message": "Verification code did not match!!!"});
+			}
 			orderData.data.status = 'confirmed';
+			orderData.data.confirm_time = new Date();
 			orderData.data.save().catch(function(err){
 				if(err){
 					next({"status": "error", "message": "Error while saving status"});
@@ -192,7 +199,7 @@ var confirmOrder = function(id, next){
 				return;
 			});
 		}
-		else console.log(orderData);
+		else return next({"status": "error", "message": "Cannot confirm this order"});
 	});
 }
 
@@ -202,6 +209,10 @@ exports.confirmOrder = confirmOrder;
 var receiveOrder = function(id, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
+			if(orderData.data.status == 'draft'){
+				return next({"status": "error", "message": "Please confirm this order first"});
+			}
+
 			orderData.data.status = 'received';
 			orderData.data.receiver_operator = 'fh74t85';
 			orderData.data.receive_time = new Date();
@@ -387,16 +398,17 @@ var createByOperator = function(postData, next){
 
 		orderModel.create(draftOrder).catch(function(err){
 			if(err){
+				console.log(err);
 				errorData = err;
-				createDraft("Cannot create draft order");
+				return createDraft("Cannot create draft order");
 			}
 		}).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
-				createDraft(null);
+				return createDraft(null);
 			}
 			else {
-				createDraft("Cannot create order");
+				return createDraft("Cannot create order");
 			}
 		});
 
