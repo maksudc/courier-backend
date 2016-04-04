@@ -103,4 +103,19 @@ router.post('/orderDetail/:id', function(req, res){
 });
 
 
+router.post('/confirmOrder', upload.array(), function(req, res){
+
+	orderLogic.confirmOrder(req.body.id, function(data){
+		res.send(data);
+	});
+});
+
+router.post('/receiveOrder', upload.array(), function(req, res){
+
+	orderLogic.receiveOrder(req.body.id, function(data){
+		res.send(data);
+	});
+});
+
+
 module.exports = router;

@@ -192,6 +192,7 @@ var confirmOrder = function(id, next){
 				return;
 			});
 		}
+		else console.log(orderData);
 	});
 }
 
