@@ -12,6 +12,7 @@ var createShipmentWithOrders = function(postData , next){
 
     if( Object.keys(postData).length===0 || !postData.name || !postData.orders){
       next({ status:"error", statusCode:HttpStatus.BAD_REQUEST , message:"Name and orders are both needed" });
+      return;
     }
 
     shipmentBaseData = {
@@ -372,6 +373,84 @@ var deleteShipment = function(shipmentId , params , next){
   });
 };
 
+/**
+  * If the resource is like:
+  resource = {
+  a:{
+    b:{
+      c:{
+      ....
+    },
+    d:{
+    ....
+  }
+  }
+}
+}
+  * Requires the parameter specified like:
+  [
+    { "op": "test", "path": "/a/b/c", "value": "foo" },
+    { "op": "remove", "path": "/a/b/c" },
+    { "op": "add", "path": "/a/b/c", "value": [ "foo", "bar" ] },
+    { "op": "replace", "path": "/a/b/c", "value": 42 },
+    { "op": "move", "from": "/a/b/c", "path": "/a/b/d" },
+    { "op": "copy", "from": "/a/b/d", "path": "/a/b/e" }
+]
+    See the following link for details:
+  * http://williamdurand.fr/2014/02/14/please-do-not-patch-like-an-idiot/
+
+  * For adding orders to shipment
+  [
+    {
+      "op":"add" , "path":"/orders" , value:["orderUuid1" , "orderuuid2"]
+    }
+  ]
+  * For removing orders from shipment
+  [
+    {
+      "op":"remove" , "path":"/orders" , value:["orderUuid1" , "orderuuid2"]
+    }
+  ]
+  * For cleaning the shipment from orders
+  [
+    {
+      "op":"replace" , "path":"/orders" , value:[]
+    }
+  ]
+**/
+var manageShipmentOrders = function(shipmentId , params , next){
+
+  shipment
+  .findOne({ where: { uuid: shipmentId } })
+  .then(function(shipmentItem){
+
+    var paramList = JSON.parse(params);
+
+    if(!paramList || Object.keys(paramList).length===0){
+      next({ status:"error" , statusCode:HttpStatus.BAD_REQUEST , message:"Atleast one change is required" });
+      return;
+    }
+
+    return Promise.map(paramList , function(paramObject){
+
+      if(paramObject.op === "add"){
+        // add the values to the list
+        return order
+        .findAll({ where:{ uuid:paramObject.value } })
+        .map(function(orderItem){
+          return shipmentItem.addOrders(orderItem);
+        });
+      }
+    });
+  })
+  .then(function(results){
+    next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
+  })
+  .catch(function(err){
+    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err  });
+  });
+};
+
 
 exports.createShipmentWithOrders = createShipmentWithOrders;
 exports.getShipmentDetails = getShipmentDetails;
@@ -379,3 +458,4 @@ exports.getShipments = getShipments;
 exports.exportToShipment = exportToShipment;
 exports.shipmentUpdate = shipmentUpdate;
 exports.deleteShipment = deleteShipment;
+exports.manageShipmentOrders = manageShipmentOrders;

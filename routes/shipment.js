@@ -10,7 +10,17 @@ router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 
-router.delete("/:id" , upload.array() , function(req , res){
+router.patch("/:id" , upload.array() , function(req , res){
+
+    shipmentLogic.manageShipmentOrders(req.params.id , req.body , function(data){
+      if(data.statusCode){
+        res.status(data.statusCode);
+      }
+      res.send(data);
+    });
+});
+
+router.delete("/:id$" , upload.array() , function(req , res){
 
     shipmentLogic.deleteShipment(req.params.id  , req.body , function(data){
       if(data.statusCode){
@@ -76,7 +86,7 @@ router.post("/" , upload.array() , function(req , res){
             data ( JSONObject ): shipment model structure
             message ( STRING ): if error happened it contains the details of the error
 **/
-router.get("/:id" , function(req , res){
+router.get("/:id$" , function(req , res){
 
   queryVars = req.query;
   //console.log(queryVars);
