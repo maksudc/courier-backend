@@ -10,55 +10,55 @@ var HttpStatus = require("http-status-codes");
 
 var createShipmentWithOrders = function(postData , next){
 
-    if( Object.keys(postData).length===0 || !postData.name || !postData.orders){
-      next({ status:"error", statusCode:HttpStatus.BAD_REQUEST , message:"Name and orders are both needed" });
-      return;
+  if( Object.keys(postData).length===0 || !postData.name || !postData.orders){
+    next({ status:"error", statusCode:HttpStatus.BAD_REQUEST , message:"Name and orders are both needed" });
+    return;
+  }
+
+  shipmentBaseData = {
+    name: postData.name,
+  };
+
+  if(postData.status){
+    _.assignIn(shipmentBaseData , { status: postData.status });
+  }
+  if(postData.shipmentType){
+    _.assignIn(shipmentBaseData , { shipmentType:postData.shipmentType });
+  }
+
+  var shipmentInstance = null;
+
+  var orders = JSON.parse(postData.orders);
+
+  shipment
+  .create(shipmentBaseData)
+  .then(function(sInstance){
+
+    shipmentInstance = sInstance;
+    promises = [];
+    for(I = 0 ; I< orders.length ; I++ ){
+      promises.push(order.findOne({ where: { uuid: orders[I] } }));
     }
+    //shipmentInstance
 
-    shipmentBaseData = {
-      name: postData.name,
-    };
+    return Promise.all(promises);
+  })
+  .then(function(results){
 
-    if(postData.status){
-      _.assignIn(shipmentBaseData , { status: postData.status });
+    promises = [];
+    for(I = 0 ; I< results.length ; I++ ){
+      promises.push(shipmentInstance.addOrders(results[I]));
     }
-    if(postData.shipmentType){
-      _.assignIn(shipmentBaseData , { shipmentType:postData.shipmentType });
-    }
-
-    var shipmentInstance = null;
-
-    var orders = JSON.parse(postData.orders);
-
-    shipment
-    .create(shipmentBaseData)
-    .then(function(sInstance){
-
-      shipmentInstance = sInstance;
-      promises = [];
-      for(I = 0 ; I< orders.length ; I++ ){
-          promises.push(order.findOne({ where: { uuid: orders[I] } }));
-      }
-      //shipmentInstance
-
-      return Promise.all(promises);
-    })
-    .then(function(results){
-
-      promises = [];
-      for(I = 0 ; I< results.length ; I++ ){
-        promises.push(shipmentInstance.addOrders(results[I]));
-      }
-      return Promise.all(promises);
-    })
-    .then(function(results){
-      //console.log(results);
-      next({ status:"success" , statusCode: HttpStatus.OK , data: shipmentInstance });
-    })
-    .catch(function(err){
-      console.log(err);
-      next({ status:"error", statusCode: HttpStatus.INTERNAL_SERVER_ERROR ,  "message": JSON.stringify(err) , data:null });
-    });
+    return Promise.all(promises);
+  })
+  .then(function(results){
+    //console.log(results);
+    next({ status:"success" , statusCode: HttpStatus.OK , data: shipmentInstance });
+  })
+  .catch(function(err){
+    console.log(err);
+    next({ status:"error", statusCode: HttpStatus.INTERNAL_SERVER_ERROR ,  "message": JSON.stringify(err) , data:null });
+  });
 };
 
 function extractParams(params){
@@ -112,46 +112,46 @@ function extractParams(params){
 
 var getShipmentDetails = function(shipmentId , params , next){
 
-    queryParams = extractParams(params);
-    _.assignIn(queryParams.queryOptions.where , { uuid: shipmentId });
+  queryParams = extractParams(params);
+  _.assignIn(queryParams.queryOptions.where , { uuid: shipmentId });
 
-    var shipmentInstance = null;
+  var shipmentInstance = null;
 
-    shipment
-    .findOne( queryParams.queryOptions )
-    .then(function(sInstance){
-      //if(shipmentInstance){
-        console.log(params);
-        console.log(queryParams.asoc);
+  shipment
+  .findOne( queryParams.queryOptions )
+  .then(function(sInstance){
+    //if(shipmentInstance){
+    console.log(params);
+    console.log(queryParams.asoc);
 
-        shipmentInstance = sInstance;
+    shipmentInstance = sInstance;
 
-        if( params.includeOrders && parseInt(params.includeOrders) > 0){
+    if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
-          order
-          .findAll({ where: { shipmentUuid:shipmentInstance.uuid } })
-          .then(function(orders){
+      order
+      .findAll({ where: { shipmentUuid:shipmentInstance.uuid } })
+      .then(function(orders){
 
-            console.log("Total " + orders.length + "Orders Found");
+        console.log("Total " + orders.length + "Orders Found");
 
-            data = {};
-            _.assignIn(data , { shipment: shipmentInstance } );
-            _.assignIn(data , { orders:orders }  );
+        data = {};
+        _.assignIn(data , { shipment: shipmentInstance } );
+        _.assignIn(data , { orders:orders }  );
 
-            next({ status:"success" , statusCode:HttpStatus.OK , data:data , message:null });
-          });
-        }else{
+        next({ status:"success" , statusCode:HttpStatus.OK , data:data , message:null });
+      });
+    }else{
 
-          data = {};
-          _.assignIn(data , { shipment:shipmentInstance });
-          _.assignIn(data , { orders:null });
-          next({ status:"success", statusCode:HttpStatus.OK , data:data , message:null });
-        }
-      //}
-    })
-    .catch(function(err){
-      next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:err , data:null });
-    });
+      data = {};
+      _.assignIn(data , { shipment:shipmentInstance });
+      _.assignIn(data , { orders:null });
+      next({ status:"success", statusCode:HttpStatus.OK , data:data , message:null });
+    }
+    //}
+  })
+  .catch(function(err){
+    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:err , data:null });
+  });
 
 };
 
@@ -208,110 +208,110 @@ var getShipments = function(params , next){
   /*
   .then(function(results){
 
-    shipments  = results;
+  shipments  = results;
 
-    if( params.includeOrders && parseInt(params.includeOrders) > 0){
+  if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
-      return
-      Promise
-      .map(results , function(shipmentItem){
+  return
+  Promise
+  .map(results , function(shipmentItem){
 
-        return order
-        .findAll({ where: { shipmentUuid: shipmentItem.uuid } })
-        .then(function(orders){
+  return order
+  .findAll({ where: { shipmentUuid: shipmentItem.uuid } })
+  .then(function(orders){
 
-          data = {};
-          if(orders && orders.length > 0){
+  data = {};
+  if(orders && orders.length > 0){
 
-            index = reverseIndex[orders[0].shipmentUuid];
-            console.log(index);
-            //console.log(datas.length + " Data are there  ");
-            //console.log();
-            _.assignIn(data , { shipment:shipmentItem });
-            _.assignIn( data , { orders:orders });
-            //datas.push(data);
-            console.log(JSON.stringify(data));
-          }else{
-            _.assignIn(data , { shipment: shipmentItem });
-            _.assignIn( data , { orders:[] });
-          }
-          return data;
-        })
-      })
-      .then(function(results){
-        console.log(results);
-        next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
-      });
+  index = reverseIndex[orders[0].shipmentUuid];
+  console.log(index);
+  //console.log(datas.length + " Data are there  ");
+  //console.log();
+  _.assignIn(data , { shipment:shipmentItem });
+  _.assignIn( data , { orders:orders });
+  //datas.push(data);
+  console.log(JSON.stringify(data));
+}else{
+_.assignIn(data , { shipment: shipmentItem });
+_.assignIn( data , { orders:[] });
+}
+return data;
+})
+})
+.then(function(results){
+console.log(results);
+next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
+});
 
-      ////
-      promises = [];
-      for(I = 0 ;I < results.length; I++){
+////
+promises = [];
+for(I = 0 ;I < results.length; I++){
 
-        shipmentItem = results[I];
+shipmentItem = results[I];
 
-        //dataTemplate = {
-        //  shipment: results[I] ,
-        //  orders:[]
-        //};
-        //datas.push(dataTemplate);
-        //
-        reverseIndex[results[I].uuid] = I;
+//dataTemplate = {
+//  shipment: results[I] ,
+//  orders:[]
+//};
+//datas.push(dataTemplate);
+//
+reverseIndex[results[I].uuid] = I;
 
-        orderPromise =
-        order
-        .findAll({ where: { shipmentUuid: results[I].uuid } })
-        .then(function(orders){
+orderPromise =
+order
+.findAll({ where: { shipmentUuid: results[I].uuid } })
+.then(function(orders){
 
-          data = {};
-          if(orders && orders.length > 0){
+data = {};
+if(orders && orders.length > 0){
 
-            index = reverseIndex[orders[0].shipmentUuid];
-            console.log(index);
-            //console.log(datas.length + " Data are there  ");
-            //console.log();
-            _.assignIn(data , { shipment: shipments[index] });
-            _.assignIn( data , { orders:orders });
-            //datas.push(data);
-            console.log(JSON.stringify(data));
-          }else{
-            _.assignIn(data , { shipment: shipmentItem });
-          }
-          return data;
-        })
-        .catch(function(err){
-          console.log(err);
-        });
+index = reverseIndex[orders[0].shipmentUuid];
+console.log(index);
+//console.log(datas.length + " Data are there  ");
+//console.log();
+_.assignIn(data , { shipment: shipments[index] });
+_.assignIn( data , { orders:orders });
+//datas.push(data);
+console.log(JSON.stringify(data));
+}else{
+_.assignIn(data , { shipment: shipmentItem });
+}
+return data;
+})
+.catch(function(err){
+console.log(err);
+});
 
-        promises.push(orderPromise);
-      }
+promises.push(orderPromise);
+}
 
-      console.log(results.length + "  shipment are in the system total");
+console.log(results.length + "  shipment are in the system total");
 
-      Promise
-      .all(promises)
-      .then(function(results){
+Promise
+.all(promises)
+.then(function(results){
 
-        next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
-      })
-      .catch(function(err){
-        next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null, message:err });
-      });
-      //////
+next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
+})
+.catch(function(err){
+next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null, message:err });
+});
+//////
 
-    }else{
-      for(I = 0 ; I< results.length ; I++){
-        datas.push({
-          shipment: results[I],
-          orders:null
-        });
-      }
-      next({ status:"success" , statusCode:HttpStatus.OK ,  data:datas });
-    }
-  })
-  .catch(function(err){
-    console.log(err);
-    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
-  });*/
+}else{
+for(I = 0 ; I< results.length ; I++){
+datas.push({
+shipment: results[I],
+orders:null
+});
+}
+next({ status:"success" , statusCode:HttpStatus.OK ,  data:datas });
+}
+})
+.catch(function(err){
+console.log(err);
+next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
+});*/
 };
 
 var shipmentUpdate = function(shipmentId , postData , next){
@@ -374,77 +374,123 @@ var deleteShipment = function(shipmentId , params , next){
 };
 
 /**
-  * If the resource is like:
-  resource = {
-  a:{
-    b:{
-      c:{
-      ....
-    },
-    d:{
-    ....
-  }
-  }
+* If the resource is like:
+resource = {
+a:{
+b:{
+c:{
+....
+},
+d:{
+....
 }
 }
-  * Requires the parameter specified like:
-  [
-    { "op": "test", "path": "/a/b/c", "value": "foo" },
-    { "op": "remove", "path": "/a/b/c" },
-    { "op": "add", "path": "/a/b/c", "value": [ "foo", "bar" ] },
-    { "op": "replace", "path": "/a/b/c", "value": 42 },
-    { "op": "move", "from": "/a/b/c", "path": "/a/b/d" },
-    { "op": "copy", "from": "/a/b/d", "path": "/a/b/e" }
+}
+}
+* Requires the parameter specified like:
+[
+{ "op": "test", "path": "/a/b/c", "value": "foo" },
+{ "op": "remove", "path": "/a/b/c" },
+{ "op": "add", "path": "/a/b/c", "value": [ "foo", "bar" ] },
+{ "op": "replace", "path": "/a/b/c", "value": 42 },
+{ "op": "move", "from": "/a/b/c", "path": "/a/b/d" },
+{ "op": "copy", "from": "/a/b/d", "path": "/a/b/e" }
 ]
-    See the following link for details:
-  * http://williamdurand.fr/2014/02/14/please-do-not-patch-like-an-idiot/
+See the following link for details:
+* http://williamdurand.fr/2014/02/14/please-do-not-patch-like-an-idiot/
 
-  * For adding orders to shipment
-  [
-    {
-      "op":"add" , "path":"/orders" , value:["orderUuid1" , "orderuuid2"]
-    }
-  ]
-  * For removing orders from shipment
-  [
-    {
-      "op":"remove" , "path":"/orders" , value:["orderUuid1" , "orderuuid2"]
-    }
-  ]
-  * For cleaning the shipment from orders
-  [
-    {
-      "op":"replace" , "path":"/orders" , value:[]
-    }
-  ]
+* For adding orders to shipment
+[
+{
+"op":"add" , "path":"/orders" , value:["orderUuid1" , "orderuuid2"]
+}
+]
+* For removing orders from shipment
+[
+{
+"op":"remove" , "path":"/orders" , value:["orderUuid1" , "orderuuid2"]
+}
+]
+* For cleaning the shipment from orders
+[
+{
+"op":"replace" , "path":"/orders" , value:[]
+}
+]
 **/
 var manageShipmentOrders = function(shipmentId , params , next){
+
+  var paramList = params;
+
+  console.log(params);
+  console.log(typeof(params));
 
   shipment
   .findOne({ where: { uuid: shipmentId } })
   .then(function(shipmentItem){
 
-    var paramList = JSON.parse(params);
+    console.log(" Shipment Uuid:  " + shipmentItem.uuid);
 
     if(!paramList || Object.keys(paramList).length===0){
       next({ status:"error" , statusCode:HttpStatus.BAD_REQUEST , message:"Atleast one change is required" });
-      return;
+      return null;
     }
 
     return Promise.map(paramList , function(paramObject){
 
-      if(paramObject.op === "add"){
-        // add the values to the list
-        return order
-        .findAll({ where:{ uuid:paramObject.value } })
-        .map(function(orderItem){
-          return shipmentItem.addOrders(orderItem);
-        });
+      console.log("Processing : ");
+      console.log(paramObject);
+
+      if(paramObject.path == "/orders"){
+
+        if(paramObject.op === "add"){
+          // add the values to the list
+          return order
+          .findAll({ where:{ uuid:paramObject.value } })
+          .map(function(orderItem){
+            console.log("Adding Order: " + orderItem.uuid + " to "+ "shipment: " + shipmentItem.uuid);
+            shipmentItem.addOrders(orderItem);
+          });
+
+        }
+        else if(paramObject.op=="remove"){
+
+          return order
+          .findAll({ where:{ uuid:paramObject.value } })
+          .map(function(orderItem){
+            console.log("Removing Order: " + orderItem.uuid + " from "+ "shipment: " + shipmentItem.uuid);
+            shipmentItem.removeOrders(orderItem);
+          });
+
+        }else if(paramObject.op=="replace"){
+
+          return shipmentItem
+          .setOrders([])
+          .then(function(){
+
+            if(paramObject.value && Object.keys(paramObject.value).length > 0){
+
+              return order
+              .findAll({ where:{ uuid:paramObject.value } })
+              .map(function(orderItem){
+                console.log("adding orders on replacement: " + orderItem.uuid + " To " + shipmentItem.uuid);
+                shipmentItem.addOrders(orderItem);
+              });
+            }
+          });
+        }
+      }else{
+
+        return Promise.reject("only order is currently processed. So please try with path = `/orders`");
       }
     });
   })
   .then(function(results){
-    next({ status:"success" , statusCode:HttpStatus.OK , data:results , message:null });
+    console.log(results);
+
+    if(results){
+      next({ status:"success" , statusCode:HttpStatus.OK , data:null , message:null });
+    }
   })
   .catch(function(err){
     next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err  });
