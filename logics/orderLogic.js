@@ -5,7 +5,7 @@ var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var itemLogic = require("../logics/itemLogic");
-var productLogic = require("../logics/productLogic");
+var clientLogic = require("../logics/clientLogic");
 var _ = require("lodash");
 var async = require("async");
 
@@ -425,7 +425,6 @@ var createByOperator = function(postData, next){
 
 		itemLogic.createMany(postData.item_list, function(tempItemList){
 			if(tempItemList && tempItemList.status == 'success'){
-				next({"status": "success", "data": order});
 				addItems(null);
 			}
 			else if(tempItemList && tempItemList.status == 'error'){
@@ -435,8 +434,28 @@ var createByOperator = function(postData, next){
 
 		});
 
+	}, function(createClient){
+
+		var clientData = {};
+
+		if(postData.sender) clientData["mobile"] = postData.sender;
+		if(postData.sender_addr) clientData["address"] = postData.sender_addr;
+		if(postData.nid) clientData["national_id"] = postData.nid;
+		if(postData.senderRegion) clientData["regionId"] = postData.senderRegion;
+		if(postData.senderName) clientData["full_name"] = postData.senderName;
+		
+		clientLogic.create(clientData, function(data){
+
+			if(data.status == "success"){
+				return next({"status": "success", "data": order});
+			}
+			else createClient("Cannot create client!");
+
+		});
+
 	}], function(err){
 		if(err){
+			console.log(err);
 			next(errorData);
 			return;
 		}
