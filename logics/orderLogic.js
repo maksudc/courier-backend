@@ -39,14 +39,16 @@ var findAllOrders = function(next){
 
 	orderModel.findAll().catch(function(err){
 		if(err){
-			return next({"status": "error", "message": "Error while getting all orders"});
+			console.log(err);
+			next({"status": "error", "message": "Error while getting all orders"});
+			return;
 		}
 	}).then(function(orderList){
 		if(orderList){
-			return next({"status": "success", data: orderList});
+			next({"status": "success", data: orderList});
 		}
 		else{
-			return next({"status": "success", "message": "No order found!!!"});
+			next({"status": "success", "message": "No order found!!!"});
 		}
 	});
 
