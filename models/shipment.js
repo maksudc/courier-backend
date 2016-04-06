@@ -103,5 +103,24 @@ module.exports = function(sequelize, DataTypes) {
 
   });
 
+  ShipmentModel.hook("beforeDestroy" , function(shipmentItem , options){
+
+		shipmentItem
+		.getTracker()
+		.then(function(trackerItem){
+			if(trackerItem){
+					return trackerItem.destroy();
+			}else{
+				return ;
+			}
+		})
+		.then(function(result){
+			console.log(result);
+		})
+		.catch(function(err){
+			console.log(err);
+		});
+	});
+
   return ShipmentModel;
 };

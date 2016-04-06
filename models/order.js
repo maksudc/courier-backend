@@ -117,5 +117,24 @@ module.exports = function(sequelize, DataTypes) {
 		});
 	});
 
+	order.hook("beforeDestroy" , function(orderItem , options){
+
+		orderItem
+		.getTracker()
+		.then(function(trackerItem){
+			if(trackerItem){
+					return trackerItem.destroy();
+			}else{
+				return ;
+			}
+		})
+		.then(function(result){
+			console.log(result);
+		})
+		.catch(function(err){
+			console.log(err);
+		});
+	});
+
 	return order;
 };
