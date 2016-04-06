@@ -9,13 +9,10 @@ module.exports = {
       Example:
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
-    queryInterface.addColumn("genericTrackers" , "destinationBranchType" , {
-      type: Sequelize.ENUM( 'sub' , 'regional' ) ,
-      defaultValue:'regional'
-    });
-
-    queryInterface.addColumn("genericTrackers" , "destinationBranchId" , {
-      type: Sequelize.INTEGER
+    queryInterface.changeColumn("shipments" , "status" , {
+      type: Sequelize.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
+  		defaultValue: 'draft',
+  		allowNull: false
     });
   },
 
@@ -27,7 +24,10 @@ module.exports = {
       Example:
       return queryInterface.dropTable('users');
     */
-    queryInterface.removeColumn("genericTrackers" , "destinationBranchType");
-    queryInterface.removeColumn("genericTrackers" , "destinationBranchId");
+    queryInterface.changeColumn("shipments" , "status" , {
+      type: Sequelize.ENUM('draft','confirmed','travelling','received','reached' ,'delivered'),
+  		defaultValue: 'draft',
+  		allowNull: false
+    });
   }
 };

@@ -26,6 +26,7 @@ module.exports = function(sequelize , DataTypes){
           },
           as: "currentTrackers"
         });
+
         SubBranch.hasMany(models.trackerLog , {
           foreignKey: "branchId",
           constraints: false,
@@ -33,6 +34,24 @@ module.exports = function(sequelize , DataTypes){
             branchType: "regional"
           },
           as:"trackerLogs"
+        });
+
+        SubBranch.hasMany(models.shipment , {
+          foreignKey: "sourceBranchId",
+          constraints: false,
+          scope:{
+            branchType: "sub"
+          },
+          as:"sourcedShipment"
+        });
+
+        SubBranch.hasMany(models.shipment , {
+          foreignKey: "destinationBranchId",
+          constraints: false,
+          scope:{
+            branchType: "sub"
+          },
+          as:"destinedShipment"
         });
 
       }

@@ -28,6 +28,6 @@ module.exports = {
       return queryInterface.dropTable('users');
     */
     queryInterface.removeColumn("genericTrackers" , "sourceBranchType");
-    queryInterface.addColumn("genericTrackers" , "sourceBranchId");
+    queryInterface.removeColumn("genericTrackers" , "sourceBranchId");
   }
 };

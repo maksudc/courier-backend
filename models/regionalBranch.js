@@ -57,6 +57,24 @@ module.exports = function(sequelize , DataTypes){
           },
           as:"trackerLogs"
         });
+
+        RegionalBranch.hasMany(models.shipment , {
+          foreignKey: "sourceBranchId",
+          constraints: false,
+          scope:{
+            branchType: "regional"
+          },
+          as:"sourcedShipment"
+        });
+
+        RegionalBranch.hasMany(models.shipment , {
+          foreignKey: "destinationBranchId",
+          constraints: false,
+          scope:{
+            branchType: "regional"
+          },
+          as:"destinedShipment"
+        });
       }
     }
   });

@@ -15,14 +15,22 @@ module.exports = function(sequelize, DataTypes) {
     // The status field for order and shipment are same , since the status shipment hold
     // will be applicable and replicated across all the order item inside the shipment
     status: {
-  		type: DataTypes.ENUM('draft', 'confirmed', 'received', 'travelling', 'reached', 'delivered'),
+  		type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
   		defaultValue: 'draft',
   		allowNull: false
-  	}
+  	},
+    sourceBranchType: { type: DataTypes.ENUM('regional' , 'sub') },
+    sourceBranchId:{ type: DataTypes.INTEGER },
+
+    destinationBranchType:{ type: DataTypes.ENUM('regional', 'sub') },
+    destinationBranchId: { type: DataTypes.INTEGER },
+
+    shipmentType:{ type: DataTypes.ENUM("local" , "national" , "international") , defaultValue:"national" }
 
   } , {
 
     classMethods: {
+
       associate: function(models) {
         // associations can be defined here
         ShipmentModel.hasMany(models.order , {
@@ -38,6 +46,28 @@ module.exports = function(sequelize, DataTypes) {
           },
           as: 'tracker'
         });
+
+        ShipmentModel.belongsTo(models.regionalBranch , {
+          foreignKey: "sourceBranchId",
+          constraints: false,
+          as: "sourceRegionalBranch"
+        });
+        ShipmentModel.belongsTo(models.regionalBranch , {
+          foreignKey: "destinationBranchId",
+          constraints: false,
+          as: "sourceRegionalBranch"
+        });
+
+        ShipmentModel.belongsTo(models.subBranch , {
+          foreignKey: "sourceBranchId",
+          constraints: false,
+          as: "sourceSubBranch"
+        });
+        ShipmentModel.belongsTo(models.subBranch , {
+          foreignKey: "destinationBranchId",
+          constraints: false,
+          as: "sourceSubBranch"
+        });
       }
     }
   });
@@ -48,9 +78,19 @@ module.exports = function(sequelize, DataTypes) {
     .getTracker()
     .then(function(currentTrackerItem){
       if(!currentTrackerItem){
+
         var trackerData = {};
         trackerData.trackableType = "shipment";
         trackerData.trackableId = shipmentItem.uuid ;
+
+        trackerData.sourceBranchType = shipmentItem.sourceBranchType;
+        trackerData.sourceBranchId = shipmentItem.sourceBranchId;
+
+        trackerData.destinationBranchType = shipmentItem.destinationBranchType;
+        trackerData.destinationBranchId = shipmentItem.destinationBranchId;
+
+        trackerData.currentBranchType = trackerData.sourceBranchType;
+        trackerData.currentBranchId = trackerData.sourceBranchId;
 
         sequelize.models.genericTracker
         .create(trackerData)
