@@ -31,7 +31,7 @@ var findByIdList = function(idList, next){
 		return;
 	}
 
-	SubBranchModel.findAll({where: {"id": {"$in": idList}}, attributes: ['id', 'label']}).then(function(branchList){
+	SubBranchModel.findAll({where: {"id": {"$in": idList}}, attributes: ['id', 'label', 'position', 'regionalBranchId']}).then(function(branchList){
 		if(branchList){
 			return next({"status": "success", data: branchList});
 		}
