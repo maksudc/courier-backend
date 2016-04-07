@@ -210,11 +210,12 @@ var confirmOrder = function(id, code, next){
 	findOne(id, function(orderData){
 
 		if(orderData.status == 'success' && orderData.data.status == 'draft'){
-			if(isNaN(parseInt(code)) || !isFinite(code))
+			//Following code fragment will be available when verification sms will be sent to user
+			/*if(isNaN(parseInt(code)) || !isFinite(code))
 				return next({"status": "error", "message": "Invalid verification code!!!"});
 			else if(parseInt(code) != parseInt(orderData.data.verification_code)){
 				return next({"status": "error", "message": "Verification code did not match!!!"});
-			}
+			}*/
 			orderData.data.status = 'confirmed';
 			orderData.data.confirm_time = new Date();
 			orderData.data.save().then(function(newOrderData){
