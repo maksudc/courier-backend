@@ -6,6 +6,8 @@ var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var itemLogic = require("../logics/itemLogic");
 var clientLogic = require("../logics/clientLogic");
+var subBranchLogic = require("../logics/subBranchLogic");
+var adminLogic = require("../logics/admin/adminLogic");
 var _ = require("lodash");
 var async = require("async");
 
@@ -16,17 +18,13 @@ var findOne = function(id, next){
 		return;
 	}
 
-	orderModel.findOne({where: {uuid: id}}).catch(function(err){
+	orderModel.findOne({where: {uuid: id}}).then(function(order){
+		
+		if(order) next({"status": "success", "data": order});
+
+	}).catch(function(err){
 		if(err){
 			next({"status":"error", "message": "Error occurred while searching order"});
-			return;
-		}
-	}).then(function(order){
-		if(order){
-			next({"status": "success", "data": order});
-		}
-		else{
-			next({"status": "error", "message": "Cannot find any order by this id"});
 		}
 	});
 };
@@ -37,18 +35,52 @@ exports.findOne = findOne;
 
 var findAllOrders = function(next){
 
-	orderModel.findAll().catch(function(err){
+	orderModel.findAll().then(function(orderList){
+		if(orderList){
+
+			var idList = [];
+
+			_.forEach(orderList, function(singleOrder){
+				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0)
+					idList.push(parseInt(singleOrder.entry_branch));
+				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0)
+					idList.push(parseInt(singleOrder.exit_branch));
+			});
+
+			var branchLabels = {};
+
+			subBranchLogic.findByIdList(idList, function(branchList){
+
+				if(branchList.status == 'error'){
+					next({"status": "error", "message": "Error while reading branch names"});
+					return;
+				}
+
+				_.forEach(branchList.data, function(singleBranch){
+					branchLabels[singleBranch.dataValues.id] = singleBranch.dataValues.label;
+				});
+
+				_.forEach(orderList, function(singleOrder){
+					if(branchLabels[singleOrder.dataValues.entry_branch])
+						singleOrder.dataValues.entry_branch = branchLabels[singleOrder.dataValues.entry_branch];
+					if(branchLabels[singleOrder.dataValues.exit_branch])
+						singleOrder.dataValues.exit_branch = branchLabels[singleOrder.dataValues.exit_branch];
+
+				});
+
+				next({"status": "success", data: orderList});
+			});
+
+			
+		}
+		else{
+			next({"status": "success", "message": "No order found!!!"});
+		}
+	}).catch(function(err){
 		if(err){
 			console.log(err);
 			next({"status": "error", "message": "Error while getting all orders"});
 			return;
-		}
-	}).then(function(orderList){
-		if(orderList){
-			next({"status": "success", data: orderList});
-		}
-		else{
-			next({"status": "success", "message": "No order found!!!"});
 		}
 	});
 
@@ -90,12 +122,7 @@ var createDraft = function(postData, next){
 	if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
 	if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
 
-	orderModel.create(draftOrder).catch(function(err){
-		if(err){
-			next({"status": "error","message": "Error occured while creating order"});
-			return;
-		}
-	}).then(function(order){
+	orderModel.create(draftOrder).then(function(order){
 		if(order){
 			//Now create items under that order
 			_.forEach(postData.item_list, function(item){
@@ -116,6 +143,11 @@ var createDraft = function(postData, next){
 		}
 		else{
 			next({"status": "error", "message": "No order created!!!"});
+			return;
+		}
+	}).catch(function(err){
+		if(err){
+			next({"status": "error","message": "Error occured while creating order"});
 			return;
 		}
 	});
@@ -185,12 +217,7 @@ var confirmOrder = function(id, code, next){
 			}
 			orderData.data.status = 'confirmed';
 			orderData.data.confirm_time = new Date();
-			orderData.data.save().catch(function(err){
-				if(err){
-					next({"status": "error", "message": "Error while saving status"});
-					return;
-				}
-			}).then(function(newOrderData){
+			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});
 				}
@@ -199,6 +226,11 @@ var confirmOrder = function(id, code, next){
 				}
 
 				return;
+			}).catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
 			});
 		}
 		else return next({"status": "error", "message": "Cannot confirm this order"});
@@ -218,12 +250,7 @@ var receiveOrder = function(id, next){
 			orderData.data.status = 'received';
 			orderData.data.receiver_operator = 'fh74t85';
 			orderData.data.receive_time = new Date();
-			orderData.data.save().catch(function(err){
-				if(err){
-					next({"status": "error", "message": "Error while saving status"});
-					return;
-				}
-			}).then(function(newOrderData){
+			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});
 				}
@@ -232,6 +259,11 @@ var receiveOrder = function(id, next){
 				}
 
 				return;
+			}).catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
 			});
 		}
 		else next(orderData);
@@ -258,12 +290,7 @@ var deliverOrder = function(id, next){
 			orderData.data.status = 'delivered';
 			orderData.data.delivery_operator = 'adfadfadfdasfdafasdfawfe';
 			orderData.data.delivery_time = new Date();
-			orderData.data.save().catch(function(err){
-				if(err){
-					next({"status": "error", "message": "Error while saving status"});
-					return;
-				}
-			}).then(function(newOrderData){
+			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});
 				}
@@ -272,6 +299,11 @@ var deliverOrder = function(id, next){
 				}
 
 				return;
+			}).catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
 			});
 		}
 		else next(orderData);
@@ -293,12 +325,7 @@ var receivePayment = function(id, next){
 
 			orderData.data.payment_status = 'paid';
 			orderData.data.payment_operator = 'qwedsafsag4w';
-			orderData.data.save().catch(function(err){
-				if(err){
-					next({"status": "error", "message": "Error while saving status"});
-					return;
-				}
-			}).then(function(newOrderData){
+			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});
 				}
@@ -307,6 +334,11 @@ var receivePayment = function(id, next){
 				}
 
 				return;
+			}).catch(function(err){
+				if(err){
+					next({"status": "error", "message": "Error while saving status"});
+					return;
+				}
 			});
 		}
 		else next(orderData);
@@ -338,9 +370,29 @@ var createByOperator = function(postData, next){
 
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
-	var createdProducts = {}, itemList, order, errorData;
+	var createdProducts = {}, itemList, order, errorData, adminData;
 
-	async.series([function(testBranches){
+	async.series([
+	function(prepareAdmin){
+
+		if(postData["admin"]){
+			adminLogic.findAdmin(postData["admin"], function(err, admin){
+				if(err){
+					prepareAdmin("error while reading admin");		
+				}
+				else if(admin){
+					postData["receiver_operator"] = admin.email;
+				}
+			});
+			prepareAdmin(null);
+		}
+		else {
+			//when http-authentication is set, we will read data from req.user
+			prepareAdmin(null);
+		}
+
+	},
+	function(testBranches){
 
 		/*
 		On 30th march, we assumed that there will be only one parameter named exit_branch_id 
@@ -350,7 +402,7 @@ var createByOperator = function(postData, next){
 		*/
 
 		subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
-			if(branch.status == "error") testBranches(data.message);
+			if(branch.status == "error") testBranches(branch.message);
 			else {
 				postData["exit_branch"] = branch.data.id;
 				postData["exit_branch_type"] = "sub-branch";
@@ -397,20 +449,21 @@ var createByOperator = function(postData, next){
 		if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
 		if(postData.payment) draftOrder["payment"] = parseFloat(postData.payment);
 		if(postData.nid) draftOrder["nid"] = postData.nid;
+		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
 
-		orderModel.create(draftOrder).catch(function(err){
-			if(err){
-				console.log(err);
-				errorData = err;
-				return createDraft("Cannot create draft order");
-			}
-		}).then(function(tempOrder){
+		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
 				return createDraft(null);
 			}
 			else {
 				return createDraft("Cannot create order");
+			}
+		}).catch(function(err){
+			if(err){
+				console.log(err);
+				errorData = err;
+				return createDraft("Cannot create draft order");
 			}
 		});
 

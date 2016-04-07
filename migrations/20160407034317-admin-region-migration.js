@@ -9,8 +9,14 @@ module.exports = {
       Example:
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
-    queryInterface.addColumn('orders', 'nid', {
-      type: Sequelize.STRING
+    queryInterface.addColumn('admins', 'region_id', {
+      type: Sequelize.INTEGER
+    }).then(function(){
+
+      queryInterface.sequelize.query(
+         " ALTER TABLE `admins` ADD CONSTRAINT `admin_main_region_id` FOREIGN KEY (`region_id`) REFERENCES `regions` ( `id` ) ON DELETE SET NULL ON UPDATE CASCADE; "
+      );
+
     });
   },
 
@@ -22,6 +28,8 @@ module.exports = {
       Example:
       return queryInterface.dropTable('users');
     */
-    queryInterface.removeColumn("orders" , "nid");
+    queryInterface.removeColumn('admins', 'region_id').then(function(){
+      queryInterface.removeColumn("admins" , "region_id");
+    });
   }
 };

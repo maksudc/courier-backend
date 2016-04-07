@@ -20,6 +20,9 @@ module.exports = function(sequelize , DataTypes){
 
 		classMethods: {
 			associate: function(models){
+				admin.belongsTo(models.regionalBranch , { foreignKey: 'regional_branch_id' });
+				admin.belongsTo(models.subBranch , { foreignKey: 'sub_branch_id' });
+				admin.belongsTo(models.region , { foreignKey: 'region_id' });
 			}
 		}
 	});

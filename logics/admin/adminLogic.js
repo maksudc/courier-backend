@@ -8,16 +8,17 @@ var async = require('async');
 var checkLogin = function(email, password, next){
     adminModel.find({
         where: {email: email, password: password}}
-    ).catch(function(err){
-        if(err){
-            next("Error while reading admin");
-        }
-    }).then(function(admin){
+    ).then(function(admin){
         if(admin){
             next(null, admin);
         }
         else{
             next("email or password missmtched!");
+        }
+    }).catch(function(err){
+        if(err){
+            console.log(err);
+            next("Error while reading admin");
         }
     });
 }
@@ -28,16 +29,16 @@ var findAdmin = function(email, next){
 
     adminModel.find({
         where: {email: email}}
-    ).catch(function(err){
-        if(err){
-            next("Error while reading admin");
-        }
-    }).then(function(admin){
+    ).then(function(admin){
         if(admin){
             next(null, admin);
         }
         else{
             next("No admin found", false);
+        }
+    }).catch(function(err){
+        if(err){
+            next("Error while reading admin");
         }
     });
 
@@ -75,16 +76,16 @@ var createAdmin = function(data, next){
             mobile: data.phoneNO,
             national_id: data.nationalID,
             role: data.role
-        }).catch(function(err){
-
-            console.log(err);
-            createThisAdmin(err.errors[0]["message"]);
-
         }).then(function(admin){
             if(admin){
                 next(null, admin);
                 createThisAdmin(null);
             }
+        }).catch(function(err){
+
+            console.log(err);
+            createThisAdmin(err.errors[0]["message"]);
+
         });
 
     }], 
