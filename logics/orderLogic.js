@@ -57,7 +57,7 @@ var findAllOrders = function(next){
 				}
 
 				_.forEach(branchList.data, function(singleBranch){
-					branchLabels[singleBranch.dataValues.id] = singleBranch.dataValues.label;
+					branchLabels[singleBranch.dataValues.id] = singleBranch.dataValues;
 				});
 
 				_.forEach(orderList, function(singleOrder){
