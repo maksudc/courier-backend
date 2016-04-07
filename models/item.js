@@ -28,6 +28,10 @@ module.exports = function(sequelize , DataTypes){
 		entry_branch: {type: DataTypes.INTEGER}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
 		exit_branch: {type: DataTypes.INTEGER}, //where the order is right now , In 2nd release, branch id
+<<<<<<< HEAD
+=======
+
+>>>>>>> Fix: Merge conflict removed from item model
 		exit_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')},
 		current_hub: {type: DataTypes.STRING}, //where the product is to be delivered, In 2nd release, branch id
 		next_hub: {type: DataTypes.STRING} //Next destination of this product, In 2nd release, branch id
