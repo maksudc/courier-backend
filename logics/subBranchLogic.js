@@ -22,6 +22,8 @@ var findOneById = function(id, next){
 	});
 };
 
+exports.findOneById = findOneById;
+
 var findByIdList = function(idList, next){
 
 	if(!idList){
