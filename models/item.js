@@ -17,18 +17,14 @@ var Promise = require("bluebird");
 module.exports = function(sequelize , DataTypes){
 
 	var item = sequelize.define('item', {
-		
+
 		uuid: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV1},
 		amount: {type: DataTypes.FLOAT},
 		price: {type: DataTypes.FLOAT, allowNull: false},
 		product_name: {type: DataTypes.STRING},
-		length: {type: DataTypes.INTEGER},
-		width: {type: DataTypes.INTEGER},
-		height: {type: DataTypes.INTEGER},
-		weight: {type: DataTypes.FLOAT},
-		entry_branch: {type: DataTypes.INTEGER}, //where the order is received, In 2nd release, branch id
+		entry_branch: {type: DataTypes.STRING}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
-		exit_branch: {type: DataTypes.INTEGER}, //where the order is right now , In 2nd release, branch id
+		exit_branch: {type: DataTypes.STRING}, //where the order is right now , In 2nd release, branch id
 		exit_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')},
 		current_hub: {type: DataTypes.STRING}, //where the product is to be delivered, In 2nd release, branch id
 		next_hub: {type: DataTypes.STRING} //Next destination of this product, In 2nd release, branch id
@@ -37,7 +33,6 @@ module.exports = function(sequelize , DataTypes){
 
 		classMethods: {
 			associate: function(models){
-<<<<<<< HEAD
 				item.belongsTo(models.products , { foreignKey: "productUuid" });
 				item.belongsTo(models.order , { foreignKey: "orderUuid" , as:"order" });
 				item.hasOne(models.genericTracker , {
@@ -46,15 +41,8 @@ module.exports = function(sequelize , DataTypes){
 					scope:{ trackableType: "orderItem" },
 					as: "tracker"
 				});
-=======
-
-				item.belongsTo(models.order , { foreignKey: "orderUuid" });
-				item.hasOne(models.genericTracker , { foreignKey: "trackableId" , constraints: false , scope:{ trackableType: "orderItem" } });
-			
->>>>>>> Feature: Item model changed
 			}
 		}
-		
 	});
 
 	item.hook("afterCreate" , function(orderItem , options){
