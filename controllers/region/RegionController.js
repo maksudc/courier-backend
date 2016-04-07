@@ -13,7 +13,7 @@ RegionController.prototype.index = function(req , res){
 RegionController.prototype.getAll = function(req , res){
 
 	regionLogic.findAll(function(regionList){
-		res.send({ "status": "Get all the regions", data: regionList});
+		res.send({ "status": "success", data: regionList});
 	});
     
 };
