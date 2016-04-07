@@ -36,7 +36,7 @@ module.exports = function(sequelize , DataTypes){
 
 		classMethods: {
 			associate: function(models){
-				item.belongsTo(models.products , { foreignKey: "productUuid" });
+				//item.belongsTo(models.products , { foreignKey: "productUuid" });
 				item.belongsTo(models.order , { foreignKey: "orderUuid" , as:"order" });
 				item.hasOne(models.genericTracker , {
 					foreignKey: "trackableId" ,
