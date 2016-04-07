@@ -17,20 +17,10 @@ var Promise = require("bluebird");
 module.exports = function(sequelize , DataTypes){
 
 	var item = sequelize.define('item', {
-<<<<<<< HEAD
-
-=======
-		
->>>>>>> 5e1924d6488f4a47b58c9637ef4ad1d719f5b051
 		uuid: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV1},
 		amount: {type: DataTypes.FLOAT},
 		price: {type: DataTypes.FLOAT, allowNull: false},
 		product_name: {type: DataTypes.STRING},
-<<<<<<< HEAD
-		entry_branch: {type: DataTypes.STRING}, //where the order is received, In 2nd release, branch id
-		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
-		exit_branch: {type: DataTypes.STRING}, //where the order is right now , In 2nd release, branch id
-=======
 		length: {type: DataTypes.INTEGER},
 		width: {type: DataTypes.INTEGER},
 		height: {type: DataTypes.INTEGER},
@@ -38,7 +28,6 @@ module.exports = function(sequelize , DataTypes){
 		entry_branch: {type: DataTypes.INTEGER}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
 		exit_branch: {type: DataTypes.INTEGER}, //where the order is right now , In 2nd release, branch id
->>>>>>> 5e1924d6488f4a47b58c9637ef4ad1d719f5b051
 		exit_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')},
 		current_hub: {type: DataTypes.STRING}, //where the product is to be delivered, In 2nd release, branch id
 		next_hub: {type: DataTypes.STRING} //Next destination of this product, In 2nd release, branch id
@@ -47,7 +36,6 @@ module.exports = function(sequelize , DataTypes){
 
 		classMethods: {
 			associate: function(models){
-<<<<<<< HEAD
 				item.belongsTo(models.products , { foreignKey: "productUuid" });
 				item.belongsTo(models.order , { foreignKey: "orderUuid" , as:"order" });
 				item.hasOne(models.genericTracker , {
@@ -56,15 +44,9 @@ module.exports = function(sequelize , DataTypes){
 					scope:{ trackableType: "orderItem" },
 					as: "tracker"
 				});
-=======
-
-				item.belongsTo(models.order , { foreignKey: "orderUuid" });
-				item.hasOne(models.genericTracker , { foreignKey: "trackableId" , constraints: false , scope:{ trackableType: "orderItem" } });
-			
->>>>>>> 5e1924d6488f4a47b58c9637ef4ad1d719f5b051
 			}
 		}
-		
+
 	});
 
 	item.hook("afterCreate" , function(orderItem , options){
@@ -80,6 +62,23 @@ module.exports = function(sequelize , DataTypes){
 
 				trackerData.trackableType = "orderItem";
 				trackerData.trackableId = orderItem.uuid;
+
+				if(orderItem.entry_branch_type == "regional-branch"){
+					trackerData.sourceBranchType = "regional";
+				}else{
+					trackerData.sourceBranchType = "sub";
+				}
+				trackerData.sourceBranchId = parseInt(orderItem.entry_branch);
+
+				if(orderItem.exit_branch_type == "regional-branch"){
+					trackerData.destinationBranchType = "regional";
+				}else{
+					trackerData.destinationBranchType = "sub";
+				}
+				trackerData.destinationBranchId = parseInt(orderItem.exit_branch);
+
+				trackerData.currentBranchType = trackerData.sourceBranchType;
+				trackerData.currentBranchId = trackerData.sourceBranchId;
 
 				return sequelize.models.genericTracker.create(trackerData);
 
@@ -98,10 +97,14 @@ module.exports = function(sequelize , DataTypes){
 		.then(function(results){
 
 			console.log("Found result: "+ results);
-			var trackerData = {};
 
 			var orderInstance = results[0];
 			var trackerItem = results[1];
+
+			var p3 = orderInstance.getTracker();
+			var p4 = Promise.resolve(trackerItem);
+
+			/*var trackerData = {};
 
 			if(orderInstance.entry_branch_type == "regional-branch"){
 				trackerData.sourceBranchType = "regional";
@@ -120,11 +123,11 @@ module.exports = function(sequelize , DataTypes){
 			trackerData.currentBranchType = trackerData.sourceBranchType;
 			trackerData.currentBranchId = trackerData.sourceBranchId;
 
-			var p3 = orderInstance.getTracker();
-			var p4 = Promise.resolve(trackerItem);
-			var p5 = trackerItem.update(trackerData);
+			var p5 = trackerItem.update(trackerData);*/
 
-			return Promise.all([p3 , p4 , p5]);
+			//return Promise.all([p3 , p4 , p5]);
+			return Promise.all([p3 , p4]);
+
 		})
 		.then(function(results){
 
@@ -132,7 +135,7 @@ module.exports = function(sequelize , DataTypes){
 
 			var parentTracker = results[0];
 			var trackerItem = results[1];
-			var updateResult = results[2];
+			//var updateResult = results[2];
 
 			if(parentTracker){
 				var p6 = trackerItem.update( { parentTrackerId: parentTracker.uuid } );
