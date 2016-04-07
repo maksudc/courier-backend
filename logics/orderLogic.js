@@ -374,22 +374,24 @@ var createByOperator = function(postData, next){
 	var createdProducts = {}, itemList, order, errorData, adminData;
 
 	async.series([
-	function(prepareAdmin){
+	function(setOperatorCredentials){
 
 		if(postData["admin"]){
 			adminLogic.findAdmin(postData["admin"], function(err, admin){
 				if(err){
-					prepareAdmin("error while reading admin");		
+					setOperatorCredentials("error while reading admin");		
 				}
 				else if(admin){
+					console.log(admin);
 					postData["receiver_operator"] = admin.email;
+					//setOperatorCredentials("testing is going on");
 				}
 			});
-			prepareAdmin(null);
+			setOperatorCredentials(null);
 		}
 		else {
 			//when http-authentication is set, we will read data from req.user
-			prepareAdmin(null);
+			setOperatorCredentials(null);
 		}
 
 	},
