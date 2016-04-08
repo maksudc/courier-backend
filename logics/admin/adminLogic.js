@@ -49,8 +49,6 @@ exports.findAdmin = findAdmin;
 
 var createAdmin = function(data, next){
 
-    console.log("In create admin");
-    console.log(data.email);
     async.series([function(emailCheck){
         findAdmin(data.email, function(err, admin){
             
@@ -67,16 +65,22 @@ var createAdmin = function(data, next){
 
     }, function(createThisAdmin){
 
-        adminModel.create({
+        var draftAdmin = {
             email: data.email,
             full_name: data.firstName + " " + data.lastName,
-            username: data.username,
             password: data.password,
-            address: data.address,
             mobile: data.phoneNO,
-            national_id: data.nationalID,
-            role: data.role
-        }).then(function(admin){
+            role: data.role,
+            region_id: parseInt(data.region),
+            regional_branch_id: parseInt(data.regionalBranch)
+        };
+
+        if(data.address) draftAdmin["address"] = data.address;
+        if(data.username) draftAdmin["username"] = data.username;
+        if(data.nationalID) draftAdmin["national_id"] = data.nationalID;
+        if(data.subBranch && data.subBranch != '' && !isNaN(parseInt(data.subBranch))) draftAdmin["sub_branch_id"] = parseInt(data.subBranch);
+
+        adminModel.create(draftAdmin).then(function(admin){
             if(admin){
                 next(null, admin);
                 createThisAdmin(null);
