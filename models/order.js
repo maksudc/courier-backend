@@ -107,6 +107,9 @@ module.exports = function(sequelize, DataTypes) {
 				trackerData.currentBranchType = trackerData.sourceBranchType;
 				trackerData.currentBranchId = trackerData.sourceBranchId;
 
+				trackerData.previousBranchType = trackerData.sourceBranchType;
+				trackerData.previousBranchId = trackerData.sourceBranchId;
+
 				trackerData.trackableType = "order";
 				trackerData.trackableId = order.uuid;
 
