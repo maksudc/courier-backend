@@ -16,6 +16,7 @@ item.sync();
 module.exports = order;
 */
 var _ = require("lodash");
+var Promise = require("bluebird");
 
 module.exports = function(sequelize, DataTypes) {
 
@@ -63,9 +64,9 @@ module.exports = function(sequelize, DataTypes) {
 			associate: function(models){
 
 				//product.hasOne(models.item, { foreignKey: 'productUuid' });
-				order.hasOne(models.item, { foreignKey: 'orderUuid'});
+				order.hasMany(models.item, { foreignKey: 'orderUuid' , as:"items"});
 				//ShipmentModel.hasMany(order , {foreignKey: 'shipmentUuid'});
-				order.belongsTo(models.shipment , { foreignKey: 'shipmentUuid' });
+				order.belongsTo(models.shipment , { foreignKey: 'shipmentUuid' , as:"shipment" });
 
 				order.hasOne(models.genericTracker , {
 					foreignKey: "trackableId",
@@ -120,6 +121,54 @@ module.exports = function(sequelize, DataTypes) {
 				});
 			}
 		});
+	});
+
+	order.hook("afterUpdate" , function(orderInstance, options, next){
+
+		//console.log("instances : " + JSON.stringify(orderInstances));
+			console.log(" on order after update hook for: "+ orderInstance.uuid);
+			//console.log(orderInstance);
+			//console.log(options);
+
+			console.log(" Whether shipment changed ? " + orderInstance.changed('shipmentUuid'));
+
+			if(orderInstance.changed("shipmentUuid")){
+				// changed the shipment , so trigger the change in tracker parent
+
+				return orderInstance
+				.getShipment()
+				.then(function(shipmentInstance){
+
+					var p1 = shipmentInstance.getTracker();
+					var p2 = orderInstance.getTracker();
+
+					return sequelize.Promise.all([p1 , p2]);
+				})
+				.then(function(results){
+
+					//console.log(" Trackers:  "+ JSON.stringify(results));
+					var parentTrackerInstance = results[0];
+					var childTrackerInstance = results[1];
+
+					if(parentTrackerInstance){
+						if(childTrackerInstance){
+
+							childTrackerInstance.parentTrackerId = parentTrackerInstance.uuid;
+							return childTrackerInstance.save();
+						}
+					}
+
+					return Promise.resolve(0);
+				})
+				.then(function(updateResult){
+					//console.log("Updated : " + updateResult);
+					return next();
+				});
+
+			}else{
+
+				return next();
+			}
 	});
 
 	order.hook("beforeDestroy" , function(orderItem , options){
