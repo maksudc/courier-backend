@@ -8,6 +8,7 @@ exports.setup = function(passport){
     passport.serializeUser(function(user, done){
       
         //insert this user object to redis and then replace the user.email with redis id
+        console.log("serializeUser");
         if(user.type == 'admin'){
             done(null, {email: user.email, type: 'admin'});
         }
@@ -18,6 +19,7 @@ exports.setup = function(passport){
 
     passport.deserializeUser(function(user, done){
 
+        console.log("deserializeUser");
         if(user.type == 'admin') {
             adminLogic.findAdmin(user.email, function(err, admin){
                 if(err) {
@@ -37,11 +39,16 @@ exports.setup = function(passport){
         
             });
         }
+        else done(null, false);
     });
 
 
     passport.use(new passportHTTP.BasicStrategy(function(email, password, done){
        //if the requested email is not a valid email address
+
+       console.log(email);
+       console.log(password);
+
        if(email.length == 0)
        {
            req.flash("error" , "You have to give a valid email address");
@@ -56,12 +63,26 @@ exports.setup = function(passport){
 
        adminLogic.checkLogin(email, password, function(err, admin){
            if(err) {
-               done(err);
+              done(null);
+              //Here, user will be checked
            }
            else if(admin){
-               done(null, {email: admin.email, type: 'admin'});
+              done(null, {
+                email: admin.dataValues.email,
+                role: admin.dataValues.role,
+                username: admin.dataValues.username,
+                address: admin.dataValues.address,
+                national_id: admin.dataValues.national_id,
+                region_id: admin.dataValues.region_id,
+                regional_branch_id: admin.dataValues.regional_branch_id,
+                sub_branch_id: admin.dataValues.sub_branch_id,
+                admin: true
+              });
            }
-           else done("Username and password did not match", false);
+           else {
+              console.log("Did not match");
+              done(null, false);
+          }
        });
     }));
 }
