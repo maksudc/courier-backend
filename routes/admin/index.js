@@ -4,10 +4,10 @@ var config = require('./../../config');
 var adminLogic = require('./../../logics/admin/adminLogic');
 var upload = require('multer')();
 
-// var passport = require('passport');
-// var middleware = require(process.cwd() + '/middleware');
-// router.use(passport.authenticate('basic', {session: false}));
-// router.use(middleware.checkPermission);
+var passport = require('passport');
+var middleware = require(process.cwd() + '/middleware');
+router.use(passport.authenticate('basic', {session: false}));
+router.use(middleware.checkPermission);
 
 
 router.get('/', function(req, res){
@@ -20,6 +20,8 @@ router.get('/types', function(req, res){
 
 
 router.post('/create', function(req, res){
+
+	console.log("Hitting here!!!");
 	
 	var adminData = req.body;
 	console.log(adminData);
@@ -33,9 +35,11 @@ router.post('/create', function(req, res){
 
 	adminLogic.createAdmin(adminData, function(err, admin){
 		if(err){
+			console.log(err);
 			res.send({"err": {"message": JSON.stringify(err)}});
 		}
 		else if(admin){
+			console.log("Admin created");
 			res.send({"data": JSON.stringify(admin)});
 		}
 	});
@@ -43,9 +47,6 @@ router.post('/create', function(req, res){
 
 
 router.post('/updateSelf', function(req, res){
-
-	// console.log(req.user);
-	// return;
 	
 	adminLogic.updateSelf(req.body, function(err, admin){
 		if(err) res.send({"status": "error"});
