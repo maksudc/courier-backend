@@ -9,19 +9,20 @@ module.exports = {
       Example:
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
-    return queryInterface.addColumn("orders" , "shipmentUuid" , {
+    queryInterface.sequelize.query(
+       " ALTER TABLE `orders` ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`shipmentUuid`) REFERENCES `shipments` ( `uuid` ) ON DELETE SET NULL ON UPDATE CASCADE; "
+    )
+    .then(function(){
 
-      type: Sequelize.UUID,
-      allowNull: true,
-      references:{
-        model: "shipments",
-        key: "uuid"
-      }
-    }).then(function(){
+      queryInterface.addColumn("orders" , "shipmentUuid" , {
 
-      queryInterface.sequelize.query(
-         " ALTER TABLE `orders` ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`shipmentUuid`) REFERENCES `shipments` ( `uuid` ) ON DELETE SET NULL ON UPDATE CASCADE; "
-      );
+        type: Sequelize.UUID,
+        allowNull: true,
+        references:{
+          model: "shipments",
+          key: "uuid"
+        }
+      });
 
     });
   },
