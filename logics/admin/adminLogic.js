@@ -38,6 +38,7 @@ var findAdmin = function(email, next){
         }
     }).catch(function(err){
         if(err){
+            console.log(err);
             next("Error while reading admin");
         }
     });
@@ -100,3 +101,49 @@ var createAdmin = function(data, next){
 };
 
 exports.createAdmin = createAdmin;
+
+var updateSelf = function(adminData, next){
+
+    async.series([function(emailCheck){
+        findAdmin(adminData.email, function(err, admin){
+            
+            if(err || !admin){
+                // console.log("No admin by this email found. Proceeding to create admin section");
+                emailCheck("Admin doesnot exists");
+            }
+            else {
+                if(adminData.fullName && adminData.fullName != '')
+                    admin.full_name = adminData.fullName;
+                if(adminData.nationalID && adminData.nationalID != '')
+                    admin.national_id = adminData.nationalID;
+                if(adminData.username && adminData.username != '')
+                    admin.username = adminData.username;
+                if(adminData.phoneNO && adminData.phoneNO != '')
+                    admin.mobile = adminData.phoneNO;
+                if(adminData.address && adminData.address != '')
+                    admin.address = adminData.address;
+                if(adminData.password && adminData.password != '')
+                    admin.password = adminData.password;
+
+                admin.save().then(function(admin){
+                    next(null, admin);    
+                    emailCheck(null);
+                }).catch(function(err){
+                    emailCheck("Error while saving");
+                });
+                
+                
+            }
+        });
+
+    }], 
+    function(err){
+
+        if(err) next(err);
+        
+    });
+
+
+};
+
+exports.updateSelf = updateSelf;
