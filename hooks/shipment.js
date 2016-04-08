@@ -3,6 +3,8 @@ var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 
 var ShipmentModel = sequelize.models.shipment;
+var genericTracker = sequelize.models.genericTracker;
+
 var RouteLogic = require("../logics/branchRouteLogic");
 
 ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
@@ -56,6 +58,31 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
             updatedInstance.nextBranchId = firstRoute.id;
 
             instance.updatedInstance = updatedInstance;
+          })
+          .then(function(){
+
+            // Get the tracker
+            return instance.getTracker();
+          }).then(function(trackerItem){
+
+            if(trackerItem){
+
+              // Update the tracker for consistency
+              trackerItem.currentBranchType = updatedInstance.currentBranchType;
+              trackerItem.currentBranchId = updatedInstance.currentBranchId;
+
+              trackerItem.previousBranchType = updatedInstance.previousBranchType;
+              trackerItem.previousBranchId = updatedInstance.previousBranchId;
+
+              trackerItem.nextBranchType = updatedInstance.nextBranchType;
+              trackerItem.nextBranchId = updatedInstance.nextBranchId;
+
+              return trackerItem.save();
+            }
+
+            return Promise.resolve(0);
+          })
+          .then(function(updatedResult){
 
             return next();
           });
@@ -69,6 +96,8 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           //instance.previousBranchType = instance.currentBranchType;
           //instance.previousBranchId = instance.currentBranchId;
 
+          console.log("Inside processor");
+
           updatedInstance.currentBranchType = snapshotInstance.nextBranchType;
           updatedInstance.currentBranchId = snapshotInstance.nextBranchId;
 
@@ -79,10 +108,37 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           }else{
             // direct sub branch shipment unlikely
           }
-        }
 
-        instance.updatedInstance = updatedInstance;
-        return next();
+          instance.updatedInstance = updatedInstance;
+
+          return genericTracker
+          .findOne({ where: { trackableType: "shipment" , trackableId:instance.uuid } })
+          .then(function(trackerItem){
+
+            console.log("Got the tracker Item: "+ trackerItem.uuid);
+
+            if(trackerItem){
+
+              trackerItem.currentBranchType = updatedInstance.currentBranchType;
+              trackerItem.currentBranchId = updatedInstance.currentBranchId;
+
+              trackerItem.previousBranchType = updatedInstance.previousBranchType;
+              trackerItem.previousBranchId = updatedInstance.previousBranchId;
+
+              trackerItem.nextBranchType = updatedInstance.nextBranchType;
+              trackerItem.nextBranchId = updatedInstance.nextBranchId;
+
+              return trackerItem.save();
+            }
+            return sequelize.Promise.resolve(0);
+          })
+          .then(function(updatedResult){
+
+            console.log("Returning to saving shipment");
+
+            return next();
+          });
+        }
       }
 
       else if(snapshotInstance.status == "received"){
@@ -117,6 +173,30 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
             }
 
             instance.updatedInstance = updatedInstance;
+          })
+          .then(function(){
+
+            return instance.getTracker();
+          })
+          .then(function(trackerItem){
+
+            if(trackerItem){
+              trackerItem.currentBranchType = updatedInstance.currentBranchType;
+              trackerItem.currentBranchId = updatedInstance.currentBranchId;
+
+              trackerItem.previousBranchType = updatedInstance.previousBranchType;
+              trackerItem.previousBranchId = updatedInstance.previousBranchId;
+
+              trackerItem.nextBranchType = updatedInstance.nextBranchType;
+              trackerItem.nextBranchId = updatedInstance.nextBranchId;
+
+              return trackerItem.save();
+            }
+
+            return Promise.resolve(0);
+          })
+          .then(function(updatedResult){
+
             return next();
           });
         }
