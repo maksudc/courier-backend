@@ -19,11 +19,21 @@ module.exports = function(sequelize, DataTypes) {
   		defaultValue: 'draft',
   		allowNull: false
   	},
+
     sourceBranchType: { type: DataTypes.ENUM('regional' , 'sub') },
     sourceBranchId:{ type: DataTypes.INTEGER },
 
     destinationBranchType:{ type: DataTypes.ENUM('regional', 'sub') },
     destinationBranchId: { type: DataTypes.INTEGER },
+
+    currentBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    currentBranchId: { type: DataTypes.INTEGER },
+
+    previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    previousBranchId: { type: DataTypes.INTEGER },
+
+    nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    nextBranchId: { type: DataTypes.INTEGER },
 
     shipmentType:{ type: DataTypes.ENUM("local" , "national" , "international") , defaultValue:"national" }
 
