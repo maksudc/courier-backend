@@ -4,8 +4,10 @@ var config = require('./../../config');
 var adminLogic = require('./../../logics/admin/adminLogic');
 var upload = require('multer')();
 
-/* Order route definitions */
-// router.use('/login', require('./login'));
+// var passport = require('passport');
+// var middleware = require(process.cwd() + '/middleware');
+// router.use(passport.authenticate('basic', {session: false}));
+// router.use(middleware.checkPermission);
 
 
 router.get('/', function(req, res){
@@ -41,6 +43,9 @@ router.post('/create', function(req, res){
 
 
 router.post('/updateSelf', function(req, res){
+
+	// console.log(req.user);
+	// return;
 	
 	adminLogic.updateSelf(req.body, function(err, admin){
 		if(err) res.send({"status": "error"});

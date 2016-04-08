@@ -6,6 +6,11 @@ var upload = multer();
 var passport = require('passport');
 var bodyParser = require('body-parser');
 
+var middleware = require('./../middleware');
+router.use(passport.authenticate('basic', {session: false}));
+router.use(middleware.checkPermission);
+
+
 router.get('/', function(req, res){
 	res.send({"status": "success", "message": "In permission route"});
 });
@@ -39,6 +44,12 @@ router.post('/delete', upload.array(), function(req, res){
 		if(err) res.send({"status":"error", message: err});
 		else res.send({"status":"success", data: data});
 	});
+});
+
+router.get('/test', function(req, res){
+
+	res.send({"status": "test successfull!!!"});
+	
 });
 
 module.exports = router;

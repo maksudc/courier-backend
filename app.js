@@ -43,7 +43,7 @@ app.use(cookieParser());
 //     // cookie: { maxAge: 60*60000 }
 // }));
 
-//app.use(passport.initialize());
+app.use(passport.initialize());
 //app.use(passport.session());
 
 //passport initialization

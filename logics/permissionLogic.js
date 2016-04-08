@@ -129,3 +129,17 @@ var findByURL = function(url, next){
 };
 
 exports.findByURL = findByURL;
+
+var checkPermission = function(url, role, next){
+	findByURL(url, function(err, permission){
+		if(err) next(err);
+		else if(permission){
+			next(null, permission[role]);
+		}
+		else next(null, true);
+		/*here, true is sending because it is assumed that api endpoint 
+		which is not using permission has global permission to everyone*/
+	});
+};
+
+exports.checkPermission = checkPermission;

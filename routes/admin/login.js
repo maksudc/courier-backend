@@ -15,7 +15,7 @@ router.post('/',
 
 
 
-router.get('/success', passport.authenticate('basic'), function(req, res){
+router.get('/success', passport.authenticate('basic', {session: false}), function(req, res){
   console.log(req.isAuthenticated());
 	res.send("Log in successfull!!!");
 });
