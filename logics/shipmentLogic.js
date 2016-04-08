@@ -25,6 +25,30 @@ var createShipmentWithOrders = function(postData , next){
   if(postData.shipmentType){
     _.assignIn(shipmentBaseData , { shipmentType:postData.shipmentType });
   }
+  if(postData.sourceBranchType){
+    _.assignIn(shipmentBaseData , { sourceBranchType:postData.sourceBranchType });
+  }
+  if(postData.sourceBranchId){
+    _.assignIn(shipmentBaseData , { sourceBranchId:postData.sourceBranchId });
+  }
+  if(postData.destinationBranchType){
+    _.assignIn(shipmentBaseData , { destinationBranchType:postData.destinationBranchType });
+  }
+  if(postData.destinationBranchId){
+    _.assignIn(shipmentBaseData , { destinationBranchId:postData.destinationBranchId });
+  }
+  if(postData.currentBranchType){
+    _.assignIn(shipmentBaseData , { currentBranchType:postData.currentBranchType });
+  }else{
+    //_.assignIn(shipmentBaseData , { currentBranchType:postData.sourceBranchType });
+    shipmentBaseData.currentBranchType = shipmentBaseData.sourceBranchType;
+  }
+  if(postData.currentBranchId){
+    _.assignIn(shipmentBaseData , { currentBranchId:postData.currentBranchId });
+  }else{
+    //_.assignIn(shipmentBaseData , { currentBranchType:postData.sourceBranchId });
+    shipmentBaseData.currentBranchId = shipmentBaseData.sourceBranchId;
+  }
 
   var shipmentInstance = null;
 
@@ -322,7 +346,8 @@ var shipmentUpdate = function(shipmentId , postData , next){
   }
 
   shipment.update(postData , {
-    where: { uuid: shipmentId }
+    where: { uuid: shipmentId },
+    individualHooks: true
   })
   .then(function(result){
     next({ status:"success" , statusCode:HttpStatus.OK , data:result , message:null });

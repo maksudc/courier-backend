@@ -48,6 +48,13 @@ module.exports = function(sequelize , DataTypes){
 
       destinationBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
       destinationBranchId:{ type: DataTypes.INTEGER },
+
+      previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+      previousBranchId: { type: DataTypes.INTEGER },
+
+      nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+      nextBranchId: { type: DataTypes.INTEGER },
+
   } , {
 
     classMethods: {

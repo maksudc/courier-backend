@@ -28,7 +28,6 @@ module.exports = function(sequelize , DataTypes){
 		entry_branch: {type: DataTypes.INTEGER}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
 		exit_branch: {type: DataTypes.INTEGER}, //where the order is right now , In 2nd release, branch id
-
 		exit_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')},
 		current_hub: {type: DataTypes.STRING}, //where the product is to be delivered, In 2nd release, branch id
 		next_hub: {type: DataTypes.STRING} //Next destination of this product, In 2nd release, branch id
@@ -47,7 +46,7 @@ module.exports = function(sequelize , DataTypes){
 				});
 			}
 		}
-		
+
 	});
 
 	item.hook("afterCreate" , function(orderItem , options){
@@ -63,6 +62,26 @@ module.exports = function(sequelize , DataTypes){
 
 				trackerData.trackableType = "orderItem";
 				trackerData.trackableId = orderItem.uuid;
+
+				if(orderItem.entry_branch_type == "regional-branch"){
+					trackerData.sourceBranchType = "regional";
+				}else{
+					trackerData.sourceBranchType = "sub";
+				}
+				trackerData.sourceBranchId = parseInt(orderItem.entry_branch);
+
+				if(orderItem.exit_branch_type == "regional-branch"){
+					trackerData.destinationBranchType = "regional";
+				}else{
+					trackerData.destinationBranchType = "sub";
+				}
+				trackerData.destinationBranchId = parseInt(orderItem.exit_branch);
+
+				trackerData.currentBranchType = trackerData.sourceBranchType;
+				trackerData.currentBranchId = trackerData.sourceBranchId;
+
+				trackerData.previousBranchType = trackerData.sourceBranchType;
+				trackerData.previousBranchId = trackerData.sourceBranchId;
 
 				return sequelize.models.genericTracker.create(trackerData);
 
@@ -81,10 +100,14 @@ module.exports = function(sequelize , DataTypes){
 		.then(function(results){
 
 			console.log("Found result: "+ results);
-			var trackerData = {};
 
 			var orderInstance = results[0];
 			var trackerItem = results[1];
+
+			var p3 = orderInstance.getTracker();
+			var p4 = Promise.resolve(trackerItem);
+
+			/*var trackerData = {};
 
 			if(orderInstance.entry_branch_type == "regional-branch"){
 				trackerData.sourceBranchType = "regional";
@@ -103,11 +126,11 @@ module.exports = function(sequelize , DataTypes){
 			trackerData.currentBranchType = trackerData.sourceBranchType;
 			trackerData.currentBranchId = trackerData.sourceBranchId;
 
-			var p3 = orderInstance.getTracker();
-			var p4 = Promise.resolve(trackerItem);
-			var p5 = trackerItem.update(trackerData);
+			var p5 = trackerItem.update(trackerData);*/
 
-			return Promise.all([p3 , p4 , p5]);
+			//return Promise.all([p3 , p4 , p5]);
+			return Promise.all([p3 , p4]);
+
 		})
 		.then(function(results){
 
@@ -115,7 +138,7 @@ module.exports = function(sequelize , DataTypes){
 
 			var parentTracker = results[0];
 			var trackerItem = results[1];
-			var updateResult = results[2];
+			//var updateResult = results[2];
 
 			if(parentTracker){
 				var p6 = trackerItem.update( { parentTrackerId: parentTracker.uuid } );

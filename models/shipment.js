@@ -6,6 +6,9 @@ var trackerModel = require("./genericTrackerModel");
 ShipmentModel.sync();
 
 module.exports = ShipmentModel;*/
+var Promise = require("bluebird");
+//var RouteLogic = require("../logics/branchRouteLogic");
+
 module.exports = function(sequelize, DataTypes) {
 
   var ShipmentModel = sequelize.define("shipment" , {
@@ -16,14 +19,24 @@ module.exports = function(sequelize, DataTypes) {
     // will be applicable and replicated across all the order item inside the shipment
     status: {
   		type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
-  		defaultValue: 'draft',
+  		defaultValue: 'ready',
   		allowNull: false
   	},
+
     sourceBranchType: { type: DataTypes.ENUM('regional' , 'sub') },
     sourceBranchId:{ type: DataTypes.INTEGER },
 
     destinationBranchType:{ type: DataTypes.ENUM('regional', 'sub') },
     destinationBranchId: { type: DataTypes.INTEGER },
+
+    currentBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    currentBranchId: { type: DataTypes.INTEGER },
+
+    previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    previousBranchId: { type: DataTypes.INTEGER },
+
+    nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    nextBranchId: { type: DataTypes.INTEGER },
 
     shipmentType:{ type: DataTypes.ENUM("local" , "national" , "international") , defaultValue:"national" }
 
@@ -92,6 +105,9 @@ module.exports = function(sequelize, DataTypes) {
         trackerData.currentBranchType = trackerData.sourceBranchType;
         trackerData.currentBranchId = trackerData.sourceBranchId;
 
+        trackerData.previousBranchType = trackerData.sourceBranchType;
+        trackerData.previousBranchId = trackerData.sourceBranchId;
+
         sequelize.models.genericTracker
         .create(trackerData)
         .then(function(trackerItem){
@@ -105,7 +121,8 @@ module.exports = function(sequelize, DataTypes) {
 
   ShipmentModel.hook("beforeDestroy" , function(shipmentItem , options){
 
-		shipmentItem
+    return
+    shipmentItem
 		.getTracker()
 		.then(function(trackerItem){
 			if(trackerItem){

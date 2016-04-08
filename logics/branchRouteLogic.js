@@ -8,7 +8,7 @@ var _ = require("lodash");
 
 var Promise = require("bluebird");
 
-var getFullRouteBetween = function(sourceSubBranchId , destinationSubBranchId , next){
+var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSubBranchId , next){
 
     /*Promise.map([ sourceSubBranchId , destinationSubBranchId ] , function(currentSubBranchId){
 
@@ -99,7 +99,7 @@ var getFullRouteBetween = function(sourceSubBranchId , destinationSubBranchId , 
                 console.log(midNodesExpanded);
 
                 next(midNodesExpanded);
-            })
+            });
         })
         .catch(function(err){
 
@@ -121,6 +121,110 @@ var getFullRouteBetween = function(sourceSubBranchId , destinationSubBranchId , 
             }
         })
     })*/
+};
+
+var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBranchType , destinationBranchId ,next){
+
+  /*if(sourceBranchType == 'sub' && destinationBranchType=='sub'){
+    getFullRouteBetween(sourceBranchId , destinationBranchId , next);
+    return;
+  }*/
+  var p1 = Promise.resolve(null);
+  var p2 = Promise.resolve(null);
+
+  if(sourceBranchType == "sub"){
+    p1 = SubBranchModel.findOne({ where: { id: sourceBranchId } });
+  }
+  if(destinationBranchType == "sub"){
+    p2 = SubBranchModel.findOne({ where: { id: destinationBranchId } });
+  }
+
+  var sourceRegionalBranchId = null;
+  var destinationRegionalBranchId = null;
+
+  return Promise
+  .all([p1 , p2])
+  .then(function(results){
+
+    var sourceSubBranchItem = null;
+    var destinationSubBranchItem = null;
+
+    //console.log("partial queries results are: "+ JSON.stringify(results));
+
+    if(results && results.constructor == Array ){
+      if(results.length > 0 && results[0] !== null && results[0].regionalBranchId){
+          sourceSubBranchItem = results[0];
+      }
+      if(results.length > 1 && results[1] !== null && results[0].regionalBranchId){
+          destinationSubBranchItem = results[1];
+      }
+    }
+
+    if(sourceSubBranchItem){
+      sourceRegionalBranchId = sourceSubBranchItem.regonalBranchId;
+    }else{
+      sourceRegionalBranchId = sourceBranchId;
+    }
+
+    if(destinationSubBranchItem){
+      destinationRegionalBranchId = destinationSubBranchItem.regionalBranchId;
+    }else{
+      destinationRegionalBranchId = destinationBranchId;
+    }
+
+    console.log("Source Regional Branch Id: " + sourceRegionalBranchId);
+    console.log("Destination Regional Branch Id: " + destinationRegionalBranchId);
+
+    return RouteModel.findOne({
+        where: {
+
+            sourceId: sourceRegionalBranchId,
+            destinationId: destinationRegionalBranchId,
+        }
+    });
+  })
+  .then(function(routeItem){
+
+      console.log(" Found Route Item ");
+      console.log(routeItem.id);
+
+      if(routeItem){
+
+          var midNodes = [];
+
+          //console.log(" MidNodes ");
+          if(routeItem.midNodes){
+              midNodes = JSON.parse(routeItem.midNodes);
+          }
+          console.log(midNodes);
+
+          midNodes = [sourceRegionalBranchId].concat(midNodes);
+          midNodes.push(destinationRegionalBranchId);
+
+          return midNodes;
+      }
+
+      return Promise.reject("No route defined");
+  })
+  .map(function(midNodeId){
+
+      console.log("Working on a single Midnode");
+      console.log(midNodeId);
+
+      return RegionalBranchModel.findOne({ where: { id: midNodeId } });
+  })
+  .then(function(midNodesExpanded){
+
+      console.log(" Almost complete  ");
+      //console.log(midNodesExpanded);
+      console.log("Expanded mid nodes number: " + midNodesExpanded.length);
+
+      //next(midNodesExpanded);
+      return midNodesExpanded;
+  })
+  .catch(function(err){
+      return Promise.reject(JSON.stringify(err));
+  });
 };
 
 var newRoute = function(postData , next){
@@ -167,5 +271,6 @@ var newRoute = function(postData , next){
   });
 };
 
-exports.getFullRouteBetween = getFullRouteBetween;
+exports.getFullRouteBetween = getFullRouteBetweenSubBranches;
 exports.newRoute = newRoute;
+exports.getRouteBetween = getRouteBetween;

@@ -4,8 +4,8 @@ module.exports = function(sequelize , DataTypes){
 
   var trackerLog = sequelize.define("trackerLog" , {
 
-    uuid: { type: DataTypes.UUID , primaryKey:true , defaultValue:sequelize.UUIDV1 },
-    action: { type: DataTypes.ENUM( "entrance" , "exit" , "block" , "reopen" ) , allowNull:true },
+    uuid: { type: DataTypes.UUID , primaryKey: true ,  defaultValue: DataTypes.UUIDV1 },
+    action: { type: DataTypes.ENUM( "created" , "entrance" , "exit" , "reached" , "block" , "reopen" , "expired" ) , allowNull:true },
     trackerId: { type: DataTypes.UUID , allowNull:false },
     branchType: { type: DataTypes.ENUM("regional" , "sub") , allowNull:false , defaultValue:"regional" },
     branchId: { type: DataTypes.INTEGER , allowNull:true },
