@@ -367,7 +367,7 @@ function findBranch(branchType, branchId, next){
 
 };
 
-var createByOperator = function(postData, next){
+var createByOperator = function(postData, operator, next){
 
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
@@ -376,7 +376,23 @@ var createByOperator = function(postData, next){
 	async.series([
 	function(setOperatorCredentials){
 
-		if(postData["admin"]){
+		console.log("Reading admins");
+
+		if(operator) {
+			//when http-authentication is set, we will read data from req.user
+			postData["receiver_operator"] = operator.email;
+			if(operator.sub_branch_id){
+				postData["entry_branch"] = operator.sub_branch_id;
+				postData["entry_branch_type"] = 'sub-branch';
+			}
+			else{
+				postData["entry_branch"] = operator.regional_branch_id;
+				postData["entry_branch_type"] = 'regional-branch';
+			}
+
+			setOperatorCredentials(null);
+		}
+		else{
 			adminLogic.findAdmin(postData["admin"], function(err, admin){
 				if(err){
 					setOperatorCredentials("error while reading admin");		
@@ -385,14 +401,11 @@ var createByOperator = function(postData, next){
 					console.log(admin);
 					postData["receiver_operator"] = admin.email;
 					//setOperatorCredentials("testing is going on");
+					setOperatorCredentials(null);
 				}
 			});
-			setOperatorCredentials(null);
 		}
-		else {
-			//when http-authentication is set, we will read data from req.user
-			setOperatorCredentials(null);
-		}
+
 
 	},
 	function(testBranches){
@@ -403,18 +416,20 @@ var createByOperator = function(postData, next){
 		In future, exit_branch_id may come from regionalBranch or subBranch table. If anything wrong happens 
 		then, blame munna
 		*/
+		console.log("Setting branches");
 
 		subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
 			if(branch.status == "error") testBranches(branch.message);
 			else {
-				postData["exit_branch"] = branch.data.id;
+				postData["exit_branch_id"] = branch.data.id;
 				postData["exit_branch_type"] = "sub-branch";
 
 				/*setting some dummy data for entry branch type and entry branch id.
 				 This will be read from req.user*/
 
-				postData["entry_branch"] = "2";
-				postData["entry_branch_type"] = "sub-branch";
+				 //Set dummy data if no oprator working branch is defined
+				if(!postData["entry_branch"]) postData["entry_branch"] = "2";
+				if(!postData["entry_branch_type"]) postData["entry_branch_type"] = "sub-branch";
 
 				testBranches(null);
 			}

@@ -62,7 +62,6 @@ module.exports = function(sequelize, DataTypes) {
 
 		classMethods: {
 			associate: function(models){
-
 				//product.hasOne(models.item, { foreignKey: 'productUuid' });
 				order.hasMany(models.item, { foreignKey: 'orderUuid' , as:"items"});
 				//ShipmentModel.hasMany(order , {foreignKey: 'shipmentUuid'});
