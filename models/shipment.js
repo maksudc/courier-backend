@@ -6,6 +6,9 @@ var trackerModel = require("./genericTrackerModel");
 ShipmentModel.sync();
 
 module.exports = ShipmentModel;*/
+var Promise = require("bluebird");
+//var RouteLogic = require("../logics/branchRouteLogic");
+
 module.exports = function(sequelize, DataTypes) {
 
   var ShipmentModel = sequelize.define("shipment" , {
@@ -118,7 +121,8 @@ module.exports = function(sequelize, DataTypes) {
 
   ShipmentModel.hook("beforeDestroy" , function(shipmentItem , options){
 
-		shipmentItem
+    return
+    shipmentItem
 		.getTracker()
 		.then(function(trackerItem){
 			if(trackerItem){

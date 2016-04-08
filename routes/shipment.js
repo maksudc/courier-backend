@@ -43,6 +43,8 @@ router.delete("/:id$" , upload.array() , function(req , res){
 **/
 router.put("/:id" , upload.array() , function(req , res){
 
+    console.log(req.body);
+    
     shipmentLogic.shipmentUpdate(req.params.id , req.body , function(data){
       if(data.statusCode){
         res.status(data.statusCode);

@@ -322,7 +322,8 @@ var shipmentUpdate = function(shipmentId , postData , next){
   }
 
   shipment.update(postData , {
-    where: { uuid: shipmentId }
+    where: { uuid: shipmentId },
+    individualHooks: true
   })
   .then(function(result){
     next({ status:"success" , statusCode:HttpStatus.OK , data:result , message:null });

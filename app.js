@@ -13,6 +13,8 @@ var redisStore = require('connect-redis')(expressSession);
 
 var DB = require('./models/index');
 var sequelize = DB.sequelize;
+var hookedModels = require('./hooks/index');
+
 sequelize.sync();
 
 var routes = require('./routes/index');
