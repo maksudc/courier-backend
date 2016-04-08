@@ -11,11 +11,6 @@ router.get('/', function(req, res){
 	res.send("In Admin page");
 });
 
-// router.get('/logout', function(req, res){
-// 	req.logout();	
-// 	res.redirect('/');
-// });
-
 router.get('/types', function(req, res){
 	res.send({data: JSON.stringify(config.adminTypes)});
 });
@@ -29,6 +24,8 @@ router.post('/create', function(req, res){
 	else if(!adminData.username) return res.send({"err": JSON.stringify({"message": "Must have user name"})});
 	else if(!adminData.role) return res.send({"err": JSON.stringify({"message": "Must select role"})});
 	else if(!adminData.phoneNO) return res.send({"err": JSON.stringify({"message": "Must select phone number"})});
+	else if(!adminData.region) return res.send({"err": JSON.stringify({"message": "Must set region"})});
+	else if(!adminData.regionalBranch) return res.send({"err": JSON.stringify({"message": "Must set regional branch"})});
 
 	adminLogic.createAdmin(adminData, function(err, admin){
 		if(err){
