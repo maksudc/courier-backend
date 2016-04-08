@@ -9,7 +9,7 @@ var checkPermission = function(req, res, next){
 	else permissionLogic.checkPermission(req.baseUrl + req.path, req.user.role, function(err, result){
 		console.log(err);
 		console.log(result);
-		if(err || !result) return res.send(401);
+		if(err || !result) return res.sendStatus(401);
 		else next();
 	});
 };

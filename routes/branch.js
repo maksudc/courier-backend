@@ -13,6 +13,11 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
+var passport = require('passport');
+var middleware = require(process.cwd() + '/middleware');
+router.use(passport.authenticate('basic', {session: false}));
+router.use(middleware.checkPermission);
+
 router.get("/" , BranchController.index);
 
 router.post("/regional" , upload.array() , function(req , res){
