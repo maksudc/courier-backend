@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var config = require('./../../config');
 var adminLogic = require('./../../logics/admin/adminLogic');
+var upload = require('multer')();
 
 /* Order route definitions */
 // router.use('/login', require('./login'));
@@ -14,6 +15,7 @@ router.get('/', function(req, res){
 router.get('/types', function(req, res){
 	res.send({data: JSON.stringify(config.adminTypes)});
 });
+
 
 router.post('/create', function(req, res){
 	
@@ -36,6 +38,17 @@ router.post('/create', function(req, res){
 		}
 	});
 });
+
+
+router.post('/updateSelf', function(req, res){
+	
+	adminLogic.updateSelf(req.body, function(err, admin){
+		if(err) res.send({"status": "error"});
+		else res.send({"status": "success"});
+	});
+
+});
+
 
 
 module.exports = router;
