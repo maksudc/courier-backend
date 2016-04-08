@@ -19,7 +19,7 @@ module.exports = function(sequelize, DataTypes) {
     // will be applicable and replicated across all the order item inside the shipment
     status: {
   		type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
-  		defaultValue: 'draft',
+  		defaultValue: 'ready',
   		allowNull: false
   	},
 

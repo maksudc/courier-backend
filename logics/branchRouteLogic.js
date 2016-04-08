@@ -198,8 +198,8 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
           }
           console.log(midNodes);
 
-          [sourceRegionalBranchId].concat(midNodes);
-          midNodes.push([destinationRegionalBranchId]);
+          midNodes = [sourceRegionalBranchId].concat(midNodes);
+          midNodes.push(destinationRegionalBranchId);
 
           return midNodes;
       }
