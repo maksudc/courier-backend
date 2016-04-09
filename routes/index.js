@@ -35,6 +35,8 @@ router.use("/admin", require("./admin"));
 
 router.use("/permission", require("./permission"));
 
+router.use("/client", require("./client"));
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   	res.send({"status": "In home page"});

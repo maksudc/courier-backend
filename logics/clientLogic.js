@@ -16,6 +16,17 @@ function makePass()
     return text;
 }
 
+function makeVerficationCode()
+{
+    var text = "";
+    var possible = "0123456789";
+
+    for( var i=0; i < 4; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
 var findOneByMobile = function(mobile, next){
 
 	clientModel.findOne({where: {mobile: mobile}}).catch(function(err){
@@ -42,6 +53,7 @@ exports.findOneByMobile = findOneByMobile;
 var create = function(clientData, next){
 
 	clientData["password"] = makePass();
+	clientData["verification_code"] = parseInt(makeVerficationCode());
 
 	findOneByMobile(clientData.mobile, function(data){
 		if(data.status == "success") return next(data);
@@ -66,3 +78,21 @@ var create = function(clientData, next){
 };
 
 exports.create = create;
+
+
+var getAll = function(next){
+
+	clientModel.findAll().then(function(clientList){
+
+		if(clientList)next(null, clientList);
+		else next(null, false);
+
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+};
+
+exports.getAll = getAll;

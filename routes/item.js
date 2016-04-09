@@ -88,6 +88,7 @@ router.post('/receiveItem', upload.array(), function(req, res){
 	}
 
 	itemLogic.changeStatus(req.body.id, function(err, item){
+		console.log(err);
 		if(err) res.send({"status": "error", data: err});
 		else res.send({"status": "success", data: item});
 	});

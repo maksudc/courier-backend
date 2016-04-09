@@ -380,22 +380,30 @@ var changeStatus = function(id, next){
 
 		branchRouteLogic.getRouteBetween(a, item.dataValues.entry_branch, b, item.dataValues.exit_branch, null).then(function(routes){
 			route = routes;
+			conosle.log(route);
 			getRoute(null);
 		}).catch(function(err){
+			console.log(err);
 			if(err) getRoute(err);
 		});
 
 	}, function(setStatus){
 
-		if(item.dataValues.status == 'running'){
+		if(item.dataValues.status == 'running' || item.dataValues.status == "ready"){
 			console.log("Route length: " + route.length);
 			console.log(route[0].dataValues.id);
 			console.log(route[1].dataValues.id);
 
 			if(!item.dataValues.current_hub){
-				item.status = "received";
 				item.current_hub = parseInt(route[0].dataValues.id);
-				item.next_hub = parseInt(route[1].dataValues.id);
+				if(route.length == 1){
+					item.status = "reached";
+					item.next_hub = parseInt(route[0].dataValues.id);
+				}
+				else {
+					item.status = "received";
+					item.next_hub = parseInt(route[1].dataValues.id);
+				}
 			}
 			else{
 				item.current_hub = item.dataValues.next_hub;
@@ -427,7 +435,7 @@ var changeStatus = function(id, next){
 			});
 		}
 		else{
-			setStatus("Cannot rceive product that is already received");
+			setStatus("Cannot rceive item that is not running or ready");
 		}
 
 	}],
