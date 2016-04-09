@@ -96,3 +96,20 @@ var getAll = function(next){
 };
 
 exports.getAll = getAll;
+
+var findManyByMobile = function(mobile, next){
+
+	console.log("Adsasdfadsf");
+
+	clientModel.findAll({where: {mobile: {$like: mobile + '%'}}}).then(function(clientList){
+
+		if(clientList) next(null, clientList);
+		else next(null, false);
+
+	}).catch(function(err){
+		if(err) next(err);
+	});
+
+};
+
+exports.findManyByMobile = findManyByMobile;
