@@ -17,7 +17,7 @@ module.exports = function(sequelize , DataTypes){
     classMethods:{
       associate: function(models){
 
-        SubBranch.belongsTo(models.regionalBranch , { foreignKey: "regionalBranchId" });
+        SubBranch.belongsTo(models.regionalBranch , { foreignKey: "regionalBranchId" , as:"regionalBranch" });
         SubBranch.hasMany(models.genericTracker , {
           foreignKey: "currentBranchId",
           constraints: false,

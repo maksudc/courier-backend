@@ -46,7 +46,7 @@ module.exports = function(sequelize, DataTypes) {
 		payment_operator: {type: DataTypes.STRING}, //operator who took the money,In 2nd release, operator id
 		status: {
 			type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
-			defaultValue: 'draft',
+			defaultValue: 'ready',
 			allowNull: false
 		},
 		deliveryType: {
