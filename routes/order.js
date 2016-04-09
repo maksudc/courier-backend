@@ -37,6 +37,17 @@ router.get('/showAll', function(req, res){
 	});
 });
 
+router.get('/showAll/:id', function(req, res){
+
+	if(!req.params.id) res.send({status: "error", message: "Mobile number required"});
+	else {
+		var mobile = req.params.id;
+		orderLogic.findAllOrdersByMobile(mobile, function(data){
+			res.send(data);
+		});
+	}
+});
+
 router.post('/createDraft', upload.array(), function(req, res){
 	/*
 	when client creates an order. requried and accessible parameters are:
