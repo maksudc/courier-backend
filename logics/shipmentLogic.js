@@ -50,6 +50,18 @@ var createShipmentWithOrders = function(postData , next){
     shipmentBaseData.currentBranchId = shipmentBaseData.sourceBranchId;
   }
 
+  if(postData.previousBranchType){
+    _.assignIn(shipmentBaseData , { previousBranchType:postData.previousBranchType });
+  }else{
+    shipmentBaseData.previousBranchType = shipmentBaseData.sourceBranchType;
+  }
+
+  if(postData.previousBranchId){
+    _.assignIn(shipmentBaseData , { previousBranchId:postData.previousBranchId });
+  }else{
+    shipmentBaseData.previousBranchId = shipmentBaseData.sourceBranchId;
+  }
+
   var shipmentInstance = null;
 
   var orders = JSON.parse(postData.orders);
@@ -63,7 +75,6 @@ var createShipmentWithOrders = function(postData , next){
     for(I = 0 ; I< orders.length ; I++ ){
       promises.push(order.findOne({ where: { uuid: orders[I] } }));
     }
-    //shipmentInstance
 
     return Promise.all(promises);
   })
@@ -71,7 +82,7 @@ var createShipmentWithOrders = function(postData , next){
 
     promises = [];
     for(I = 0 ; I< results.length ; I++ ){
-      promises.push(shipmentInstance.addOrders(results[I]));
+      promises.push(shipmentInstance.addOrders(results[I] , { individualHooks:true }));
     }
     return Promise.all(promises);
   })

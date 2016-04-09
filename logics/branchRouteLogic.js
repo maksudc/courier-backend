@@ -231,8 +231,10 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
 
 var newRoute = function(postData , next){
 
-  sourceId = postData.sourceId;
-  destinationId = postData.destinationId;
+  var sourceId = postData.sourceId;
+  var destinationId = postData.destinationId;
+
+  console.log(postData);
 
   if(!sourceId || !destinationId || !postData.midNodes){
 
@@ -241,8 +243,18 @@ var newRoute = function(postData , next){
   }
 
   var midNodes  = JSON.parse(postData.midNodes);
+  var reverseMidNodes = JSON.parse(postData.midNodes).reverse();
 
-  RouteModel
+  var routeData = {};
+  var reverseRouteData = {};
+
+  routeData.sourceId = sourceId;
+  routeData.destinationId = destinationId;
+
+  reverseRouteData.sourceId = destinationId;
+  reverseRouteData.destinationId = sourceId;
+
+  var forwardRoutePromise = RouteModel
   .findOne({ where: { sourceId:sourceId , destinationId:destinationId } })
   .then(function(result){
     if(result){
@@ -250,27 +262,70 @@ var newRoute = function(postData , next){
     }
   })
   .then(function(result){
-    routeData = {};
-    _.assignIn(routeData , postData);
 
     if(midNodes){
 
-      nodes = [];
+      forwardtmpNodes = [];
       for(I = 0 ;I < midNodes.length ; I++){
-        nodes.push(parseInt(midNodes[I]));
+        forwardtmpNodes.push(parseInt(midNodes[I]));
       }
-      _.assignIn(routeData , { 'midNodes': JSON.stringify(nodes)  });
+      _.assignIn(routeData , { 'midNodes': JSON.stringify(forwardtmpNodes)  });
     }
-
     return RouteModel.create(routeData);
-  })
-  .then(function(result){
-    next({ status:"success" , data:result , message:null });
-  })
-  .catch(function(err){
-    console.log(err);
-    next({ status:"error" , data:null , message:err });
   });
+
+  // by default the reverse route will be true
+  // unless turned off by parameter
+  if(postData.reverse===null || postData.reverse===undefined){
+    postData.reverse = "true";
+  }
+
+  if(postData.reverse=="false" || postData.reverse ===false){
+      // Only forward way
+      forwardRoutePromise
+      .then(function(result){
+          next({ status:"success" , data:result , message:null });
+          return;
+      })
+      .catch(function(err){
+        console.log(err);
+        next({ status:"error" , data:null , message:err });
+        return;
+      });
+  }else{
+    // both forward and backward route has to be defined
+
+    var backwardRoutePromise = RouteModel
+    .findOne({ where: { sourceId:destinationId , destinationId:sourceId } })
+    .then(function(result){
+      if(result){
+        return  result.destroy();
+      }
+    })
+    .then(function(result){
+
+      if(reverseMidNodes){
+
+        backwardtmpNodes = [];
+        for(I = 0 ;I < reverseMidNodes.length ; I++){
+          backwardtmpNodes.push(parseInt(reverseMidNodes[I]));
+        }
+        _.assignIn(reverseRouteData , { 'midNodes': JSON.stringify(backwardtmpNodes)  });
+      }
+      return RouteModel.create(reverseRouteData);
+    });
+
+    Promise.all([forwardRoutePromise , backwardRoutePromise])
+    .then(function(results){
+        next({ status:"success" , data:results[0] , message:null });
+        return;
+    })
+    .catch(function(err){
+      console.log(err);
+      next({ status:"error" , data:null , message:err });
+      return;
+    });
+  }
 };
 
 exports.getFullRouteBetween = getFullRouteBetweenSubBranches;
