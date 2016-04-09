@@ -42,7 +42,18 @@ router.get('/showAll/:id', function(req, res){
 	if(!req.params.id) res.send({status: "error", message: "Mobile number required"});
 	else {
 		var mobile = req.params.id;
-		orderLogic.findAllOrdersByMobile(mobile, function(data){
+		orderLogic.findAllOrdersByMobile({sender: mobile}, function(data){
+			res.send(data);
+		});
+	}
+});
+
+router.get('/showByStatus/:status', function(req, res){
+
+	if(!req.params.status) res.send({status: "error", message: "Status required"});
+	else {
+		var status = req.params.status;
+		orderLogic.findAllOrdersByMobile({status: status}, function(data){
 			res.send(data);
 		});
 	}

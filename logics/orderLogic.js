@@ -89,9 +89,9 @@ var findAllOrders = function(next){
 exports.findAllOrders = findAllOrders;
 
 
-var findAllOrdersByMobile = function(mobile, next){
+var findAllOrdersByMobile = function(params, next){
 
-	orderModel.findAll({where: {sender: mobile}}).then(function(orderList){
+	orderModel.findAll({where: params}).then(function(orderList){
 		if(orderList){
 
 			var idList = [];
