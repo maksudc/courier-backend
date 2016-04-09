@@ -62,16 +62,10 @@ module.exports = function(sequelize, DataTypes) {
 
 		classMethods: {
 			associate: function(models){
-<<<<<<< HEAD
 				//product.hasOne(models.item, { foreignKey: 'productUuid' });
 				order.hasMany(models.item, { foreignKey: 'orderUuid' , as:"items"});
 				//ShipmentModel.hasMany(order , {foreignKey: 'shipmentUuid'});
 				order.belongsTo(models.shipment , { foreignKey: 'shipmentUuid' , as:"shipment" });
-=======
-
-				order.hasOne(models.item, { foreignKey: 'orderUuid'});
-				order.belongsTo(models.shipment , { foreignKey: 'shipmentUuid' });
->>>>>>> Feature: Source branch saved at order
 
 				order.hasOne(models.genericTracker , {
 					foreignKey: "trackableId",
