@@ -434,6 +434,7 @@ var createByOperator = function(postData, operator, next){
 
 		console.log("Reading admins");
 
+		console.log(operator);
 		if(operator) {
 			//when http-authentication is set, we will read data from req.user
 			postData["receiver_operator"] = operator.email;
@@ -641,3 +642,9 @@ var orderDetail = function(id, next){
 };
 
 exports.orderDetail = orderDetail;
+
+var updateBranch = function(id, next){
+	
+};
+
+exports.updateBranch = updateBranch;
