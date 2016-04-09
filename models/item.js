@@ -26,11 +26,18 @@ module.exports = function(sequelize , DataTypes){
 		height: {type: DataTypes.INTEGER},
 		weight: {type: DataTypes.FLOAT},
 		entry_branch: {type: DataTypes.INTEGER}, //where the order is received, In 2nd release, branch id
-		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
+		entry_branch_type: {type: DataTypes.ENUM('regional', 'sub')}, //Entry branch type
 		exit_branch: {type: DataTypes.INTEGER}, //where the order is right now , In 2nd release, branch id
-		exit_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')},
+		exit_branch_type: {type: DataTypes.ENUM('regional', 'sub')},
 		current_hub: {type: DataTypes.STRING}, //where the product is to be delivered, In 2nd release, branch id
-		next_hub: {type: DataTypes.STRING} //Next destination of this product, In 2nd release, branch id
+		current_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
+		next_hub: {type: DataTypes.STRING}, //Next destination of this product, In 2nd release, branch id
+		next_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
+		status: {
+			type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
+			defaultValue: 'draft',
+			allowNull: false
+		}
 
 	} , {
 

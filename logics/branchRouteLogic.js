@@ -129,6 +129,8 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
     getFullRouteBetween(sourceBranchId , destinationBranchId , next);
     return;
   }*/
+  console.log(sourceBranchType);
+  console.log(destinationBranchType);
   var p1 = Promise.resolve(null);
   var p2 = Promise.resolve(null);
 
@@ -161,7 +163,7 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
     }
 
     if(sourceSubBranchItem){
-      sourceRegionalBranchId = sourceSubBranchItem.regonalBranchId;
+      sourceRegionalBranchId = sourceSubBranchItem.regionalBranchId;
     }else{
       sourceRegionalBranchId = sourceBranchId;
     }

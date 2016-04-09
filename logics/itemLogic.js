@@ -3,11 +3,11 @@ var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var itemModel = sequelize.models.item;
 var productModel = sequelize.models.products;
-
-var productLogic = require("../logics/productLogic");
-var orderLogic = require("../logics/orderLogic");
+var orderLogic = require(process.cwd() + "/logics/orderLogic");
+var branchRouteLogic = require(process.cwd() + "/logics/branchRouteLogic");
 
 var _ = require('lodash');
+var async= require('async');
 
 var findOneById = function(id, next){
 
@@ -355,3 +355,87 @@ var addItems = function(data, next){
 };
 
 exports.addItems = addItems;
+
+var changeStatus = function(id, next){
+	var item, route;
+
+	async.series([function(getItem){
+
+		findOneById(id, function(data){
+			if(data.status == "success") {
+				item = data.data;
+				getItem(null);
+			}
+			else getItem("Error finding item by given id");
+		});
+
+	}, function(getRoute){
+
+		//The following is the ugliest fix of my life. Ashamed of it
+		var a, b;
+		if(item.dataValues.entry_branch_type == 'regional-branch') a = 'regional';
+		else a = 'sub';
+		if(item.dataValues.exit_branch_type == 'regional-branch') b = 'regional';
+		else b = 'sub';
+
+		branchRouteLogic.getRouteBetween(a, item.dataValues.entry_branch, b, item.dataValues.exit_branch, null).then(function(routes){
+			route = routes;
+			getRoute(null);
+		}).catch(function(err){
+			if(err) getRoute(err);
+		});
+
+	}, function(setStatus){
+
+		if(item.dataValues.status == 'running'){
+			console.log("Route length: " + route.length);
+			console.log(route[0].dataValues.id);
+			console.log(route[1].dataValues.id);
+
+			if(!item.dataValues.current_hub){
+				item.status = "received";
+				item.current_hub = parseInt(route[0].dataValues.id);
+				item.next_hub = parseInt(route[1].dataValues.id);
+			}
+			else{
+				item.current_hub = item.dataValues.next_hub;
+
+				var index = _.findIndex(route, function(branch){
+					return parseInt(branch.dataValues.id) == parseInt(item.dataValues.next_hub);
+				});
+
+				if(index < 0) {
+					setStatus("This should not have happended!!! Error in item logic");
+					return;
+				}
+				else if(index < route.length - 1){
+					item.status = "received";
+					item.current_hub = item.dataValues.next_hub;
+					item.next_hub = route[index + 1].dataValues.id;
+				}
+				else {
+					item.status = "reached";
+					item.current_hub = item.dataValues.next_hub;
+					item.next_hub = item.dataValues.next_hub;
+				}
+			}
+
+			item.save().then(function(tempItem){
+				console.log(tempItem);
+				next(null, tempItem);
+				setStatus(null);
+			});
+		}
+		else{
+			setStatus("Cannot rceive product that is already received");
+		}
+
+	}],
+	function(err){
+
+		if(err) next(err);
+
+	});
+};
+
+exports.changeStatus = changeStatus;
