@@ -23,12 +23,12 @@ router.post("/regional" , upload.array() , function(req , res){
     res.send({ status:"error" , data:null , message:"Label not specified" });
     return;
   }
-  if(!postData.regonId){
+  if(!postData.regionId){
     postData.regionId = null;
   }
 
   postData.branchType = "regional";
-
+  
   regionalBranch
   .create(postData)
   .then(function(result){
