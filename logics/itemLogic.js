@@ -356,11 +356,12 @@ var addItems = function(data, next){
 
 exports.addItems = addItems;
 
-var changeStatus = function(id, next){
+var receiveItem = function(id, next){
 	var item, route;
 
 	async.series([function(getItem){
 
+		console.log("Get item by id");
 		findOneById(id, function(data){
 			if(data.status == "success") {
 				item = data.data;
@@ -371,6 +372,7 @@ var changeStatus = function(id, next){
 
 	}, function(getRoute){
 
+		console.log("Get route");
 		//The following is the ugliest fix of my life. Ashamed of it
 		var a, b;
 		if(item.dataValues.entry_branch_type == 'regional-branch') a = 'regional';
@@ -380,19 +382,19 @@ var changeStatus = function(id, next){
 
 		branchRouteLogic.getRouteBetween(a, item.dataValues.entry_branch, b, item.dataValues.exit_branch, null).then(function(routes){
 			route = routes;
-			conosle.log(route);
 			getRoute(null);
 		}).catch(function(err){
+			console.log("Error while finding route");
 			console.log(err);
 			if(err) getRoute(err);
 		});
 
 	}, function(setStatus){
 
+		console.log(item.dataValues);
+
 		if(item.dataValues.status == 'running' || item.dataValues.status == "ready"){
 			console.log("Route length: " + route.length);
-			console.log(route[0].dataValues.id);
-			console.log(route[1].dataValues.id);
 
 			if(!item.dataValues.current_hub){
 				item.current_hub = parseInt(route[0].dataValues.id);
@@ -429,9 +431,13 @@ var changeStatus = function(id, next){
 			}
 
 			item.save().then(function(tempItem){
-				console.log(tempItem);
-				next(null, tempItem);
-				setStatus(null);
+				
+				updateOrderWithBranch(tempItem.dataValues.orderUuid, function(err, order){
+					if(err) next(err);
+					else next(null, tempItem);
+
+					setStatus(null);
+				});
 			});
 		}
 		else{
@@ -446,4 +452,72 @@ var changeStatus = function(id, next){
 	});
 };
 
-exports.changeStatus = changeStatus;
+exports.receiveItem = receiveItem;
+
+var setItemRunning  = function(id, next){
+
+	itemModel.findOne({where: {uuid: id}}).then(function(item){
+
+		if(item.dataValues.status == 'received'){
+			item.status = 'running';
+			item.save().then(function(newItem){
+				if(newItem) next(null, newItem);
+				else next(null, false);
+			}).catch(function(err){
+				if(err){
+					console.log(err);
+					next(err);
+				}
+			});
+		}
+
+	}).catch(function(err){
+		if(err) {
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.setItemRunning = setItemRunning;
+
+var updateOrderWithBranch = function(id, next){
+	itemModel.findAll({where: {orderUuid: id}}).then(function(itemList){
+
+		if(itemList){
+			var refItem = itemList[0].dataValues;
+
+			console.log("***********************************************************");
+			var index = _.findIndex(itemList, function(singleItem){
+				return refItem.current_hub != singleItem.dataValues.current_hub || refItem.next_hub != singleItem.dataValues.next_hub;
+			});
+			
+
+			if(index < 0){
+				
+				orderLogic.findOne(id, function(order){
+					order.data.current_hub = refItem.current_hub;
+					order.data.next_hub = refItem.next_hub;
+					order.data.save().then(function(updatedOrder){
+						if(updatedOrder) next(null, updatedOrder);
+						else next(null, true);
+					}).catch(function(err){
+						if(err){
+							console.log(err);
+							next(null, true);
+						}
+					});
+				});
+			}
+			else {
+				next(null, true);
+			}
+
+			//next(null, true);
+		}
+
+	}).catch(function(err){
+		if(err) next(err);
+	});
+}

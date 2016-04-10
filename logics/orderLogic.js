@@ -89,6 +89,62 @@ var findAllOrders = function(next){
 exports.findAllOrders = findAllOrders;
 
 
+var findAllOrdersByMobile = function(params, next){
+
+	orderModel.findAll({where: params}).then(function(orderList){
+		if(orderList){
+
+			var idList = [];
+
+			_.forEach(orderList, function(singleOrder){
+				console.log(singleOrder);
+				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0)
+					idList.push(parseInt(singleOrder.entry_branch));
+				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0)
+					idList.push(parseInt(singleOrder.exit_branch));
+			});
+
+			var branchLabels = {};
+
+			subBranchLogic.findByIdList(idList, function(branchList){
+
+				if(branchList.status == 'error'){
+					next({"status": "error", "message": "Error while reading branch names"});
+					return;
+				}
+
+				_.forEach(branchList.data, function(singleBranch){
+					branchLabels[singleBranch.dataValues.id] = singleBranch.dataValues;
+				});
+
+				_.forEach(orderList, function(singleOrder){
+					if(branchLabels[singleOrder.dataValues.entry_branch])
+						singleOrder.dataValues.entry_branch = branchLabels[singleOrder.dataValues.entry_branch];
+					if(branchLabels[singleOrder.dataValues.exit_branch])
+						singleOrder.dataValues.exit_branch = branchLabels[singleOrder.dataValues.exit_branch];
+
+				});
+
+				next({"status": "success", data: orderList});
+			});
+			
+		}
+		else{
+			next({"status": "success", "message": "No order found!!!"});
+		}
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next({"status": "error", "message": "Error while getting all orders"});
+			return;
+		}
+	});
+
+};
+
+exports.findAllOrdersByMobile = findAllOrdersByMobile;
+
+
 
 var createDraft = function(postData, next){
 	/*
@@ -378,6 +434,7 @@ var createByOperator = function(postData, operator, next){
 
 		console.log("Reading admins");
 
+		console.log(operator);
 		if(operator) {
 			//when http-authentication is set, we will read data from req.user
 			postData["receiver_operator"] = operator.email;
@@ -585,3 +642,9 @@ var orderDetail = function(id, next){
 };
 
 exports.orderDetail = orderDetail;
+
+var updateBranch = function(id, next){
+	
+};
+
+exports.updateBranch = updateBranch;
