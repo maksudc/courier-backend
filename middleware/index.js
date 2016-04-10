@@ -25,3 +25,16 @@ var adminRoutes = function(req, res, next){
 
 exports.adminRoutes = adminRoutes;
 
+var makeVerficationCode = function()
+{
+    var text = "";
+    var possible = "0123456789";
+
+    for( var i=0; i < 4; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
+exports.makeVerficationCode = makeVerficationCode;
+
