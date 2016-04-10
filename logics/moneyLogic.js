@@ -22,11 +22,11 @@ var create = function(operator, moneyData, next){
 	var postData = {
 		sender_full_name: moneyData.sender_full_name,
 		sender_mobile: moneyData.sender_mobile,
-		sender_nid: moneyData.sender_nid,
+		sender_nid: moneyData.sender_nid || '',
 		sender_verification_code: middleware.makeVerficationCode(),
 		receiver_full_name: moneyData.receiver_full_name,
 		receiver_mobile: moneyData.receiver_mobile,
-		receiver_nid: moneyData.receiver_nid,
+		receiver_nid: moneyData.receiver_nid || '',
 		receiver_verification_code: middleware.makeVerficationCode(),
 		amount: parseInt(moneyData.amount),
 		charge: parseInt(moneyData.charge),
@@ -57,3 +57,35 @@ var create = function(operator, moneyData, next){
 };
 
 exports.create = create;
+
+var findAll = function(next){
+
+	moneyModel.findAll().then(function(moneyOrderList){
+		if(moneyOrderList) next(null, moneyOrderList);
+		else next(null, false);
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.findAll = findAll;
+
+var findById = function(id, next){
+
+	moneyModel.findOne({where: {id: id}}).then(function(moneyOrder){
+		if(moneyOrder) next(null, moneyOrder);
+		else next(null, false);
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.findById = findById;
