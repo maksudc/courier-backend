@@ -35,7 +35,7 @@ module.exports = function(sequelize , DataTypes){
 		next_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		status: {
 			type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
-			defaultValue: 'draft',
+			defaultValue: 'ready',
 			allowNull: false
 		}
 
