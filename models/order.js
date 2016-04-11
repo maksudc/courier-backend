@@ -33,12 +33,19 @@ module.exports = function(sequelize, DataTypes) {
 		nid:{type: DataTypes.STRING},
 		receiver: {type: DataTypes.STRING, allowNull: false}, //receiver mobile
 		receiver_addr: {type: DataTypes.STRING},
+
 		entry_branch: {type: DataTypes.STRING}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
+		
 		exit_branch: {type: DataTypes.STRING}, //where the order is right now , In 2nd release, branch id
 		exit_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')},
+
+		current_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		current_hub: {type: DataTypes.STRING}, //where the product is to be delivered, In 2nd release, branch id
+
+		next_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		next_hub: {type: DataTypes.STRING}, //Next destination of this product, In 2nd release, branch id
+
 		receiver_operator: {type: DataTypes.STRING}, //operator who received this product
 		payment: {type: DataTypes.FLOAT}, //cost of the order
 		payment_status: {type: DataTypes.ENUM('unpaid', 'paid'), defaultValue: 'unpaid'}, //status of payment

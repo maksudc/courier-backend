@@ -14,11 +14,81 @@ var Promise = require("bluebird");
 
 item.hook("beforeCreate" , function(instance , options , next){
 
-  if(!instance.current_hub_type){
-    instance.current_hub_type = instance.entry_branch_type;
-  }
-  if(!instance.current_hub){
-    instance.current_hub = instance.entry_branch;
+  console.log("Before creation.....");
+  console.log(instance);
+  console.log("OrderUUid: ");
+  console.log(instance.orderUuid);
+
+  console.log("options..");
+  console.log(options);
+
+  if(instance.orderUuid){
+
+    return order
+    .findOne({ where: { uuid: instance.orderUuid } })
+    .then(function(parentOrderInstance){
+
+      console.log("Parent Order Instance...");
+      console.log(parentOrderInstance);
+
+      if(parentOrderInstance){
+
+        if(parentOrderInstance.entry_branch_type){
+
+          entry_branch_type_parts = parentOrderInstance.entry_branch_type.split("-");
+          if(entry_branch_type_parts.length > 0){
+            instance.entry_branch_type = entry_branch_type_parts[0];
+          }
+        }
+        if(parentOrderInstance.entry_branch){
+          instance.entry_branch = parentOrderInstance.entry_branch;
+        }
+
+        if(parentOrderInstance.exit_branch_type){
+
+          exit_branch_type_parts = parentOrderInstance.exit_branch_type.split("-");
+          if(exit_branch_type_parts.length > 0){
+            instance.exit_branch_type = exit_branch_type_parts[0];
+          }
+        }
+        if(parentOrderInstance.exit_branch){
+          instance.exit_branch = parentOrderInstance.exit_branch;
+        }
+
+        if(parentOrderInstance.current_hub_type){
+
+          branch_parts = parentOrderInstance.current_hub_type.split("-");
+          if(branch_parts.length > 0){
+            instance.current_hub_type = branch_parts[0];
+          }
+        }
+        if(parentOrderInstance.current_hub){
+          instance.current_hub = parentOrderInstance.current_hub;
+        }
+
+        if(parentOrderInstance.next_hub_type){
+
+          branch_parts = parentOrderInstance.next_hub_type.split("-");
+          if(branch_parts.length > 0){
+            instance.next_hub_type = branch_parts[0];
+          }
+        }
+        if(parentOrderInstance.next_hub){
+          instance.next_hub = parentOrderInstance.next_hub;
+        }
+      }
+    })
+    .then(function(){
+
+      if(!instance.current_hub_type){
+        instance.current_hub_type = instance.entry_branch_type;
+      }
+      if(!instance.current_hub){
+        instance.current_hub = instance.entry_branch;
+      }
+
+      return next();
+    });
   }
 
   return next();
