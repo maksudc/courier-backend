@@ -123,7 +123,7 @@ var findRawById = function(id, next){
 
 exports.findRawById = findRawById;
 
-var receiveOrder = function(id, verification_code, next){
+var receiveOrder = function(id, verification_code, operator, next){
 	findRawById(id, function(err, moneyOrder){
 		if(err) next(err);
 		else if(!moneyOrder) next("No order found by this error");
@@ -135,6 +135,7 @@ var receiveOrder = function(id, verification_code, next){
 			if(moneyOrder.dataValues.status == 'draft'){
 
 				moneyOrder.status = 'received';
+				moneyOrder.receiver_operator = operator.email;
 				moneyOrder.save();
 				next(null, moneyOrder);
 
@@ -150,7 +151,7 @@ var receiveOrder = function(id, verification_code, next){
 exports.receiveOrder = receiveOrder;
 
 
-var confirmOrder = function(id, next){
+var confirmOrder = function(id, operator, next){
 	findRawById(id, function(err, moneyOrder){
 		if(err) next(err);
 		else if(!moneyOrder) next("No order found by this error");
@@ -162,6 +163,7 @@ var confirmOrder = function(id, next){
 			if(moneyOrder.dataValues.status == 'received'){
 
 				moneyOrder.status = 'deliverable';
+				moneyOrder.payment_receiver_operator = operator.email;
 				moneyOrder.save();
 				next(null, moneyOrder);
 
@@ -176,7 +178,7 @@ var confirmOrder = function(id, next){
 
 exports.confirmOrder = confirmOrder;
 
-var deliverOrder = function(id, verification_code, next){
+var deliverOrder = function(id, verification_code, operator, next){
 	findRawById(id, function(err, moneyOrder){
 		if(err) next(err);
 		else if(!moneyOrder) next("No order found by this error");
@@ -188,6 +190,7 @@ var deliverOrder = function(id, verification_code, next){
 			if(moneyOrder.dataValues.status == 'deliverable'){
 
 				moneyOrder.status = 'delivered';
+				moneyOrder.deliver_operator = operator.email;
 				moneyOrder.save();
 				next(null, moneyOrder);
 

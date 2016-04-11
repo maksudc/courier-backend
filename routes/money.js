@@ -48,7 +48,7 @@ router.get('/view/:id', function(req, res){
 
 router.post('/receive', upload.array(), function(req, res){
 	
-	moneyLogic.receiveOrder(req.body.money_order_id, req.body.verification_code, function(err, data){
+	moneyLogic.receiveOrder(req.body.money_order_id, req.body.verification_code, req.user, function(err, data){
 		if(err || !data) res.send({"status": "error", message: err || "Cannot receive this order"});
 		else res.send({"status": "success", data: data});
 	});
@@ -57,7 +57,7 @@ router.post('/receive', upload.array(), function(req, res){
 
 router.post('/confirm', upload.array(), function(req, res){
 	
-	moneyLogic.confirmOrder(req.body.money_order_id, function(err, data){
+	moneyLogic.confirmOrder(req.body.money_order_id, req.user, function(err, data){
 		if(err || !data) res.send({"status": "error", message: err || "Cannot receive this order"});
 		else res.send({"status": "success", data: data});
 	});
@@ -66,7 +66,7 @@ router.post('/confirm', upload.array(), function(req, res){
 
 router.post('/deliver', upload.array(), function(req, res){
 	
-	moneyLogic.deliverOrder(req.body.money_order_id, req.body.verification_code, function(err, data){
+	moneyLogic.deliverOrder(req.body.money_order_id, req.body.verification_code, req.user, function(err, data){
 		if(err || !data) res.send({"status": "error", message: err || "Cannot receive this order"});
 		else res.send({"status": "success", data: data});
 	});
