@@ -14,13 +14,13 @@ var Promise = require("bluebird");
 
 item.hook("beforeCreate" , function(instance , options , next){
 
-  console.log("Before creation.....");
-  console.log(instance);
-  console.log("OrderUUid: ");
-  console.log(instance.orderUuid);
+  //console.log("Before creation.....");
+  //console.log(instance);
+  //console.log("OrderUUid: ");
+  //console.log(instance.orderUuid);
 
-  console.log("options..");
-  console.log(options);
+  //console.log("options..");
+  //console.log(options);
 
   if(instance.orderUuid){
 
@@ -28,8 +28,8 @@ item.hook("beforeCreate" , function(instance , options , next){
     .findOne({ where: { uuid: instance.orderUuid } })
     .then(function(parentOrderInstance){
 
-      console.log("Parent Order Instance...");
-      console.log(parentOrderInstance);
+      //console.log("Parent Order Instance...");
+      //console.log(parentOrderInstance);
 
       if(parentOrderInstance){
 
@@ -205,51 +205,14 @@ item.hook("beforeUpdate" , function(instance , options , next){
             });
           }
         }
-
-
-        /*p1 = Promise.resolve(updatedInstance.status);
-
-        if(updatedInstance.exit_branch_type=="sub"){
-
-          if(updatedInstance.exit_branch == updatedInstance.current_hub && updatedInstance.exit_branch_type == updatedInstance.current_hub_type){
-
-            updatedInstance.status = "stocked";
-            return Promise.resolve(updatedInstance.status);
-
-          }else{
-
-            p1 = subBranch
-            .findOne({ where: { id: instance.exit_branch } })
-            .then(function(exitSubBranchInstance){
-
-              return exitSubBranchInstance.getRegionalBranch();
-            }).then(function(exitRegionalBranchInstance){
-
-              if(exitRegionalBranchInstance.id == updatedInstance.current_hub && exitRegionalBranchInstance.branchType == updatedInstance.current_hub_type){
-                updatedInstance.status = "reached";
-
-                return Promise.resolve(updatedInstance.status);
-              }
-              return Promise.resolve(updatedInstance.status);
-              //instance.updatedInstance = updatedInstance;
-            });
-          }
-        }
-        else if(updatedInstance.exit_branch_type == "regional"){
-
-          if(updatedInstance.current_hub_type == updatedInstance.exit_branch_type && updatedInstance.current_hub == updatedInstance.exit_branch){
-            updatedInstance.status = "stocked";
-          }
-          p1 = Promise.resolve(updatedInstance.status);
-        }*/
-
+        
         return p1
         .then(function(updatedStatus){
           console.log(updatedStatus);
           console.log("On instance story...");
-          console.log(instance);
+          //console.log(instance);
           console.log("Updated instance");
-          console.log(updatedInstance);
+          //console.log(updatedInstance);
 
           return instance.getTracker();
         })
