@@ -77,8 +77,20 @@ exports.findAll = findAll;
 var findById = function(id, next){
 
 	moneyModel.findOne({where: {id: id}}).then(function(moneyOrder){
-		if(moneyOrder) next(null, moneyOrder);
+		if(moneyOrder) {
+			subBranchLogic.findCredential(parseInt(moneyOrder.dataValues.sub_branch_id), function(err, detail){
+				if(err) next(err);
+				else{
+					var tempData = moneyOrder.dataValues;
+					tempData["subBranch"] = detail.subBranch;
+					tempData["regionalBranch"] = detail.regionalBranch;
+					tempData["region"] = detail.region;
+					next(null, tempData);
+				}
+			});
+		}
 		else next(null, false);
+
 	}).catch(function(err){
 		if(err){
 			console.log(err);
