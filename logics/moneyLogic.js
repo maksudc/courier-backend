@@ -85,6 +85,8 @@ var findById = function(id, next){
 					tempData["subBranch"] = detail.subBranch;
 					tempData["regionalBranch"] = detail.regionalBranch;
 					tempData["region"] = detail.region;
+					tempData["sender_verification_code"] = null;
+					tempData["receiver_verification_code"] = null;
 					next(null, tempData);
 				}
 			});
@@ -101,3 +103,101 @@ var findById = function(id, next){
 }
 
 exports.findById = findById;
+
+var findRawById = function(id, next){
+
+	moneyModel.findOne({where: {id: id}}).then(function(moneyOrder){
+		if(moneyOrder) {
+			next(null, moneyOrder);
+		}
+		else next(null, false);
+
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.findRawById = findRawById;
+
+var receiveOrder = function(id, verification_code, next){
+	findRawById(id, function(err, moneyOrder){
+		if(err) next(err);
+		else if(!moneyOrder) next("No order found by this error");
+		else{
+			//Here, verification will be checked
+			console.log(moneyOrder);
+
+			//if verification passes, receive this order
+			if(moneyOrder.dataValues.status == 'draft'){
+
+				moneyOrder.status = 'received';
+				moneyOrder.save();
+				next(null, moneyOrder);
+
+			}
+			else{
+				//Not in desired state
+				next("Cannot set this status bcause of money order logic");
+			}
+		}
+	});
+}
+
+exports.receiveOrder = receiveOrder;
+
+
+var confirmOrder = function(id, next){
+	findRawById(id, function(err, moneyOrder){
+		if(err) next(err);
+		else if(!moneyOrder) next("No order found by this error");
+		else{
+			//Here, verification will be checked
+			console.log(moneyOrder);
+
+			//if verification passes, receive this order
+			if(moneyOrder.dataValues.status == 'received'){
+
+				moneyOrder.status = 'deliverable';
+				moneyOrder.save();
+				next(null, moneyOrder);
+
+			}
+			else{
+				//Not in desired state
+				next("Cannot set this status bcause of money order logic");
+			}
+		}
+	});
+}
+
+exports.confirmOrder = confirmOrder;
+
+var deliverOrder = function(id, verification_code, next){
+	findRawById(id, function(err, moneyOrder){
+		if(err) next(err);
+		else if(!moneyOrder) next("No order found by this error");
+		else{
+			//Here, verification will be checked
+			console.log(moneyOrder);
+
+			//if verification passes, receive this order
+			if(moneyOrder.dataValues.status == 'deliverable'){
+
+				moneyOrder.status = 'delivered';
+				moneyOrder.save();
+				next(null, moneyOrder);
+
+			}
+			else{
+				//Not in desired state
+				next("Cannot set this status bcause of money order logic");
+			}
+		}
+	});
+}
+
+exports.deliverOrder = deliverOrder;

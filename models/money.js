@@ -18,7 +18,12 @@ module.exports = function(sequelize , DataTypes){
 		payable: {type: DataTypes.INTEGER, allowNull: false},
 		paid: {type: DataTypes.BOOLEAN, defaultValue: false},
 		payment_time: {type: DataTypes.DATE},
-		delivery_time: {type: DataTypes.DATE}
+		delivery_time: {type: DataTypes.DATE},
+		status: {
+			type: DataTypes.ENUM('draft','received', 'deliverable','delivered'),
+			defaultValue: 'draft',
+			allowNull: false
+		}
 	} , {
 
 		classMethods: {
