@@ -428,11 +428,13 @@ var createByOperator = function(postData, operator, next){
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
 	var createdProducts = {}, itemList, order, errorData, adminData;
+	operator = null;
 
 	async.series([
 	function(setOperatorCredentials){
 
 		console.log("Reading admins");
+		if(!postData.admin) postData["admin"] = 'tariqul.isha@gmail.com';
 
 		console.log(operator);
 		if(operator) {
@@ -572,7 +574,8 @@ var createByOperator = function(postData, operator, next){
 		if(postData.sender_addr) clientData["address"] = postData.sender_addr;
 		if(postData.nid) clientData["national_id"] = postData.nid;
 		if(postData.senderRegion) clientData["regionId"] = postData.senderRegion;
-		if(postData.senderName) clientData["full_name"] = postData.senderName;
+		if(postData.sender_name) clientData["full_name"] = postData.sender_name;
+		console.log(postData.sender_name);
 		
 		clientLogic.create(clientData, function(data){
 

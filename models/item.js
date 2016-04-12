@@ -19,6 +19,7 @@ module.exports = function(sequelize , DataTypes){
 	var item = sequelize.define('item', {
 		uuid: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV1},
 		amount: {type: DataTypes.FLOAT},
+		unit: {type: DataTypes.STRING}, //migration for this field not written!
 		price: {type: DataTypes.FLOAT, allowNull: false},
 		product_name: {type: DataTypes.STRING},
 		length: {type: DataTypes.INTEGER},
