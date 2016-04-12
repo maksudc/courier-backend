@@ -33,12 +33,19 @@ module.exports = function(sequelize, DataTypes) {
 		nid:{type: DataTypes.STRING},
 		receiver: {type: DataTypes.STRING, allowNull: false}, //receiver mobile
 		receiver_addr: {type: DataTypes.STRING},
+
 		entry_branch: {type: DataTypes.STRING}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')}, //Entry branch type
+
 		exit_branch: {type: DataTypes.STRING}, //where the order is right now , In 2nd release, branch id
 		exit_branch_type: {type: DataTypes.ENUM('regional-branch', 'sub-branch')},
+
+		current_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		current_hub: {type: DataTypes.STRING}, //where the product is to be delivered, In 2nd release, branch id
+
+		next_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		next_hub: {type: DataTypes.STRING}, //Next destination of this product, In 2nd release, branch id
+
 		receiver_operator: {type: DataTypes.STRING}, //operator who received this product
 		payment: {type: DataTypes.FLOAT}, //cost of the order
 		payment_status: {type: DataTypes.ENUM('unpaid', 'paid'), defaultValue: 'unpaid'}, //status of payment
@@ -46,7 +53,7 @@ module.exports = function(sequelize, DataTypes) {
 		payment_operator: {type: DataTypes.STRING}, //operator who took the money,In 2nd release, operator id
 		status: {
 			type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
-			defaultValue: 'draft',
+			defaultValue: 'ready',
 			allowNull: false
 		},
 		deliveryType: {
@@ -120,54 +127,6 @@ module.exports = function(sequelize, DataTypes) {
 				});
 			}
 		});
-	});
-
-	order.hook("afterUpdate" , function(orderInstance, options, next){
-
-		//console.log("instances : " + JSON.stringify(orderInstances));
-			console.log(" on order after update hook for: "+ orderInstance.uuid);
-			//console.log(orderInstance);
-			//console.log(options);
-
-			console.log(" Whether shipment changed ? " + orderInstance.changed('shipmentUuid'));
-
-			if(orderInstance.changed("shipmentUuid")){
-				// changed the shipment , so trigger the change in tracker parent
-
-				return orderInstance
-				.getShipment()
-				.then(function(shipmentInstance){
-
-					var p1 = shipmentInstance.getTracker();
-					var p2 = orderInstance.getTracker();
-
-					return sequelize.Promise.all([p1 , p2]);
-				})
-				.then(function(results){
-
-					//console.log(" Trackers:  "+ JSON.stringify(results));
-					var parentTrackerInstance = results[0];
-					var childTrackerInstance = results[1];
-
-					if(parentTrackerInstance){
-						if(childTrackerInstance){
-
-							childTrackerInstance.parentTrackerId = parentTrackerInstance.uuid;
-							return childTrackerInstance.save();
-						}
-					}
-
-					return Promise.resolve(0);
-				})
-				.then(function(updateResult){
-					//console.log("Updated : " + updateResult);
-					return next();
-				});
-
-			}else{
-
-				return next();
-			}
 	});
 
 	order.hook("beforeDestroy" , function(orderItem , options){

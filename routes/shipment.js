@@ -10,7 +10,17 @@ router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 
-router.patch("/:id" , upload.array() , function(req , res){
+router.post("/:id/unpack" , upload.array() , function(req , res){
+
+  shipmentLogic.unpackShipment(req.params.id , function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
+router.patch("/:id$" , upload.array() , function(req , res){
 
     shipmentLogic.manageShipmentOrders(req.params.id , req.body , function(data){
       if(data.statusCode){
@@ -41,10 +51,10 @@ router.delete("/:id$" , upload.array() , function(req , res){
   @return res ( JSON ): {  'status'=> 'success'/'error', 'message'=>'' ,'data':newlyCreatedShipment  }
 
 **/
-router.put("/:id" , upload.array() , function(req , res){
+router.put("/:id$" , upload.array() , function(req , res){
 
     console.log(req.body);
-    
+
     shipmentLogic.shipmentUpdate(req.params.id , req.body , function(data){
       if(data.statusCode){
         res.status(data.statusCode);
