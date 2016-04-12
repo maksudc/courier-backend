@@ -29,6 +29,8 @@ function makeVerficationCode()
 
 var findOneByMobile = function(mobile, next){
 
+	console.log("*****************Hitting API findOneByMobile**************");
+
 	clientModel.findOne({where: {mobile: mobile}}).catch(function(err){
 
 		if(err){

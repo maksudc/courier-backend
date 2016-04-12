@@ -37,6 +37,8 @@ router.use("/permission", require("./permission"));
 
 router.use("/client", require("./client"));
 
+router.use("/money", require("./money"));
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   	res.send({"status": "In home page"});

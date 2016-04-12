@@ -458,7 +458,7 @@ var setItemRunning  = function(id, next){
 
 	itemModel.findOne({where: {uuid: id}}).then(function(item){
 
-		if(item.dataValues.status == 'received'){
+		if(item.dataValues.status == 'received' || item.dataValues.status == 'reached'){
 			item.status = 'running';
 			item.save().then(function(newItem){
 				if(newItem) next(null, newItem);
