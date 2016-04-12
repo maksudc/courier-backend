@@ -428,7 +428,6 @@ var createByOperator = function(postData, operator, next){
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
 	var createdProducts = {}, itemList, order, errorData, adminData;
-	operator = null;
 
 	async.series([
 	function(setOperatorCredentials){
