@@ -6,6 +6,9 @@ var ShipmentModel = sequelize.models.shipment;
 var genericTracker = sequelize.models.genericTracker;
 
 var RouteLogic = require("../logics/branchRouteLogic");
+var Promise = require("bluebird");
+
+var statusStateMachine = ['draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'];
 
 ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
 
@@ -206,6 +209,42 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
 
       //return sequelize.Promise.resolve({ instance: instance , options:options , fn:fn });
     //});
+});
+
+ShipmentModel.hook("afterUpdate" , function(instance , options , next){
+
+  // if the status is set to running
+  // check whether any order under the shipment is still not reached and update them to running state
+  snapshotInstance = instance._previousDataValues;
+  updatedInstance = instance.dataValues;
+
+  if(!instance.changed('status')){
+    return next();
+  }
+
+  if(updatedInstance.status == "running"){
+
+    return instance
+    .getOrders()
+    .then(function(orderInstances){
+
+      return Promise.map(orderInstances , function(orderInstance){
+
+        preReachedStateIndex = statusStateMachine.indexOf("reached");
+        orderStatusStateIndex = statusStateMachine.indexOf(orderInstance.status);
+
+        if(orderStatusStateIndex < preReachedStateIndex){
+          orderInstance.status = "running";
+          return orderInstance.save();
+        }
+      });
+    })
+    .then(function(results){
+      return next();
+    });
+  }
+
+  return next();
 });
 
 module.exports = ShipmentModel;
