@@ -19,7 +19,7 @@ var findOne = function(id, next){
 	}
 
 	orderModel.findOne({where: {uuid: id}}).then(function(order){
-		
+
 		if(order) next({"status": "success", "data": order});
 
 	}).catch(function(err){
@@ -71,7 +71,7 @@ var findAllOrders = function(next){
 				next({"status": "success", data: orderList});
 			});
 
-			
+
 		}
 		else{
 			next({"status": "success", "message": "No order found!!!"});
@@ -127,7 +127,7 @@ var findAllOrdersByMobile = function(params, next){
 
 				next({"status": "success", data: orderList});
 			});
-			
+
 		}
 		else{
 			next({"status": "success", "message": "No order found!!!"});
@@ -452,7 +452,7 @@ var createByOperator = function(postData, operator, next){
 		else{
 			adminLogic.findAdmin(postData["admin"], function(err, admin){
 				if(err){
-					setOperatorCredentials("error while reading admin");		
+					setOperatorCredentials("error while reading admin");
 				}
 				else if(admin){
 					console.log(admin);
@@ -468,13 +468,13 @@ var createByOperator = function(postData, operator, next){
 	function(testBranches){
 
 		/*
-		On 30th march, we assumed that there will be only one parameter named exit_branch_id 
+		On 30th march, we assumed that there will be only one parameter named exit_branch_id
 		which will be regional branch. entry branch must be read from operator table (his working branch)
-		In future, exit_branch_id may come from regionalBranch or subBranch table. If anything wrong happens 
+		In future, exit_branch_id may come from regionalBranch or subBranch table. If anything wrong happens
 		then, blame munna
 		*/
 		console.log("Setting branches");
-
+ 		// @// TODO: Integrate regional branch as entry or exit 
 		subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
 			if(branch.status == "error") testBranches(branch.message);
 			else {
@@ -547,10 +547,10 @@ var createByOperator = function(postData, operator, next){
 
 		_.forEach(postData.item_list, function(item){
 			item["orderUuid"] = order.uuid;
-			item["entry_branch"] = parseInt(order.entry_branch);
-			item["entry_branch_type"] = order.entry_branch_type;
-			item["exit_branch"] = parseInt(order.exit_branch);
-			item["exit_branch_type"] = order.exit_branch_type;
+			//item["entry_branch"] = parseInt(order.entry_branch);
+			//item["entry_branch_type"] = order.entry_branch_type;
+			//item["exit_branch"] = parseInt(order.exit_branch);
+			//item["exit_branch_type"] = order.exit_branch_type;
 		});
 
 		itemLogic.createMany(postData.item_list, function(tempItemList){
@@ -573,7 +573,7 @@ var createByOperator = function(postData, operator, next){
 		if(postData.nid) clientData["national_id"] = postData.nid;
 		if(postData.senderRegion) clientData["regionId"] = postData.senderRegion;
 		if(postData.senderName) clientData["full_name"] = postData.senderName;
-		
+
 		clientLogic.create(clientData, function(data){
 
 			if(data.status == "success"){
@@ -644,7 +644,7 @@ var orderDetail = function(id, next){
 exports.orderDetail = orderDetail;
 
 var updateBranch = function(id, next){
-	
+
 };
 
 exports.updateBranch = updateBranch;

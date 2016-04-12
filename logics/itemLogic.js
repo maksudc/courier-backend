@@ -159,7 +159,7 @@ var createMany = function(data, next){
 	});
 	*/
 
-	itemModel.bulkCreate(data).catch(function(err){
+	itemModel.bulkCreate(data , { individualHooks:true }).catch(function(err){
 		if(err){
 			next({"status": "error", "message": "error while creating items"});
 			return;
@@ -431,7 +431,7 @@ var receiveItem = function(id, next){
 			}
 
 			item.save().then(function(tempItem){
-				
+
 				updateOrderWithBranch(tempItem.dataValues.orderUuid, function(err, order){
 					if(err) next(err);
 					else next(null, tempItem);
@@ -492,10 +492,10 @@ var updateOrderWithBranch = function(id, next){
 			var index = _.findIndex(itemList, function(singleItem){
 				return refItem.current_hub != singleItem.dataValues.current_hub || refItem.next_hub != singleItem.dataValues.next_hub;
 			});
-			
+
 
 			if(index < 0){
-				
+
 				orderLogic.findOne(id, function(order){
 					order.data.current_hub = refItem.current_hub;
 					order.data.next_hub = refItem.next_hub;
