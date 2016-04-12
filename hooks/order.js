@@ -43,6 +43,75 @@ order.hook("beforeCreate" , function(instance , options , next){
   return next();
 });
 
+order.hook("afterUpdate" , function(instance , options , next){
+
+  // if the order is in running state
+  // all the items inside it should be also in running state as well
+
+  var snapshotInstance = instance._previousDataValues;
+  var updatedInstance = instance.dataValues;
+
+  if(instance.changed('status')){
+
+    if(instance.status == 'running'){
+
+      return instance
+      .getItems()
+      .map(function(itemInstance){
+          itemInstance.status = "running";
+          return itemInstance.save();
+      })
+      .then(function(results){
+        return next();
+      });
+    }
+  }
+
+  //console.log("instances : " + JSON.stringify(orderInstances));
+    console.log(" on order after update hook for: "+ orderInstance.uuid);
+    //console.log(orderInstance);
+    //console.log(options);
+
+    console.log(" Whether shipment changed ? " + orderInstance.changed('shipmentUuid'));
+
+    if(orderInstance.changed("shipmentUuid")){
+      // changed the shipment , so trigger the change in tracker parent
+
+      return orderInstance
+      .getShipment()
+      .then(function(shipmentInstance){
+
+        var p1 = shipmentInstance.getTracker();
+        var p2 = orderInstance.getTracker();
+
+        return sequelize.Promise.all([p1 , p2]);
+      })
+      .then(function(results){
+
+        //console.log(" Trackers:  "+ JSON.stringify(results));
+        var parentTrackerInstance = results[0];
+        var childTrackerInstance = results[1];
+
+        if(parentTrackerInstance){
+          if(childTrackerInstance){
+
+            childTrackerInstance.parentTrackerId = parentTrackerInstance.uuid;
+            return childTrackerInstance.save();
+          }
+        }
+
+        return Promise.resolve(0);
+      })
+      .then(function(updateResult){
+        //console.log("Updated : " + updateResult);
+        return next();
+      });
+
+    }
+
+  return next();
+});
+
 order.hook("beforeUpdate" , function(instance , options , next){
 
   var updatedInstance = instance.dataValues;

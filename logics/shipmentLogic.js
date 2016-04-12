@@ -133,6 +133,31 @@ function extractParams(params){
   if(params.destinationBranchId){
     _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
   }
+  if(params.destinationBranchId){
+    _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
+  }
+
+  if(params.currentBranchType){
+    _.assignIn(queryOptions.where , { currentBranchType: params.currentBranchType } );
+  }
+  if(params.currentBranchId){
+    _.assignIn(queryOptions.where , { currentBranchId: params.currentBranchId } );
+  }
+
+  if(params.previousBranchType){
+      _.assignIn(queryOptions.where , { previousBranchType: params.previousBranchType } );
+  }
+  if(params.previousBranchId){
+      _.assignIn(queryOptions.where , { previousBranchId: params.previousBranchId } );
+  }
+
+  if(params.nextBranchType){
+      _.assignIn(queryOptions.where , { nextBranchType: params.nextBranchType } );
+  }
+  if(params.nextBranchId){
+      _.assignIn(queryOptions.where , { nextBranchId: params.nextBranchId } );
+  }
+
 
   assoc = null;
   includeOrders =  0;
