@@ -62,9 +62,17 @@ var findAllOrders = function(next){
 
 				_.forEach(orderList, function(singleOrder){
 					if(branchLabels[singleOrder.dataValues.entry_branch])
+					{
 						singleOrder.dataValues.entry_branch = branchLabels[singleOrder.dataValues.entry_branch];
+						singleOrder.dataValues["entry_branch_id"] = singleOrder.dataValues.entry_branch.id;
+					}
 					if(branchLabels[singleOrder.dataValues.exit_branch])
+					{
 						singleOrder.dataValues.exit_branch = branchLabels[singleOrder.dataValues.exit_branch];
+						singleOrder.dataValues["exit_branch_id"] = singleOrder.dataValues.exit_branch.id;
+					}
+
+					console.log(singleOrder["entry_branch_id"]);
 
 				});
 
