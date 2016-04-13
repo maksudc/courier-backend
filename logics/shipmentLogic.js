@@ -8,6 +8,7 @@ var order = sequelize.models.order;
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
 
+
 var ShipmentStatus = ['draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'];
 
 var unpackShipment = function(shipmentId , next){
@@ -172,30 +173,6 @@ function extractParams(params){
   }
   if(params.destinationBranchId){
     _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
-  }
-  if(params.destinationBranchId){
-    _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
-  }
-
-  if(params.currentBranchType){
-    _.assignIn(queryOptions.where , { currentBranchType: params.currentBranchType } );
-  }
-  if(params.currentBranchId){
-    _.assignIn(queryOptions.where , { currentBranchId: params.currentBranchId } );
-  }
-
-  if(params.previousBranchType){
-      _.assignIn(queryOptions.where , { previousBranchType: params.previousBranchType } );
-  }
-  if(params.previousBranchId){
-      _.assignIn(queryOptions.where , { previousBranchId: params.previousBranchId } );
-  }
-
-  if(params.nextBranchType){
-      _.assignIn(queryOptions.where , { nextBranchType: params.nextBranchType } );
-  }
-  if(params.nextBranchId){
-      _.assignIn(queryOptions.where , { nextBranchId: params.nextBranchId } );
   }
 
   assoc = null;
@@ -605,4 +582,3 @@ exports.exportToShipment = exportToShipment;
 exports.shipmentUpdate = shipmentUpdate;
 exports.deleteShipment = deleteShipment;
 exports.manageShipmentOrders = manageShipmentOrders;
-exports.unpackShipment = unpackShipment;

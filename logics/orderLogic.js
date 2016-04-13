@@ -4,10 +4,10 @@ var Sequelize = DB.Sequelize;
 var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
-var itemLogic = require("../logics/itemLogic");
-var clientLogic = require("../logics/clientLogic");
-var subBranchLogic = require("../logics/subBranchLogic");
-var adminLogic = require("../logics/admin/adminLogic");
+var itemLogic = require("./itemLogic");
+var clientLogic = require("./clientLogic");
+var subBranchLogic = require("./subBranchLogic");
+var adminLogic = require("./admin/adminLogic");
 var _ = require("lodash");
 var async = require("async");
 
@@ -24,6 +24,7 @@ var findOne = function(id, next){
 
 	}).catch(function(err){
 		if(err){
+			console.log(err);
 			next({"status":"error", "message": "Error occurred while searching order"});
 		}
 	});
@@ -62,9 +63,17 @@ var findAllOrders = function(next){
 
 				_.forEach(orderList, function(singleOrder){
 					if(branchLabels[singleOrder.dataValues.entry_branch])
+					{
 						singleOrder.dataValues.entry_branch = branchLabels[singleOrder.dataValues.entry_branch];
+						singleOrder.dataValues["entry_branch_id"] = singleOrder.dataValues.entry_branch.id;
+					}
 					if(branchLabels[singleOrder.dataValues.exit_branch])
+					{
 						singleOrder.dataValues.exit_branch = branchLabels[singleOrder.dataValues.exit_branch];
+						singleOrder.dataValues["exit_branch_id"] = singleOrder.dataValues.exit_branch.id;
+					}
+
+					console.log(singleOrder["entry_branch_id"]);
 
 				});
 
@@ -428,7 +437,6 @@ var createByOperator = function(postData, operator, next){
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
 	var createdProducts = {}, itemList, order, errorData, adminData;
-	operator = null;
 
 	async.series([
 	function(setOperatorCredentials){

@@ -3,8 +3,8 @@ var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var itemModel = sequelize.models.item;
 var productModel = sequelize.models.products;
-var orderLogic = require(process.cwd() + "/logics/orderLogic");
-var branchRouteLogic = require(process.cwd() + "/logics/branchRouteLogic");
+var orderLogic = require("./orderLogic");
+var branchRouteLogic = require("./branchRouteLogic");
 
 var _ = require('lodash');
 var async= require('async');

@@ -90,7 +90,7 @@ router.post('/deleteDraft', upload.array(), function(req, res){
 	});
 });
 
-router.post('/createByOperator', upload.array(), function(req, res){
+router.post('/createByOperator', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 
 		/*When operator creates an order.
 		1st release.....
@@ -105,7 +105,7 @@ router.post('/createByOperator', upload.array(), function(req, res){
 
 		console.log(req.body);
 
-		orderLogic.createByOperator(req.body, 2, function(data){
+		orderLogic.createByOperator(req.body, req.user, function(data){
 			res.send(data);
 	});
 });
