@@ -58,6 +58,7 @@ var findAllOrders = function(next){
 				}
 
 				_.forEach(branchList.data, function(singleBranch){
+					singleBranch.dataValues.regionalBranch = singleBranch.regionalBranch;
 					branchLabels[singleBranch.dataValues.id] = singleBranch.dataValues;
 				});
 
