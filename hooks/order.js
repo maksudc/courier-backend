@@ -51,33 +51,36 @@ order.hook("afterUpdate" , function(instance , options , next){
   var snapshotInstance = instance._previousDataValues;
   var updatedInstance = instance.dataValues;
 
+  var orderInstance = instance;
+  //console.log("instances : " + JSON.stringify(orderInstances));
+  console.log(" on order after update hook for: "+ orderInstance.uuid);
+    //console.log(orderInstance);
+    //console.log(options);
+  console.log(" Whether shipment changed ? " + orderInstance.changed('shipmentUuid'));
+
+  var pstatus = Promise.resolve(null);
+  var pshipment = Promise.resolve(null);
+
   if(instance.changed('status')){
 
     if(instance.status == 'running'){
 
-      return instance
+      pstatus =instance
       .getItems()
       .map(function(itemInstance){
           itemInstance.status = "running";
           return itemInstance.save();
       })
       .then(function(results){
-        return next();
+
       });
     }
   }
 
-  //console.log("instances : " + JSON.stringify(orderInstances));
-    console.log(" on order after update hook for: "+ orderInstance.uuid);
-    //console.log(orderInstance);
-    //console.log(options);
-
-    console.log(" Whether shipment changed ? " + orderInstance.changed('shipmentUuid'));
-
     if(orderInstance.changed("shipmentUuid")){
       // changed the shipment , so trigger the change in tracker parent
 
-      return orderInstance
+      pshipment = orderInstance
       .getShipment()
       .then(function(shipmentInstance){
 
@@ -104,12 +107,18 @@ order.hook("afterUpdate" , function(instance , options , next){
       })
       .then(function(updateResult){
         //console.log("Updated : " + updateResult);
-        return next();
+        //return next();
       });
 
     }
 
-  return next();
+    return pstatus
+    .then(function(){
+      return pshipment;
+    })
+    .then(function(result){
+      return next();
+    });
 });
 
 order.hook("beforeUpdate" , function(instance , options , next){
