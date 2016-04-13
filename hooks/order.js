@@ -5,6 +5,7 @@ var Sequelize = DB.Sequelize;
 var genericTracker = sequelize.models.genericTracker;
 var order = sequelize.models.order;
 var item = sequelize.models.item;
+var trackerLog = sequelize.models.trackerLog;
 
 var subBranch = sequelize.models.subBranch;
 var regionalBranch = sequelize.models.regionalBranch;
@@ -63,7 +64,7 @@ order.hook("afterUpdate" , function(instance , options , next){
 
   if(instance.changed('status')){
 
-    if(instance.status == 'running'){
+    if(updatedInstance.status == 'running'){
 
       pstatus =instance
       .getItems()
@@ -73,6 +74,33 @@ order.hook("afterUpdate" , function(instance , options , next){
       })
       .then(function(results){
 
+      });
+    }else if(updatedInstance.status == "delivered"){
+
+      // Insert into tracker logs for final delivery of the order
+      pstatus = instance
+      .getTracker()
+      .then(function(trackerInstance){
+
+        var trackerLogData = {};
+
+        trackerLogData.action = "delivered";
+        trackerLogData.trackerId = trackerInstance.uuid;
+        if(trackerInstance.currentBranchType){
+            trackerLogData.branchType = trackerInstance.currentBranchType;
+        }
+        trackerLogData.branchId = trackerInstance.currentBranchId;
+
+        return trackerLog
+        .create(trackerLogData);
+      })
+      .then(function(trackerLogItem){
+        //return next();
+      })
+      .then(function(){
+
+        //Noe mark the items under this order as delivered
+        return item.update({ status: 'delivered' } , {  where:{ orderUuid: updatedInstance.uuid } , individualHooks:true });
       });
     }
   }
@@ -113,7 +141,7 @@ order.hook("afterUpdate" , function(instance , options , next){
     }
 
     return pstatus
-    .then(function(){
+    .then(function(result){
       return pshipment;
     })
     .then(function(result){

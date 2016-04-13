@@ -1,11 +1,10 @@
 var moment = require("moment");
 
 module.exports = function(sequelize , DataTypes){
-
   var trackerLog = sequelize.define("trackerLog" , {
 
     uuid: { type: DataTypes.UUID , primaryKey: true ,  defaultValue: DataTypes.UUIDV1 },
-    action: { type: DataTypes.ENUM( "created" , "entrance" , "exit" , "reached" , "block" , "reopen" , "expired" ) , allowNull:true },
+    action: { type: DataTypes.ENUM( "created" , "entrance" , "exit" , "reached" , "block" , "reopen" , "expired" , "delivered" ) , allowNull:true , defaultValue:"created" },
     trackerId: { type: DataTypes.UUID , allowNull:false },
     branchType: { type: DataTypes.ENUM("regional" , "sub") , allowNull:false , defaultValue:"regional" },
     branchId: { type: DataTypes.INTEGER , allowNull:true },

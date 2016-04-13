@@ -7,10 +7,53 @@ var genericTracker = sequelize.models.genericTracker;
 var item = sequelize.models.item;
 var subBranch = sequelize.models.subBranch;
 var regionalBranch = sequelize.models.regionalBranch;
+var trackerLog = sequelize.models.trackerLog;
 
 var itemLogic = require("../logics/itemLogic");
 var RouteLogic = require("../logics/branchRouteLogic");
 var Promise = require("bluebird");
+
+item.hook("afterUpdate" ,function(instance , options , next){
+
+  var updatedInstance = instance.dataValues;
+  var snapshotInstance = instance._previousDataValues;
+
+  if(!instance.changed('status')){
+    return next();
+  }
+
+  var pstatus = Promise.resolve(null);
+  if(updatedInstance.status == 'delivered'){
+
+    pstatus = instance
+    .getTracker()
+    .then(function(trackerInstance){
+
+      if(trackerInstance){
+
+        var trackerLogData = {};
+
+        trackerLogData.action = "delivered";
+        trackerLogData.trackerId = trackerInstance.uuid;
+        if(trackerInstance.currentBranchType){
+            trackerLogData.branchType = trackerInstance.currentBranchType;
+        }
+        trackerLogData.branchId = trackerInstance.currentBranchId;
+
+        return trackerLog
+        .create(trackerLogData);
+      }
+    })
+    .then(function(trackerLogItem){
+      //return next();
+    });
+  }
+
+  pstatus
+  .then(function(){
+    return next();
+  });
+});
 
 item.hook("beforeCreate" , function(instance , options , next){
 
@@ -205,7 +248,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
             });
           }
         }
-        
+
         return p1
         .then(function(updatedStatus){
           console.log(updatedStatus);
