@@ -136,7 +136,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
     return next();
   }
 
-  if(snapshotInstance.status == "ready"){
+  if(snapshotInstance.status == "ready" || snapshotInstance.status == "confirmed"){
     // can be switched to running
     if(updatedInstance.status == "running"){
 
