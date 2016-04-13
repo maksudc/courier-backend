@@ -582,3 +582,4 @@ exports.exportToShipment = exportToShipment;
 exports.shipmentUpdate = shipmentUpdate;
 exports.deleteShipment = deleteShipment;
 exports.manageShipmentOrders = manageShipmentOrders;
+exports.unpackShipment = unpackShipment;
