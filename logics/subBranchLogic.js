@@ -34,7 +34,28 @@ var findByIdList = function(idList, next){
 		return;
 	}
 
-	SubBranchModel.findAll({where: {"id": {"$in": idList}}, attributes: ['id', 'label', 'position', 'regionalBranchId']}).then(function(branchList){
+	SubBranchModel.findAll({
+		where: {"id": {"$in": idList}},
+		attributes: ['id', 'label', 'position', 'regionalBranchId'] ,
+	})
+	.map(function(branchItem){
+
+			if(branchItem.regionalBranchId){
+
+				return RegionalBranchModel
+				.findOne({ where:{ id: branchItem.regionalBranchId } })
+				.then(function(regionalBranchItem){
+					branchItem.regionalBranch = regionalBranchItem;
+					return branchItem;
+				});
+			}
+
+			branchItem.regionalBranch = null;
+			return branchItem;
+	})
+	.then(function(branchList){
+		console.log(branchList);
+
 		if(branchList){
 			return next({"status": "success", data: branchList});
 		}
@@ -45,7 +66,7 @@ var findByIdList = function(idList, next){
 			return next({"status": "error", "message": "Error while finding sub-branchList by ids"});
 		}
 	});
-}
+};
 
 exports.findByIdList = findByIdList;
 
@@ -98,7 +119,7 @@ var findCredential = function(id, next){
 			RegionModel.findOne({where: {id: regionalBranch.regionId}}).then(function(tempRegion){
 				if(tempRegion){
 					region = tempRegion.dataValues;
-					
+
 					next(null, {
 						"subBranch": subBranch,
 						"regionalBranch": regionalBranch,
@@ -120,7 +141,7 @@ var findCredential = function(id, next){
 
 			});
 
-		}], 
+		}],
 		function(err){
 			if(err){
 				console.log(err);
