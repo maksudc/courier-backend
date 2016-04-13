@@ -62,7 +62,7 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
         .then(function(routeItem){
 
             console.log(" Found Route Item ");
-            console.log(routeItem);
+            //console.log(routeItem);
 
             if(routeItem){
 
@@ -73,7 +73,7 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
 
                     midNodes = JSON.parse(midNodes);
                 }
-                console.log(midNodes);
+                //console.log(midNodes);
 
                 return Promise.resolve(midNodes);
             }
@@ -96,7 +96,7 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
             .then(function(midNodesExpanded){
 
                 console.log(" Almost complete  ");
-                console.log(midNodesExpanded);
+                //console.log(midNodesExpanded);
 
                 next(midNodesExpanded);
             });
