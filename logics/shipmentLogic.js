@@ -8,47 +8,6 @@ var order = sequelize.models.order;
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
 
-var ShipmentStatus = ['draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'];
-
-var unpackShipment = function(shipmentId , next){
-
-  shipment
-  .findOne({ where:{ uuid: shipmentId } })
-  .then(function(shipmentInstance){
-
-    if(!shipmentInstance){
-      next({ status: "error" , statusCode:HttpStatus.NOT_FOUND , message:"Shipment Not found" , data:null });
-      return;
-    }
-
-    if(shipmentInstance.status != "reached" ){
-      next({ status: "error" , statusCode:HttpStatus.FORBIDDEN , message:"Can not unpack unless it has reached the destination regional branch" , data:null });
-      return;
-    }
-
-    return shipmentInstance.getOrders();
-  })
-  .map(function(orderInstance){
-
-    currentIndex = ShipmentStatus.indexOf(orderInstance.status);
-    lastIndex = ShipmentStatus.indexOf('stocked');
-
-    if(currentIndex < lastIndex){
-      orderInstance.status = "running";
-      orderInstance.save();
-
-      return orderInstance.uuid;
-    }
-  })
-  .then(function(results){
-      next({ status:"success" , statusCode: HttpStatus.OK , message:null , data:results });
-  })
-  .catch(function(err){
-    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:JSON.stringify(err) , data:null });
-  });
-
-};
-
 var createShipmentWithOrders = function(postData , next){
 
   if( Object.keys(postData).length===0 || !postData.name || !postData.orders){
@@ -173,30 +132,6 @@ function extractParams(params){
   }
   if(params.destinationBranchId){
     _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
-  }
-  if(params.destinationBranchId){
-    _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
-  }
-
-  if(params.currentBranchType){
-    _.assignIn(queryOptions.where , { currentBranchType: params.currentBranchType } );
-  }
-  if(params.currentBranchId){
-    _.assignIn(queryOptions.where , { currentBranchId: params.currentBranchId } );
-  }
-
-  if(params.previousBranchType){
-      _.assignIn(queryOptions.where , { previousBranchType: params.previousBranchType } );
-  }
-  if(params.previousBranchId){
-      _.assignIn(queryOptions.where , { previousBranchId: params.previousBranchId } );
-  }
-
-  if(params.nextBranchType){
-      _.assignIn(queryOptions.where , { nextBranchType: params.nextBranchType } );
-  }
-  if(params.nextBranchId){
-      _.assignIn(queryOptions.where , { nextBranchId: params.nextBranchId } );
   }
 
   assoc = null;
@@ -606,4 +541,3 @@ exports.exportToShipment = exportToShipment;
 exports.shipmentUpdate = shipmentUpdate;
 exports.deleteShipment = deleteShipment;
 exports.manageShipmentOrders = manageShipmentOrders;
-exports.unpackShipment = unpackShipment;

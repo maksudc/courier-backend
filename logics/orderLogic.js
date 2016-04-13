@@ -4,10 +4,10 @@ var Sequelize = DB.Sequelize;
 var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
-var itemLogic = require("../logics/itemLogic");
-var clientLogic = require("../logics/clientLogic");
-var subBranchLogic = require("../logics/subBranchLogic");
-var adminLogic = require("../logics/admin/adminLogic");
+var itemLogic = require("./itemLogic");
+var clientLogic = require("./clientLogic");
+var subBranchLogic = require("./subBranchLogic");
+var adminLogic = require("./admin/adminLogic");
 var _ = require("lodash");
 var async = require("async");
 
@@ -24,6 +24,7 @@ var findOne = function(id, next){
 
 	}).catch(function(err){
 		if(err){
+			console.log(err);
 			next({"status":"error", "message": "Error occurred while searching order"});
 		}
 	});
