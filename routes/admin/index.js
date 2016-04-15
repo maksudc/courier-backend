@@ -56,5 +56,45 @@ router.post('/updateSelf', function(req, res){
 });
 
 
+router.get('/update', function(req, res){
+	/*
+	Get all admin email and the admin types for Selecting admin in client side
+	*/
+
+	if(req.user.role != config.adminTypes.super_admin.type) return res.send(401);
+	console.log(req.user);
+
+	adminLogic.getAdminsToChange(function(err, adminList){
+		if(err) return res.send({"status": "error", error: err});
+		else return res.send({"status": "success", data: adminList});
+	});
+
+});
+
+
+router.get('/update/:email', function(req, res){
+	/*
+	Get all admin email and the admin types for Selecting admin in client side
+	*/
+
+	if(req.user.role != config.adminTypes.super_admin.type) return res.send(401);
+	console.log(req.user);
+
+	adminLogic.getAdminToChage(req.params.email, function(err, admin){
+		if(err) return res.send({"status": "error", error: err});
+		else return res.send({"status": "success", data: admin});
+	});
+
+});
+
+
+router.post('/update', upload.array(), function(req, res){
+	
+	console.log("Change or delete admin");
+	console.log(req.body);
+
+});
+
+
 
 module.exports = router;

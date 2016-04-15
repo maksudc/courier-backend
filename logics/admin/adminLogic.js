@@ -48,6 +48,40 @@ var findAdmin = function(email, next){
 exports.findAdmin = findAdmin;
 
 
+var getAdminToChage = function(email, next){
+
+    adminModel.find({
+        where: {email: email}}
+    ).then(function(admin){
+        if(admin){
+            next(null, {
+                full_name: admin.dataValues.full_name || '',
+                regional_branch_id: admin.dataValues.regional_branch_id,
+                sub_branch_id: admin.dataValues.sub_branch_id,
+                region_id: admin.dataValues.region_id,
+                mobile: admin.dataValues.mobile || '',
+                national_id: admin.dataValues.national_id || '',
+                address: admin.dataValues.address || '',
+                username: admin.dataValues.username || ''
+            });
+        }
+        else{
+            next("No admin found", false);
+        }
+    }).catch(function(err){
+        if(err){
+            console.log(err);
+            next("Error while reading admin");
+        }
+    });
+
+};
+
+exports.getAdminToChage = getAdminToChage;
+
+
+
+
 var createAdmin = function(data, next){
 
     async.series([function(emailCheck){
@@ -147,3 +181,24 @@ var updateSelf = function(adminData, next){
 };
 
 exports.updateSelf = updateSelf;
+
+
+var getAdminsToChange = function(next){
+
+    adminModel.findAll({attributes: ['email', 'full_name']})
+        .then(function(adminList){
+            if(adminList){
+                return next(null, adminList);
+            }
+            else return next(null, false);
+        })
+        .catch(function(err){
+            if(err){
+                console.log(err);
+                return next(err);
+            }
+        });
+
+}
+
+exports.getAdminsToChange = getAdminsToChange;
