@@ -34,9 +34,9 @@ var findOne = function(id, next){
 exports.findOne = findOne;
 
 
-var findAllOrders = function(next){
+var findAllOrders = function(params, next){
 
-	orderModel.findAll().then(function(orderList){
+	orderModel.findAll({where: params}).then(function(orderList){
 		if(orderList){
 
 			var idList = [];

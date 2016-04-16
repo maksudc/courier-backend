@@ -32,7 +32,7 @@ router.get('/getOrder/:id', function(req, res){
 
 router.get('/showAll', function(req, res){
 
-	orderLogic.findAllOrders(function(data){
+	orderLogic.findAllOrders(req.query, function(data){
 		res.send(data);
 	});
 });
