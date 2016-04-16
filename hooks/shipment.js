@@ -222,7 +222,7 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
     return next();
   }
 
-  if(updatedInstance.status == "running"){
+  //if(updatedInstance.status == "running" ){
 
     return instance
     .getOrders()
@@ -232,17 +232,28 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
 
         preReachedStateIndex = statusStateMachine.indexOf("reached");
         orderStatusStateIndex = statusStateMachine.indexOf(orderInstance.status);
+        shipmentStatusIndex = statusStateMachine.indexOf(updatedInstance.status);
 
-        if(orderStatusStateIndex < preReachedStateIndex){
-          orderInstance.status = "running";
-          return orderInstance.save();
+        if(shipmentStatusIndex < preReachedStateIndex && updatedInstance.status != "ready"){
+
+          if(orderStatusStateIndex < preReachedStateIndex){
+            orderInstance.status = updatedInstance.status;
+            return orderInstance.save();
+          }
+        }else if(shipmentStatusIndex == preReachedStateIndex){
+
+          if(orderStatusStateIndex < preReachedStateIndex){
+            orderInstance.status = "received";
+            return orderInstance.save();
+          }
         }
+        
       });
     })
     .then(function(results){
       return next();
     });
-  }
+  //}
 
   return next();
 });
