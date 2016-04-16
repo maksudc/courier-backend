@@ -36,7 +36,6 @@ var unpackShipment = function(shipmentId , next){
 
     if(currentIndex < lastIndex){
       orderInstance.status = "running";
-
       return orderInstance.save();
     }
   })
