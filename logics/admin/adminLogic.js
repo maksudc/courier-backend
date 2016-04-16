@@ -218,10 +218,14 @@ var updateAdmin = function(updateData, next){
                 if(updateData.region_id) admin.region_id = parseInt(updateData.region_id);
                 if(updateData.regional_branch_id) admin.regional_branch_id = parseInt(updateData.regional_branch_id);
                 if(updateData.region_id && updateData.regional_branch_id){
-                    if(updateData.sub_branch_id == "")
+                    if(!updateData.sub_branch_id || updateData.sub_branch_id == '')
                         admin.sub_branch_id = null;
-                    else updateData.sub_branch_id == parseInt(updateData.sub_branch_id);
+                    else 
+                        admin.sub_branch_id = parseInt(updateData.sub_branch_id);
                 }
+
+                console.log(!updateData.sub_branch_id);
+                console.log(updateData.sub_branch_id);
 
 
                 admin.save();
