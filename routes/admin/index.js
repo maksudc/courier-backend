@@ -96,8 +96,10 @@ router.get('/update/:email', function(req, res){
 
 router.post('/update', upload.array(), function(req, res){
 	
-	console.log("Change or delete admin");
-	console.log(req.body);
+	adminLogic.updateAdmin(req.body, function(err, admin){
+		if(err) return res.send({"status": "error", error: err});
+		else return res.send({"status": "success", data: admin});
+	});
 
 });
 

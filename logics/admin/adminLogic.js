@@ -62,7 +62,8 @@ var getAdminToChage = function(email, next){
                 mobile: admin.dataValues.mobile || '',
                 national_id: admin.dataValues.national_id || '',
                 address: admin.dataValues.address || '',
-                username: admin.dataValues.username || ''
+                username: admin.dataValues.username || '',
+                role: admin.dataValues.role
             });
         }
         else{
@@ -202,3 +203,40 @@ var getAdminsToChange = function(next){
 }
 
 exports.getAdminsToChange = getAdminsToChange;
+
+
+var updateAdmin = function(updateData, next){
+
+    adminModel.findOne({where: {email: updateData.email}})
+        .then(function(admin){
+            if(admin){
+                if(updateData.full_name) admin.full_name = updateData.full_name;
+                if(updateData.mobile) admin.mobile = updateData.mobile;
+                if(updateData.username) admin.username = updateData.username;
+                if(updateData.address) admin.address = updateData.address;
+
+                admin.save();
+                return next(null, {
+                    full_name: admin.dataValues.full_name || '',
+                    regional_branch_id: admin.dataValues.regional_branch_id,
+                    sub_branch_id: admin.dataValues.sub_branch_id,
+                    region_id: admin.dataValues.region_id,
+                    mobile: admin.dataValues.mobile || '',
+                    national_id: admin.dataValues.national_id || '',
+                    address: admin.dataValues.address || '',
+                    username: admin.dataValues.username || '',
+                    role: admin.dataValues.role
+                });
+            }
+            else return next(null, false);
+        })
+        .catch(function(err){
+            if(err){
+                console.log(err);
+                return next(err);
+            }
+        });
+
+}
+
+exports.updateAdmin = updateAdmin;
