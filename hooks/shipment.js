@@ -247,7 +247,7 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
             return orderInstance.save();
           }
         }
-
+        
       });
     })
     .then(function(results){
