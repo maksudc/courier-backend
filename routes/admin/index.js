@@ -66,7 +66,13 @@ router.get('/update', function(req, res){
 
 	adminLogic.getAdminsToChange(function(err, adminList){
 		if(err) return res.send({"status": "error", error: err});
-		else return res.send({"status": "success", data: adminList});
+		else return res.send({
+			"status": "success",
+			data: {
+				adminList: adminList,
+				adminTypes: JSON.stringify(config.adminTypes)
+			}
+		});
 	});
 
 });
