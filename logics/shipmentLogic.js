@@ -174,6 +174,24 @@ function extractParams(params){
   if(params.destinationBranchId){
     _.assignIn(queryOptions.where , { destinationBranchId: params.destinationBranchId } );
   }
+  if(params.currentBranchId){
+    _.assignIn(queryOptions.where , { currentBranchId: params.currentBranchId } );
+  }
+  if(params.currentBranchType){
+    _.assignIn(queryOptions.where , { currentBranchType: params.currentBranchType } );
+  }
+  if(params.previousBranchId){
+    _.assignIn(queryOptions.where , { previousBranchId: params.previousBranchId } );
+  }
+  if(params.previousBranchType){
+    _.assignIn(queryOptions.where , { previousBranchType: params.previousBranchType } );
+  }
+  if(params.nextBranchId){
+    _.assignIn(queryOptions.where , { nextBranchId: params.nextBranchId } );
+  }
+  if(params.nextBranchType){
+    _.assignIn(queryOptions.where , { nextBranchType: params.nextBranchType } );
+  }
 
   assoc = null;
   includeOrders =  0;
