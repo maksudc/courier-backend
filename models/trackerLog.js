@@ -7,7 +7,7 @@ module.exports = function(sequelize , DataTypes){
     uuid: { type: DataTypes.UUID , primaryKey: true ,  defaultValue: DataTypes.UUIDV1 },
     action: { type: DataTypes.ENUM( "created" , "entrance" , "exit" , "reached" , "block" , "reopen" , "expired" , "delivered" ) , allowNull:true , defaultValue:"created" },
     trackerId: { type: DataTypes.UUID , allowNull:false },
-    branchType: { type: DataTypes.ENUM("regional" , "sub") , allowNull:false , defaultValue:"regional" },
+    branchType: { type: DataTypes.ENUM("regional" , "sub") , allowNull:true },
     branchId: { type: DataTypes.INTEGER , allowNull:true },
     description: { type: DataTypes.TEXT , allowNull:true },
     eventDateTime: { type: DataTypes.DATE , allowNull:false , defaultValue:moment.utc().format('YYYY-MM-DD HH:mm:ss') }

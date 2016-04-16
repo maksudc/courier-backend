@@ -1,32 +1,5 @@
 'use strict';
-/*
-var Sequelize = require("sequelize");
-var sequelize = require("./connect");
 
-var GenericTracker = sequelize.define("genericTracker" , {
-
-    uuid: { type: Sequelize.UUID , primaryKey:true , defaultValue: Sequelize.UUIDV1 },
-    trackableType: { type:Sequelize.ENUM('order' , 'orderItem' , 'shipment') , defaultValue:'order' , allowNull:false },
-    trackableId:{ type:Sequelize.UUID , alowNull:false },
-    status: { type: Sequelize.ENUM('active' , 'deactive') , defaultValue:"active" ,allowNull:true },
-    currentGeoLocation: { type: Sequelize.GEOMETRY , allowNull:true },
-    parentTrackerId: {
-
-      type: Sequelize.UUID ,
-      defaultValue: null,
-      allowNull: true,
-      references:{
-        model: GenericTracker,
-        key: "uuid"
-      }
-    },
-    hasChild: { type: Sequelize.BOOLEAN , defaultValue: false }
-});
-
-GenericTracker.sync();
-
-module.exports = GenericTracker;
-*/
 var Promise = require("bluebird");
 
 module.exports = function(sequelize , DataTypes){
@@ -40,19 +13,20 @@ module.exports = function(sequelize , DataTypes){
       currentGeoLocation: { type: DataTypes.GEOMETRY , allowNull:true },
 
       hasChild: { type: DataTypes.BOOLEAN , defaultValue: false },
-      currentBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
+
+      currentBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , allowNull:true , defaultValue: null },
       currentBranchId:{ type: DataTypes.INTEGER },
 
-      sourceBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
+      sourceBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , allowNull:true , defaultValue: null },
       sourceBranchId:{ type: DataTypes.INTEGER },
 
-      destinationBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , defaultValue:'regional' },
+      destinationBranchType: { type: DataTypes.ENUM( 'sub' , 'regional' ) , allowNull:true , defaultValue: null },
       destinationBranchId:{ type: DataTypes.INTEGER },
 
-      previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+      previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) , allowNull:true , defaultValue: null },
       previousBranchId: { type: DataTypes.INTEGER },
 
-      nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+      nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) , allowNull:true , defaultValue: null },
       nextBranchId: { type: DataTypes.INTEGER },
 
   } , {

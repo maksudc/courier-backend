@@ -35,22 +35,6 @@ module.exports = {
       return queryInterface.dropTable('users');
     */
 
-    /**
-    sourceBranchType: { type: DataTypes.ENUM('regional' , 'sub') },
-    sourceBranchId:{ type: DataTypes.INTEGER },
-
-    destinationBranchType:{ type: DataTypes.ENUM('regional', 'sub') },
-    destinationBranchId: { type: DataTypes.INTEGER },
-
-    currentBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
-    currentBranchId: { type: DataTypes.INTEGER },
-
-    previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
-    previousBranchId: { type: DataTypes.INTEGER },
-
-    nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
-    nextBranchId: { type: DataTypes.INTEGER },
-    **/
     queryInterface.changeColumn("shipments" , "sourceBranchType" , { type: Sequelize.ENUM('regional' , 'sub')  });
     queryInterface.changeColumn("shipments" , "sourceBranchId" , { type: Sequelize.INTEGER} );
 
