@@ -660,3 +660,25 @@ var updateBranch = function(id, next){
 };
 
 exports.updateBranch = updateBranch;
+
+var findOrderByClient = function(mobile, next){
+
+	orderModel.findAll({where: {sender: mobile}}).then(function(orderList){
+
+		if(orderList){
+			next(null, orderList);
+		}
+		else next(null, false);
+
+	}).catch(function(err){
+
+		if(err){
+			console.log(err);
+			next(err);
+		}
+
+	});
+
+}
+
+exports.findOrderByClient = findOrderByClient;
