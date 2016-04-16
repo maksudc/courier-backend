@@ -215,6 +215,10 @@ var updateAdmin = function(updateData, next){
                 if(updateData.username) admin.username = updateData.username;
                 if(updateData.address) admin.address = updateData.address;
 
+                if(updateData.region_id) admin.region_id = parseInt(updateData.region_id);
+                if(updateData.regional_branch_id) admin.regional_branch_id = parseInt(updateData.regional_branch_id);
+                if(updateData.sub_branch_id) admin.sub_branch_id = parseInt(updateData.sub_branch_id);
+
                 admin.save();
                 return next(null, {
                     full_name: admin.dataValues.full_name || '',
