@@ -64,12 +64,12 @@ order.hook("afterUpdate" , function(instance , options , next){
 
   if(instance.changed('status')){
 
-    if(updatedInstance.status == 'running'){
+    if(updatedInstance.status == 'running' || updatedInstance.status == "received" || updatedInstance.status == "reached" || updatedInstance.status == "stocked"){
 
       pstatus =instance
       .getItems()
       .map(function(itemInstance){
-          itemInstance.status = "running";
+          itemInstance.status = updatedInstance.status;
           return itemInstance.save();
       })
       .then(function(results){
