@@ -3,7 +3,8 @@
 module.exports = function(sequelize , DataTypes){
 
 	var permission = sequelize.define('permission', {
-		url: { type: DataTypes.STRING, primaryKey: true},
+		name: {type: DataTypes.STRING, unique: true},
+		url: { type: DataTypes.STRING, unique: true},
 		description: {type: DataTypes.STRING, allowNull: false},
 		system_operator : { type: DataTypes.BOOLEAN, defaultValue: false},
 		accountant : { type: DataTypes.BOOLEAN, defaultValue: false},

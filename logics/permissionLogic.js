@@ -143,3 +143,19 @@ var checkPermission = function(url, role, next){
 };
 
 exports.checkPermission = checkPermission;
+
+var findAll = function(next){
+	permissionModel.findAll().then(function(permissionList){
+
+		if(permissionList) next(null, permissionList);
+		else next(null, false);
+
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+}
+
+exports.findAll = findAll;

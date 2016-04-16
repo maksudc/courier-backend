@@ -147,5 +147,15 @@ router.post('/receiveOrder', upload.array(), function(req, res){
 	});
 });
 
+router.get('/getOrderByClient/:client', function(req, res){
+
+	orderLogic.findOrderByClient(req.params.client, function(err, orderList){
+		if(err) res.send({status: "error", message:"Error while getting order list by client"});
+		else res.send({"status": "success", data: orderList});
+	});
+
+});
+
+
 
 module.exports = router;
