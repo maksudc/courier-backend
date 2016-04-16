@@ -4,19 +4,19 @@ var trackerLogLogic = require("../logics/trackerLogLogic");
 
 router.get("/" , function(req , res){
 
-  trackerLogLogic.getTrackerLogs(function(data){
+  trackerLogLogic.getTrackerLogs(req.query , function(data){
     res.send(data);
   });
 });
 
 router.get("/:id" , function(req , res){
-  trackerLogLogic.getTrackerLogDetails(req.params.id , function(data){
+  trackerLogLogic.getTrackerLogDetails(req.params.id , req.query , function(data){
     res.send(data);
   });
 });
 
 router.get("/tracker/:id" , function(req , res){
-  trackerLogLogic.getTrackerLogsForTracker(req.params.id , function(data){
+  trackerLogLogic.getTrackerLogsForTracker(req.params.id , req.query, function(data){
     res.send(data);
   });
 });

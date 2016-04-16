@@ -1,4 +1,5 @@
 var moment = require("moment");
+var Promise = require("bluebird");
 
 module.exports = function(sequelize , DataTypes){
   var trackerLog = sequelize.define("trackerLog" , {
@@ -27,6 +28,20 @@ module.exports = function(sequelize , DataTypes){
           constraints: false,
           as: "subBranch"
         });
+      },
+    },
+    instanceMethods: {
+
+      getBranch: function() {
+
+        if(this.branchType && this.branchId){
+          if(this.branchType == "regional"){
+            return this.getRegionalBranch();
+          }else{
+            return this.getSubBranch();
+          }
+        }
+        return Promise.resolve(null);
       }
     }
   });
