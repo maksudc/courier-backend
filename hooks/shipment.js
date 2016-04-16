@@ -237,8 +237,13 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
         if(shipmentStatusIndex < preReachedStateIndex && updatedInstance.status != "ready"){
 
           if(orderStatusStateIndex < preReachedStateIndex){
-
             orderInstance.status = updatedInstance.status;
+            return orderInstance.save();
+          }
+        }else if(shipmentStatusIndex == preReachedStateIndex){
+
+          if(orderStatusStateIndex < preReachedStateIndex){
+            orderInstance.status = "received";
             return orderInstance.save();
           }
         }
