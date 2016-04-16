@@ -23,19 +23,19 @@ module.exports = function(sequelize, DataTypes) {
   		allowNull: false
   	},
 
-    sourceBranchType: { type: DataTypes.ENUM('regional' , 'sub') },
-    sourceBranchId:{ type: DataTypes.INTEGER },
+    sourceBranchType: { type: DataTypes.ENUM('regional' , 'sub') , allowNull: false },
+    sourceBranchId:{ type: DataTypes.INTEGER , allowNull:false },
 
-    destinationBranchType:{ type: DataTypes.ENUM('regional', 'sub') },
-    destinationBranchId: { type: DataTypes.INTEGER },
+    destinationBranchType:{ type: DataTypes.ENUM('regional', 'sub') , allowNull:false },
+    destinationBranchId: { type: DataTypes.INTEGER , allowNull: false },
 
-    currentBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    currentBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) , allowNull:true , defaultValue: null },
     currentBranchId: { type: DataTypes.INTEGER },
 
-    previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    previousBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) ,allowNull:true , defaultValue: null },
     previousBranchId: { type: DataTypes.INTEGER },
 
-    nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) },
+    nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' )  , allowNull:true , defaultValue: null },
     nextBranchId: { type: DataTypes.INTEGER },
 
     shipmentType:{ type: DataTypes.ENUM("local" , "national" , "international") , defaultValue:"national" }
