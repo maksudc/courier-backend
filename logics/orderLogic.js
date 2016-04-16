@@ -21,6 +21,7 @@ var findOne = function(id, next){
 	orderModel.findOne({where: {uuid: id}}).then(function(order){
 
 		if(order) next({"status": "success", "data": order});
+		else next({"status":"error", message:"No order found by this id"});
 
 	}).catch(function(err){
 		if(err){

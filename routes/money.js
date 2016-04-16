@@ -26,7 +26,7 @@ router.post('/create', upload.array(), function(req, res){
 
 router.get('/viewAll', function(req, res){
 
-	moneyLogic.findAll(function(err, data){
+	moneyLogic.findAll(req.user, function(err, data){
 		if(err) res.send({"status": "error", error: error});
 		else if(!data) res.send({"status": "error", data: []});
 		else res.send({"status": "success", data: data});

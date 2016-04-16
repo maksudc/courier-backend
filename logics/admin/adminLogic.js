@@ -199,10 +199,27 @@ var getAdminsToChange = function(next){
                 return next(err);
             }
         });
-
 }
 
 exports.getAdminsToChange = getAdminsToChange;
+
+var getSameBranchAdmins = function(adminDataParams, next){
+    
+    adminModel.findAll({where: adminDataParams})
+        .then(function(adminList){
+            if(adminList){
+                next(null, adminList);
+            }
+            else next(null, false);
+        }).catch(function(err){
+            if(err){
+                console.log(err);
+                next(err);
+            }
+        });
+}
+
+exports.getSameBranchAdmins = getSameBranchAdmins;
 
 
 var updateAdmin = function(updateData, next){

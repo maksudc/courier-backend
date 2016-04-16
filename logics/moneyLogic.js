@@ -4,6 +4,7 @@ var Sequelize = DB.Sequelize;
 var moneyModel = sequelize.models.money;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
+var adminLogic = require("./admin/adminLogic");
 var clientLogic = require("./clientLogic");
 var _ = require("lodash");
 var async = require("async");
@@ -58,17 +59,59 @@ var create = function(operator, moneyData, next){
 
 exports.create = create;
 
-var findAll = function(next){
+var findAll = function(adminData, next){
 
-	moneyModel.findAll().then(function(moneyOrderList){
-		if(moneyOrderList) next(null, moneyOrderList);
-		else next(null, false);
-	}).catch(function(err){
-		if(err){
-			console.log(err);
-			next(err);
-		}
-	});
+	var adminDataParams = {};
+	var adminEmailList = [];
+	if(adminData.region_id) adminDataParams["region_id"] = adminData.region_id;
+	if(adminData.regional_branch_id) adminDataParams["regional_branch_id"] = adminData.regional_branch_id;
+	if(adminData.sub_branch_id) adminDataParams["sub_branch_id"] = adminData.sub_branch_id;
+
+	async.series([function(findOperators){
+
+			adminLogic.getSameBranchAdmins(adminDataParams, function(err, adminList){
+				if(adminList){
+					_.forEach(adminList, function(singleAdmin){
+						adminEmailList.push(singleAdmin.dataValues.email);
+					});
+				}
+
+				findOperators(null);
+			});
+
+		}, function(findMoneyOrders){
+
+			var filterParams = {
+				"$or":[
+					{receiver_operator: {"$in": adminEmailList}},
+					{payment_receiver_operator: {"$in": adminEmailList}},
+					{deliver_operator: {"$in": adminEmailList}},
+					{"$and": [
+						{region_id: adminData.region_id},
+						{regional_branch_id: adminData.regional_branch_id},
+						{sub_branch_id: adminData.sub_branch_id}
+					]}
+				]
+			};
+
+
+			moneyModel.findAll({where: filterParams}).then(function(moneyOrderList){
+				if(moneyOrderList) next(null, moneyOrderList);
+				else next(null, false);
+			}).catch(function(err){
+				if(err){
+					console.log(err);
+					next(err);
+				}
+			});
+
+		}], 
+		function(err){
+			if(err){
+				console.log(err);
+				next(err);
+			}
+		});
 
 }
 
