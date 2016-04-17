@@ -155,7 +155,7 @@ router.post('/receiveOrder', passport.authenticate('basic', {session: false}), u
 	orderLogic.receiveOrder(req.body.id, req.user, function(data){
 		res.send(data);
 	});
-	
+
 });
 
 router.get('/getOrderByClient/:client', function(req, res){

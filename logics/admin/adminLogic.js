@@ -115,6 +115,7 @@ var createAdmin = function(data, next){
         if(data.username) draftAdmin["username"] = data.username;
         if(data.nationalID) draftAdmin["national_id"] = data.nationalID;
         if(data.subBranch && data.subBranch != '' && !isNaN(parseInt(data.subBranch))) draftAdmin["sub_branch_id"] = parseInt(data.subBranch);
+        else draftAdmin["sub_branch_id"] = null;
 
         adminModel.create(draftAdmin).then(function(admin){
             if(admin){
