@@ -21,7 +21,7 @@ var checkLogin = function(email, password, next){
             next("Error while reading admin");
         }
     });
-}
+};
 
 exports.checkLogin = checkLogin;
 
@@ -87,7 +87,7 @@ var createAdmin = function(data, next){
 
     async.series([function(emailCheck){
         findAdmin(data.email, function(err, admin){
-            
+
             if((!err || err == "No admin found") && !admin){
                 console.log("No admin by this email found. Proceeding to create admin section");
                 emailCheck(null);
@@ -115,6 +115,7 @@ var createAdmin = function(data, next){
         if(data.username) draftAdmin["username"] = data.username;
         if(data.nationalID) draftAdmin["national_id"] = data.nationalID;
         if(data.subBranch && data.subBranch != '' && !isNaN(parseInt(data.subBranch))) draftAdmin["sub_branch_id"] = parseInt(data.subBranch);
+        else draftAdmin["sub_branch_id"] = null;
 
         adminModel.create(draftAdmin).then(function(admin){
             if(admin){
@@ -128,7 +129,7 @@ var createAdmin = function(data, next){
 
         });
 
-    }], 
+    }],
     function(err){
         return next(err);
     });
@@ -141,7 +142,7 @@ var updateSelf = function(adminData, next){
 
     async.series([function(emailCheck){
         findAdmin(adminData.email, function(err, admin){
-            
+
             if(err || !admin){
                 // console.log("No admin by this email found. Proceeding to create admin section");
                 emailCheck("Admin doesnot exists");
@@ -161,21 +162,21 @@ var updateSelf = function(adminData, next){
                     admin.password = adminData.password;
 
                 admin.save().then(function(admin){
-                    next(null, admin);    
+                    next(null, admin);
                     emailCheck(null);
                 }).catch(function(err){
                     emailCheck("Error while saving");
                 });
-                
-                
+
+
             }
         });
 
-    }], 
+    }],
     function(err){
 
         if(err) next(err);
-        
+
     });
 
 
@@ -204,7 +205,7 @@ var getAdminsToChange = function(next){
 exports.getAdminsToChange = getAdminsToChange;
 
 var getSameBranchAdmins = function(adminDataParams, next){
-    
+
     adminModel.findAll({where: adminDataParams})
         .then(function(adminList){
             if(adminList){
@@ -237,7 +238,7 @@ var updateAdmin = function(updateData, next){
                 if(updateData.region_id && updateData.regional_branch_id){
                     if(!updateData.sub_branch_id || updateData.sub_branch_id == '')
                         admin.sub_branch_id = null;
-                    else 
+                    else
                         admin.sub_branch_id = parseInt(updateData.sub_branch_id);
                 }
 
