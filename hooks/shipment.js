@@ -52,7 +52,7 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           .then(function(routes){
 
             var firstRoute = null;
-            if(instance.previousBranchType == "sub"){
+            if(updatedInstance.previousBranchType == "sub"){
               firstRoute = routes[0];
             }else{
               firstRoute = routes[1];
