@@ -71,18 +71,10 @@ module.exports = function(sequelize , DataTypes){
 				trackerData.trackableType = "orderItem";
 				trackerData.trackableId = orderItem.uuid;
 
-				if(orderItem.entry_branch_type == "regional-branch"){
-					trackerData.sourceBranchType = "regional";
-				}else{
-					trackerData.sourceBranchType = "sub";
-				}
+				trackerData.sourceBranchType = orderItem.entry_branch_type;
 				trackerData.sourceBranchId = parseInt(orderItem.entry_branch);
 
-				if(orderItem.exit_branch_type == "regional-branch"){
-					trackerData.destinationBranchType = "regional";
-				}else{
-					trackerData.destinationBranchType = "sub";
-				}
+				trackerData.destinationBranchType = orderItem.exit_branch_type;
 				trackerData.destinationBranchId = parseInt(orderItem.exit_branch);
 
 				trackerData.currentBranchType = trackerData.sourceBranchType;

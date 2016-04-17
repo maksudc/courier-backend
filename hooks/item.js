@@ -11,7 +11,24 @@ var trackerLog = sequelize.models.trackerLog;
 
 var itemLogic = require("../logics/itemLogic");
 var RouteLogic = require("../logics/branchRouteLogic");
+
 var Promise = require("bluebird");
+var _ = require("lodash");
+
+function sanitizeBranchType(branchType){
+
+  parts = [];
+
+  if(branchType){
+    parts = branchType.split("-");
+  }
+
+  if(parts.length > 0){
+    return parts[0];
+  }
+
+  return ;
+}
 
 item.hook("afterUpdate" ,function(instance , options , next){
 
@@ -65,10 +82,13 @@ item.hook("beforeCreate" , function(instance , options , next){
   //console.log("options..");
   //console.log(options);
 
-  if(instance.orderUuid){
+  var snapshotInstance = instance._previousDataValues;
+  var updatedInstance = instance.dataValues;
+
+  if(updatedInstance.orderUuid){
 
     return order
-    .findOne({ where: { uuid: instance.orderUuid } })
+    .findOne({ where: { uuid: updatedInstance.orderUuid } })
     .then(function(parentOrderInstance){
 
       //console.log("Parent Order Instance...");
@@ -123,13 +143,6 @@ item.hook("beforeCreate" , function(instance , options , next){
     })
     .then(function(){
 
-      if(!instance.current_hub_type){
-        instance.current_hub_type = instance.entry_branch_type;
-      }
-      if(!instance.current_hub){
-        instance.current_hub = instance.entry_branch;
-      }
-
       return next();
     });
   }
@@ -152,7 +165,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
       return next();
     }
 
-    if(snapshotInstance.status == "ready"){
+    if(snapshotInstance.status == "ready" || snapshotInstance.status == "confirmed"){
       // can be switched to running
       if(updatedInstance.status == "running"){
 
@@ -163,7 +176,10 @@ item.hook("beforeUpdate" , function(instance , options , next){
         //updatedInstance.previousBranchType = snapshotInstance.currentBranchType;
         //updatedInstance.previousBranchId = snapshotInstance.currentBranchId;
 
-        return RouteLogic.getRouteBetween(instance.entry_branch_type , instance.entry_branch , instance.exit_branch_type , instance.exit_branch , null)
+        updatedInstance.current_hub = updatedInstance.entry_branch;
+        updatedInstance.current_hub_type = sanitizeBranchType(updatedInstance.entry_branch_type);
+
+        return RouteLogic.getRouteBetween(sanitizeBranchType(instance.entry_branch_type) , instance.entry_branch , sanitizeBranchType(instance.exit_branch_type) , instance.exit_branch , null)
         .then(function(routes){
 
           var firstRoute = null;
@@ -175,9 +191,14 @@ item.hook("beforeUpdate" , function(instance , options , next){
           updatedInstance.next_hub_type = firstRoute.branchType;
           updatedInstance.next_hub = firstRoute.id;
 
+          console.log('consolidated route: ');
+          console.log(firstRoute);
+
           instance.updatedInstance = updatedInstance;
+
+          return Promise.resolve(updatedInstance.status);
         })
-        .then(function(){
+        .then(function(currentStatus){
 
           // Get the tracker
           return instance.getTracker();
@@ -185,6 +206,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
 
           if(trackerItem){
 
+            console.log("Got the tracker item: "+ trackerItem.uuid);
             // Update the tracker for consistency
             trackerItem.currentBranchType = updatedInstance.current_hub_type;
             trackerItem.currentBranchId = updatedInstance.current_hub;
@@ -201,6 +223,15 @@ item.hook("beforeUpdate" , function(instance , options , next){
           return Promise.resolve(trackerItem);
         })
         .then(function(updatedResult){
+
+          //instance.dataValues = updatedInstance;
+          instance.dataValues = updatedInstance;
+
+            _.assignIn(instance._changed , { status: true });
+            _.assignIn(instance._changed , { current_hub: true });
+            _.assignIn(instance._changed , { current_hub_type: true });
+            _.assignIn(instance._changed , { next_hub: true });
+            _.assignIn(instance._changed , { next_hub_type: true });
 
           return next();
         });
@@ -219,73 +250,140 @@ item.hook("beforeUpdate" , function(instance , options , next){
         updatedInstance.current_hub_type = updatedInstance.next_hub_type;
         updatedInstance.current_hub = updatedInstance.next_hub;
 
-        instance.current_hub_type = updatedInstance.next_hub_type;
-        instance.current_hub = updatedInstance.next_hub;
-
         instance.updatedInstance = updatedInstance;
 
         var p1 = sequelize.Promise.resolve(updatedInstance.status);
 
-        if(updatedInstance.current_hub_type == updatedInstance.exit_branch_type && updatedInstance.current_hub == updatedInstance.exit_branch){
+        if(updatedInstance.current_hub_type == sanitizeBranchType(updatedInstance.exit_branch_type) && updatedInstance.current_hub == updatedInstance.exit_branch){
           updatedInstance.status = "stocked";
-          p1 = sequelize.Promise.resolve(updatedInstance.status);
+
+          return sequelize.Promise.resolve(updatedInstance.status).then(function(updatedStatus){
+            console.log(updatedStatus);
+            console.log("On instance story...");
+            //console.log(instance);
+            console.log("Updated instance");
+            //console.log(updatedInstance);
+
+            return instance.getTracker();
+          })
+          .then(function(trackerItem){
+
+            if(trackerItem){
+
+              console.log("Got the tracker Item: "+ trackerItem.uuid);
+
+              trackerItem.currentBranchType = updatedInstance.current_hub_type;
+              trackerItem.currentBranchId = updatedInstance.current_hub;
+
+              trackerItem.previousBranchType = updatedInstance.current_hub_type;
+              trackerItem.previousBranchId = updatedInstance.current_hub;
+
+              trackerItem.nextBranchType = updatedInstance.next_hub_type;
+              trackerItem.nextBranchId = updatedInstance.next_hub;
+
+              return trackerItem.save();
+            }
+            return Promise.resolve(trackerItem);
+          })
+          .then(function(updatedResult){
+
+            console.log("Returning to saving shipment");
+          })
+          .then(function(){
+
+            instance.dataValues = updatedInstance;
+
+              _.assignIn(instance._changed , { status: true });
+              _.assignIn(instance._changed , { current_hub: true });
+              _.assignIn(instance._changed , { current_hub_type: true });
+              _.assignIn(instance._changed , { next_hub: true });
+              _.assignIn(instance._changed , { next_hub_type: true });
+            return next();
+          });
+
         }else{
 
-          if(updatedInstance.exit_branch_type=="sub"){
+          var destinationModel = null;
 
-            p1 = subBranch
+          if(sanitizeBranchType(updatedInstance.exit_branch_type) == "sub"){
+            destinationModel = subBranch;
+          }else if(sanitizeBranchType(updatedInstance.exit_branch_type) == "regional"){
+            destinationModel = regionalBranch;
+          }
+
+          if(destinationModel){
+
+             return destinationModel
             .findOne({ where: { id: instance.exit_branch } })
-            .then(function(exitSubBranchInstance){
+            .then(function(exitBranchInstance){
 
-              return exitSubBranchInstance.getRegionalBranch();
+              if(exitBranchInstance){
+                if(exitBranchInstance.branchType == "regional"){
+                  return Promise.resolve(exitBranchInstance);
+                }else{
+                  return exitBranchInstance.getRegionalBranch();
+                }
+              }
             })
             .then(function(exitRegionalBranchInstance){
-
-              if(exitRegionalBranchInstance.id == updatedInstance.current_hub && exitRegionalBranchInstance.branchType == updatedInstance.current_hub_type){
-                updatedInstance.status = "reached";
+              if(exitRegionalBranchInstance){
+                if(exitRegionalBranchInstance.id == updatedInstance.current_hub && exitRegionalBranchInstance.branchType == updatedInstance.current_hub_type){
+                  updatedInstance.status = "reached";
+                }
               }
               return Promise.resolve(updatedInstance.status);
+
+            }).then(function(updatedStatus){
+              console.log(updatedStatus);
+              console.log("On instance story...");
+              //console.log(instance);
+              console.log("Updated instance");
+              //console.log(updatedInstance);
+
+              return instance.getTracker();
+            })
+            .then(function(trackerItem){
+
+              if(trackerItem){
+
+                console.log("Got the tracker Item: "+ trackerItem.uuid);
+
+                trackerItem.currentBranchType = updatedInstance.current_hub_type;
+                trackerItem.currentBranchId = updatedInstance.current_hub;
+
+                trackerItem.previousBranchType = updatedInstance.current_hub_type;
+                trackerItem.previousBranchId = updatedInstance.current_hub;
+
+                trackerItem.nextBranchType = updatedInstance.next_hub_type;
+                trackerItem.nextBranchId = updatedInstance.next_hub;
+
+                return trackerItem.save();
+              }
+              return Promise.resolve(trackerItem);
+            })
+            .then(function(updatedResult){
+
+              console.log("Returning to saving shipment");
+              instance.dataValues = updatedInstance;
+
+                _.assignIn(instance._changed , { status: true });
+                _.assignIn(instance._changed , { current_hub: true });
+                _.assignIn(instance._changed , { current_hub_type: true });
+                _.assignIn(instance._changed , { next_hub: true });
+                _.assignIn(instance._changed , { next_hub_type: true });
+              return next();
             });
           }
         }
 
-        return p1
-        .then(function(updatedStatus){
-          console.log(updatedStatus);
-          console.log("On instance story...");
-          //console.log(instance);
-          console.log("Updated instance");
-          //console.log(updatedInstance);
+        instance.dataValues = updatedInstance;
 
-          return instance.getTracker();
-        })
-        .then(function(trackerItem){
-
-          console.log("Got the tracker Item: "+ trackerItem.uuid);
-
-          if(trackerItem){
-
-            trackerItem.currentBranchType = updatedInstance.current_hub_type;
-            trackerItem.currentBranchId = updatedInstance.current_hub;
-
-            trackerItem.previousBranchType = updatedInstance.current_hub_type;
-            trackerItem.previousBranchId = updatedInstance.current_hub;
-
-            trackerItem.nextBranchType = updatedInstance.next_hub_type;
-            trackerItem.nextBranchId = updatedInstance.next_hub;
-
-            return trackerItem.save();
-          }
-          return Promise.resolve(trackerItem);
-        })
-        .then(function(updatedResult){
-
-          console.log("Returning to saving shipment");
-        })
-        .then(function(){
-
-          return next();
-        });
+          _.assignIn(instance._changed , { status: true });
+          _.assignIn(instance._changed , { current_hub: true });
+          _.assignIn(instance._changed , { current_hub_type: true });
+          _.assignIn(instance._changed , { next_hub: true });
+          _.assignIn(instance._changed , { next_hub_type: true });
+        return next();
       }
     }
 
@@ -297,7 +395,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
         //updatedInstance.previousBranchType = snapshotInstance.currentBranchType;
         //updatedInstance.previousBranchId = snapshotInstance.currentBranchId;
 
-        return RouteLogic.getRouteBetween(instance.entry_branch_type , instance.entry_branch , instance.exit_branch_type , instance.exit_branch , null)
+        return RouteLogic.getRouteBetween(sanitizeBranchType(instance.entry_branch_type) , instance.entry_branch , sanitizeBranchType(instance.exit_branch_type) , instance.exit_branch , null)
         .then(function(routes){
 
           if(routes && routes.constructor == Array && Object.keys(routes).length > 0 ){
@@ -345,6 +443,14 @@ item.hook("beforeUpdate" , function(instance , options , next){
         })
         .then(function(updatedResult){
 
+          instance.dataValues = updatedInstance;
+
+            _.assignIn(instance._changed , { status: true });
+            _.assignIn(instance._changed , { current_hub: true });
+            _.assignIn(instance._changed , { current_hub_type: true });
+            _.assignIn(instance._changed , { next_hub: true });
+            _.assignIn(instance._changed , { next_hub_type: true });
+
           return next();
         });
       }
@@ -379,11 +485,26 @@ item.hook("beforeUpdate" , function(instance , options , next){
         })
         .then(function(updatedResult){
 
+          instance.dataValues = updatedInstance;
+
+            _.assignIn(instance._changed , { status: true });
+            _.assignIn(instance._changed , { current_hub: true });
+            _.assignIn(instance._changed , { current_hub_type: true });
+            _.assignIn(instance._changed , { next_hub: true });
+            _.assignIn(instance._changed , { next_hub_type: true });
+
           return next();
         });
 
       }
     }
 
+    instance.dataValues = updatedInstance;
+
+      _.assignIn(instance._changed , { status: true });
+      _.assignIn(instance._changed , { current_hub: true });
+      _.assignIn(instance._changed , { current_hub_type: true });
+      _.assignIn(instance._changed , { next_hub: true });
+      _.assignIn(instance._changed , { next_hub_type: true });
     return next();
 });
