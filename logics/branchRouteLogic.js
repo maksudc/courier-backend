@@ -148,18 +148,15 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
   .all([p1 , p2])
   .then(function(results){
 
-    var sourceSubBranchItem = null;
-    var destinationSubBranchItem = null;
+    sourceSubBranchItem = null;
+    destinationSubBranchItem = null;
 
     //console.log("partial queries results are: "+ JSON.stringify(results));
-
-    if(results && results.constructor == Array ){
-      if(results.length > 0 && results[0] !== null && results[0].regionalBranchId){
-          sourceSubBranchItem = results[0];
-      }
-      if(results.length > 1 && results[1] !== null && results[0].regionalBranchId){
-          destinationSubBranchItem = results[1];
-      }
+    if(results.length > 0 && results[0] !== null){
+        sourceSubBranchItem = results[0];
+    }
+    if(results.length > 1 && results[1] !== null){
+        destinationSubBranchItem = results[1];
     }
 
     if(sourceSubBranchItem){
