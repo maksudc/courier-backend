@@ -215,8 +215,8 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
 
   // if the status is set to running
   // check whether any order under the shipment is still not reached and update them to running state
-  snapshotInstance = instance._previousDataValues;
-  updatedInstance = instance.dataValues;
+  var snapshotInstance = instance._previousDataValues;
+  var updatedInstance = instance.dataValues;
 
   if(!instance.changed('status')){
     return next();
@@ -226,10 +226,9 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
 
     return instance
     .getOrders()
-    .then(function(orderInstances){
+    .map(function(orderInstance){
 
-      return Promise.map(orderInstances , function(orderInstance){
-
+      //return Promise.map(orderInstances , function(orderInstance){
         preReachedStateIndex = statusStateMachine.indexOf("reached");
         orderStatusStateIndex = statusStateMachine.indexOf(orderInstance.status);
         shipmentStatusIndex = statusStateMachine.indexOf(updatedInstance.status);
@@ -248,7 +247,7 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
           }
         }
 
-      });
+      //});
     })
     .then(function(results){
       return next();
