@@ -7,6 +7,7 @@ var genericTracker = sequelize.models.genericTracker;
 
 var RouteLogic = require("../logics/branchRouteLogic");
 var Promise = require("bluebird");
+var _ = require("lodash");
 
 var statusStateMachine = ['draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'];
 
@@ -87,6 +88,19 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           })
           .then(function(updatedResult){
 
+            instance.dataValues = updatedInstance;
+            
+            _.assignIn(instance._changed , { status: true });
+
+            _.assignIn(instance._changed , { currentBranchId: true });
+            _.assignIn(instance._changed , { currentBranchType: true });
+
+            _.assignIn(instance._changed , { nextBranchId: true });
+            _.assignIn(instance._changed , { nextBranchType: true });
+
+            _.assignIn(instance._changed , { previousBranchId: true });
+            _.assignIn(instance._changed , { previousBranchType: true });
+
             return next();
           });
         }
@@ -139,6 +153,17 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
 
             console.log("Returning to saving shipment");
 
+            instance.dataValues = updatedInstance;
+            _.assignIn(instance._changed , { status: true });
+
+            _.assignIn(instance._changed , { currentBranchId: true });
+            _.assignIn(instance._changed , { currentBranchType: true });
+
+            _.assignIn(instance._changed , { nextBranchId: true });
+            _.assignIn(instance._changed , { nextBranchType: true });
+
+            _.assignIn(instance._changed , { previousBranchId: true });
+            _.assignIn(instance._changed , { previousBranchType: true });
             return next();
           });
         }
@@ -200,11 +225,33 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           })
           .then(function(updatedResult){
 
+            instance.dataValues = updatedInstance;
+
+            _.assignIn(instance._changed , { status: true });
+
+            _.assignIn(instance._changed , { currentBranchId: true });
+            _.assignIn(instance._changed , { currentBranchType: true });
+
+            _.assignIn(instance._changed , { nextBranchId: true });
+            _.assignIn(instance._changed , { nextBranchType: true });
+
+            _.assignIn(instance._changed , { previousBranchId: true });
+            _.assignIn(instance._changed , { previousBranchType: true });
             return next();
           });
         }
       }
 
+      _.assignIn(instance._changed , { status: true });
+
+      _.assignIn(instance._changed , { currentBranchId: true });
+      _.assignIn(instance._changed , { currentBranchType: true });
+
+      _.assignIn(instance._changed , { nextBranchId: true });
+      _.assignIn(instance._changed , { nextBranchType: true });
+
+      _.assignIn(instance._changed , { previousBranchId: true });
+      _.assignIn(instance._changed , { previousBranchType: true });
       return next();
 
       //return sequelize.Promise.resolve({ instance: instance , options:options , fn:fn });
