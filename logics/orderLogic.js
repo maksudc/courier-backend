@@ -683,3 +683,34 @@ var findOrderByClient = function(mobile, next){
 }
 
 exports.findOrderByClient = findOrderByClient;
+
+
+var updateStatus = function(data, next){
+
+	orderModel.findOne({where: {uuid: data.id}}).then(function(order){
+		
+		if(order){
+			order.status = data.status;
+			order.save().then(function(updatedOrder){
+				if(updatedOrder){
+					next(null, updatedOrder);
+				}
+				else next("cannot update order");
+			}).catch(function(err){
+				if(err){
+					console.log(err);
+					next(err);
+				}
+			});
+		}
+		else next(null, false);
+
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+}
+
+exports.updateStatus = updateStatus;

@@ -111,6 +111,16 @@ router.post('/createByOperator', passport.authenticate('basic', {session: false}
 });
 
 
+router.post('/updateStatus', upload.array(), function(req, res){
+
+	orderLogic.updateStatus(req.body, function(err, order){
+		if(err) res.send({"status": "error", error: err});
+		else res.send({"status": "success", data: order});
+	});
+
+});
+
+
 router.post('/deliverOrder', upload.array(), function(req, res){
 	orderLogic.deliverOrder(req.body.id, function(data){
 		res.send(data);
