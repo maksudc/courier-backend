@@ -17,8 +17,8 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
     Change the tracker branch information appropriately
   **/
     //console.log(instance);
-    console.log(instance);
-    console.log(options);
+    console.log("Shipment Uuid: "  + instance.uuid);
+    console.log("Update Options: " + JSON.stringify(options));
 
     //ShipmentModel
     //.findOne({ where: { uuid: instance.uuid } })

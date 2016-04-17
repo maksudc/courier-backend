@@ -188,13 +188,18 @@ item.hook("beforeUpdate" , function(instance , options , next){
           }else{
             firstRoute = routes[1];
           }
-          updatedInstance.next_hub_type = firstRoute.branchType;
-          updatedInstance.next_hub = firstRoute.id;
 
           console.log('consolidated route: ');
-          console.log(firstRoute);
 
-          instance.updatedInstance = updatedInstance;
+          if(firstRoute != null){
+
+              updatedInstance.next_hub_type = firstRoute.branchType;
+              updatedInstance.next_hub = firstRoute.id;
+
+              console.log(firstRoute.branchType + ":" + firstRoute.id);
+          }
+
+          //instance.updatedInstance = updatedInstance;
 
           return Promise.resolve(updatedInstance.status);
         })
