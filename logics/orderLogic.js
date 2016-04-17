@@ -277,12 +277,7 @@ var confirmOrder = function(id, code, next){
 	findOne(id, function(orderData){
 
 		if(orderData.status == 'success' && orderData.data.status == 'draft'){
-			//Following code fragment will be available when verification sms will be sent to user
-			/*if(isNaN(parseInt(code)) || !isFinite(code))
-				return next({"status": "error", "message": "Invalid verification code!!!"});
-			else if(parseInt(code) != parseInt(orderData.data.verification_code)){
-				return next({"status": "error", "message": "Verification code did not match!!!"});
-			}*/
+			
 			orderData.data.status = 'confirmed';
 			orderData.data.confirm_time = new Date();
 			orderData.data.save().then(function(newOrderData){
@@ -308,7 +303,7 @@ var confirmOrder = function(id, code, next){
 exports.confirmOrder = confirmOrder;
 
 
-var receiveOrder = function(id, next){
+var receiveOrder = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 			if(orderData.data.status == 'draft'){
@@ -316,7 +311,7 @@ var receiveOrder = function(id, next){
 			}
 
 			orderData.data.status = 'received';
-			orderData.data.receiver_operator = 'fh74t85';
+			orderData.data.receiver_operator = operator.email;
 			orderData.data.receive_time = new Date();
 			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
@@ -341,7 +336,7 @@ var receiveOrder = function(id, next){
 exports.receiveOrder = receiveOrder;
 
 
-var deliverOrder = function(id, next){
+var deliverOrder = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 
@@ -356,7 +351,7 @@ var deliverOrder = function(id, next){
 
 			//This block will be under else if block of status == 'reached'
 			orderData.data.status = 'delivered';
-			orderData.data.delivery_operator = 'adfadfadfdasfdafasdfawfe';
+			orderData.data.delivery_operator = operator.email;
 			orderData.data.delivery_time = new Date();
 			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
@@ -382,7 +377,7 @@ exports.deliverOrder = deliverOrder;
 
 
 
-var receivePayment = function(id, next){
+var receivePayment = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 
@@ -392,7 +387,7 @@ var receivePayment = function(id, next){
 			}
 
 			orderData.data.payment_status = 'paid';
-			orderData.data.payment_operator = 'qwedsafsag4w';
+			orderData.data.payment_operator = operator.email;
 			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});

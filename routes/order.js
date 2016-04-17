@@ -121,15 +121,15 @@ router.post('/updateStatus', upload.array(), function(req, res){
 });
 
 
-router.post('/deliverOrder', upload.array(), function(req, res){
-	orderLogic.deliverOrder(req.body.id, function(data){
+router.post('/deliverOrder', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
+	orderLogic.deliverOrder(req.body.id, req.user, function(data){
 		res.send(data);
 	});
 });
 
 
-router.post('/receivePayment', upload.array(), function(req, res){
-	orderLogic.receivePayment(req.body.id, function(data){
+router.post('/receivePayment', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
+	orderLogic.receivePayment(req.body.id, req.user, function(data){
 		res.send(data);
 	});
 });
@@ -142,7 +142,7 @@ router.post('/orderDetail/:id', function(req, res){
 });
 
 
-router.post('/confirmOrder', upload.array(), function(req, res){
+router.post('/confirmOrder', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 	console.log(req.body);
 
 	orderLogic.confirmOrder(req.body.id, req.body.code, function(data){
@@ -150,11 +150,12 @@ router.post('/confirmOrder', upload.array(), function(req, res){
 	});
 });
 
-router.post('/receiveOrder', upload.array(), function(req, res){
+router.post('/receiveOrder', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 
-	orderLogic.receiveOrder(req.body.id, function(data){
+	orderLogic.receiveOrder(req.body.id, req.user, function(data){
 		res.send(data);
 	});
+	
 });
 
 router.get('/getOrderByClient/:client', function(req, res){
