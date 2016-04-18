@@ -13,7 +13,7 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 // router.use(passport.authenticate('basic', {session: false}));
 // router.use(middleware.checkPermission);
 
-router.get('/getOrder/:id', function(req, res){
+router.get('/getOrderView/:id', function(req, res){
 	if(!req.params.id){
 		res.send({
 			"status": "error",
@@ -24,7 +24,7 @@ router.get('/getOrder/:id', function(req, res){
 		return;
 	}
 
-	orderLogic.orderDetail(req.params.id, function(data){
+	orderLogic.orderDetailView(req.params.id, function(data){
 		res.send(data);
 	});
 });

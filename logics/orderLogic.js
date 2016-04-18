@@ -552,15 +552,34 @@ var createByOperator = function(postData, operator, next){
 
 	}, function(addItems){
 
+		var seperateItems = [];
+
 		_.forEach(postData.item_list, function(item){
-			item["orderUuid"] = order.uuid;
-			//item["entry_branch"] = parseInt(order.entry_branch);
-			//item["entry_branch_type"] = order.entry_branch_type;
-			//item["exit_branch"] = parseInt(order.exit_branch);
-			//item["exit_branch_type"] = order.exit_branch_type;
+			
+			if(parseInt(item["amount"])>1){
+				var length = parseInt(item["amount"]);
+				var singleItem = { 
+				  amount: 1,
+				  price: item["price"],
+				  product_name: item["product_name"],
+				  unit: item["unit"],
+				  length: item["length"],
+				  width: item["width"],
+				  height: item["height"],
+				  weight: item["weight"],
+				  orderUuid: order.uuid
+				}
+
+				for(var i=0; i<length; i++) seperateItems.push(singleItem);
+			}
+			else{
+				seperateItems.push(item);
+			}
 		});
 
-		itemLogic.createMany(postData.item_list, function(tempItemList){
+		delete postData["item_list"];
+
+		itemLogic.createMany(seperateItems, function(tempItemList){
 			if(tempItemList && tempItemList.status == 'success'){
 				addItems(null);
 			}
@@ -650,6 +669,92 @@ var orderDetail = function(id, next){
 };
 
 exports.orderDetail = orderDetail;
+
+
+
+//Get details to show only. No item id will be provided here
+var orderDetailView = function(id, next){
+
+	if(!id){
+		next({"status": "error", "message": "Id required"});
+		return;
+	}
+
+	var errorData, orderDetails = {"status": ""};
+
+	async.series([function(findOrder){
+
+		findOne(id, function(orderData){
+			if(orderData.status == "success"){
+				orderDetails["status"] = "success";
+				orderDetails["data"] = {};
+				orderDetails["data"]["orderData"] = orderData.data;
+				findOrder(null);
+			}
+			else{
+				errorData = orderData;
+				findOrder(orderData);
+			}
+		});
+
+	}, function(getItems){
+
+		itemLogic.findByOrderId(id, function(itemList){
+			var itemNameList = [];
+			var itemDetails = [];
+			if(itemList.status == "success"){
+				//orderDetails["data"]["items"] = itemList.data;
+				_.forEach(itemList.data, function(singleItem){
+					var identificationString = singleItem.product_name + ' ' + 
+						singleItem.length.toString() + 'x' +
+						singleItem.height.toString() + 'x' + 
+						singleItem.width.toString() + 'x' + 
+						singleItem.weight.toString() + 'x' + 
+						singleItem.unit;
+					
+					if(itemNameList.indexOf(identificationString) < 0)
+						itemNameList.push(identificationString);
+
+					var index = itemNameList.indexOf(identificationString);
+					if(index < itemDetails.length){
+						itemDetails[index].amount = itemDetails[index].amount + 1;
+					}
+					else{
+						itemDetails.push({
+							amount: 1,
+						    unit: singleItem["unit"],
+						    price: singleItem["price"],
+						    product_name: singleItem["product_name"],
+						    length: singleItem["length"],
+						    width: singleItem["width"],
+						    height: singleItem["height"],
+						    weight: singleItem["weight"]
+						});
+					}
+				});
+				delete itemList["data"];
+				orderDetails["data"]["items"] = itemDetails;
+				return next(orderDetails);
+			}
+			else{
+				errorData = itemList;
+				findOrder(errorData);
+			}
+		});
+
+	}], function(err){
+		if(err){
+			if(errorData) return next(errorData);
+			else return next({"status": "error", "message": "Unknown error"});
+		}
+	});
+
+};
+
+exports.orderDetailView = orderDetailView;
+
+
+
 
 var updateBranch = function(id, next){
 
