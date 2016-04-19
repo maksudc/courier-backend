@@ -75,8 +75,6 @@ var findAllOrders = function(params, next){
 						singleOrder.dataValues["exit_branch_id"] = singleOrder.dataValues.exit_branch.id;
 					}
 
-					console.log(singleOrder["entry_branch_id"]);
-
 				});
 
 				next({"status": "success", data: orderList});
@@ -108,7 +106,6 @@ var findAllOrdersByMobile = function(params, next){
 			var idList = [];
 
 			_.forEach(orderList, function(singleOrder){
-				console.log(singleOrder);
 				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0)
 					idList.push(parseInt(singleOrder.entry_branch));
 				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0)
@@ -441,7 +438,6 @@ var createByOperator = function(postData, operator, next){
 		console.log("Reading admins");
 		if(!postData.admin) postData["admin"] = 'tariqul.isha@gmail.com';
 
-		console.log(operator);
 		if(operator) {
 			//when http-authentication is set, we will read data from req.user
 			postData["receiver_operator"] = operator.email;
@@ -558,21 +554,30 @@ var createByOperator = function(postData, operator, next){
 			
 			if(parseInt(item["amount"])>1){
 				var length = parseInt(item["amount"]);
-				var singleItem = { 
-				  amount: 1,
-				  price: item["price"],
-				  product_name: item["product_name"],
-				  unit: item["unit"],
-				  length: item["length"],
-				  width: item["width"],
-				  height: item["height"],
-				  weight: item["weight"],
-				  orderUuid: order.uuid
+
+				var barCode = order.bar_code.toString() + '-' + order.entry_branch.toString() + '-' + order.exit_branch.toString() + '-';
+				for(var i=0; i<length; i++) {
+					var singleItem = { 
+					  amount: 1,
+					  price: item["price"],
+					  product_name: item["product_name"],
+					  unit: item["unit"],
+					  length: item["length"],
+					  width: item["width"],
+					  height: item["height"],
+					  weight: item["weight"],
+					  bar_code: barCode + i.toString(),
+					  orderUuid: order.uuid
+					}
+					
+					seperateItems.push(singleItem);
 				}
 
-				for(var i=0; i<length; i++) seperateItems.push(singleItem);
 			}
 			else{
+				item["bar_code"] = order.bar_code.toString() + '-' + 
+					order.entry_branch.toString() + '-' + 
+					order.exit_branch.toString() + '-0';
 				seperateItems.push(item);
 			}
 		});
@@ -599,7 +604,6 @@ var createByOperator = function(postData, operator, next){
 		if(postData.nid) clientData["national_id"] = postData.nid;
 		if(postData.senderRegion) clientData["regionId"] = postData.senderRegion;
 		if(postData.sender_name) clientData["full_name"] = postData.sender_name;
-		console.log(postData.sender_name);
 
 		clientLogic.create(clientData, function(data){
 

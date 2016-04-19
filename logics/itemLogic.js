@@ -159,12 +159,8 @@ var createMany = function(data, next){
 	});
 	*/
 
-	itemModel.bulkCreate(data , { individualHooks:true }).catch(function(err){
-		if(err){
-			next({"status": "error", "message": "error while creating items"});
-			return;
-		}
-	}).then(function(items){
+	itemModel.bulkCreate(data , { individualHooks:true })
+	.then(function(items){
 		if(items){
 			var tempItems = [];
 			_.forEach(items, function(tempItem){
@@ -174,6 +170,13 @@ var createMany = function(data, next){
 		}
 		else {
 			next({"status": "errror", "message": "cannot create these items. Check them properly"});
+		}
+	})
+	.catch(function(err){
+		if(err){
+			console.log(err);
+			next({"status": "error", "message": "error while creating items"});
+			return;
 		}
 	});
 

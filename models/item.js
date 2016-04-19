@@ -18,6 +18,8 @@ module.exports = function(sequelize , DataTypes){
 
 	var item = sequelize.define('item', {
 		uuid: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV1},
+		bar_code: {type: DataTypes.STRING, unique: true},
+
 		amount: {type: DataTypes.FLOAT},
 		unit: {type: DataTypes.STRING}, //migration for this field not written!
 		price: {type: DataTypes.FLOAT, allowNull: false},
@@ -26,6 +28,7 @@ module.exports = function(sequelize , DataTypes){
 		width: {type: DataTypes.INTEGER},
 		height: {type: DataTypes.INTEGER},
 		weight: {type: DataTypes.FLOAT},
+
 		entry_branch: {type: DataTypes.INTEGER}, //where the order is received, In 2nd release, branch id
 		entry_branch_type: {type: DataTypes.ENUM('regional', 'sub')}, //Entry branch type
 		exit_branch: {type: DataTypes.INTEGER}, //where the order is right now , In 2nd release, branch id
@@ -34,6 +37,7 @@ module.exports = function(sequelize , DataTypes){
 		current_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		next_hub: {type: DataTypes.STRING}, //Next destination of this product, In 2nd release, branch id
 		next_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
+		
 		status: {
 			type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
 			defaultValue: 'ready',

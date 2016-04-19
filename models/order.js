@@ -23,6 +23,8 @@ module.exports = function(sequelize, DataTypes) {
 	var order = sequelize.define('order', {
 
 		uuid: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV1},
+		bar_code: {type: DataTypes.INTEGER, unique: true, allowNull: false, autoIncrement: true},
+
 		type: {type: DataTypes.ENUM('general', 'value_delivery'), defaultValue: 'general', allowNull: false},
 		confirm_time: {type: DataTypes.DATE},
 		receive_time: {type: DataTypes.DATE},
