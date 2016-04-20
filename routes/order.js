@@ -30,6 +30,23 @@ router.get('/getOrderView/:id', function(req, res){
 });
 
 
+router.get('/getOrder/:id', function(req, res){
+	if(!req.params.id){
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "Id required"
+			}
+		});
+		return;
+	}
+
+	orderLogic.orderDetail(req.params.id, function(data){
+		res.send(data);
+	});
+});
+
+
 router.get('/showAll', function(req, res){
 
 	orderLogic.findAllOrders(req.query, function(data){
