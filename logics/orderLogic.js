@@ -337,11 +337,7 @@ var deliverOrder = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 
-			if(orderData.data.payment_status == 'unpaid'){
-				next({"status": "error", "message": "Sorry, please clear the payment first"});
-				return;
-			}
-			else if(orderData.data.status == 'delivered'){
+			if(orderData.data.status == 'delivered'){
 				next({"status": "error", "message": "Sorry, this order is already delivered"});
 				return;
 			}
