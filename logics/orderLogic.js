@@ -492,6 +492,7 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	},function(createDraft){
+		console.log("Creating order");
 
 		var message = "";
 
@@ -528,6 +529,7 @@ var createByOperator = function(postData, operator, next){
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
+				console.log(order.uuid);
 				return createDraft(null);
 			}
 			else {
@@ -543,6 +545,7 @@ var createByOperator = function(postData, operator, next){
 
 
 	}, function(addItems){
+		console.log("Adding items");
 
 		var seperateItems = [];
 
@@ -552,6 +555,7 @@ var createByOperator = function(postData, operator, next){
 				var length = parseInt(item["amount"]);
 
 				var barCode = order.bar_code.toString() + '-' + order.entry_branch.toString() + '-' + order.exit_branch.toString() + '-';
+				
 				for(var i=0; i<length; i++) {
 					var singleItem = { 
 					  amount: 1,
@@ -574,6 +578,7 @@ var createByOperator = function(postData, operator, next){
 				item["bar_code"] = order.bar_code.toString() + '-' + 
 					order.entry_branch.toString() + '-' + 
 					order.exit_branch.toString() + '-0';
+				item["orderUuid"] = order.uuid;
 				seperateItems.push(item);
 			}
 		});
@@ -592,6 +597,7 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	}, function(createClient){
+		console.log("Creating client");
 
 		var clientData = {};
 

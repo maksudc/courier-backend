@@ -119,6 +119,7 @@ var createMany = function(data, next){
 
 	//final release: items will be created with predefined price
 	var missingIndex = _.findIndex(data, function(item){
+		console.log(item);
 		return !item.amount || !item.product_name || !item.orderUuid;
 	});
 
