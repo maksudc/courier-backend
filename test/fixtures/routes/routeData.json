@@ -1,0 +1,10 @@
+[
+  {
+    "sourceBranchLabel": "Dhaka Branch",
+    "destinationBranchLabel":"Barisal Branch",
+    "midNodes": [
+      "Rajhshahi Branch",
+      "Khulna Branch"
+    ]
+  }
+]
