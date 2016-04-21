@@ -65,6 +65,9 @@ var createShipmentWithOrders = function(postData , next){
   if(postData.shipmentType){
     _.assignIn(shipmentBaseData , { shipmentType:postData.shipmentType });
   }
+  if(postData.bar_code){
+    _.assignIn(shipmentBaseData , { bar_code:postData.bar_code });
+  }
   if(postData.sourceBranchType){
     _.assignIn(shipmentBaseData , { sourceBranchType:postData.sourceBranchType });
   }
@@ -160,6 +163,10 @@ function extractParams(params){
   }
   if(params.shipmentType){
     _.assignIn(queryOptions.where , { shipmentType: params.shipmentType } );
+  }
+
+  if(params.bar_code){
+    _.assignIn(queryOptions.where , { bar_code: params.bar_code });
   }
   if(params.sourceBranchType){
     _.assignIn(queryOptions.where , { sourceBranchType: params.sourceBranchType } );

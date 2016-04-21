@@ -38,7 +38,9 @@ module.exports = function(sequelize, DataTypes) {
     nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' )  , allowNull:true , defaultValue: null },
     nextBranchId: { type: DataTypes.INTEGER },
 
-    shipmentType:{ type: DataTypes.ENUM("local" , "national" , "international") , defaultValue:"national" }
+    shipmentType:{ type: DataTypes.ENUM("local" , "national" , "international") , defaultValue:"national" },
+
+    bar_code: {type: DataTypes.INTEGER, unique: true, allowNull: false, autoIncrement: true}
 
   } , {
 
