@@ -271,3 +271,27 @@ var updateAdmin = function(updateData, next){
 }
 
 exports.updateAdmin = updateAdmin;
+
+
+var deleteAdmin = function(email, next){
+
+    adminModel.findOne({where: {email: email}})
+    .then(function(adminData){
+        if(adminData){
+            adminData.destroy();
+            next(null, true);
+        }
+        else next(null, false);
+    }).catch(function(err){
+        if(err){
+            next(err);
+        }
+    });
+
+}
+
+exports.deleteAdmin = deleteAdmin;
+
+
+
+
