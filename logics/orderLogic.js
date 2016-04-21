@@ -10,6 +10,7 @@ var subBranchLogic = require("./subBranchLogic");
 var adminLogic = require("./admin/adminLogic");
 var _ = require("lodash");
 var async = require("async");
+var config = require("./../config");
 
 
 var findOne = function(id, next){
@@ -75,8 +76,6 @@ var findAllOrders = function(params, next){
 						singleOrder.dataValues["exit_branch_id"] = singleOrder.dataValues.exit_branch.id;
 					}
 
-					console.log(singleOrder["entry_branch_id"]);
-
 				});
 
 				next({"status": "success", data: orderList});
@@ -108,7 +107,6 @@ var findAllOrdersByMobile = function(params, next){
 			var idList = [];
 
 			_.forEach(orderList, function(singleOrder){
-				console.log(singleOrder);
 				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0)
 					idList.push(parseInt(singleOrder.entry_branch));
 				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0)
@@ -340,11 +338,7 @@ var deliverOrder = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 
-			if(orderData.data.payment_status == 'unpaid'){
-				next({"status": "error", "message": "Sorry, please clear the payment first"});
-				return;
-			}
-			else if(orderData.data.status == 'delivered'){
+			if(orderData.data.status == 'delivered'){
 				next({"status": "error", "message": "Sorry, this order is already delivered"});
 				return;
 			}
@@ -377,8 +371,9 @@ exports.deliverOrder = deliverOrder;
 
 
 
-var receivePayment = function(id, operator, next){
-	findOne(id, function(orderData){
+var receivePayment = function(paymentData, operator, next){
+
+	findOne(paymentData.id, function(orderData){
 		if(orderData.status == 'success'){
 
 			if(orderData.data.payment_status == 'paid'){
@@ -386,8 +381,20 @@ var receivePayment = function(id, operator, next){
 				return;
 			}
 
+			if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
+				if(operator.role == config.adminTypes.branch_operator.type
+					|| operator.role == config.adminTypes.super_admin.type){
+					orderData.data.payment = parseFloat(paymentData.payment);
+				}
+				else {
+					return next({"status": "error", "message": "Edit permission is not allowed for u!"});
+				}
+			}
+
 			orderData.data.payment_status = 'paid';
 			orderData.data.payment_operator = operator.email;
+
+			
 			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});
@@ -441,7 +448,6 @@ var createByOperator = function(postData, operator, next){
 		console.log("Reading admins");
 		if(!postData.admin) postData["admin"] = 'tariqul.isha@gmail.com';
 
-		console.log(operator);
 		if(operator) {
 			//when http-authentication is set, we will read data from req.user
 			postData["receiver_operator"] = operator.email;
@@ -500,6 +506,7 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	},function(createDraft){
+		console.log("Creating order");
 
 		var message = "";
 
@@ -532,10 +539,12 @@ var createByOperator = function(postData, operator, next){
 		if(postData.payment) draftOrder["payment"] = parseFloat(postData.payment);
 		if(postData.nid) draftOrder["nid"] = postData.nid;
 		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
+		if(postData.order_vat != '0') draftOrder["vat"] = true;
 
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
+				console.log(order.uuid);
 				return createDraft(null);
 			}
 			else {
@@ -551,16 +560,47 @@ var createByOperator = function(postData, operator, next){
 
 
 	}, function(addItems){
+		console.log("Adding items");
+
+		var seperateItems = [];
 
 		_.forEach(postData.item_list, function(item){
-			item["orderUuid"] = order.uuid;
-			//item["entry_branch"] = parseInt(order.entry_branch);
-			//item["entry_branch_type"] = order.entry_branch_type;
-			//item["exit_branch"] = parseInt(order.exit_branch);
-			//item["exit_branch_type"] = order.exit_branch_type;
+			
+			if(parseInt(item["amount"])>1){
+				var length = parseInt(item["amount"]);
+
+				var barCode = order.bar_code.toString() + '-' + order.entry_branch.toString() + '-' + order.exit_branch.toString() + '-';
+				
+				for(var i=0; i<length; i++) {
+					var singleItem = { 
+					  amount: 1,
+					  price: item["price"],
+					  product_name: item["product_name"],
+					  unit: item["unit"],
+					  length: item["length"],
+					  width: item["width"],
+					  height: item["height"],
+					  weight: item["weight"],
+					  bar_code: barCode + i.toString(),
+					  orderUuid: order.uuid
+					}
+					
+					seperateItems.push(singleItem);
+				}
+
+			}
+			else{
+				item["bar_code"] = order.bar_code.toString() + '-' + 
+					order.entry_branch.toString() + '-' + 
+					order.exit_branch.toString() + '-0';
+				item["orderUuid"] = order.uuid;
+				seperateItems.push(item);
+			}
 		});
 
-		itemLogic.createMany(postData.item_list, function(tempItemList){
+		delete postData["item_list"];
+
+		itemLogic.createMany(seperateItems, function(tempItemList){
 			if(tempItemList && tempItemList.status == 'success'){
 				addItems(null);
 			}
@@ -572,6 +612,7 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	}, function(createClient){
+		console.log("Creating client");
 
 		var clientData = {};
 
@@ -580,7 +621,6 @@ var createByOperator = function(postData, operator, next){
 		if(postData.nid) clientData["national_id"] = postData.nid;
 		if(postData.senderRegion) clientData["regionId"] = postData.senderRegion;
 		if(postData.sender_name) clientData["full_name"] = postData.sender_name;
-		console.log(postData.sender_name);
 
 		clientLogic.create(clientData, function(data){
 
@@ -650,6 +690,92 @@ var orderDetail = function(id, next){
 };
 
 exports.orderDetail = orderDetail;
+
+
+
+//Get details to show only. No item id will be provided here
+var orderDetailView = function(id, next){
+
+	if(!id){
+		next({"status": "error", "message": "Id required"});
+		return;
+	}
+
+	var errorData, orderDetails = {"status": ""};
+
+	async.series([function(findOrder){
+
+		findOne(id, function(orderData){
+			if(orderData.status == "success"){
+				orderDetails["status"] = "success";
+				orderDetails["data"] = {};
+				orderDetails["data"]["orderData"] = orderData.data;
+				findOrder(null);
+			}
+			else{
+				errorData = orderData;
+				findOrder(orderData);
+			}
+		});
+
+	}, function(getItems){
+
+		itemLogic.findByOrderId(id, function(itemList){
+			var itemNameList = [];
+			var itemDetails = [];
+			if(itemList.status == "success"){
+				//orderDetails["data"]["items"] = itemList.data;
+				_.forEach(itemList.data, function(singleItem){
+					var identificationString = singleItem.product_name + ' ' + 
+						singleItem.length.toString() + 'x' +
+						singleItem.height.toString() + 'x' + 
+						singleItem.width.toString() + 'x' + 
+						singleItem.weight.toString() + 'x' + 
+						singleItem.unit;
+					
+					if(itemNameList.indexOf(identificationString) < 0)
+						itemNameList.push(identificationString);
+
+					var index = itemNameList.indexOf(identificationString);
+					if(index < itemDetails.length){
+						itemDetails[index].amount = itemDetails[index].amount + 1;
+					}
+					else{
+						itemDetails.push({
+							amount: 1,
+						    unit: singleItem["unit"],
+						    price: singleItem["price"],
+						    product_name: singleItem["product_name"],
+						    length: singleItem["length"],
+						    width: singleItem["width"],
+						    height: singleItem["height"],
+						    weight: singleItem["weight"]
+						});
+					}
+				});
+				delete itemList["data"];
+				orderDetails["data"]["items"] = itemDetails;
+				return next(orderDetails);
+			}
+			else{
+				errorData = itemList;
+				findOrder(errorData);
+			}
+		});
+
+	}], function(err){
+		if(err){
+			if(errorData) return next(errorData);
+			else return next({"status": "error", "message": "Unknown error"});
+		}
+	});
+
+};
+
+exports.orderDetailView = orderDetailView;
+
+
+
 
 var updateBranch = function(id, next){
 

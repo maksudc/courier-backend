@@ -23,6 +23,8 @@ module.exports = function(sequelize, DataTypes) {
 	var order = sequelize.define('order', {
 
 		uuid: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV1},
+		bar_code: {type: DataTypes.INTEGER, unique: true, allowNull: false, autoIncrement: true},
+
 		type: {type: DataTypes.ENUM('general', 'value_delivery'), defaultValue: 'general', allowNull: false},
 		confirm_time: {type: DataTypes.DATE},
 		receive_time: {type: DataTypes.DATE},
@@ -46,9 +48,13 @@ module.exports = function(sequelize, DataTypes) {
 		next_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		next_hub: {type: DataTypes.STRING}, //Next destination of this product, In 2nd release, branch id
 
-		receiver_operator: {type: DataTypes.STRING}, //operator who received this product
+		
 		payment: {type: DataTypes.FLOAT}, //cost of the order
 		payment_status: {type: DataTypes.ENUM('unpaid', 'paid'), defaultValue: 'unpaid'}, //status of payment
+		vat: {type: DataTypes.BOOLEAN, defaultValue: false},
+		vat_amount: {type: DataTypes.INTEGER, defaultValue: 15},
+
+		receiver_operator: {type: DataTypes.STRING}, //operator who received this product
 		delivery_operator: {type: DataTypes.STRING}, //operator who delivered this product. In 2nd release, operator id
 		payment_operator: {type: DataTypes.STRING}, //operator who took the money,In 2nd release, operator id
 		status: {

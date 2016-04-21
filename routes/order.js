@@ -13,6 +13,28 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 // router.use(passport.authenticate('basic', {session: false}));
 // router.use(middleware.checkPermission);
 
+router.get('/getOrderView/:id', function(req, res){
+	if(!req.params.id){
+		res.send({
+			"status": "error",
+			"data": {
+				"message": "Id required"
+			}
+		});
+		return;
+	}
+
+	//New function, will be used to seperate multiple items
+	/*orderLogic.orderDetailView(req.params.id, function(data){
+		res.send(data);
+	});*/
+	
+	orderLogic.orderDetail(req.params.id, function(data){
+		res.send(data);
+	});
+});
+
+
 router.get('/getOrder/:id', function(req, res){
 	if(!req.params.id){
 		res.send({
@@ -129,7 +151,7 @@ router.post('/deliverOrder', passport.authenticate('basic', {session: false}), u
 
 
 router.post('/receivePayment', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
-	orderLogic.receivePayment(req.body.id, req.user, function(data){
+	orderLogic.receivePayment(req.body, req.user, function(data){
 		res.send(data);
 	});
 });
@@ -155,7 +177,7 @@ router.post('/receiveOrder', passport.authenticate('basic', {session: false}), u
 	orderLogic.receiveOrder(req.body.id, req.user, function(data){
 		res.send(data);
 	});
-	
+
 });
 
 router.get('/getOrderByClient/:client', function(req, res){

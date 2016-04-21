@@ -103,6 +103,19 @@ router.post('/update', upload.array(), function(req, res){
 
 });
 
+router.post('/delete', upload.array(), function(req, res){
+
+	if(req.user.role != config.adminTypes.super_admin.type){
+		return res.send(401);
+	}
+
+	adminLogic.deleteAdmin(req.body.email, function(err, admin){
+		if(err || !admin) res.send({"status": "error", message: err});
+		else res.send({"status":"success", data: admin});
+	});
+
+});
+
 
 
 module.exports = router;

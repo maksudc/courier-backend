@@ -235,17 +235,20 @@ order.hook("beforeUpdate" , function(instance , options , next){
         }
 
         console.log("Adjusted Route is : ");
-        console.log(firstRoute);
+        if(firstRoute != null){
+            console.log(firstRoute.branchType + ":" +firstRoute.id);
 
-        updatedInstance.next_hub_type = firstRoute.branchType;
-        updatedInstance.next_hub = firstRoute.id;
+            updatedInstance.next_hub_type = firstRoute.branchType;
+            updatedInstance.next_hub = firstRoute.id;
 
-        instance.set("next_hub_type" , firstRoute.branchType);
-        instance.set('next_hub' , firstRoute.id);
+            instance.set("next_hub_type" , firstRoute.branchType);
+            instance.set('next_hub' , firstRoute.id);
+        }
 
         //instance.updatedInstance = updatedInstance;
         console.log("After adjusting next :....");
-        console.log(instance);
+        console.log(instance.next_hub_type);
+        console.log(instance.next_hub);
 
         return Promise.resolve(updatedInstance.status);
       })
@@ -268,7 +271,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
           trackerItem.nextBranchId = updatedInstance.next_hub;
 
           console.log(" updated tracker Item...");
-          console.log(trackerItem);
+          console.log(trackerItem.uuid);
 
           return trackerItem.save();
         }
