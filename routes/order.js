@@ -24,7 +24,12 @@ router.get('/getOrderView/:id', function(req, res){
 		return;
 	}
 
-	orderLogic.orderDetailView(req.params.id, function(data){
+	//New function, will be used to seperate multiple items
+	/*orderLogic.orderDetailView(req.params.id, function(data){
+		res.send(data);
+	});*/
+	
+	orderLogic.orderDetail(req.params.id, function(data){
 		res.send(data);
 	});
 });
