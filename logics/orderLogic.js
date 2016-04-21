@@ -569,7 +569,7 @@ var createByOperator = function(postData, operator, next){
 			if(parseInt(item["amount"])>1){
 				var length = parseInt(item["amount"]);
 
-				var barCode = order.bar_code.toString() + '-' + order.entry_branch.toString() + '-' + order.exit_branch.toString() + '-';
+				var barCode = order.bar_code.toString() + '-';
 				
 				for(var i=0; i<length; i++) {
 					var singleItem = { 
