@@ -234,7 +234,7 @@ var getShipmentDetails = function(shipmentId , params , next){
 
         console.log("Total " + orders.length + "Orders Found");
 
-        barCode = shipmentItem.bar_code + "";
+        barCode = shipmentInstance.bar_code + "";
 
         if( barCode.length < shipmentBarCodeConfig.MAX_LENGTH ){
           fillUpLength = shipmentBarCodeConfig.MAX_LENGTH - barCode.length;
@@ -242,7 +242,7 @@ var getShipmentDetails = function(shipmentId , params , next){
             barCode = "0" + barCode;
           }
         }
-        shipmentItem.dataValues.bar_code = barCode;
+        shipmentInstance.bar_code = barCode;
 
         data = {};
         _.assignIn(data , { shipment: shipmentInstance } );
@@ -297,7 +297,7 @@ var getShipments = function(params , next){
               barCode = "0" + barCode;
             }
           }
-          shipmentItem.dataValues.bar_code = barCode;
+          shipmentItem.bar_code = barCode;
 
           _.assignIn(data , { shipment:shipmentItem });
           _.assignIn( data , { orders:orders });
