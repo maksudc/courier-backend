@@ -14,6 +14,9 @@ var itemLogic = require("../logics/itemLogic");
 var orderLogic = require("../logics/orderLogic");
 var RouteLogic = require("../logics/branchRouteLogic");
 
+var handlebars = require("handlebars");
+var fs = require("fs");
+
 var messageUtils = require("../utils/message");
 
 var Promise = require("bluebird");
@@ -92,7 +95,9 @@ order.hook("afterUpdate" , function(instance , options , next){
           console.log("Sending message...");
 
           // Send message to the receiver about stocing of his/her order
-          messageUtils.sendMessage(updatedInstance.receiver , "Order from " + JSON.stringify(updatedInstance.sender) + " for you has reached " , function(data){
+          content = fs.readFileSync("./views/message/stocked.handlebars");
+          contentTemplate = handlebars.compile(content.toString());
+          messageUtils.sendMessage(updatedInstance.receiver ,  contentTemplate({ updatedInstance: updatedInstance }), function(data){
             console.log(data);
           });
         }
@@ -127,7 +132,10 @@ order.hook("afterUpdate" , function(instance , options , next){
       })
       .then(function(results){
 
-        messageUtils.sendMessage(updatedInstance.sender , "Order has been delivered to:  " + JSON.stringify(updatedInstance.receiver) , function(data){
+        content = fs.readFileSync("./views/message/delivered.handlebars");
+        contentTemplate = handlebars.compile(content.toString());
+
+        messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance }) , function(data){
           console.log(data);
         });
       });
@@ -236,7 +244,6 @@ order.hook("beforeUpdate" , function(instance , options , next){
         instance.set('next_hub' , firstRoute.id);
 
         //instance.updatedInstance = updatedInstance;
-
         console.log("After adjusting next :....");
         console.log(instance);
 
@@ -466,8 +473,11 @@ order.hook("beforeUpdate" , function(instance , options , next){
             if(nextRouteIndex==1){
               // just started off the regional branch
               // So let the sender know of the status
+              content = fs.readFileSync( "./views/message/start.handlebars");
+              contentTemplate = handlebars.compile(content.toString());
+
               console.log("starting the message sending to let know the sender of the starting of the journey...");
-              messageUtils.sendMessage(updatedInstance.sender , "Your order is on the way " , function(data){
+              messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance }) , function(data){
                 console.log(data);
               });
             }

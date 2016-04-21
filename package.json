@@ -17,6 +17,7 @@
     "express-flash": "0.0.2",
     "express-session": "^1.13.0",
     "google-libphonenumber": "^1.0.17",
+    "handlebars": "^4.0.5",
     "http-status-codes": "^1.0.6",
     "jade": "~1.11.0",
     "lodash": "^4.6.1",
