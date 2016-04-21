@@ -370,8 +370,9 @@ exports.deliverOrder = deliverOrder;
 
 
 
-var receivePayment = function(id, operator, next){
-	findOne(id, function(orderData){
+var receivePayment = function(paymentData, operator, next){
+
+	findOne(paymentData.id, function(orderData){
 		if(orderData.status == 'success'){
 
 			if(orderData.data.payment_status == 'paid'){
@@ -381,6 +382,10 @@ var receivePayment = function(id, operator, next){
 
 			orderData.data.payment_status = 'paid';
 			orderData.data.payment_operator = operator.email;
+
+			//Check if payment is not the same, then if the initiator is branch operator or not
+
+			
 			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});
