@@ -151,7 +151,7 @@ router.post('/deliverOrder', passport.authenticate('basic', {session: false}), u
 
 
 router.post('/receivePayment', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
-	orderLogic.receivePayment(req.body.id, req.user, function(data){
+	orderLogic.receivePayment(req.body, req.user, function(data){
 		res.send(data);
 	});
 });
