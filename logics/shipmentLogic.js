@@ -234,6 +234,16 @@ var getShipmentDetails = function(shipmentId , params , next){
 
         console.log("Total " + orders.length + "Orders Found");
 
+        barCode = shipmentItem.bar_code + "";
+
+        if( barCode.length < shipmentBarCodeConfig.MAX_LENGTH ){
+          fillUpLength = shipmentBarCodeConfig.MAX_LENGTH - barCode.length;
+          for(I = 0; I < fillUpLength ; I++){
+            barCode = "0" + barCode;
+          }
+        }
+        shipmentItem.bar_code = barCode;
+
         data = {};
         _.assignIn(data , { shipment: shipmentInstance } );
         _.assignIn(data , { orders:orders }  );
@@ -273,10 +283,22 @@ var getShipments = function(params , next){
       .findAll({ where: { shipmentUuid: shipmentItem.uuid } })
       .then(function(orders){
 
+        var shipmentBarCodeConfig = require("../config/shipmentBarCode");
+
         data = {};
         if(orders && orders.length > 0){
           //console.log(datas.length + " Data are there  ");
           //console.log();
+          barCode = shipmentItem.bar_code + "";
+
+          if( barCode.length < shipmentBarCodeConfig.MAX_LENGTH ){
+            fillUpLength = shipmentBarCodeConfig.MAX_LENGTH - barCode.length;
+            for(I = 0; I < fillUpLength ; I++){
+              barCode = "0" + barCode;
+            }
+          }
+          shipmentItem.bar_code = barCode;
+
           _.assignIn(data , { shipment:shipmentItem });
           _.assignIn( data , { orders:orders });
           //datas.push(data);
