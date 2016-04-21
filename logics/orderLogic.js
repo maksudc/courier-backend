@@ -10,6 +10,7 @@ var subBranchLogic = require("./subBranchLogic");
 var adminLogic = require("./admin/adminLogic");
 var _ = require("lodash");
 var async = require("async");
+var config = require("./../config");
 
 
 var findOne = function(id, next){
@@ -380,10 +381,18 @@ var receivePayment = function(paymentData, operator, next){
 				return;
 			}
 
+			if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
+				if(operator.role == config.adminTypes.branch_operator.type
+					|| operator.role == config.adminTypes.super_admin.type){
+					orderData.data.payment = parseFloat(paymentData.payment);
+				}
+				else {
+					return next({"status": "error", "message": "Edit permission is not allowed for u!"});
+				}
+			}
+
 			orderData.data.payment_status = 'paid';
 			orderData.data.payment_operator = operator.email;
-
-			//Check if payment is not the same, then if the initiator is branch operator or not
 
 			
 			orderData.data.save().then(function(newOrderData){
