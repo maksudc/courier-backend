@@ -14,6 +14,8 @@ var itemLogic = require("../logics/itemLogic");
 var orderLogic = require("../logics/orderLogic");
 var RouteLogic = require("../logics/branchRouteLogic");
 
+var messageUtils = require("../utils/message");
+
 var Promise = require("bluebird");
 
 var _ = require("lodash");
@@ -45,6 +47,10 @@ order.hook("beforeCreate" , function(instance , options , next){
     instance.dataValues.current_hub_type = sanitizeBranchType(instance.entry_branch_type);
     instance.current_hub_type = sanitizeBranchType(instance.entry_branch_type);
   }
+
+  _.assignIn(instance._changed , { current_hub: true });
+  _.assignIn(instance._changed , { current_hub_type: true });
+
   return next();
 });
 
@@ -78,6 +84,18 @@ order.hook("afterUpdate" , function(instance , options , next){
       })
       .then(function(results){
         return Promise.resolve(results);
+      })
+      .then(function(){
+
+        if(updatedInstance.status == 'stocked'){
+
+          console.log("Sending message...");
+
+          // Send message to the receiver about stocing of his/her order
+          messageUtils.sendMessage(updatedInstance.receiver , "Order from " + JSON.stringify(updatedInstance.sender) + " for you has reached " , function(data){
+            console.log(data);
+          });
+        }
       });
 
     }else if(updatedInstance.status == "delivered"){
@@ -106,6 +124,12 @@ order.hook("afterUpdate" , function(instance , options , next){
 
         //Noe mark the items under this order as delivered
         return item.update({ status: 'delivered' } , {  where:{ orderUuid: updatedInstance.uuid } , individualHooks:true });
+      })
+      .then(function(results){
+
+        messageUtils.sendMessage(updatedInstance.sender , "Order has been delivered to:  " + JSON.stringify(updatedInstance.receiver) , function(data){
+          console.log(data);
+        });
       });
     }
   }
@@ -308,9 +332,18 @@ order.hook("beforeUpdate" , function(instance , options , next){
             _.assignIn(instance._changed , { current_hub_type: true });
             _.assignIn(instance._changed , { next_hub: true });
             _.assignIn(instance._changed , { next_hub_type: true });
-
-          return next();
+        })
+        // .then(function(){
+        //    // moved to after update
+        //   // Send message to the receiver about stocing of his/her order
+        //   messageUtils.sendMessage(updatedInstance.receiver , "Order from " + JSON.stringify(updatedInstance.sender) + " for you has reached " , function(data){
+        //     console.log(data);
+        //   });
+        // })
+        .then(function(){
+            return next();
         });
+
       }else{
 
         var destinationModel = null;
@@ -517,6 +550,6 @@ order.hook("beforeUpdate" , function(instance , options , next){
     _.assignIn(instance._changed , { current_hub_type: true });
     _.assignIn(instance._changed , { next_hub: true });
     _.assignIn(instance._changed , { next_hub_type: true });
-  return next();
 
+    return next();
 });

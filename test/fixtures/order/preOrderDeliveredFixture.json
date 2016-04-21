@@ -1,0 +1,11 @@
+{
+  "sender": "01520080138",
+  "receiver": "01520080138",
+  "status": "confirmed",
+
+  "entry_hub_type":"sub-branch",
+  "entry_hub_label": "D1",
+
+  "exit_hub_type":"sub-branch",
+  "exit_hub_label": "B1"
+}
