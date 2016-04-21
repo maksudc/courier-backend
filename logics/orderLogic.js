@@ -539,6 +539,7 @@ var createByOperator = function(postData, operator, next){
 		if(postData.payment) draftOrder["payment"] = parseFloat(postData.payment);
 		if(postData.nid) draftOrder["nid"] = postData.nid;
 		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
+		if(postData.order_vat != '0') draftOrder["vat"] = true;
 
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
@@ -562,12 +563,13 @@ var createByOperator = function(postData, operator, next){
 		console.log("Adding items");
 
 		var seperateItems = [];
-		var barCode = order.bar_code.toString() + '-' + order.entry_branch.toString() + '-' + order.exit_branch.toString() + '-';
 
 		_.forEach(postData.item_list, function(item){
 			
 			if(parseInt(item["amount"])>1){
 				var length = parseInt(item["amount"]);
+
+				var barCode = order.bar_code.toString() + '-' + order.entry_branch.toString() + '-' + order.exit_branch.toString() + '-';
 				
 				for(var i=0; i<length; i++) {
 					var singleItem = { 
@@ -579,18 +581,18 @@ var createByOperator = function(postData, operator, next){
 					  width: item["width"],
 					  height: item["height"],
 					  weight: item["weight"],
-					  bar_code: barCode + seperateItems.length.toString(),
+					  bar_code: barCode + i.toString(),
 					  orderUuid: order.uuid
 					}
-
-					console.log(singleItem.bar_code);
 					
 					seperateItems.push(singleItem);
 				}
 
 			}
 			else{
-				item["bar_code"] = barCode + seperateItems.length.toString();
+				item["bar_code"] = order.bar_code.toString() + '-' + 
+					order.entry_branch.toString() + '-' + 
+					order.exit_branch.toString() + '-0';
 				item["orderUuid"] = order.uuid;
 				seperateItems.push(item);
 			}
