@@ -218,6 +218,12 @@ order.hook("beforeUpdate" , function(instance , options , next){
           firstRoute = routes[0];
         }else{
           firstRoute = routes[1];
+
+          // started off directly the regional branch , so send the message since it is running
+          console.log("starting the message sending to let know the sender of the starting of the journey...");
+          messageUtils.sendMessage(updatedInstance.sender , "Your order is on the way" , function(data){
+            console.log(data);
+          });
         }
 
         console.log("Adjusted Route is : ");
@@ -455,6 +461,16 @@ order.hook("beforeUpdate" , function(instance , options , next){
 
             instance.set("next_hub_type" , nextRoute.branchType);
             instance.set("next_hub" , nextRoute.id);
+
+            //Check whether the order has started off the regional branch or not
+            if(nextRouteIndex==1){
+              // just started off the regional branch
+              // So let the sender know of the status
+              console.log("starting the message sending to let know the sender of the starting of the journey...");
+              messageUtils.sendMessage(updatedInstance.sender , "Your order is on the way " , function(data){
+                console.log(data);
+              });
+            }
           }
         }
 
@@ -484,7 +500,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
         return Promise.resolve(trackerItem);
       })
       .then(function(updatedResult){
-        instance.dataValues = updatedInstance;
+          instance.dataValues = updatedInstance;
 
           _.assignIn(instance._changed , { status: true });
           _.assignIn(instance._changed , { current_hub: true });
