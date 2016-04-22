@@ -7,7 +7,29 @@ var shipment = sequelize.models.shipment;
 var order = sequelize.models.order;
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
+var shipmentBarCodeConfig = require("../config/shipmentBarcode");
 
+
+function prepareBarCode(shipmentInstance){
+
+  if(!shipmentInstance){
+    return ;
+  }
+
+  if(shipmentInstance.bar_code){
+
+    barCode = shipmentInstance.bar_code + "";
+
+    if( barCode.length < shipmentBarCodeConfig.MAX_LENGTH ){
+      fillUpLength = shipmentBarCodeConfig.MAX_LENGTH - barCode.length;
+      for(I = 0; I < fillUpLength ; I++){
+        barCode = "0" + barCode;
+      }
+    }
+    shipmentInstance.bar_code = barCode;
+  }
+  return ;
+}
 
 var ShipmentStatus = ['draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'];
 
@@ -226,6 +248,8 @@ var getShipmentDetails = function(shipmentId , params , next){
 
     shipmentInstance = sInstance;
 
+    prepareBarCode(shipmentInstance);
+
     if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
       order
@@ -233,16 +257,6 @@ var getShipmentDetails = function(shipmentId , params , next){
       .then(function(orders){
 
         console.log("Total " + orders.length + "Orders Found");
-
-        barCode = shipmentInstance.bar_code + "";
-
-        if( barCode.length < shipmentBarCodeConfig.MAX_LENGTH ){
-          fillUpLength = shipmentBarCodeConfig.MAX_LENGTH - barCode.length;
-          for(I = 0; I < fillUpLength ; I++){
-            barCode = "0" + barCode;
-          }
-        }
-        shipmentInstance.bar_code = barCode;
 
         data = {};
         _.assignIn(data , { shipment: shipmentInstance } );
@@ -277,27 +291,18 @@ var getShipments = function(params , next){
   .findAll(queryParams.queryOptions)
   .map(function(shipmentItem){
 
+    prepareBarCode(shipmentItem);
+
     if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
       return order
       .findAll({ where: { shipmentUuid: shipmentItem.uuid } })
       .then(function(orders){
 
-        var shipmentBarCodeConfig = require("../config/shipmentBarCode");
-
         data = {};
         if(orders && orders.length > 0){
           //console.log(datas.length + " Data are there  ");
           //console.log();
-          barCode = shipmentItem.bar_code + "";
-
-          if( barCode.length < shipmentBarCodeConfig.MAX_LENGTH ){
-            fillUpLength = shipmentBarCodeConfig.MAX_LENGTH - barCode.length;
-            for(I = 0; I < fillUpLength ; I++){
-              barCode = "0" + barCode;
-            }
-          }
-          shipmentItem.bar_code = barCode;
 
           _.assignIn(data , { shipment:shipmentItem });
           _.assignIn( data , { orders:orders });
