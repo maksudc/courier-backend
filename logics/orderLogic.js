@@ -23,14 +23,21 @@ var findOne = function(id, next){
 	orderModel.findOne({where: {uuid: id}}).then(function(order){
 
 		if(order) {
-			order.getMoney_order().then(function(moneyOrder){
-				if(moneyOrder){
-					console.log("*************************************");
-					console.log(moneyOrder.dataValues);
-					console.log("*************************************");
-				}
-			});
-			next({"status": "success", "data": order});
+			if(order.dataValues.type == 'value_delivery'){
+				console.log("Value delivery");
+				order.getMoney_order().then(function(moneyOrder){
+					console.log("Money order");
+					console.log(moneyOrder);
+					if(moneyOrder){
+						console.log("Money order found");
+						order.dataValues["vd_status"] = moneyOrder.dataValues.status;
+						order.dataValues["vd_id"] = moneyOrder.dataValues.id;
+						next({"status": "success", "data": order});			
+					}
+					else next({"status":"error", "message": "No money parcel found against this vd!"});
+				});
+			}
+			else next({"status": "success", "data": order});
 		}
 		else next({"status":"error", message:"No order found by this id"});
 
@@ -551,6 +558,7 @@ var createByOperator = function(postData, operator, next){
 		if(postData.nid) draftOrder["nid"] = postData.nid;
 		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
+		if(postData.type == 'vd') draftOrder["type"] = 'value_delivery';
 
 
 
