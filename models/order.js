@@ -79,6 +79,7 @@ module.exports = function(sequelize, DataTypes) {
 				order.hasMany(models.item, { foreignKey: 'orderUuid' , as:"items"});
 				//ShipmentModel.hasMany(order , {foreignKey: 'shipmentUuid'});
 				order.belongsTo(models.shipment , { foreignKey: 'shipmentUuid' , as:"shipment" });
+				order.hasOne(models.money , { foreignKey: 'money_order_id' , as: "money_order" });
 
 				order.hasOne(models.genericTracker , {
 					foreignKey: "trackableId",
