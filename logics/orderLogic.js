@@ -22,7 +22,16 @@ var findOne = function(id, next){
 
 	orderModel.findOne({where: {uuid: id}}).then(function(order){
 
-		if(order) next({"status": "success", "data": order});
+		if(order) {
+			order.getMoney_order().then(function(moneyOrder){
+				if(moneyOrder){
+					console.log("*************************************");
+					console.log(moneyOrder.dataValues);
+					console.log("*************************************");
+				}
+			});
+			next({"status": "success", "data": order});
+		}
 		else next({"status":"error", message:"No order found by this id"});
 
 	}).catch(function(err){
@@ -441,7 +450,7 @@ var createByOperator = function(postData, operator, next){
 
 	/*For first release:
 	create draft --> createProducts --> add items --> receive this product(add operator id by login information)*/
-	var createdProducts = {}, itemList, order, errorData, adminData;
+	var createdProducts = {}, itemList, order, errorData, adminData, exitBranch;
 
 	async.series([
 	function(setOperatorCredentials){
@@ -494,6 +503,7 @@ var createByOperator = function(postData, operator, next){
 			else {
 				postData["exit_branch_id"] = branch.data.id;
 				postData["exit_branch_type"] = "sub-branch";
+				exitBranch = branch.data;
 
 				/*setting some dummy data for entry branch type and entry branch id.
 				 This will be read from req.user*/
@@ -531,8 +541,7 @@ var createByOperator = function(postData, operator, next){
 			exit_branch: postData["exit_branch_id"],
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"],
-			payment: parseInt(postData["total_price"]),
-			money_order_id: 9
+			payment: parseInt(postData["total_price"])
 		};
 
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
@@ -544,14 +553,11 @@ var createByOperator = function(postData, operator, next){
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
 
 
+
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
 				console.log(order.uuid);
-				
-				var moneyData = {
-
-				}					
 
 				return createDraft(null);
 			}
@@ -566,7 +572,41 @@ var createByOperator = function(postData, operator, next){
 			}
 		});
 
-	}, function(addItems){
+	}, function(createMoneyOrder){
+
+		if(postData.type!='vd') createMoneyOrder(null);
+		else{
+			var moneyData = {
+				sender_full_name: postData.receiver_name,
+				sender_mobile: postData.receiver,
+				sender_nid: '',
+				receiver_full_name: postData.sender_name,
+				receiver_mobile: postData.sender,
+				receiver_nid: '',
+				region: operator.region_id, //destination of money order, credential of operator
+				regionalBranch: operator.regional_branch_id,
+				subBranch: operator.sub_branch_id,
+				source_region_id: null, //source of money order, will be the exit branch of order
+				source_regional_branch_id: parseInt(exitBranch.regionalBranch.id),
+				source_sub_branch_id: parseInt(exitBranch.id),
+				amount: postData.vd_amount,
+				charge: postData.vd_charge,
+				discount: postData.vd_discount,
+				payable: postData.vd_payable,
+				type: 'virtual_delivery',
+				money_order_id: order.uuid
+			}
+
+			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){
+				if(err) createMoneyOrder(err);
+				else if(!moneyOrderData) createMoneyOrder("No money order created");
+				else {
+					createMoneyOrder(null);
+				}
+			});
+		}
+
+	},function(addItems){
 		console.log("Adding items");
 
 		var seperateItems = [];
