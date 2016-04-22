@@ -18,10 +18,9 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
 
-// @todo re-enable the followign 2 lines
 
-//router.use(passport.authenticate('basic', {session: false}));
-//router.use(middleware.checkPermission);
+router.use(passport.authenticate('basic', {session: false}));
+router.use(middleware.checkPermission);
 
 router.post("/regional$" , upload.array() , function(req , res){
 
