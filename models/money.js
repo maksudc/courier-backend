@@ -35,10 +35,11 @@ module.exports = function(sequelize , DataTypes){
 				money.belongsTo(models.regionalBranch , { foreignKey: 'regional_branch_id' });
 				money.belongsTo(models.subBranch , { foreignKey: 'sub_branch_id' });
 				money.belongsTo(models.region , { foreignKey: 'region_id' });
+				money.belongsTo(models.region , { foreignKey: 'source_region_id' });
 				money.belongsTo(models.admin , { foreignKey: 'receiver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'deliver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'payment_receiver_operator' });
-				money.belongsTo(models.order , { foreignKey: 'money_order_id' }); //this should be removed
+				money.belongsTo(models.order , { foreignKey: 'money_order_id' });
 			}
 		}
 	});
