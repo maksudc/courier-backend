@@ -29,7 +29,7 @@ describe("Message Tests" , function(){
 
   describe('description', function(){
 
-    it("create the order" , function(done){
+    it.skip("create the order" , function(done){
 
       var deliveredContent = fs.readFileSync("./test/fixtures/order/preOrderDeliveredFixture.json");
       var preDeliveredOrderData = JSON.parse(deliveredContent);

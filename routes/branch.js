@@ -10,17 +10,20 @@ var subBranch = sequelize.models.subBranch;
 var passport = require('passport');
 var bodyParser = require('body-parser');
 
+var branchLogic = require("../logics/branchLogic");
+
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
-router.use(passport.authenticate('basic', {session: false}));
-router.use(middleware.checkPermission);
 
-router.get("/" , BranchController.index);
+// @todo re-enable the followign 2 lines
 
-router.post("/regional" , upload.array() , function(req , res){
+//router.use(passport.authenticate('basic', {session: false}));
+//router.use(middleware.checkPermission);
+
+router.post("/regional$" , upload.array() , function(req , res){
 
   postData = req.body;
 
@@ -33,7 +36,7 @@ router.post("/regional" , upload.array() , function(req , res){
   }
 
   postData.branchType = "regional";
-  
+
   regionalBranch
   .create(postData)
   .then(function(result){
@@ -44,7 +47,7 @@ router.post("/regional" , upload.array() , function(req , res){
   });
 });
 
-router.post("/sub" , upload.array() , function(req , res){
+router.post("/sub$" , upload.array() , function(req , res){
 
   postData = req.body;
 
@@ -63,5 +66,47 @@ router.post("/sub" , upload.array() , function(req , res){
     res.send({ status:"error" , data:null , message:err });
   });
 });
+
+router.get("/:branchType" , function(req , res){
+
+  branchLogic.getBranches(req.params.branchType , req.query , function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
+router.get("/:branchType/:branchId" , function(req , res){
+
+  branchLogic.getBranch(req.params.branchType ,req.params.branchId , function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
+router.put("/:branchType/:branchId" , upload.array() , function(req , res){
+
+  branchLogic.updateBranch(req.params.branchType , req.params.branchId , req.body , function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
+router.delete("/:branchType/:branchId" , upload.array() , function(req , res){
+
+  branchLogic.deleteBranch(req.params.branchType , req.params.branchId , function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
+router.get("/$" , BranchController.index);
 
 module.exports = router;
