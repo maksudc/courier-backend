@@ -6,6 +6,7 @@ var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var itemLogic = require("./itemLogic");
 var clientLogic = require("./clientLogic");
+var moneyLogic = require("./moneyLogic");
 var subBranchLogic = require("./subBranchLogic");
 var adminLogic = require("./admin/adminLogic");
 var _ = require("lodash");
@@ -530,7 +531,8 @@ var createByOperator = function(postData, operator, next){
 			exit_branch: postData["exit_branch_id"],
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"],
-			payment: parseInt(postData["total_price"])
+			payment: parseInt(postData["total_price"]),
+			money_order_id: 9
 		};
 
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
@@ -541,17 +543,16 @@ var createByOperator = function(postData, operator, next){
 		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
 
-		//analyze if vd
-		if(postData.type == 'vd')
-		{
-
-		}
-		return;
 
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
 				console.log(order.uuid);
+				
+				var moneyData = {
+
+				}					
+
 				return createDraft(null);
 			}
 			else {
@@ -564,7 +565,6 @@ var createByOperator = function(postData, operator, next){
 				return createDraft("Cannot create draft order");
 			}
 		});
-
 
 	}, function(addItems){
 		console.log("Adding items");

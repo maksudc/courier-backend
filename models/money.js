@@ -38,9 +38,47 @@ module.exports = function(sequelize , DataTypes){
 				money.belongsTo(models.admin , { foreignKey: 'receiver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'deliver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'payment_receiver_operator' });
+				money.belongsTo(models.order , { foreignKey: 'money_order_id' }); //this should be removed
 			}
 		}
 	});
 
 	return money;
 };
+
+
+/*
+'use strict';
+
+module.exports = {
+  up: function (queryInterface, Sequelize) {
+    
+
+      queryInterface.addColumn("money" , "vd_order_id" , {
+
+        type: Sequelize.UUID,
+        allowNull: true,
+        references:{
+          model: "orders",
+          key: "uuid"
+        }
+      }).then(function(){
+        queryInterface.sequelize.query(
+          " ALTER TABLE `money` ADD CONSTRAINT `money_ibfk_7` FOREIGN KEY (`vd_order_id`) REFERENCES `orders` ( `uuid` ) ON DELETE SET NULL ON UPDATE CASCADE; "
+        );
+      });
+  },
+
+  down: function (queryInterface, Sequelize) {
+    
+    
+      queryInterface.removeColumn("money" , "vd_order_id").then(function(){
+        queryInterface.sequelize.query(
+          "ALTER TABLE `money` DROP FOREIGN KEY `vd_order_id_foreign_idx`;"
+        )
+      });
+    
+  }
+};
+
+*/
