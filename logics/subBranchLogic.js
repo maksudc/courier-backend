@@ -14,7 +14,15 @@ var findOneById = function(id, next){
 
 	SubBranchModel.findOne({where: {id: id}}).then(function(branch){
 		if(branch){
-			return next({"status": "success", data: branch.dataValues});
+			branch.getRegionalBranch().then(function(regionalBranch){
+				if(regionalBranch){
+					var branchData = branch.dataValues;
+					branchData["regionalBranch"] = regionalBranch.dataValues;
+					console.log(branchData);
+					return next({"status": "success", data: branchData});
+				}
+				else return next({"status": "success", data: branch.dataValues});
+			});
 		}
 		else return next({"status": "error", "message": "No sub-branch by given id"});
 	}).catch(function(err){

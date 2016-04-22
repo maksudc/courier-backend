@@ -36,6 +36,8 @@ module.exports = function(sequelize , DataTypes){
 				money.belongsTo(models.subBranch , { foreignKey: 'sub_branch_id' });
 				money.belongsTo(models.region , { foreignKey: 'region_id' });
 				money.belongsTo(models.region , { foreignKey: 'source_region_id' });
+				money.belongsTo(models.region , { foreignKey: 'source_regional_branch_id' });
+				money.belongsTo(models.region , { foreignKey: 'source_sub_branch_id' });
 				money.belongsTo(models.admin , { foreignKey: 'receiver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'deliver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'payment_receiver_operator' });

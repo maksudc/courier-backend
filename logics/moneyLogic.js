@@ -33,10 +33,24 @@ var create = function(operator, moneyData, next){
 		charge: parseInt(moneyData.charge),
 		discount: parseInt(moneyData.discount) || 0,
 		payable: parseInt(moneyData.payable),
-		receiver_operator: operator.email,
 		region_id: parseInt(moneyData.region),
 		regional_branch_id: parseInt(moneyData.regionalBranch),
-		sub_branch_id: parseInt(moneyData.subBranch),
+		sub_branch_id: parseInt(moneyData.subBranch)
+	}
+
+	if(moneyData.type == 'virtual_delivery') 
+	{
+		postData["type"] = moneyData["type"];
+		postData["money_order_id"] = moneyData["money_order_id"];
+		postData["source_region_id"] = moneyData.source_region_id;
+		postData["source_regional_branch_id"] = moneyData.source_regional_branch_id;
+		postData["source_sub_branch_id"] = moneyData.source_sub_branch_id;
+	}
+	else {
+		postData["source_region_id"] = operator.region_id;
+		postData["source_regional_branch_id"] = operator.regional_branch_id;
+		postData["source_sub_branch_id"] = operator.sub_branch_id;
+		postData["receiver_operator"] = operator.email;
 	}
 
 	if(moneyData.vat == '1.15') postData["vat"] = true;
