@@ -23,6 +23,10 @@ module.exports = function(sequelize , DataTypes){
 			type: DataTypes.ENUM('draft','received', 'deliverable','delivered'),
 			defaultValue: 'draft',
 			allowNull: false
+		},
+		type: {
+			type: DataTypes.ENUM('general', 'virtual_delivery'),
+			defaultValue: 'general'
 		}
 	} , {
 
