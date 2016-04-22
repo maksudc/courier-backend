@@ -541,6 +541,13 @@ var createByOperator = function(postData, operator, next){
 		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
 
+		//analyze if vd
+		if(postData.type == 'vd')
+		{
+
+		}
+		return;
+
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
