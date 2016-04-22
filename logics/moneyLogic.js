@@ -240,10 +240,122 @@ var deliverOrder = function(id, verification_code, operator, next){
 			}
 			else{
 				//Not in desired state
-				next("Cannot set this status bcause of money order logic");
+				next("Cannot set this status because of money order logic");
 			}
 		}
 	});
 }
 
 exports.deliverOrder = deliverOrder;
+
+var deleteMoneyOrder = function(operator, id, next){
+	var oldMoneyOrder, receiver_operator, newOrderId;
+
+	async.series([
+	function(findOrder){
+
+		findById(id, function(err, moneyOrder){
+			if(err) findOrder(err);
+			else if(!moneyOrder) findOrder("No money order found");
+			else {
+				oldMoneyOrder = moneyOrder;
+				findOrder(null);
+			}
+		});
+
+	}, function(findOperator){
+
+		adminLogic.findAdmin(oldMoneyOrder.receiver_operator, function(err, admin){
+			if(err) findOperator(err);
+			else if(!admin) findOperator("This money order was created by a ghost!");
+			else {
+				receiver_operator = admin.dataValues;
+				findOperator(null);
+			}
+		});
+
+	}, function(createMoneyOrder){
+
+		var newMoneyOrder = {
+			sender_full_name: oldMoneyOrder.receiver_full_name,
+			sender_mobile: oldMoneyOrder.receiver_mobile,
+			sender_nid: oldMoneyOrder.receiver_nid || '',
+			receiver_full_name: oldMoneyOrder.sender_full_name,
+			receiver_mobile: oldMoneyOrder.sender_mobile,
+			receiver_nid: oldMoneyOrder.sender_nid || '',
+			amount: parseInt(oldMoneyOrder.amount) - parseInt(oldMoneyOrder.charge) + parseInt(oldMoneyOrder.discount),
+			charge: parseInt(oldMoneyOrder.charge),
+			discount: parseInt(oldMoneyOrder.discount) || 0,
+			payable: parseInt(oldMoneyOrder.amount),
+			receiver_operator: operator.email,
+			region: parseInt(receiver_operator.region_id),
+			regionalBranch: parseInt(receiver_operator.regional_branch_id),
+			subBranch: parseInt(receiver_operator.sub_branch_id),
+		}
+
+		
+
+		create(operator, newMoneyOrder, function(err, moneyOrder){
+			if(err) createMoneyOrder(err);
+			else if(!newMoneyOrder) createMoneyOrder("Could not create money order");
+			else {
+				console.log(moneyOrder);
+				console.log("Money order redirected!");
+				newOrderId = moneyOrder.id;
+				createMoneyOrder(null);
+			}
+		});
+
+	}, function(confirmNewOrder){
+
+		moneyModel.findOne({where: {id: newOrderId}})
+			.then(function(moneyOrder){
+				moneyOrder.status = 'deliverable';
+				moneyOrder.payment_receiver_operator = operator.email;
+				moneyOrder.save();
+				confirmNewOrder(null);
+			}).catch(function(err){
+				if(err){
+					confirmNewOrder(err);
+				}
+			});
+
+	}, function(deliverOldOrder){
+
+		moneyModel.findOne({where: {id: oldMoneyOrder.id}})
+			.then(function(moneyOrder){
+				moneyOrder.status = 'delivered';
+				if(!moneyOrder.dataValues.payment_receiver_operator) moneyOrder.payment_receiver_operator = operator.email;
+				if(!moneyOrder.dataValues.deliver_operator) moneyOrder.deliver_operator = operator.email;
+				moneyOrder.save();
+				return next(null, {id: newOrderId});
+				deliverOldOrder(null);
+			}).catch(function(err){
+				if(err){
+					confirmNewOrder(err);
+				}
+			});
+
+	}], 
+	function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+	//findAdmin
+
+}
+
+exports.deleteMoneyOrder = deleteMoneyOrder;
+
+
+
+
+
+
+
+
+
+
