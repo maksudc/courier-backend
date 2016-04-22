@@ -74,4 +74,16 @@ router.post('/deliver', upload.array(), function(req, res){
 });
 
 
+router.post('/delete', upload.array(), function(req, res){
+	moneyLogic.deleteMoneyOrder(req.user, req.body.money_order_id, function(err, data){
+		if(err || !data){
+			res.send({"status": "error", "error": err});
+		}
+		else {
+			res.send({"status": "success", "data": data});
+		}
+	});
+});
+
+
 module.exports = router;
