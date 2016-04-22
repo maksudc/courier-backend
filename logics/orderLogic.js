@@ -61,9 +61,9 @@ var findAllOrders = function(params, next){
 			var idList = [];
 
 			_.forEach(orderList, function(singleOrder){
-				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0)
+				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0 && !isNaN(parseInt(singleOrder.entry_branch)))
 					idList.push(parseInt(singleOrder.entry_branch));
-				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0)
+				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0 && !isNaN(parseInt(singleOrder.exit_branch)))
 					idList.push(parseInt(singleOrder.exit_branch));
 			});
 

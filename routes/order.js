@@ -54,6 +54,9 @@ router.get('/getOrder/:id', function(req, res){
 
 router.get('/showAll', function(req, res){
 
+	console.log("Calling all received orders");
+	console.log(req.query);
+
 	orderLogic.findAllOrders(req.query, function(data){
 		res.send(data);
 	});
