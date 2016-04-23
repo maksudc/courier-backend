@@ -33,33 +33,35 @@ function prepareBarCode(shipmentInstance){
 
 var ShipmentStatus = ['draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'];
 
-var unpackShipment = function(shipmentId , next){
+var unpackShipment = function(postData ,  next){
 
-  shipment
-  .findOne({ where:{ uuid: shipmentId } })
-  .then(function(shipmentInstance){
+  var exitBranchType = postData.exitBranchType;
+  var exitBranchId = postData.exitBranchId;
 
-    if(!shipmentInstance){
-      next({ status: "error" , statusCode:HttpStatus.NOT_FOUND , message:"Shipment Not found" , data:null });
-      return;
-    }
+  var branchUtils = require("../utils/branch");
 
-    if(shipmentInstance.status != "reached" ){
-      next({ status: "error" , statusCode:HttpStatus.FORBIDDEN , message:"Can not unpack unless it has reached the destination regional branch" , data:null });
-      return;
-    }
+  var whereParams = {
+    exit_branch_type: branchUtils.desanitizeBranchType(exitBranchType) ,
+    exit_branch: exitBranchId,
 
-    return shipmentInstance.getOrders();
-  })
+    status: "reached"
+  };
+
+  order
+  .findAll({ where: whereParams })
   .map(function(orderInstance){
 
-    currentIndex = ShipmentStatus.indexOf(orderInstance.status);
+    /*currentIndex = ShipmentStatus.indexOf(orderInstance.status);
     lastIndex = ShipmentStatus.indexOf('stocked');
 
     if(currentIndex < lastIndex){
-      orderInstance.status = "running";
-      return orderInstance.save();
-    }
+        orderInstance.status = "running";
+        return orderInstance.save();
+    }*/
+
+    orderInstance.status = "running";
+    return orderInstance.save();
+
   })
   .then(function(results){
       next({ status:"success" , statusCode: HttpStatus.OK , message:null , data:results });
@@ -67,6 +69,41 @@ var unpackShipment = function(shipmentId , next){
   .catch(function(err){
     next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:JSON.stringify(err) , data:null });
   });
+
+  // shipment
+  // .findOne({ where:{ uuid: shipmentId } })
+  // .then(function(shipmentInstance){
+  //
+  //   if(!shipmentInstance){
+  //     next({ status: "error" , statusCode:HttpStatus.NOT_FOUND , message:"Shipment Not found" , data:null });
+  //     return;
+  //   }
+  //
+  //   if(shipmentInstance.status != "reached" ){
+  //     next({ status: "error" , statusCode:HttpStatus.FORBIDDEN , message:"Can not unpack unless it has reached the destination regional branch" , data:null });
+  //     return;
+  //   }
+  //
+  //   return shipmentInstance.getOrders();
+  // })
+  // .map(function(orderInstance){
+  //
+  //   currentIndex = ShipmentStatus.indexOf(orderInstance.status);
+  //   lastIndex = ShipmentStatus.indexOf('stocked');
+  //
+  //   if(currentIndex < lastIndex){
+  //     if(branchUtils.sanitizeBranchType(orderInstance.exit_branch_type) == sanitizeBranchType(exitBranchType) && orderInstance.exit_branch == exitBranchId){
+  //       orderInstance.status = "running";
+  //       return orderInstance.save();
+  //     }
+  //   }
+  // })
+  // .then(function(results){
+  //     next({ status:"success" , statusCode: HttpStatus.OK , message:null , data:results });
+  // })
+  // .catch(function(err){
+  //   next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:JSON.stringify(err) , data:null });
+  // });
 
 };
 

@@ -10,9 +10,9 @@ router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 
-router.post("/:id/unpack" , upload.array() , function(req , res){
+router.post("/unpack" , upload.array() , function(req , res){
 
-  shipmentLogic.unpackShipment(req.params.id , function(data){
+  shipmentLogic.unpackShipment(req.body , function(data){
     if(data.statusCode){
       res.status(data.statusCode);
     }
