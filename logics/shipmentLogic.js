@@ -7,7 +7,29 @@ var shipment = sequelize.models.shipment;
 var order = sequelize.models.order;
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
+var shipmentBarCodeConfig = require("../config/shipmentBarcode");
 
+
+function prepareBarCode(shipmentInstance){
+
+  if(!shipmentInstance){
+    return ;
+  }
+
+  if(shipmentInstance.bar_code){
+
+    barCode = shipmentInstance.bar_code + "";
+
+    if( barCode.length < shipmentBarCodeConfig.MAX_LENGTH ){
+      fillUpLength = shipmentBarCodeConfig.MAX_LENGTH - barCode.length;
+      for(I = 0; I < fillUpLength ; I++){
+        barCode = "0" + barCode;
+      }
+    }
+    shipmentInstance.bar_code = barCode;
+  }
+  return ;
+}
 
 var ShipmentStatus = ['draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'];
 
@@ -64,6 +86,9 @@ var createShipmentWithOrders = function(postData , next){
   }
   if(postData.shipmentType){
     _.assignIn(shipmentBaseData , { shipmentType:postData.shipmentType });
+  }
+  if(postData.bar_code){
+    _.assignIn(shipmentBaseData , { bar_code:postData.bar_code });
   }
   if(postData.sourceBranchType){
     _.assignIn(shipmentBaseData , { sourceBranchType:postData.sourceBranchType });
@@ -161,6 +186,10 @@ function extractParams(params){
   if(params.shipmentType){
     _.assignIn(queryOptions.where , { shipmentType: params.shipmentType } );
   }
+
+  if(params.bar_code){
+    _.assignIn(queryOptions.where , { bar_code: params.bar_code });
+  }
   if(params.sourceBranchType){
     _.assignIn(queryOptions.where , { sourceBranchType: params.sourceBranchType } );
   }
@@ -219,6 +248,8 @@ var getShipmentDetails = function(shipmentId , params , next){
 
     shipmentInstance = sInstance;
 
+    prepareBarCode(shipmentInstance);
+
     if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
       order
@@ -260,6 +291,8 @@ var getShipments = function(params , next){
   .findAll(queryParams.queryOptions)
   .map(function(shipmentItem){
 
+    prepareBarCode(shipmentItem);
+
     if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
       return order
@@ -270,6 +303,7 @@ var getShipments = function(params , next){
         if(orders && orders.length > 0){
           //console.log(datas.length + " Data are there  ");
           //console.log();
+
           _.assignIn(data , { shipment:shipmentItem });
           _.assignIn( data , { orders:orders });
           //datas.push(data);

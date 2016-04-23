@@ -3,9 +3,9 @@ module.exports = {
         {
             "name":"Dhaka",
             "regionalBranch":{
-                
+
                 "label":"Dhaka Branch",
-                "branchType": "regional" ,                        
+                "branchType": "regional" ,
                 "SubBranches":[
                     {
                         "label":"D1",
@@ -23,15 +23,15 @@ module.exports = {
                         "label":"D4",
                         "branchType":"sub"
                     }
-                ]   
-            }                 
+                ]
+            }
         },
         {
             "name":"Rajhshahi",
             "regionalBranch":{
-                
+
                 "label":"Rajhshahi Branch",
-                "branchType": "regional",            
+                "branchType": "regional",
                 "SubBranches":[
                     {
                         "label":"R1",
@@ -49,15 +49,15 @@ module.exports = {
                         "label":"R4",
                         "branchType":"sub"
                     }
-                ]     
-            }                  
+                ]
+            }
         },
         {
             "name":"Chittagong",
             "regionalBranch":{
-                
+
                 "label":"Chittagong Branch",
-                "branchType": "regional",            
+                "branchType": "regional",
                 "SubBranches":[
                     {
                         "label":"C1",
@@ -75,16 +75,16 @@ module.exports = {
                         "label":"C4",
                         "branchType":"sub"
                     }
-                ]     
-            }                     
+                ]
+            }
         },
         {
-                      
+
             "name":"Khulna",
             "regionalBranch":{
-                
+
                 "label":"Khulna Branch",
-                "branchType":"regional",            
+                "branchType":"regional",
                 "SubBranches":[
                     {
                         "label":"K1",
@@ -102,14 +102,14 @@ module.exports = {
                         "label":"K4",
                         "branchType":"sub"
                     }
-                ]   
-            }                
+                ]
+            }
         },
         {
-            
+
             "name":"Barisal",
             "regionalBranch":{
-                
+
                 "label":"Barisal Branch",
                 "branchType":"regional",
                 "SubBranches":[
@@ -129,15 +129,15 @@ module.exports = {
                         "label":"B4",
                         "branchType":"sub"
                     }
-                ]    
-            }                
+                ]
+            }
         },
-        { 
+        {
             "name":"Sylhet",
             "regionalBranch":{
-                
+
                 "label":"Sylhet Branch",
-                "branchType":"regional", 
+                "branchType":"regional",
                 "SubBranches":[
                     {
                         "label":"S1",
@@ -155,8 +155,8 @@ module.exports = {
                         "label":"S4",
                         "branchType":"sub"
                     }
-                ]      
-            }               
+                ]
+            }
         }
-    ],   
-}
+    ],
+};

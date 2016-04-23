@@ -16,6 +16,8 @@
     "express": "~4.13.1",
     "express-flash": "0.0.2",
     "express-session": "^1.13.0",
+    "google-libphonenumber": "^1.0.17",
+    "handlebars": "^4.0.5",
     "http-status-codes": "^1.0.6",
     "jade": "~1.11.0",
     "lodash": "^4.6.1",
@@ -28,8 +30,14 @@
     "passport-http": "^0.3.0",
     "passport-local": "^1.0.0",
     "redis": "^2.5.3",
+    "request": "^2.72.0",
     "sequelize": "^3.19.3",
     "sequelize-cli": "^2.3.1",
     "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "should": "^8.3.1"
   }
 }

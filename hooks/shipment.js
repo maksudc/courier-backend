@@ -89,7 +89,7 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           .then(function(updatedResult){
 
             instance.dataValues = updatedInstance;
-            
+
             _.assignIn(instance._changed , { status: true });
 
             _.assignIn(instance._changed , { currentBranchId: true });
