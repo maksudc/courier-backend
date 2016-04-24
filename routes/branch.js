@@ -18,6 +18,7 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
 
+
 router.use(passport.authenticate('basic', {session: false}));
 router.use(middleware.checkPermission);
 
