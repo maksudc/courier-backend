@@ -235,10 +235,19 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
       console.log("Expanded mid nodes number: " + midNodesExpanded.length);
 
       //next(midNodesExpanded);
-      return midNodesExpanded;
+      if(next){
+        return next({ status: "success" , statusCode: HttpStatus.OK , message:null , data:midNodesExpanded  });
+      }else{
+        return midNodesExpanded;
+      }
   })
   .catch(function(err){
+
+    if(next){
+      return next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message:err , data:null  });
+    }else{
       return Promise.reject(JSON.stringify(err));
+    }
   });
 };
 
