@@ -13,7 +13,7 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 router.get("/from/:sourceSubBranchId/to/:destinationSubBranchId" , function(req , res){
 
     //console.log(req.params.sourceSubBranchId);
-    //console.log(req.params.destinationSubBranchId);
+    //console.log(req.params.de`stinationSubBranchId);
 
     branchRouteLogic.getFullRouteBetween(req.params.sourceSubBranchId , req.params.destinationSubBranchId , function(data){
        if(data){
@@ -33,5 +33,17 @@ router.post("/" , upload.array(), function(req , res){
   });
 
 });
+
+router.get("/$" , function(req , res){
+
+  branchRouteLogic.getDefinedRoutes(function(data){
+
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
 
 module.exports = router;

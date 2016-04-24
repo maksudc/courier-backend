@@ -106,6 +106,4 @@ router.delete("/:branchType/:branchId" , upload.array() , function(req , res){
   });
 });
 
-router.get("/$" , BranchController.index);
-
 module.exports = router;
