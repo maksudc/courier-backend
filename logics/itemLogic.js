@@ -32,6 +32,31 @@ var findOneById = function(id, next){
 
 exports.findOneById = findOneById;
 
+
+var findOneByParams = function(params, next){
+
+	itemModel.findOne({where: params}).catch(function(err){
+
+		if(err){
+			next({"status": "error","data": null, "message": "Cannot get this item, an error occurred"});
+			return;
+		}
+
+	}).then(function(item){
+
+		if(item){
+			next({"status": "success","data": item});
+		}
+		else{
+			next({"status": "error", "message": "No item found by this id", "data": null});
+		}
+
+	});
+};
+
+exports.findOneByParams = findOneByParams;
+
+
 var findManyByIds = function(ids, next){
 
 };
@@ -360,13 +385,28 @@ var addItems = function(data, next){
 
 exports.addItems = addItems;
 
-var receiveItem = function(id, next){
+var updateItemStatus = function(params, next){
+	
+	var findParams = {};
+	if(params["bar_code"]) findParams["bar_code"] = params["bar_code"];
+	if(params["id"]) findParams["uuid"] = params["id"];
+
 	var item, route;
 
 	async.series([function(getItem){
 
 		console.log("Get item by id");
+		/*
 		findOneById(id, function(data){
+			if(data.status == "success") {
+				item = data.data;
+				getItem(null);
+			}
+			else getItem("Error finding item by given id");
+		});
+		*/
+
+		findOneByParams(findParams, function(data){
 			if(data.status == "success") {
 				item = data.data;
 				getItem(null);
@@ -377,76 +417,41 @@ var receiveItem = function(id, next){
 	}, function(getRoute){
 
 		console.log("Get route");
-		//The following is the ugliest fix of my life. Ashamed of it
-		var a, b;
-		if(item.dataValues.entry_branch_type == 'regional-branch') a = 'regional';
-		else a = 'sub';
-		if(item.dataValues.exit_branch_type == 'regional-branch') b = 'regional';
-		else b = 'sub';
-
-		branchRouteLogic.getRouteBetween(a, item.dataValues.entry_branch, b, item.dataValues.exit_branch, null).then(function(routes){
-			route = routes;
-			getRoute(null);
-		}).catch(function(err){
-			console.log("Error while finding route");
-			console.log(err);
-			if(err) getRoute(err);
-		});
+		getRoute(null);
+		
+		/*
+			Route checking is not needed right now. This will be added later. 
+			This check will be regional branch and sub branch check of operator 
+			and current regional/sub branch
+		*/
 
 	}, function(setStatus){
 
-		console.log(item.dataValues);
+		console.log("Setting status");
 
-		if(item.dataValues.status == 'running' || item.dataValues.status == "ready"){
-			console.log("Route length: " + route.length);
+		item.status = params["status"];
+		item.save().then(function(newItem){
 
-			if(!item.dataValues.current_hub){
-				item.current_hub = parseInt(route[0].dataValues.id);
-				if(route.length == 1){
-					item.status = "reached";
-					item.next_hub = parseInt(route[0].dataValues.id);
-				}
+			console.log(newItem.dataValues.status);
+			console.log("Item updated");
+
+			getRemainingItems(newItem.dataValues.orderUuid, newItem.dataValues.status, function(err, remainingCount){
+				if(err) setStatus(err);
 				else {
-					item.status = "received";
-					item.next_hub = parseInt(route[1].dataValues.id);
+					next(null, {
+						current_bar_code: params["bar_code"],
+						current_status: newItem.dataValues.status,
+						remaining_items: parseInt(remainingCount)
+					});
 				}
-			}
-			else{
-				item.current_hub = item.dataValues.next_hub;
-
-				var index = _.findIndex(route, function(branch){
-					return parseInt(branch.dataValues.id) == parseInt(item.dataValues.next_hub);
-				});
-
-				if(index < 0) {
-					setStatus("This should not have happended!!! Error in item logic");
-					return;
-				}
-				else if(index < route.length - 1){
-					item.status = "received";
-					item.current_hub = item.dataValues.next_hub;
-					item.next_hub = route[index + 1].dataValues.id;
-				}
-				else {
-					item.status = "reached";
-					item.current_hub = item.dataValues.next_hub;
-					item.next_hub = item.dataValues.next_hub;
-				}
-			}
-
-			item.save().then(function(tempItem){
-
-				updateOrderWithBranch(tempItem.dataValues.orderUuid, function(err, order){
-					if(err) next(err);
-					else next(null, tempItem);
-
-					setStatus(null);
-				});
 			});
-		}
-		else{
-			setStatus("Cannot rceive item that is not running or ready");
-		}
+
+		}).catch(function(err){
+			if(err){
+				console.log(err);
+				setStatus(err);
+			}
+		});
 
 	}],
 	function(err){
@@ -456,12 +461,19 @@ var receiveItem = function(id, next){
 	});
 };
 
-exports.receiveItem = receiveItem;
+exports.updateItemStatus = updateItemStatus;
 
-var setItemRunning  = function(id, next){
+var setItemRunning  = function(params, next){
 
-	itemModel.findOne({where: {uuid: id}}).then(function(item){
+	var findParams = {};
+	if(params["id"]) findParams["uuid"] = params["id"];
+	if(params["bar_code"]) findParams["bar_code"] = params["bar_code"];
 
+	console.log(findParams);
+
+	itemModel.findOne({where: findParams}).then(function(item){
+
+		console.log(item);
 		if(item.dataValues.status == 'received' || item.dataValues.status == 'reached'){
 			item.status = 'running';
 			item.save().then(function(newItem){
@@ -473,6 +485,9 @@ var setItemRunning  = function(id, next){
 					next(err);
 				}
 			});
+		}
+		else {
+			console.log("Fadsfjakhfa");
 		}
 
 	}).catch(function(err){
@@ -524,4 +539,26 @@ var updateOrderWithBranch = function(id, next){
 	}).catch(function(err){
 		if(err) next(err);
 	});
+}
+
+
+var getRemainingItems = function(orderId, updatedStatus, next){
+
+	itemModel.findAll({where: 
+		{
+			orderUuid: orderId,
+			status: {
+				$not: updatedStatus
+			}
+		}}).then(function(itemList){
+
+		next(null, itemList.length);
+		
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
 }

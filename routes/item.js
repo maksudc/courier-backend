@@ -82,12 +82,26 @@ router.post('/addItems', upload.array(), function(req, res){
 });
 
 router.post('/receiveItem', upload.array(), function(req, res){
-	if(!req.body.id){
+	if(!req.body){
 		res.send({"status": "error", "message": "Not enought information given", "data": null});
 		return;
 	}
 
-	itemLogic.receiveItem(req.body.id, function(err, item){
+	itemLogic.receiveItem(req.body, function(err, item){
+		console.log(err);
+		if(err) res.send({"status": "error", data: err});
+		else res.send({"status": "success", data: item});
+	});
+});
+
+
+router.post('/updateItemStatus', upload.array(), function(req, res){
+	if(!req.body){
+		res.send({"status": "error", "message": "Not enought information given", "data": null});
+		return;
+	}
+
+	itemLogic.updateItemStatus(req.body, function(err, item){
 		console.log(err);
 		if(err) res.send({"status": "error", data: err});
 		else res.send({"status": "success", data: item});
@@ -95,12 +109,12 @@ router.post('/receiveItem', upload.array(), function(req, res){
 });
 
 router.post('/setItemRunning', upload.array(), function(req, res){
-	if(!req.body.id){
+	if(!req.body){
 		res.send({"status": "error", "message": "Not enought information given", "data": null});
 		return;
 	}
 
-	itemLogic.setItemRunning(req.body.id, function(err, item){
+	itemLogic.setItemRunning(req.body, function(err, item){
 		console.log(err);
 		if(err) res.send({"status": "error", data: err});
 		else res.send({"status": "success", data: item});
