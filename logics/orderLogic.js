@@ -359,6 +359,13 @@ var deliverOrder = function(id, operator, next){
 				next({"status": "error", "message": "Sorry, this order is already delivered"});
 				return;
 			}
+			else if( (orderData.data.dataValues.exit_branch_type == 'sub-branch' && parseInt(orderData.data.dataValues.exit_branch)!= operator.sub_branch_id)
+				|| (orderData.data.dataValues.exit_branch_type == 'regional-branch' && parseInt(orderData.data.dataValues.exit_branch)!= operator.regional_branch_id)
+			){
+				console.log("Other branch's order");
+				next({"status": "error", "message": "Sorry, this order is not of your branch!"});
+				return;
+			}
 
 			//This block will be under else if block of status == 'reached'
 			orderData.data.status = 'delivered';
@@ -504,7 +511,7 @@ var createByOperator = function(postData, operator, next){
 		then, blame munna
 		*/
 		console.log("Setting branches");
- 		// @// TODO: Integrate regional branch as entry or exit
+ 		
 		subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
 			if(branch.status == "error") testBranches(branch.message);
 			else {
