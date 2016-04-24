@@ -435,14 +435,10 @@ var updateItemStatus = function(params, next){
 			console.log(newItem.dataValues.status);
 			console.log("Item updated");
 
-			getRemainingItems(newItem.dataValues.orderUuid, newItem.dataValues.status, function(err, remainingCount){
+			getRemainingItems(newItem.dataValues.orderUuid, newItem.dataValues.status, function(err, itemCredential){
 				if(err) setStatus(err);
 				else {
-					next(null, {
-						current_bar_code: params["bar_code"],
-						current_status: newItem.dataValues.status,
-						remaining_items: parseInt(remainingCount)
-					});
+					next(null, itemCredential);
 				}
 			});
 
@@ -545,14 +541,39 @@ var updateOrderWithBranch = function(id, next){
 var getRemainingItems = function(orderId, updatedStatus, next){
 
 	itemModel.findAll({where: 
-		{
-			orderUuid: orderId,
-			status: {
-				$not: updatedStatus
-			}
-		}}).then(function(itemList){
+	{
+		orderUuid: orderId,
+		status: {
+			$not: updatedStatus
+		}
+	}}).then(function(itemList){
 
-		next(null, itemList.length);
+		//next(null, itemList.length);
+		if(itemList.length == 0)
+			orderLogic.findOne(orderId, function(orderData){
+				
+				if(orderData.data){
+					if(orderData.data.dataValues.status != updatedStatus){
+						orderData.data.status = updatedStatus;
+						orderData.data.save();
+					}
+			
+					next(null, {
+						"remainingItemCount": itemList.length,
+						"orderUpdated": true
+					});
+				}
+				else next(null, {
+					"remainingItemCount": itemList.length,
+					"error": true,
+					"errorMessage": "Error while update order. No order found!",
+					"orderUpdated": false
+				});
+					
+			});
+		else next(null, {
+			"remainingItemCount": itemList.length
+		});
 		
 	}).catch(function(err){
 		if(err){
