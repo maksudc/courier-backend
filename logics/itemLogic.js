@@ -548,31 +548,34 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 		}
 	}}).then(function(itemList){
 
-		//next(null, itemList.length);
-		if(itemList.length == 0)
-			orderLogic.findOne(orderId, function(orderData){
-				
-				if(orderData.data){
-					if(orderData.data.dataValues.status != updatedStatus){
-						orderData.data.status = updatedStatus;
-						orderData.data.save();
-					}
+		
+		orderLogic.findOne(orderId, function(orderData){
+
+			var orderUpdated = false;
 			
-					next(null, {
-						"remainingItemCount": itemList.length,
-						"orderUpdated": true
-					});
+			if(orderData.data){
+				if(orderData.data.dataValues.status != updatedStatus && itemList.length == 0){
+					orderData.data.status = updatedStatus;
+					orderData.data.save();
+					orderUpdated = true;
 				}
-				else next(null, {
+				else if(orderData.data.dataValues.status == updatedStatus && itemList.length == 0){
+					orderUpdated = true;
+				}
+		
+				next(null, {
 					"remainingItemCount": itemList.length,
-					"error": true,
-					"errorMessage": "Error while update order. No order found!",
-					"orderUpdated": false
+					"orderUpdated": orderUpdated,
+					"orderData": orderData.data.dataValues
 				});
-					
+			}
+			else next(null, {
+				"remainingItemCount": itemList.length,
+				"error": true,
+				"errorMessage": "Error while update order. No order found!",
+				"orderUpdated": false
 			});
-		else next(null, {
-			"remainingItemCount": itemList.length
+				
 		});
 		
 	}).catch(function(err){
