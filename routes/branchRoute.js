@@ -24,6 +24,20 @@ router.get("/from/:sourceSubBranchId/to/:destinationSubBranchId" , function(req 
     });
 });
 
+router.get("/get" , function(req , res){
+
+    //console.log(req.params.sourceSubBranchId);
+    //console.log(req.params.de`stinationSubBranchId);
+
+    branchRouteLogic.getRouteBetween(req.query.sourceBranchType , req.query.sourceBranchId , req.query.destinationBranchType , req.query.destinationBranchId , function(data){
+       if(data){
+           res.send(data);
+       }else{
+           res.send({ "status": "error" , data:data , "message": "error occured " });
+       }
+    });
+});
+
 router.post("/" , upload.array(), function(req , res){
 
   console.log(req.body);
