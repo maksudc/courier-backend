@@ -4,9 +4,25 @@ var Sequelize = DB.Sequelize;
 var RouteModel = sequelize.models.branchRoute;
 var RegionalBranchModel = sequelize.models.regionalBranch;
 var SubBranchModel = sequelize.models.subBranch;
+var HttpStatus = require("http-status-codes");
+
 var _ = require("lodash");
 
 var Promise = require("bluebird");
+
+var getDefinedRoutes = function(next){
+
+  var routeResult = null;
+
+  RouteModel
+  .findAll({ order: "sourceId ASC" })
+  .then(function(routeItems){
+    next({ status: "success" , statusCode: HttpStatus.OK , message:null , data:routeItems });
+  })
+  .catch(function(err){
+    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message: JSON.stringify(err) , data:null });
+  });
+};
 
 var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSubBranchId , next){
 
@@ -219,10 +235,19 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
       console.log("Expanded mid nodes number: " + midNodesExpanded.length);
 
       //next(midNodesExpanded);
-      return midNodesExpanded;
+      if(next){
+        return next({ status: "success" , statusCode: HttpStatus.OK , message:null , data:midNodesExpanded  });
+      }else{
+        return midNodesExpanded;
+      }
   })
   .catch(function(err){
+
+    if(next){
+      return next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message:err , data:null  });
+    }else{
       return Promise.reject(JSON.stringify(err));
+    }
   });
 };
 
@@ -328,3 +353,4 @@ var newRoute = function(postData , next){
 exports.getFullRouteBetween = getFullRouteBetweenSubBranches;
 exports.newRoute = newRoute;
 exports.getRouteBetween = getRouteBetween;
+exports.getDefinedRoutes = getDefinedRoutes;
