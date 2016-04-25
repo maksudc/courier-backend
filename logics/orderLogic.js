@@ -2,8 +2,9 @@ var DB = require("../models/index");
 var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var orderModel = sequelize.models.order;
-var regionalBranch = require("./regionalBranchLogic");
+var regionalBranchLogic = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
+var branchLogic = require("./branchLogic");
 var itemLogic = require("./itemLogic");
 var clientLogic = require("./clientLogic");
 var moneyLogic = require("./moneyLogic");
@@ -445,7 +446,7 @@ exports.receivePayment = receivePayment;
 function findBranch(branchType, branchId, next){
 
 	if(branchType == 'regional-branch'){
-		regionalBranch.findOneById(branchId, function(branchData){
+		regionalBranchLogic.findOneById(branchId, function(branchData){
 			return next(branchData);
 		});
 	}
@@ -734,12 +735,47 @@ var orderDetail = function(id, next){
 		itemLogic.findByOrderId(id, function(itemList){
 			if(itemList.status == "success"){
 				orderDetails["data"]["items"] = itemList.data;
-				return next(orderDetails);
+				//return next(orderDetails);
+				getItems(null);
 			}
 			else{
 				errorData = itemList;
 				findOrder(errorData);
 			}
+		});
+
+	}, function(getEntryBranch){
+
+		var entry_branch_id = parseInt(orderDetails.data.orderData.dataValues.entry_branch);
+		var entry_branch_type = orderDetails.data.orderData.dataValues.entry_branch_type == 'regional-branch'? 'regional' : 'sub';
+
+		if(!entry_branch_id){
+			orderDetails.data.orderData.dataValues["entry_branch_label"] = 'No Entry branch!';
+			getEntryBranch(null);
+		}
+		else branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
+			
+			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["entry_branch_label"] = branchData.data.dataValues.label;
+			else orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
+			getEntryBranch(null);
+		});
+
+	}, function(getExitBranch){
+
+		var exit_branch_type = orderDetails.data.orderData.dataValues.exit_branch_type == 'regional-branch'? 'regional' : 'sub';
+		var exit_branch_id = parseInt(orderDetails.data.orderData.dataValues.exit_branch);
+
+		if(!exit_branch_id){
+			orderDetails.data.orderData.dataValues["exit_branch_label"] = 'No Entry branch!';
+			return next(orderDetails);
+			getExitBranch(null);
+		}
+		else branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
+			
+			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
+			else orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
+			return next(orderDetails);
+			getEntryBranch(null);
 		});
 
 	}], function(err){
