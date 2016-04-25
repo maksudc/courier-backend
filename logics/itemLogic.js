@@ -586,3 +586,25 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 	});
 
 }
+
+var getItemCount = function(orderUuid, next){
+	itemModel.findAll({
+		where: {
+			orderUuid: orderUuid
+		},
+		attributes: ['uuid']
+	}).then(function(itemList){
+
+		if(itemList) next(false, itemList.length);
+		else next("No order found");
+		
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.getItemCount = getItemCount;

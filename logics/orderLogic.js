@@ -933,3 +933,107 @@ var updateStatus = function(data, next){
 }
 
 exports.updateStatus = updateStatus;
+
+var addItem = function(additionalData, operator, next){
+
+	console.log(additionalData);
+	var parentOrder, newPrice, existingItemCount;
+
+	async.series(
+		[function(checkStatus){
+			orderModel.findOne({where: {uuid: additionalData.uuid}})
+				.then(function(orderData){
+					if(orderData){
+						parentOrder = orderData;
+						if(parentOrder.dataValues.status == 'draft' || !parentOrder.dataValues.shipmentUuid){
+							checkStatus(null);
+						}
+						else{
+							checkStatus("You cannot add any item into this order. Not in right status");
+						}
+					}
+					else checkStatus("No order found by this id");
+				})
+				.catch(function(err){
+					if(err) checkStatus(err);
+				});
+		}, function(addPayment){
+
+			newPrice = parseFloat(parentOrder.dataValues.payment) + parseFloat(additionalData.total_price);
+			addPayment(null);
+
+		}, function(countItem){
+
+			itemLogic.getItemCount(additionalData.uuid, function(err, itemCount){
+				if(err) countItem(err);
+				else{
+					existingItemCount = parseInt(itemCount);
+					countItem(null);
+				}
+			});
+
+		}, function(addItems){
+			console.log("Adding items");
+
+			var seperateItems = [];
+
+			var barCode = parentOrder.dataValues.bar_code.toString() + '-';
+
+			_.forEach(additionalData.item_list, function(item){
+				
+				if(parseInt(item["amount"])>1){
+					var length = parseInt(item["amount"]);
+					
+					for(var i=0; i<length; i++) {
+						var singleItem = { 
+						  amount: 1,
+						  price: item["price"],
+						  product_name: item["product_name"],
+						  unit: item["unit"],
+						  length: item["length"],
+						  width: item["width"],
+						  height: item["height"],
+						  weight: item["weight"],
+						  bar_code: barCode + existingItemCount.toString(),
+						  orderUuid: parentOrder.dataValues.uuid
+						}
+						existingItemCount++;
+						
+						seperateItems.push(singleItem);
+					}
+
+				}
+				else{
+					item["bar_code"] = barCode + existingItemCount.toString();
+					item["orderUuid"] = parentOrder.dataValues.uuid;
+					seperateItems.push(item);
+				}
+			});
+
+			delete additionalData["item_list"];
+			console.log(seperateItems);
+
+			itemLogic.createMany(seperateItems, function(tempItemList){
+				if(tempItemList && tempItemList.status == 'success'){
+					parentOrder.payment = newPrice;
+					parentOrder.save();
+					next(null, parentOrder.dataValues);
+				}
+				else if(tempItemList && tempItemList.status == 'error'){
+					errorData = tempItemList;
+					addItems("Cannot insert items");
+				}
+
+			});
+
+		}],
+		function(err){
+			if(err){
+				console.log(err);
+				next(err);
+			}
+		});
+
+}
+
+exports.addItem = addItem;
