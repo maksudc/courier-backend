@@ -1011,7 +1011,6 @@ var addItem = function(additionalData, operator, next){
 			});
 
 			delete additionalData["item_list"];
-			console.log(seperateItems);
 
 			itemLogic.createMany(seperateItems, function(tempItemList){
 				if(tempItemList && tempItemList.status == 'success'){
