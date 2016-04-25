@@ -637,13 +637,13 @@ var createByOperator = function(postData, operator, next){
 		console.log("Adding items");
 
 		var seperateItems = [];
+		var barCode = order.bar_code.toString() + '-';
+		var itemCount = 0;
 
 		_.forEach(postData.item_list, function(item){
 			
 			if(parseInt(item["amount"])>1){
 				var length = parseInt(item["amount"]);
-
-				var barCode = order.bar_code.toString() + '-';
 				
 				for(var i=0; i<length; i++) {
 					var singleItem = { 
@@ -655,18 +655,18 @@ var createByOperator = function(postData, operator, next){
 					  width: item["width"],
 					  height: item["height"],
 					  weight: item["weight"],
-					  bar_code: barCode + i.toString(),
+					  bar_code: barCode + itemCount.toString(),
 					  orderUuid: order.uuid
 					}
 					
+					itemCount++;
 					seperateItems.push(singleItem);
 				}
 
 			}
 			else{
-				item["bar_code"] = order.bar_code.toString() + '-' + 
-					order.entry_branch.toString() + '-' + 
-					order.exit_branch.toString() + '-0';
+				item["bar_code"] = barCode + itemCount.toString();
+				itemCount++;
 				item["orderUuid"] = order.uuid;
 				seperateItems.push(item);
 			}
