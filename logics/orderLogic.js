@@ -513,21 +513,32 @@ var createByOperator = function(postData, operator, next){
 		*/
 		console.log("Setting branches");
  		
-		subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
-			if(branch.status == "error") testBranches(branch.message);
-			else {
-				postData["exit_branch_id"] = branch.data.id;
-				postData["exit_branch_type"] = "sub-branch";
-				exitBranch = branch.data;
+		// subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
+		// 	if(branch.status == "error") testBranches(branch.message);
+		// 	else {
+		// 		postData["exit_branch_id"] = branch.data.id;
+		// 		postData["exit_branch_type"] = "sub-branch";
+		// 		exitBranch = branch.data;
 
-				/*setting some dummy data for entry branch type and entry branch id.
-				 This will be read from req.user*/
+		// 		setting some dummy data for entry branch type and entry branch id.
+		// 		 This will be read from req.user
 
-				 //Set dummy data if no oprator working branch is defined
-				if(!postData["entry_branch"]) postData["entry_branch"] = "2";
-				if(!postData["entry_branch_type"]) postData["entry_branch_type"] = "sub-branch";
+		// 		 //Set dummy data if no oprator working branch is defined
+		// 		if(!postData["entry_branch"]) postData["entry_branch"] = "2";
+		// 		if(!postData["entry_branch_type"]) postData["entry_branch_type"] = "sub-branch";
 
+		// 		testBranches(null);
+		// 	}
+		// });
+
+		branchLogic.getBranch(postData["exit_branch_type"], postData["exit_branch_id"], function(branchData){
+			if(branchData.status == 'success'){
+				postData["exit_branch_type"] = postData["exit_branch_type"] + '-branch';
+				exitBranch= branchData.data.dataValues;
 				testBranches(null);
+			}
+			else{
+				testBranches("Error while setting exit branch");
 			}
 		});
 
