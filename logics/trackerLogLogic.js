@@ -2,6 +2,9 @@ var DB = require("../models/index");
 var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var trackerLog = sequelize.models.trackerLog;
+var order = sequelize.models.order;
+var shipment = sequelize.models.shipment;
+
 var Promise = require("bluebird");
 var _ = require("lodash");
 
@@ -80,6 +83,11 @@ var getTrackerLogDetails = function(trackerLogUuid , params, next){
   .catch(function(err){
     next({ status:"error" , data:null , message:err });
   });
+};
+
+var getTrackerLogsForOrder  = function(params , next){
+
+
 };
 
 var getTrackerLogsForTracker = function(trackerId , params , next){

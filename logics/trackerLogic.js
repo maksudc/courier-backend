@@ -85,6 +85,9 @@ var getTrackers = function(params , next){
   if(params.parentTrackerId){
     whereClause.parentTrackerId = params.parentTrackerId;
   }
+  if(params.bar_code){
+    whereClause.bar_code = params.bar_code;
+  }
 
   queryParam = {};
   _.assignIn(queryParam , paginationClause);
