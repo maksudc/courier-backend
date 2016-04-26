@@ -5,6 +5,9 @@ var Sequelize = DB.Sequelize;
 
 var shipment = sequelize.models.shipment;
 var order = sequelize.models.order;
+var regionalBranch = sequelize.models.regionalBranch;
+var subBranch = sequelize.models.subBranch;
+
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
 var shipmentBarCodeConfig = require("../config/shipmentBarcode");
@@ -287,10 +290,36 @@ var getShipmentDetails = function(shipmentId , params , next){
 
     prepareBarCode(shipmentInstance);
 
+    var branchUtils = require("../utils/branch");
+
     if( params.includeOrders && parseInt(params.includeOrders) > 0){
 
       order
       .findAll({ where: { shipmentUuid:shipmentInstance.uuid } })
+      .map(function(orderItem){
+
+        entry_branch_type = branchUtils.sanitizeBranchType(orderItem.entry_branch_type);
+        exit_branch_type = branchUtils.sanitizeBranchType(orderItem.exit_branch_type);
+
+        entry_model = entry_branch_type == 'sub' ? subBranch: regionalBranch;
+        exit_model = exit_branch_type == "sub" ? subBranch: regionalBranch;
+
+        return entry_model
+        .findOne({ where: { id: orderItem.entry_branch_id } })
+        .then(function(branchItem){
+          orderItem.entry_branch = branchItem;
+        })
+        .then(function(){
+
+          return exit_model.findOne({ where: { id: orderItem.exit_branch_id } } );
+        })
+        .then(function(branchItem){
+          orderItem.exit_branch = branchItem;
+        })
+        .then(function(){
+          return orderItem;
+        });
+      })
       .then(function(orders){
 
         console.log("Total " + orders.length + "Orders Found");

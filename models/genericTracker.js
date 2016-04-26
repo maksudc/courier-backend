@@ -1,6 +1,8 @@
 'use strict';
 
 var Promise = require("bluebird");
+var codeUtils = require("../utils/codegen");
+var codeConfig = require("../config/codeRange");
 
 module.exports = function(sequelize , DataTypes){
 
@@ -28,6 +30,8 @@ module.exports = function(sequelize , DataTypes){
 
       nextBranchType: { type: DataTypes.ENUM('regional' , 'sub' ) , allowNull:true , defaultValue: null },
       nextBranchId: { type: DataTypes.INTEGER },
+
+      bar_code: {type: DataTypes.BIGINT, unique: true, allowNull: false, autoIncrement: true}
 
   } , {
 
@@ -91,6 +95,12 @@ module.exports = function(sequelize , DataTypes){
           as: 'destinationSubBranch'
         });
 
+      }
+    },
+    instanceMethods:{
+
+      getBarcode: function(){
+        return codeUtils.format(codeConfig.MAX_TRACKER_CODE_DIGIT , this.bar_code);
       }
     }
   });
