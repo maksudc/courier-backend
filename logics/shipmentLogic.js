@@ -5,6 +5,9 @@ var Sequelize = DB.Sequelize;
 
 var shipment = sequelize.models.shipment;
 var order = sequelize.models.order;
+var regionalBranch = sequelize.models.regionalBranch;
+var subBranch = sequelize.models.subBranch;
+
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
 var shipmentBarCodeConfig = require("../config/shipmentBarcode");
@@ -295,7 +298,7 @@ var getShipmentDetails = function(shipmentId , params , next){
       .findAll({ where: { shipmentUuid:shipmentInstance.uuid } })
       .map(function(orderItem){
 
-        entry_brach_type = branchUtils.sanitizeBranchType(orderItem.entry_branch_type);
+        entry_branch_type = branchUtils.sanitizeBranchType(orderItem.entry_branch_type);
         exit_branch_type = branchUtils.sanitizeBranchType(orderItem.exit_branch_type);
 
         entry_model = entry_branch_type == 'sub' ? subBranch: regionalBranch;
