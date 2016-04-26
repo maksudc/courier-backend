@@ -34,6 +34,7 @@ module.exports = function(sequelize, DataTypes) {
 		verification_code: {type: DataTypes.INTEGER, defaultValue: Math.floor(Math.random()*10000)},
 		nid:{type: DataTypes.STRING},
 		receiver: {type: DataTypes.STRING, allowNull: false}, //receiver mobile
+		receiver_name: {type: DataTypes.STRING}, //receiver name
 		receiver_addr: {type: DataTypes.STRING},
 
 		entry_branch: {type: DataTypes.STRING}, //where the order is received, In 2nd release, branch id
