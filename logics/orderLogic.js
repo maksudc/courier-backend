@@ -578,6 +578,7 @@ var createByOperator = function(postData, operator, next){
 		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
 		if(postData.type == 'vd') draftOrder["type"] = 'value_delivery';
+		if(postData.receiver_name) draftOrder["receiver_name"] = postData.receiver_name;
 
 
 
@@ -776,6 +777,9 @@ var orderDetail = function(id, next){
 		var exit_branch_type = orderDetails.data.orderData.dataValues.exit_branch_type == 'regional-branch'? 'regional' : 'sub';
 		var exit_branch_id = parseInt(orderDetails.data.orderData.dataValues.exit_branch);
 
+		console.log(exit_branch_type);
+		console.log(exit_branch_id);
+
 		if(!exit_branch_id){
 			orderDetails.data.orderData.dataValues["exit_branch_label"] = 'No Entry branch!';
 			return next(orderDetails);
@@ -783,10 +787,27 @@ var orderDetail = function(id, next){
 		}
 		else branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
 			
+			console.log(branchData);
+
 			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
 			else orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
-			return next(orderDetails);
-			getEntryBranch(null);
+			//return next(orderDetails);
+			getExitBranch(null);
+		});
+
+	}, function(getClient){
+
+		console.log("Get client name");
+
+		clientLogic.findNameByMobile(orderDetails.data.orderData.dataValues.sender, function(err, full_name){
+		
+			if(full_name){
+				orderDetails.data.orderData.dataValues["sender_name"] = full_name;
+				return next(orderDetails);
+			}
+			else {
+				getClient("Error while getting client name");
+			}
 		});
 
 	}], function(err){

@@ -37,14 +37,7 @@ var findOneByMobile = function(mobile, next){
 
 	console.log("*****************Hitting API findOneByMobile**************");
 
-	clientModel.findOne({where: {mobile: mobile}}).catch(function(err){
-
-		if(err){
-			return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred"});
-
-		}
-
-	}).then(function(client){
+	clientModel.findOne({where: {mobile: mobile}}).then(function(client){
 
 		if(client){
 			return next({"status": "success","data": client});
@@ -53,10 +46,40 @@ var findOneByMobile = function(mobile, next){
 			return next({"status": "error", "message": "No client found by this id", "data": null});
 		}
 
+	}).catch(function(err){
+
+		if(err){
+			return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred"});
+
+		}
+
 	});
 };
 
 exports.findOneByMobile = findOneByMobile;
+
+
+var findNameByMobile = function(mobile, next){
+
+	clientModel.findOne({where: {mobile: mobile}}).then(function(client){
+
+		if(client){
+			return next(null, client.dataValues.full_name);
+		}
+		else{
+			return next("No client found!");
+		}
+
+	}).catch(function(err){
+
+		if(err){
+			return next(err);
+		}
+
+	});
+};
+
+exports.findNameByMobile = findNameByMobile;
 
 var create = function(clientData, next){
 
