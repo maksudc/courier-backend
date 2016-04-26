@@ -307,14 +307,14 @@ var getShipmentDetails = function(shipmentId , params , next){
         return entry_model
         .findOne({ where: { id: orderItem.entry_branch_id } })
         .then(function(branchItem){
-          orderItem.entry_branch = branchItem;
+          orderItem.entry_branch_obj = branchItem;
         })
         .then(function(){
 
           return exit_model.findOne({ where: { id: orderItem.exit_branch_id } } );
         })
         .then(function(branchItem){
-          orderItem.exit_branch = branchItem;
+          orderItem.exit_branch_obj = branchItem;
         })
         .then(function(){
           return orderItem;
