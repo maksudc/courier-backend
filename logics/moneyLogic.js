@@ -15,7 +15,7 @@ var create = function(operator, moneyData, next){
 	console.log(moneyData);
 	console.log(operator);
 
-	if(!operator.region_id || !operator.regional_branch_id || !operator.sub_branch_id){
+	if(!operator.regional_branch_id || !operator.sub_branch_id){
 		next("Missing required operator data");
 		return;
 	}
@@ -33,7 +33,6 @@ var create = function(operator, moneyData, next){
 		charge: parseInt(moneyData.charge),
 		discount: parseInt(moneyData.discount) || 0,
 		payable: parseInt(moneyData.payable),
-		region_id: parseInt(moneyData.region),
 		regional_branch_id: parseInt(moneyData.regionalBranch),
 		sub_branch_id: parseInt(moneyData.subBranch)
 	}
@@ -42,19 +41,21 @@ var create = function(operator, moneyData, next){
 	{
 		postData["type"] = moneyData["type"];
 		postData["money_order_id"] = moneyData["money_order_id"];
-		postData["source_region_id"] = moneyData.source_region_id;
+		
 		postData["source_regional_branch_id"] = moneyData.source_regional_branch_id;
 		postData["source_sub_branch_id"] = moneyData.source_sub_branch_id;
 	}
 	else {
-		postData["source_region_id"] = operator.region_id;
 		postData["source_regional_branch_id"] = operator.regional_branch_id;
 		postData["source_sub_branch_id"] = operator.sub_branch_id;
+
 		postData["receiver_operator"] = operator.email;
 	}
 
 	if(moneyData.vat == '1.15') postData["vat"] = true;
 	else postData["vat"] = false;
+
+	console.log("Creating moeny order right now!");
 
 	moneyModel.create(postData).then(function(moneyParcel){
 
@@ -64,7 +65,9 @@ var create = function(operator, moneyData, next){
 	}).catch(function(err){
 
 		if(err){
+			console.log("***************************");
 			console.log(err);
+			console.log("***************************");
 			next(err);
 		}
 
@@ -77,7 +80,7 @@ var findAll = function(adminData, next){
 
 	var adminDataParams = {};
 	var adminEmailList = [];
-	if(adminData.region_id) adminDataParams["region_id"] = adminData.region_id;
+
 	if(adminData.regional_branch_id) adminDataParams["regional_branch_id"] = adminData.regional_branch_id;
 	if(adminData.sub_branch_id) adminDataParams["sub_branch_id"] = adminData.sub_branch_id;
 
@@ -101,7 +104,6 @@ var findAll = function(adminData, next){
 					{payment_receiver_operator: {"$in": adminEmailList}},
 					{deliver_operator: {"$in": adminEmailList}},
 					{"$and": [
-						{region_id: adminData.region_id},
 						{regional_branch_id: adminData.regional_branch_id},
 						{sub_branch_id: adminData.sub_branch_id}
 					]}

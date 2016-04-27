@@ -534,7 +534,10 @@ var createByOperator = function(postData, operator, next){
 		branchLogic.getBranch(postData["exit_branch_type"], postData["exit_branch_id"], function(branchData){
 			if(branchData.status == 'success'){
 				postData["exit_branch_type"] = postData["exit_branch_type"] + '-branch';
-				exitBranch= branchData.data.dataValues;
+				exitBranch = branchData.data.dataValues;
+				console.log("Exit branch**********");
+				console.log(exitBranch);
+				console.log("**********************")
 				testBranches(null);
 			}
 			else{
@@ -585,8 +588,6 @@ var createByOperator = function(postData, operator, next){
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
-				console.log(order.uuid);
-
 				return createDraft(null);
 			}
 			else {
@@ -604,6 +605,7 @@ var createByOperator = function(postData, operator, next){
 
 		if(postData.type!='vd') createMoneyOrder(null);
 		else{
+
 			var moneyData = {
 				sender_full_name: postData.receiver_name,
 				sender_mobile: postData.receiver,
@@ -611,11 +613,9 @@ var createByOperator = function(postData, operator, next){
 				receiver_full_name: postData.sender_name,
 				receiver_mobile: postData.sender,
 				receiver_nid: '',
-				region: operator.region_id, //destination of money order, credential of operator
-				regionalBranch: operator.regional_branch_id,
-				subBranch: operator.sub_branch_id,
-				source_region_id: null, //source of money order, will be the exit branch of order
-				source_regional_branch_id: parseInt(exitBranch.regionalBranch.id),
+				regionalBranch: operator.regional_branch_id || null,
+				subBranch: operator.sub_branch_id || null,
+				source_regional_branch_id: parseInt(exitBranch.regionalBranchId),
 				source_sub_branch_id: parseInt(exitBranch.id),
 				amount: postData.vd_amount,
 				charge: postData.vd_charge,
@@ -626,9 +626,15 @@ var createByOperator = function(postData, operator, next){
 			}
 
 			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){
-				if(err) createMoneyOrder(err);
-				else if(!moneyOrderData) createMoneyOrder("No money order created");
+				if(err) {
+					createMoneyOrder(err);
+				}
+				else if(!moneyOrderData) {
+					console.log("Money order creation error");
+					createMoneyOrder("No money order created");
+				}
 				else {
+					console.log("Money order created corresponding to vd");
 					createMoneyOrder(null);
 				}
 			});
