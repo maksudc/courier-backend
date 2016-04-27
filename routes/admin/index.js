@@ -30,7 +30,6 @@ router.post('/create', function(req, res){
 	else if(!adminData.username) return res.send({"err": JSON.stringify({"message": "Must have user name"})});
 	else if(!adminData.role) return res.send({"err": JSON.stringify({"message": "Must select role"})});
 	else if(!adminData.phoneNO) return res.send({"err": JSON.stringify({"message": "Must select phone number"})});
-	else if(!adminData.region) return res.send({"err": JSON.stringify({"message": "Must set region"})});
 	else if(!adminData.regionalBranch) return res.send({"err": JSON.stringify({"message": "Must set regional branch"})});
 
 	adminLogic.createAdmin(adminData, function(err, admin){
