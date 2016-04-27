@@ -227,18 +227,23 @@ var updateAdmin = function(updateData, next){
     adminModel.findOne({where: {email: updateData.email}})
         .then(function(admin){
             if(admin){
+
+                //Condition to prevent admin to change himself. Even for super admin!
+
                 if(updateData.full_name) admin.full_name = updateData.full_name;
                 if(updateData.mobile) admin.mobile = updateData.mobile;
                 if(updateData.username) admin.username = updateData.username;
                 if(updateData.address) admin.address = updateData.address;
 
-                if(updateData.region_id) admin.region_id = parseInt(updateData.region_id);
+                if(updateData.role) admin.role = updateData.role;
+
                 if(updateData.regional_branch_id) admin.regional_branch_id = parseInt(updateData.regional_branch_id);
                 if(updateData.sub_branch_id && parseInt(updateData.sub_branch_id) >= 0) admin.sub_branch_id = parseInt(updateData.sub_branch_id);
                 else admin.sub_branch_id = null;
 
 
                 admin.save();
+
                 return next(null, {
                     full_name: admin.dataValues.full_name || '',
                     regional_branch_id: admin.dataValues.regional_branch_id,
