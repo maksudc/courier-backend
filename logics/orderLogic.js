@@ -59,18 +59,97 @@ var findAllOrders = function(params, next){
 	orderModel.findAll({where: params}).then(function(orderList){
 		if(orderList){
 
-			var idList = [];
+			var idList = [], count = 0, orderLength = orderList.length;
+			var branchList = {
+				"sub": [],
+				"regional": []
+			};
+			//use async.whilst
 
+			async.whilst(
+			    function () { return count < orderLength; },
+			    function (callback) {
+
+			    	var entryType = 'regional', exitType = 'regional';
+			    	if(orderList[count].dataValues.entry_branch_type == 'sub-branch')
+			    		entryType = 'sub';
+			    	
+			    	if(orderList[count].dataValues.exit_branch_type == 'sub-branch')
+			    		exitType = 'sub';
+
+			    	var entry_branch_id = orderList[count].entry_branch.toString();
+			    	var exit_branch_id = orderList[count].exit_branch.toString();
+
+			    	async.series([function(findEntryBranch){
+
+			    		if(branchList[entryType][entry_branch_id]){
+			    			console.log("Found entry branch");
+			    			orderList[count].dataValues.entry_branch = branchList[entryType][entry_branch_id];
+							orderList[count].dataValues["entry_branch_id"] = entry_branch_id;
+
+							findEntryBranch(null);
+			    		}
+			    		else branchLogic.getBranch(entryType, parseInt(entry_branch_id), function(branchData){
+			    			console.log("Fetching entry branch");
+			    			branchList[entryType][entry_branch_id] = branchData.data.dataValues;
+
+			    			orderList[count].dataValues.entry_branch = branchList[entryType][entry_branch_id];
+							orderList[count].dataValues["entry_branch_id"] = entry_branch_id;
+
+							console.log(orderList[count].dataValues.entry_branch);
+
+							findEntryBranch(null);
+			    		});
+
+			    	}, function(findExitBranch){
+
+			    		if(branchList[exitType][exit_branch_id]){
+			    			console.log("Found exit branch");
+			    			orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
+							orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
+
+							findExitBranch(null);
+			    		}
+			    		else branchLogic.getBranch(exitType, parseInt(exit_branch_id), function(branchData){
+			    			console.log("Fetching exit branch");
+			    			branchList[exitType][exit_branch_id] = branchData.data.dataValues;
+
+			    			orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
+							orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
+
+							findExitBranch(null);
+
+							count++;
+			    			callback(null);
+			    		});
+
+			    	}], function(err){
+			    		if(err){
+			    			console.log(err);
+			    			count++;
+			    			callback(null);
+			    		}
+			    	});
+
+			    },
+			    function (err) {
+			        // 5 seconds have passed, n = 5
+			        next({"status": "success", data: orderList});
+			    }
+			);
+
+
+			/*
 			_.forEach(orderList, function(singleOrder){
 				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0 && !isNaN(parseInt(singleOrder.entry_branch)))
-					idList.push(parseInt(singleOrder.entry_branch));
+					idList.push({id: parseInt(singleOrder.entry_branch), type: singleOrder.entry_branch_type});
 				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0 && !isNaN(parseInt(singleOrder.exit_branch)))
-					idList.push(parseInt(singleOrder.exit_branch));
+					idList.push({id: parseInt(singleOrder.exit_branch), type: singleOrder.exit_branch_type});
 			});
 
 			var branchLabels = {};
 
-			subBranchLogic.findByIdList(idList, function(branchList){
+			subBranchLogic.findBranchesByIdList(idList, function(branchList){
 
 				if(branchList.status == 'error'){
 					next({"status": "error", "message": "Error while reading branch names"});
@@ -98,6 +177,7 @@ var findAllOrders = function(params, next){
 
 				next({"status": "success", data: orderList});
 			});
+			*/
 
 
 		}

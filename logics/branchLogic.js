@@ -51,6 +51,7 @@ var getBranch = function(branchType , branchId , next){
     next({ status: "success" , statusCode: HttpStatus.OK , data:branchItem , message:null });
   })
   .catch(function(err){
+    if(err) console.log(err);
     next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:JSON.stringify(err) });
   });
 };
