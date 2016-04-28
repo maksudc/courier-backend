@@ -2,7 +2,9 @@ var express = require('express');
 var router = express.Router();
 var config = require('./../../config');
 var adminLogic = require('./../../logics/admin/adminLogic');
+var branchLogic = require('./../../logics/branchLogic');
 var upload = require('multer')();
+var async = require('async');
 
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
@@ -12,6 +14,68 @@ router.use(middleware.checkPermission);
 
 router.get('/', function(req, res){
 	res.send("In Admin page");
+});
+
+router.get('/view', function(req, res){
+
+	var viewData;
+
+	adminLogic.findAdmin(req.user.email, function(err, adminData){
+
+		if(err) res.send({"status":"error", data: err});
+		else if(!adminData) res.send({"status": "error", data: null, message: "No admin found!"});
+		else {
+
+			viewData = {
+				email: adminData.dataValues.email,
+				username: adminData.dataValues.username,
+				birth_date: adminData.dataValues.birth_date,
+				full_name: adminData.dataValues.full_name,
+				address: adminData.dataValues.address,
+				national_id: adminData.dataValues.address,
+				role: adminData.dataValues.role,
+				mobile: adminData.dataValues.mobile
+			}
+
+			async.series([function(findSubBranch){
+				if(adminData.dataValues.sub_branch_id){
+					branchLogic.getBranch('sub', adminData.dataValues.sub_branch_id, function(subBranchData){
+						if(subBranchData.status == 'success'){
+							viewData["sub_branch"] = {
+								"id": subBranchData.data.dataValues.id,
+								"label": subBranchData.data.dataValues.label
+							}
+						}
+
+						findSubBranch(null);
+					});
+				}
+				else findSubBranch(null);
+			}, function(findRerionalBranch){
+
+				if(adminData.dataValues.regional_branch_id){
+					branchLogic.getBranch('regional', adminData.dataValues.regional_branch_id, function(regionalBranchData){
+						if(regionalBranchData.status == 'success'){
+							viewData["regional_branch"] = {
+								"id": regionalBranchData.data.dataValues.id,
+								"label": regionalBranchData.data.dataValues.label
+							}
+						}
+						else res.send({"status": "error", message:"No regional branch found!"});
+
+						res.send({"status": "success", data: viewData});
+					});
+				}
+				else findSubBranch(null);
+
+			}], function(err){
+				if(err){
+					console.log(err);
+					res.send({"status": "error", data: err});
+				}
+			});
+		}
+	});
 });
 
 router.get('/types', function(req, res){
