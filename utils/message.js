@@ -26,6 +26,12 @@ var sendMessage = function(toPhoneNum , body , next ){
                          body: body
                       });
 
+  var agentOptions = {
+    rejectUnauthorized: false
+  };
+  var agent = new https.Agent(agentOptions);
+  requestParams.agent = agent;
+
   request(requestParams , function(error , response , body){
     // callback
 
