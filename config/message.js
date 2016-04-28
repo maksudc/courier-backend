@@ -11,6 +11,7 @@ if(!process.env.NODE_ENV){
 var config = {};
 
 var BACKEND_NAME = banglaPhoneConfig.BACKEND_NAME;
+//var BACKEND_NAME = twilioConfig.BACKEND_NAME;
 
 if(BACKEND_NAME == banglaPhoneConfig.BACKEND_NAME){
   config = banglaPhoneConfig.config;

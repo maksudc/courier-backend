@@ -32,17 +32,7 @@ var getGatewayUrl = function(config_env){
 
 
 var prepareRequest = function(config_env , data){
-  /**
-  {
 
-    uri: URL,
-    method: "POST",
-    form:{
-      "From": messageConfig.From,
-      "To": receiverPhoneNumber,
-      "Body": body
-    }
-  }**/
   var URL = getGatewayUrl(config_env);
   var formattedData = {
     uri: URL,
