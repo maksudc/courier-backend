@@ -100,12 +100,23 @@ var findAllOrders = function(params, next){
 			    			if(branchData.status == 'error'  || !branchData.data || !branchData.data.dataValues){
 			    				console.log("No information found for entry branch: " + entry_branch_id);
 			    				branchList[entryType][entry_branch_id] = "No information about this branch";
+			    				findEntryBranch(null);
 			    			}
 			    			else{
 			    				branchList[entryType][entry_branch_id] = branchData.data.dataValues;
+			    				if(entryType == 'sub'){
+			    					branchData.data.getRegionalBranch().then(function(regionalBranch){
+			    						if(regionalBranch){
+			    							branchList[entryType][entry_branch_id]["regionalBranch"] = {
+			    								id: regionalBranch.dataValues.id,
+			    								label: regionalBranch.dataValues.label
+			    							};
+			    						}
+			    						findEntryBranch(null);
+			    					});
+			    				}
+			    				else findEntryBranch(null);
 			    			}
-
-							findEntryBranch(null);
 			    		});
 
 			    	}, function(setEntryBranch){
@@ -128,14 +139,24 @@ var findAllOrders = function(params, next){
 			    			if(branchData.status == 'error' || !branchData.data || !branchData.data.dataValues){
 			    				console.log("No inforamtion found for exit branch: " + exit_branch_id);
 			    				branchList[exitType][exit_branch_id] = "No information about this branch";
+			    				findExitBranch(null);
 			    			}
 			    			else{
 			    				branchList[exitType][exit_branch_id] = branchData.data.dataValues;
+			    				if(exitType == 'sub'){
+			    					branchData.data.getRegionalBranch().then(function(regionalBranch){
+			    						if(regionalBranch){
+			    							branchList[exitType][exit_branch_id]["regionalBranch"] = {
+			    								id: regionalBranch.dataValues.id,
+			    								label: regionalBranch.dataValues.label
+			    							};
+			    						}
+			    						findExitBranch(null);
+			    					});
+			    				}
+			    				else findExitBranch(null);
 			    			}
-			    			console.log(count);
-			    			console.log(orderLength);
 
-		    				findExitBranch(null);
 			    		});
 
 			    	}, function(setExitBranch){
