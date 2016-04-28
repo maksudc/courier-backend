@@ -84,6 +84,7 @@ var findAllOrders = function(params, next){
 
 			    		if(branchList[entryType][entry_branch_id]){
 			    			console.log("Found entry branch");
+			    			
 			    			orderList[count].dataValues.entry_branch = branchList[entryType][entry_branch_id];
 							orderList[count].dataValues["entry_branch_id"] = entry_branch_id;
 
@@ -91,12 +92,16 @@ var findAllOrders = function(params, next){
 			    		}
 			    		else branchLogic.getBranch(entryType, parseInt(entry_branch_id), function(branchData){
 			    			console.log("Fetching entry branch");
-			    			branchList[entryType][entry_branch_id] = branchData.data.dataValues;
 
+			    			if(branchData.status == 'error'  || !branchData.data || !branchData.data.dataValues){
+			    				console.log("No information found for entry branch: " + entry_branch_id);
+			    				branchList[entryType][entry_branch_id] = "No information about this branch";
+			    			}
+			    			else{
+			    				branchList[entryType][entry_branch_id] = branchData.data.dataValues;
+			    			}
 			    			orderList[count].dataValues.entry_branch = branchList[entryType][entry_branch_id];
 							orderList[count].dataValues["entry_branch_id"] = entry_branch_id;
-
-							console.log(orderList[count].dataValues.entry_branch);
 
 							findEntryBranch(null);
 			    		});
@@ -105,8 +110,7 @@ var findAllOrders = function(params, next){
 
 			    		if(branchList[exitType][exit_branch_id]){
 			    			console.log("Found exit branch");
-			    			console.log(branchList[exitType][exit_branch_id]);
-			    			console.log(exit_branch_id);
+			    			
 			    			orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
 							orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
 
@@ -115,9 +119,16 @@ var findAllOrders = function(params, next){
 			    		}
 			    		else branchLogic.getBranch(exitType, parseInt(exit_branch_id), function(branchData){
 			    			console.log("Fetching exit branch");
-			    			branchList[exitType][exit_branch_id] = branchData.data.dataValues;
 
-			    			orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
+			    			if(branchData.status == 'error' || !branchData.data || !branchData.data.dataValues){
+			    				console.log("No inforamtion found for exit branch: " + exit_branch_id);
+			    				branchList[exitType][exit_branch_id] = "No information about this branch";
+			    			}
+			    			else{
+			    				branchList[exitType][exit_branch_id] = branchData.data.dataValues;
+			    			}
+
+		    				orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
 							orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
 
 							count++;
