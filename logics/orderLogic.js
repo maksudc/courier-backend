@@ -105,10 +105,13 @@ var findAllOrders = function(params, next){
 
 			    		if(branchList[exitType][exit_branch_id]){
 			    			console.log("Found exit branch");
+			    			console.log(branchList[exitType][exit_branch_id]);
+			    			console.log(exit_branch_id);
 			    			orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
 							orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
 
-							findExitBranch(null);
+							count++;
+			    			callback(null);
 			    		}
 			    		else branchLogic.getBranch(exitType, parseInt(exit_branch_id), function(branchData){
 			    			console.log("Fetching exit branch");
@@ -116,8 +119,6 @@ var findAllOrders = function(params, next){
 
 			    			orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
 							orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
-
-							findExitBranch(null);
 
 							count++;
 			    			callback(null);
