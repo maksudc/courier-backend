@@ -2,6 +2,7 @@ var messageConfig = require("../config/message");
 var request = require("request");
 var HttpStatus = require("http-status-codes");
 var phoneUtil = require("./phone");
+var https = require("https");
 //
 // var getGatewayUrl = function(){
 //
