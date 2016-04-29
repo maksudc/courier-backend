@@ -2,6 +2,7 @@ var DB = require("../models/index");
 var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var moneyModel = sequelize.models.money;
+var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var adminLogic = require("./admin/adminLogic");
@@ -140,13 +141,40 @@ var findById = function(id, next){
 			subBranchLogic.findCredential(parseInt(moneyOrder.dataValues.sub_branch_id), function(err, detail){
 				if(err) next(err);
 				else{
-					var tempData = moneyOrder.dataValues;
-					tempData["subBranch"] = detail.subBranch;
-					tempData["regionalBranch"] = detail.regionalBranch;
-					tempData["region"] = detail.region;
-					tempData["sender_verification_code"] = null;
-					tempData["receiver_verification_code"] = null;
-					next(null, tempData);
+					if(moneyOrder.dataValues.type == 'virtual_delivery'){
+						//find corrensponding order price and send it
+
+						orderModel.findOne({
+							where: {uuid: moneyOrder.dataValues.money_order_id},
+							attributes: ['payment']
+						}).then(function(orderData){
+							if(orderData){
+								var tempData = moneyOrder.dataValues;
+								tempData["subBranch"] = detail.subBranch;
+								tempData["regionalBranch"] = detail.regionalBranch;
+								tempData["region"] = detail.region;
+								tempData["sender_verification_code"] = null;
+								tempData["receiver_verification_code"] = null;
+								tempData["parcel_payment"] = orderData.dataValues.payment;
+								next(null, tempData);
+							}
+							else next("No order found by this id!");
+						}).catch(function(err){
+							if(err){
+								console.log(err);
+								next(err);
+							}
+						});
+					}
+					else{
+						var tempData = moneyOrder.dataValues;
+						tempData["subBranch"] = detail.subBranch;
+						tempData["regionalBranch"] = detail.regionalBranch;
+						tempData["region"] = detail.region;
+						tempData["sender_verification_code"] = null;
+						tempData["receiver_verification_code"] = null;
+						next(null, tempData);
+					}
 				}
 			});
 		}
