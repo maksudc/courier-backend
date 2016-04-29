@@ -45,6 +45,14 @@ var create = function(operator, moneyData, next){
 		
 		postData["source_regional_branch_id"] = moneyData.source_regional_branch_id;
 		postData["source_sub_branch_id"] = moneyData.source_sub_branch_id;
+
+		if(moneyData.payParcelPrice == 'buyer'){
+			postData["payable"] = postData["payable"] + moneyData.parcelPrice;
+		}
+		else {
+			postData["amount"] = postData["amount"] - moneyData.parcelPrice;	
+		}
+		postData["payParcelPrice"] = moneyData["payParcelPrice"];
 	}
 	else {
 		postData["source_regional_branch_id"] = operator.regional_branch_id;
@@ -393,6 +401,61 @@ var deleteMoneyOrder = function(operator, id, next){
 }
 
 exports.deleteMoneyOrder = deleteMoneyOrder;
+
+
+var updateVDPrice = function(moneyData, next){
+
+	moneyModel.findOne({
+		where: {id: moneyData.id}
+	}).then(function(moneyOrderData){
+
+		if(moneyOrderData){
+			
+			var updateData = {
+				amount: parseInt(moneyData.amount),
+				charge: parseInt(moneyData.charge),
+				discount: parseInt(moneyData.discount) || 0,
+				payable: parseInt(moneyData.payable)
+			}
+
+			if(moneyData.newPayParcelPrice == 'buyer'){
+				updateData["payable"] = updateData["payable"] + parseInt(moneyData.order_total_price);
+			}
+			else {
+				updateData["amount"] = updateData["amount"] - parseInt(moneyData.order_total_price);
+			}
+			updateData["payParcelPrice"] = moneyData["newPayParcelPrice"];
+
+			moneyOrderData.amount = updateData.amount;
+			moneyOrderData.charge = updateData.charge;
+			moneyOrderData.discount = updateData.discount;
+			moneyOrderData.payable = updateData.payable;
+			moneyOrderData.payParcelPrice = updateData.payParcelPrice;
+
+			moneyOrderData.save().then(function(newMoneyOrderData){
+				if(newMoneyOrderData){
+					next(null, {id: newMoneyOrderData.dataValues.id});
+				}
+				else next("Failed to update");
+			}).catch(function(err){
+				if(err){
+					console.log(err);
+					next(err);
+				}
+			});
+		}
+		else next("No money order found by this id");
+
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.updateVDPrice = updateVDPrice;
 
 
 

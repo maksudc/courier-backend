@@ -749,7 +749,9 @@ var createByOperator = function(postData, operator, next){
 				discount: postData.vd_discount,
 				payable: postData.vd_payable,
 				type: 'virtual_delivery',
-				money_order_id: order.uuid
+				money_order_id: order.uuid,
+				payParcelPrice: postData["vd_payBySender"],
+				parcelPrice: parseInt(order.payment)
 			}
 
 			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){

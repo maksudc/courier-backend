@@ -85,5 +85,17 @@ router.post('/delete', upload.array(), function(req, res){
 	});
 });
 
+router.post('/updateVDPrice', upload.array(), function(req, res){
+	
+	moneyLogic.updateVDPrice(req.body, function(err, data){
+		if(err || !data){
+			res.send({"status": "error", "error": err});
+		}
+		else {
+			res.send({"status": "success", "data": data});
+		}
+	});
+});
+
 
 module.exports = router;
