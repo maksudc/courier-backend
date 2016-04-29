@@ -33,7 +33,7 @@ var findOne = function(id, next){
 						console.log("Money order found");
 						order.dataValues["vd_status"] = moneyOrder.dataValues.status;
 						order.dataValues["vd_id"] = moneyOrder.dataValues.id;
-						next({"status": "success", "data": order});			
+						next({"status": "success", "data": order});
 					}
 					else next({"status":"error", "message": "No money parcel found against this vd!"});
 				});
@@ -73,7 +73,7 @@ var findAllOrders = function(params, next){
 			    	var entryType = 'regional', exitType = 'regional';
 			    	if(orderList[count].dataValues.entry_branch_type == 'sub-branch')
 			    		entryType = 'sub';
-			    	
+
 			    	if(orderList[count].dataValues.exit_branch_type == 'sub-branch')
 			    		exitType = 'sub';
 
@@ -84,7 +84,7 @@ var findAllOrders = function(params, next){
 
 			    		if(branchList[entryType][entry_branch_id]){
 			    			console.log("Found entry branch");
-			    			
+
 			    			orderList[count].dataValues.entry_branch = branchList[entryType][entry_branch_id];
 							orderList[count].dataValues["entry_branch_id"] = entry_branch_id;
 
@@ -110,7 +110,7 @@ var findAllOrders = function(params, next){
 
 			    		if(branchList[exitType][exit_branch_id]){
 			    			console.log("Found exit branch");
-			    			
+
 			    			orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
 							orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
 
@@ -385,7 +385,7 @@ var confirmOrder = function(id, code, next){
 	findOne(id, function(orderData){
 
 		if(orderData.status == 'success' && orderData.data.status == 'draft'){
-			
+
 			orderData.data.status = 'confirmed';
 			orderData.data.confirm_time = new Date();
 			orderData.data.save().then(function(newOrderData){
@@ -511,7 +511,7 @@ var receivePayment = function(paymentData, operator, next){
 			orderData.data.payment_status = 'paid';
 			orderData.data.payment_operator = operator.email;
 
-			
+
 			orderData.data.save().then(function(newOrderData){
 				if(newOrderData){
 					next({"status": "success", "data": newOrderData.dataValues});
@@ -604,7 +604,7 @@ var createByOperator = function(postData, operator, next){
 		then, blame munna
 		*/
 		console.log("Setting branches");
- 		
+
 		// subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
 		// 	if(branch.status == "error") testBranches(branch.message);
 		// 	else {
@@ -740,12 +740,12 @@ var createByOperator = function(postData, operator, next){
 		var itemCount = 0;
 
 		_.forEach(postData.item_list, function(item){
-			
+
 			if(parseInt(item["amount"])>1){
 				var length = parseInt(item["amount"]);
-				
+
 				for(var i=0; i<length; i++) {
-					var singleItem = { 
+					var singleItem = {
 					  amount: 1,
 					  price: item["price"],
 					  product_name: item["product_name"],
@@ -757,7 +757,7 @@ var createByOperator = function(postData, operator, next){
 					  bar_code: barCode + itemCount.toString(),
 					  orderUuid: order.uuid
 					}
-					
+
 					itemCount++;
 					seperateItems.push(singleItem);
 				}
@@ -864,7 +864,7 @@ var orderDetail = function(id, next){
 			getEntryBranch(null);
 		}
 		else branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
-			
+
 			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["entry_branch_label"] = branchData.data.dataValues.label;
 			else orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
 			getEntryBranch(null);
@@ -884,7 +884,7 @@ var orderDetail = function(id, next){
 			getExitBranch(null);
 		}
 		else branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
-			
+
 			console.log(branchData);
 
 			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
@@ -898,7 +898,7 @@ var orderDetail = function(id, next){
 		console.log("Get client name");
 
 		clientLogic.findNameByMobile(orderDetails.data.orderData.dataValues.sender, function(err, full_name){
-		
+
 			if(full_name){
 				orderDetails.data.orderData.dataValues["sender_name"] = full_name;
 				return next(orderDetails);
@@ -954,13 +954,13 @@ var orderDetailView = function(id, next){
 			if(itemList.status == "success"){
 				//orderDetails["data"]["items"] = itemList.data;
 				_.forEach(itemList.data, function(singleItem){
-					var identificationString = singleItem.product_name + ' ' + 
+					var identificationString = singleItem.product_name + ' ' +
 						singleItem.length.toString() + 'x' +
-						singleItem.height.toString() + 'x' + 
-						singleItem.width.toString() + 'x' + 
-						singleItem.weight.toString() + 'x' + 
+						singleItem.height.toString() + 'x' +
+						singleItem.width.toString() + 'x' +
+						singleItem.weight.toString() + 'x' +
 						singleItem.unit;
-					
+
 					if(itemNameList.indexOf(identificationString) < 0)
 						itemNameList.push(identificationString);
 
@@ -1037,7 +1037,7 @@ exports.findOrderByClient = findOrderByClient;
 var updateStatus = function(data, next){
 
 	orderModel.findOne({where: {uuid: data.id}}).then(function(order){
-		
+
 		if(order){
 			order.status = data.status;
 			order.save().then(function(updatedOrder){
@@ -1110,12 +1110,12 @@ var addItem = function(additionalData, operator, next){
 			var barCode = parentOrder.dataValues.bar_code.toString() + '-';
 
 			_.forEach(additionalData.item_list, function(item){
-				
+
 				if(parseInt(item["amount"])>1){
 					var length = parseInt(item["amount"]);
-					
+
 					for(var i=0; i<length; i++) {
-						var singleItem = { 
+						var singleItem = {
 						  amount: 1,
 						  price: item["price"],
 						  product_name: item["product_name"],
@@ -1128,7 +1128,7 @@ var addItem = function(additionalData, operator, next){
 						  orderUuid: parentOrder.dataValues.uuid
 						}
 						existingItemCount++;
-						
+
 						seperateItems.push(singleItem);
 					}
 
@@ -1164,5 +1164,150 @@ var addItem = function(additionalData, operator, next){
 		});
 
 }
-
 exports.addItem = addItem;
+
+var branchUtils = require("../utils/branch");
+var HttpStatus = require("http-status-codes");
+var Promise = require("bluebird");
+
+var getAnalytics = function(params , next){
+
+		var branchOperation = null;
+		var branchId = null;
+		var branchType = null;
+
+		var status = null;
+		var payment_status = null;
+		var type = null;
+		var deliveryType = null;
+		var isVd = null;
+
+		var startTime = null;
+		var endTime = null;
+		var count = false;
+
+		branchOperation = params.branchOperation;
+		branchId = params.branchId;
+		branchType = branchUtils.sanitizeBranchType(params.branchType);
+
+		status = params.status;
+		payment_status = params.payment_status;
+		type = params.type;
+		deliveryType = params.deliveryType;
+		isVd = params.isVd;
+
+		startTime = params.startTime;
+		endTime = params.endTime;
+
+		var whereQuery = {};
+
+		if(branchOperation == "entry"){
+
+			if(branchType){
+				whereQuery.entry_branch_type = branchUtils.desanitizeBranchType(branchType);
+			}
+			if(branchId){
+				whereQuery.entry_branch_id = branchId;
+			}
+
+		}else if(branchOperation == "exit"){
+
+			if(branchType){
+				whereQuery.exit_branch_type = branchUtils.desanitizeBranchType(branchType);
+			}
+			if(branchId){
+				whereQuery.exit_branch = branchId;
+			}
+
+		}else if(branchOperation == "current"){
+
+			if(branchType){
+				whereQuery.current_hub_type = branchUtils.sanitizeBranchType(branchType);
+			}
+			if(branchId){
+				whereQuery.current_hub = branchId;
+			}
+
+		}else if(branchOperation == 'next'){
+
+			if(branchType){
+				whereQuery.next_hub_type = branchUtils.sanitizeBranchType(branchType);
+			}
+			if(branchId){
+				whereQuery.next_hub = branchId;
+			}
+		}else{}
+
+		//@todo Do the rwherequey construction for the remaining fields
+		if(status){
+			whereQuery.status = status;
+		}
+		if(payment_status){
+			whereQuery.payment_status = payment_status;
+		}
+		if(type){
+			whereQuery.type = type;
+		}
+		if(deliveryType){
+			whereQuery.deliveryType = deliveryType;
+		}
+
+		var startTimeObject = null;//new Date(startTime);
+		var endTimeObject = null; //new Date(endTime);
+
+		if(startTime){
+			startTimeObject = new Date(parseInt(startTime));
+		}
+		if(endTime){
+			endTimeObject = new Date(parseInt(endTime));
+		}
+
+		console.log(JSON.stringify(startTime));
+		console.log(JSON.stringify(endTime));
+
+		console.log(JSON.stringify(startTimeObject));
+		console.log(JSON.stringify(endTimeObject));
+
+		if(startTimeObject && endTimeObject){
+
+				whereQuery.createdAt = {
+					$gte: startTimeObject,
+					$lte: endTimeObject
+					//$between:[ startTimeObject , endTimeObject ]
+				};
+		}else if(startTimeObject){
+
+				whereQuery.createdAt = {
+					$gte: startTimeObject
+				};
+		}else if(endTimeObject){
+
+				whereQuery.createdAt = {
+					$lte: endTimeObject
+				};
+		}
+
+		if(params.count){
+			count = params.count;
+		}
+
+		var p1 = Promise.resolve(null);
+
+		if(count){
+			p1 = orderModel.count({ where: whereQuery });
+		}else{
+			p1 = orderModel
+			.findAll({ where: whereQuery });
+		}
+
+		p1.then(function(orderItems){
+			next({ status:"success" , statusCode: HttpStatus.OK , data:orderItems , message:null });
+			return;
+		})
+		.catch(function(err){
+			next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:JSON.stringify(err) });
+			return;
+		});
+}
+
+exports.getAnalytics = getAnalytics;
