@@ -3,6 +3,7 @@ var request = require("request");
 var HttpStatus = require("http-status-codes");
 var phoneUtil = require("./phone");
 var https = require("https");
+var requestRetry = require("requestretry");
 //
 // var getGatewayUrl = function(){
 //
@@ -33,7 +34,10 @@ var sendMessage = function(toPhoneNum , body , next ){
   var agent = new https.Agent(agentOptions);
   requestParams.agent = agent;
 
-  request.post(requestParams , function(error , response , body){
+  requestParams.maxAttempts = 7;
+  requestParams.retryDelay = 2000;
+  
+  requestRetry(requestParams , function(error , response , body){
     // callback
 
     if(error){
