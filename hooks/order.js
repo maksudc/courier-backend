@@ -201,9 +201,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
     return next();
   }
 
-  if(snapshotInstance.status == "ready" || snapshotInstance.status == "confirmed"){
+  if( (snapshotInstance.status == "ready" || snapshotInstance.status == "confirmed") && updatedInstance.status == "running"){
     // can be switched to running
-    if(updatedInstance.status == "running"){
+    if(true){
 
       // set the previous branch to the current branch
       // Get the route for the source and destination
@@ -293,9 +293,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
     }
   }
 
-  else if(snapshotInstance.status == "running"){
+  else if(snapshotInstance.status == "running" && updatedInstance.status == 'received'){
     //  a running shipment can be recieved or expired or reached
-    if(updatedInstance.status == 'received'){
+    if(true){
 
       //instance.previousBranchType = instance.currentBranchType;
       //instance.previousBranchId = instance.currentBranchId;
@@ -348,7 +348,8 @@ order.hook("beforeUpdate" , function(instance , options , next){
             _.assignIn(instance._changed , { current_hub_type: true });
             _.assignIn(instance._changed , { next_hub: true });
             _.assignIn(instance._changed , { next_hub_type: true });
-        })
+            return next();
+        });
         // .then(function(){
         //    // moved to after update
         //   // Send message to the receiver about stocing of his/her order
@@ -356,9 +357,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
         //     console.log(data);
         //   });
         // })
-        .then(function(){
-            return next();
-        });
+        // .then(function(){
+        //     return next();
+        // });
 
       }else{
 
@@ -434,15 +435,13 @@ order.hook("beforeUpdate" , function(instance , options , next){
           });
         }
       }
-
-      return next();
     }
   }
 
-  else if(snapshotInstance.status == "received"){
+  else if(snapshotInstance.status == "received" && updatedInstance.status == 'running'){
 
     // From received it can go to either running or reached state
-    if(updatedInstance.status == 'running'){
+    if(true){
 
       //updatedInstance.previousBranchType = snapshotInstance.currentBranchType;
       //updatedInstance.previousBranchId = snapshotInstance.currentBranchId;
@@ -526,8 +525,8 @@ order.hook("beforeUpdate" , function(instance , options , next){
     }
   }
 
-  else if(snapshotInstance.status == "reached"){
-    if(updatedInstance.status == "running"){
+  else if(snapshotInstance.status == "reached" && updatedInstance.status == "running"){
+    if(true){
 
       if(sanitizeBranchType(updatedInstance.exit_branch_type) == "sub" && sanitizeBranchType(updatedInstance.current_hub_type) == "regional"){
 
@@ -570,15 +569,16 @@ order.hook("beforeUpdate" , function(instance , options , next){
       });
 
     }
+  }else{
+
+      instance.dataValues = updatedInstance;
+
+      _.assignIn(instance._changed , { status: true });
+      _.assignIn(instance._changed , { current_hub: true });
+      _.assignIn(instance._changed , { current_hub_type: true });
+      _.assignIn(instance._changed , { next_hub: true });
+      _.assignIn(instance._changed , { next_hub_type: true });
+
+      return next();
   }
-
-  instance.dataValues = updatedInstance;
-
-    _.assignIn(instance._changed , { status: true });
-    _.assignIn(instance._changed , { current_hub: true });
-    _.assignIn(instance._changed , { current_hub_type: true });
-    _.assignIn(instance._changed , { next_hub: true });
-    _.assignIn(instance._changed , { next_hub_type: true });
-
-    return next();
 });
