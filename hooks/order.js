@@ -201,9 +201,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
     return next();
   }
 
-  if( (snapshotInstance.status == "ready" || snapshotInstance.status == "confirmed") && updatedInstance.status == "running"){
+  if(snapshotInstance.status == "ready" || snapshotInstance.status == "confirmed"){
     // can be switched to running
-    if(true){
+    if(updatedInstance.status == "running"){
 
       // set the previous branch to the current branch
       // Get the route for the source and destination
@@ -293,9 +293,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
     }
   }
 
-  else if(snapshotInstance.status == "running" && updatedInstance.status == 'received'){
+  else if(snapshotInstance.status == "running"){
     //  a running shipment can be recieved or expired or reached
-    if(true){
+    if(updatedInstance.status == 'received'){
 
       //instance.previousBranchType = instance.currentBranchType;
       //instance.previousBranchId = instance.currentBranchId;
@@ -316,7 +316,8 @@ order.hook("beforeUpdate" , function(instance , options , next){
         updatedInstance.status = "stocked";
 
         return sequelize.Promise.resolve(updatedInstance.status)
-        .then(function(){
+        .then(function(updatedStatus){
+
           return instance.getTracker();
         })
         .then(function(trackerItem){
@@ -349,6 +350,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
             _.assignIn(instance._changed , { next_hub: true });
             _.assignIn(instance._changed , { next_hub_type: true });
             return next();
+
         });
         // .then(function(){
         //    // moved to after update
@@ -435,13 +437,15 @@ order.hook("beforeUpdate" , function(instance , options , next){
           });
         }
       }
+
+      //return next();
     }
   }
 
-  else if(snapshotInstance.status == "received" && updatedInstance.status == 'running'){
+  else if(snapshotInstance.status == "received"){
 
     // From received it can go to either running or reached state
-    if(true){
+    if(updatedInstance.status == 'running'){
 
       //updatedInstance.previousBranchType = snapshotInstance.currentBranchType;
       //updatedInstance.previousBranchId = snapshotInstance.currentBranchId;
@@ -525,8 +529,8 @@ order.hook("beforeUpdate" , function(instance , options , next){
     }
   }
 
-  else if(snapshotInstance.status == "reached" && updatedInstance.status == "running"){
-    if(true){
+  else if(snapshotInstance.status == "reached"){
+    if(updatedInstance.status == "running"){
 
       if(sanitizeBranchType(updatedInstance.exit_branch_type) == "sub" && sanitizeBranchType(updatedInstance.current_hub_type) == "regional"){
 
@@ -569,16 +573,15 @@ order.hook("beforeUpdate" , function(instance , options , next){
       });
 
     }
-  }else{
-
-      instance.dataValues = updatedInstance;
-
-      _.assignIn(instance._changed , { status: true });
-      _.assignIn(instance._changed , { current_hub: true });
-      _.assignIn(instance._changed , { current_hub_type: true });
-      _.assignIn(instance._changed , { next_hub: true });
-      _.assignIn(instance._changed , { next_hub_type: true });
-
-      return next();
   }
+
+  instance.dataValues = updatedInstance;
+
+    _.assignIn(instance._changed , { status: true });
+    _.assignIn(instance._changed , { current_hub: true });
+    _.assignIn(instance._changed , { current_hub_type: true });
+    _.assignIn(instance._changed , { next_hub: true });
+    _.assignIn(instance._changed , { next_hub_type: true });
+
+    return next();
 });
