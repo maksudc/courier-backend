@@ -1,3 +1,5 @@
+var urlUtils = require('url');
+
 var config = {
   'test':{
    "USER_ID": "omex",
@@ -19,23 +21,28 @@ var config = {
   }
 };
 
+var BASE_HOST = "powersms.banglaphone.net.bd";
+
 var getGatewayUrl = function(config_env){
 
    BASE_PROTOCOL = "https";
    AUTHENTICATION_EXTENSION = "";
-   BASE_HOST = "powersms.banglaphone.net.bd";
    MESSAGE_EXTENSION = "/httpapi/sendsms";
 
   return BASE_PROTOCOL + "://" + AUTHENTICATION_EXTENSION  + BASE_HOST  + MESSAGE_EXTENSION;
 
 };
 
+var getHostName = function(){
+
+  return BASE_HOST;
+};
 
 var prepareRequest = function(config_env , data){
 
   var URL = getGatewayUrl(config_env);
   var formattedData = {
-    url: URL,
+    url: urlUtils.parse(URL),
     method: "POST",
     form:{
       "userId": config_env.USER_ID,

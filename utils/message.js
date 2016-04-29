@@ -33,7 +33,7 @@ var sendMessage = function(toPhoneNum , body , next ){
   var agent = new https.Agent(agentOptions);
   requestParams.agent = agent;
 
-  request(requestParams , function(error , response , body){
+  request.post(requestParams , function(error , response , body){
     // callback
 
     if(error){
