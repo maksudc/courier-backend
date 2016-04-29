@@ -62,8 +62,10 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
             updatedInstance.nextBranchId = firstRoute.id;
 
             instance.updatedInstance = updatedInstance;
+
+            return Promise.resolve(updatedInstance.status);
           })
-          .then(function(){
+          .then(function(updatedStatus){
 
             // Get the tracker
             return instance.getTracker();
@@ -276,11 +278,12 @@ ShipmentModel.hook("afterUpdate" , function(instance , options , next){
     .map(function(orderInstance){
 
       //return Promise.map(orderInstances , function(orderInstance){
+        readyStateIndex = statusStateMachine.indexOf("ready");
         preReachedStateIndex = statusStateMachine.indexOf("reached");
         orderStatusStateIndex = statusStateMachine.indexOf(orderInstance.status);
         shipmentStatusIndex = statusStateMachine.indexOf(updatedInstance.status);
 
-        if(shipmentStatusIndex < preReachedStateIndex && updatedInstance.status != "ready"){
+        if(shipmentStatusIndex > readyStateIndex && shipmentStatusIndex < preReachedStateIndex){
 
           if(orderStatusStateIndex < preReachedStateIndex){
             orderInstance.status = updatedInstance.status;

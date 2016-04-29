@@ -305,20 +305,19 @@ order.hook("beforeUpdate" , function(instance , options , next){
       updatedInstance.current_hub_type = updatedInstance.next_hub_type;
       updatedInstance.current_hub = updatedInstance.next_hub;
 
-      instance.set("current_hub_type"  , updatedInstance.next_hub_type);
-      instance.set("current_hub"  ,updatedInstance.next_hub);
+      //instance.set("current_hub_type"  , updatedInstance.next_hub_type);
+      //instance.set("current_hub"  ,updatedInstance.next_hub);
 
       //instance.updatedInstance = updatedInstance;
+
+      instance.dataValues = updatedInstance;
 
       var p1 = sequelize.Promise.resolve(updatedInstance.status);
 
       if(updatedInstance.current_hub_type == sanitizeBranchType(updatedInstance.exit_branch_type) && updatedInstance.current_hub == updatedInstance.exit_branch){
         updatedInstance.status = "stocked";
 
-        return sequelize.Promise.resolve(updatedInstance.status)
-        .then(function(){
-          return instance.getTracker();
-        })
+        return instance.getTracker()
         .then(function(trackerItem){
 
           if(trackerItem){
@@ -348,7 +347,10 @@ order.hook("beforeUpdate" , function(instance , options , next){
             _.assignIn(instance._changed , { current_hub_type: true });
             _.assignIn(instance._changed , { next_hub: true });
             _.assignIn(instance._changed , { next_hub_type: true });
-        })
+
+            return next();
+
+        });
         // .then(function(){
         //    // moved to after update
         //   // Send message to the receiver about stocing of his/her order
@@ -356,9 +358,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
         //     console.log(data);
         //   });
         // })
-        .then(function(){
-            return next();
-        });
+        // .then(function(){
+        //     return next();
+        // });
 
       }else{
 
@@ -435,7 +437,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
         }
       }
 
-      return next();
+      //return next();
     }
   }
 

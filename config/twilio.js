@@ -1,4 +1,5 @@
 var _= require("lodash");
+var urlUtils = require("url");
 
 var config = {
   'test':{
@@ -38,7 +39,7 @@ var prepareRequest = function(config_env , data){
 
   var URL = getGatewayUrl(config_env);
   var formattedData = {
-    uri: URL,
+    url: urlUtils.parse(URL),
     method: "POST",
     form:{
 

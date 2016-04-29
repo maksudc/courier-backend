@@ -28,7 +28,7 @@ router.get('/getOrderView/:id', function(req, res){
 	/*orderLogic.orderDetailView(req.params.id, function(data){
 		res.send(data);
 	});*/
-	
+
 	orderLogic.orderDetail(req.params.id, function(data){
 		res.send(data);
 	});
@@ -200,6 +200,16 @@ router.post('/addItem', function(req, res){
 
 });
 
+router.get("/analytics" , function(req , res){
+
+	orderLogic.getAnalytics(req.query , function(data){
+
+		if(data.statusCode){
+			res.status(data.statusCode);
+		}
+		res.send(data);
+	});
+});
 
 
 module.exports = router;
