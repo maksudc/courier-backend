@@ -1305,6 +1305,8 @@ var getAnalytics = function(params , next){
 
 		if(startTimeObject && endTimeObject){
 
+			// @TODO add validation for ending time > starting time
+
 				whereQuery.createdAt = {
 					$gte: startTimeObject,
 					$lte: endTimeObject
