@@ -38,7 +38,7 @@ var prepareRequest = function(config_env , data){
 
   var URL = getGatewayUrl(config_env);
   var formattedData = {
-    uri: URL,
+    url: URL,
     method: "POST",
     form:{
 
