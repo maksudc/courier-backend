@@ -6,6 +6,7 @@ var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var adminLogic = require("./admin/adminLogic");
+var orderLogic = require("./orderLogic");
 var clientLogic = require("./clientLogic");
 var _ = require("lodash");
 var async = require("async");
@@ -224,15 +225,19 @@ var receiveOrder = function(id, verification_code, operator, next){
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
-			console.log(moneyOrder);
 
 			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'draft'){
 
 				moneyOrder.status = 'received';
 				moneyOrder.receiver_operator = operator.email;
-				moneyOrder.save();
-				next(null, moneyOrder);
+				orderLogic.receivePayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
+					if(orderPaymentStatus.status == 'success'){
+						moneyOrder.save();
+						next(null, moneyOrder);
+					}
+					else next("Cannot set order as paid");
+				});
 
 			}
 			else{

@@ -532,8 +532,10 @@ var receivePayment = function(paymentData, operator, next){
 				next({"status": "error", "message": "Sorry, this order is already paid"});
 				return;
 			}
-
-			if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
+			else if(orderData.data.dataValues.type == 'value_delivery'){
+				console.log("Set order charge paid for VD");
+			}
+			else if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
 				if(operator.role == config.adminTypes.branch_operator.type
 					|| operator.role == config.adminTypes.super_admin.type){
 					orderData.data.payment = parseFloat(paymentData.payment);
