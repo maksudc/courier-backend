@@ -155,7 +155,7 @@ var findById = function(id, next){
 
 						orderModel.findOne({
 							where: {uuid: moneyOrder.dataValues.money_order_id},
-							attributes: ['payment']
+							attributes: ['payment', 'payment_status']
 						}).then(function(orderData){
 							if(orderData){
 								var tempData = moneyOrder.dataValues;
@@ -164,7 +164,13 @@ var findById = function(id, next){
 								tempData["region"] = detail.region;
 								tempData["sender_verification_code"] = null;
 								tempData["receiver_verification_code"] = null;
-								tempData["parcel_payment"] = orderData.dataValues.payment;
+								
+
+								if(orderData.dataValues.payment_status == 'paid')
+									tempData["parcel_payment"] = 0;
+								else 
+									tempData["parcel_payment"] = orderData.dataValues.payment;
+
 								next(null, tempData);
 							}
 							else next("No order found by this id!");
@@ -238,6 +244,9 @@ var receiveOrder = function(id, verification_code, operator, next){
 						if(orderPaymentStatus.status == 'success'){
 							moneyOrder.save();
 							next(null, moneyOrder);
+						}
+						else if(orderPaymentStatus.status == 'paid'){
+							console.log("It is already paid!!!!!");
 						}
 						else next("Cannot set order as paid");
 					});
@@ -417,6 +426,8 @@ exports.deleteMoneyOrder = deleteMoneyOrder;
 
 var updateVDPrice = function(moneyData, next){
 
+	console.log(moneyData);
+
 	moneyModel.findOne({
 		where: {id: moneyData.id}
 	}).then(function(moneyOrderData){
@@ -433,16 +444,22 @@ var updateVDPrice = function(moneyData, next){
 			if(moneyData.newPayParcelPrice == 'buyer'){
 				updateData["payable"] = updateData["payable"] + parseInt(moneyData.order_total_price);
 			}
-			else {
+			else if(moneyData.newPayParcelPrice == 'seller'){
 				updateData["amount"] = updateData["amount"] - parseInt(moneyData.order_total_price);
 			}
-			updateData["payParcelPrice"] = moneyData["newPayParcelPrice"];
+			updateData["payParcelPrice"] = moneyData.newPayParcelPrice;
+
+			console.log(updateData);
 
 			moneyOrderData.amount = updateData.amount;
 			moneyOrderData.charge = updateData.charge;
 			moneyOrderData.discount = updateData.discount;
 			moneyOrderData.payable = updateData.payable;
-			moneyOrderData.payParcelPrice = updateData.payParcelPrice;
+
+			console.log(updateData.payParcelPrice);
+			
+			if(updateData.payParcelPrice && updateData.payParcelPrice != '')
+				moneyOrderData.payParcelPrice = updateData.payParcelPrice;
 
 			moneyOrderData.save().then(function(newMoneyOrderData){
 				if(newMoneyOrderData){
