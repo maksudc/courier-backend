@@ -539,14 +539,15 @@ var receivePayment = function(paymentData, operator, next){
 				else if(orderData.data.dataValues.type == 'value_delivery'){
 					orderData.data.getMoney_order().then(function(moneyOrderData){
 						if(moneyOrderData){
+							console.log("Pay parcel price by: " + moneyOrderData.dataValues.payParcelPrice);
 							if(moneyOrderData.dataValues.payParcelPrice == 'seller'){
 								moneyOrderData.payParcelPrice = null;
 								moneyOrderData.amount = parseInt(moneyOrderData.dataValues.amount) + 
 									parseInt(orderData.data.dataValues.payment);
 							}
-							else{
+							else if(moneyOrderData.dataValues.payParcelPrice == 'buyer'){
 								moneyOrderData.payParcelPrice = null;
-								moneyOrderData.amount = parseInt(moneyOrderData.dataValues.payable) - 
+								moneyOrderData.payable = parseInt(moneyOrderData.dataValues.payable) - 
 									parseInt(orderData.data.dataValues.payment);
 							}
 
