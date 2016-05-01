@@ -161,7 +161,7 @@ var findById = function(id, next){
 								var tempData = moneyOrder.dataValues;
 								tempData["subBranch"] = detail.subBranch;
 								tempData["regionalBranch"] = detail.regionalBranch;
-								tempData["region"] = detail.region;
+								if(detail.region) tempData["region"] = detail.region;
 								tempData["sender_verification_code"] = null;
 								tempData["receiver_verification_code"] = null;
 								
@@ -185,7 +185,7 @@ var findById = function(id, next){
 						var tempData = moneyOrder.dataValues;
 						tempData["subBranch"] = detail.subBranch;
 						tempData["regionalBranch"] = detail.regionalBranch;
-						tempData["region"] = detail.region;
+						if(detail.region) tempData["region"] = detail.region;
 						tempData["sender_verification_code"] = null;
 						tempData["receiver_verification_code"] = null;
 						next(null, tempData);
