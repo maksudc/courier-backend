@@ -247,6 +247,8 @@ var receiveOrder = function(id, verification_code, operator, next){
 						}
 						else if(orderPaymentStatus.status == 'paid'){
 							console.log("It is already paid!!!!!");
+							moneyOrder.save();
+							next(null, moneyOrder);
 						}
 						else next("Cannot set order as paid");
 					});

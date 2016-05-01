@@ -531,9 +531,11 @@ var receivePayment = function(paymentData, operator, next){
 			async.series([function(checkCurrentStatus){
 
 				if(orderData.data.payment_status == 'paid'){
+					
 					if(orderData.data.dataValues.type == 'general')
 						next({"status": "error", "message": "Sorry, this order is already paid"});
-					else next({"status": "paid", payment: orderData.dataValues.payment});
+					else 
+						next({"status": "paid", payment: orderData.data.dataValues.payment});
 					return;
 				}
 				else if(orderData.data.dataValues.type == 'value_delivery'){
