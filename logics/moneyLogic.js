@@ -230,14 +230,21 @@ var receiveOrder = function(id, verification_code, operator, next){
 			if(moneyOrder.dataValues.status == 'draft'){
 
 				moneyOrder.status = 'received';
+				moneyOrder.paid = true;
 				moneyOrder.receiver_operator = operator.email;
-				orderLogic.receivePayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
-					if(orderPaymentStatus.status == 'success'){
-						moneyOrder.save();
-						next(null, moneyOrder);
-					}
-					else next("Cannot set order as paid");
-				});
+
+				if(moneyOrder.dataValues.type == 'virtual_delivery')
+					orderLogic.receivePayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
+						if(orderPaymentStatus.status == 'success'){
+							moneyOrder.save();
+							next(null, moneyOrder);
+						}
+						else next("Cannot set order as paid");
+					});
+				else {
+					moneyOrder.save();
+					next(null, moneyOrder);
+				}
 
 			}
 			else{
