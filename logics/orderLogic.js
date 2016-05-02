@@ -575,6 +575,7 @@ var receivePayment = function(paymentData, operator, next){
 			}, function(updateOrder){
 
 				orderData.data.payment_status = 'paid';
+				orderData.data.pay_time = new Date();
 				orderData.data.payment_operator = operator.email;
 
 				orderData.data.save().then(function(newOrderData){

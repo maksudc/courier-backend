@@ -3,6 +3,7 @@ var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var moneyModel = sequelize.models.money;
 var orderModel = sequelize.models.order;
+var adminLogic = require('./admin/adminLogic');
 var async = require('async');
 var _ = require('lodash');
 
@@ -17,6 +18,72 @@ var findOrderData = function(params, next){
 			}
 		});
 }
+
+var getOrderPaymentData = function(params, operator, next){
+
+	var searchParams = {};
+	var receiverAdminList = [];
+	var timeRange = 24*60*60*1000;
+
+	if(params.time_range == 'week') timeRange = timeRange * 7;
+	else if(params.time_range == 'month') timeRange = timeRange * 30;
+
+	async.series([function(findSameBranchAdmin){
+
+		if(params.regional_branch && params.regional_branch != '')
+			searchParams["regional_branch_id"] = parseInt(params.regional_branch);
+		if(params.sub_branch && params.sub_branch != '')
+			searchParams["sub_branch_id"] = parseInt(params.sub_branch);
+
+		if(searchParams["regional_branch_id"] && searchParams["sub_branch_id"] ){
+			searchParams = {
+				"$and": [
+					{"regional_branch_id": parseInt(searchParams["regional_branch_id"])},
+					{"sub_branch_id": parseInt(searchParams["sub_branch_id"])}
+				]
+			}
+		}
+
+		adminLogic.getSameBranchAdmins(searchParams, function(err, adminList){
+			if(err) next(err);
+			else {
+				_.forEach(adminList, function(singleAdmin){
+					receiverAdminList.push(singleAdmin.dataValues.email);
+				});
+
+				findSameBranchAdmin(null);
+			}
+		});
+
+	}, function(findOrders){
+
+		orderModel.findAll({
+			where: {
+				"$and": [
+					{payment_status: 'paid'},
+					{payment_operator: {"$in": receiverAdminList}},
+					{pay_time: {$gt: new Date(new Date() - timeRange)}}
+				]
+			},
+			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator']
+		}).then(function(orderData){
+			next(null, orderData);
+		}).catch(function(err){
+			if(err){
+				console.log(err);
+				next(err);
+			}
+		});
+
+	}], function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+}
+
+exports.getOrderPaymentData = getOrderPaymentData;
 
 var findMoneyData = function(params, next){
 	moneyModel.findAll({where: params})

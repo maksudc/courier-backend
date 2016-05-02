@@ -28,6 +28,7 @@ module.exports = function(sequelize, DataTypes) {
 		type: {type: DataTypes.ENUM('general', 'value_delivery'), defaultValue: 'general', allowNull: false},
 		confirm_time: {type: DataTypes.DATE},
 		receive_time: {type: DataTypes.DATE},
+		pay_time: {type: DataTypes.DATE},
 		delivery_time: {type: DataTypes.DATE},
 		sender: {type: DataTypes.STRING, allowNull: false}, //sender mobile
 		sender_addr: {type: DataTypes.STRING},
