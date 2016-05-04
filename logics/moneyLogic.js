@@ -237,7 +237,8 @@ var receiveOrder = function(id, verification_code, operator, next){
 
 				moneyOrder.status = 'received';
 				moneyOrder.paid = true;
-				moneyOrder.receiver_operator = operator.email;
+				moneyOrder.payment_time = new Date();
+				moneyOrder.payment_receiver_operator = operator.email;
 
 				if(moneyOrder.dataValues.type == 'virtual_delivery')
 					orderLogic.receivePayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
@@ -308,6 +309,7 @@ var deliverOrder = function(id, verification_code, operator, next){
 			if(moneyOrder.dataValues.status == 'deliverable'){
 
 				moneyOrder.status = 'delivered';
+				moneyOrder.delivery_time = new Date();
 				moneyOrder.deliver_operator = operator.email;
 				moneyOrder.save();
 				next(null, moneyOrder);
