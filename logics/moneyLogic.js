@@ -35,8 +35,8 @@ var create = function(operator, moneyData, next){
 		charge: parseInt(moneyData.charge),
 		discount: parseInt(moneyData.discount) || 0,
 		payable: parseInt(moneyData.payable),
-		regional_branch_id: parseInt(moneyData.regionalBranch),
-		sub_branch_id: parseInt(moneyData.subBranch)
+		regional_branch_id: parseInt(moneyData.regionalBranch), //destination regional branch
+		sub_branch_id: parseInt(moneyData.subBranch) //destination sub branch
 	}
 
 	if(moneyData.type == 'virtual_delivery') 
@@ -88,56 +88,37 @@ exports.create = create;
 
 var findAll = function(adminData, next){
 
-	var adminDataParams = {};
-	var adminEmailList = [];
+	var destinationBranchParams = [], sourceBranchParams = [];
 
-	if(adminData.regional_branch_id) adminDataParams["regional_branch_id"] = adminData.regional_branch_id;
-	if(adminData.sub_branch_id) adminDataParams["sub_branch_id"] = adminData.sub_branch_id;
+	if(adminData.regional_branch_id) {
+		destinationBranchParams.push({regional_branch_id: adminData.regional_branch_id});
+		sourceBranchParams.push({regional_branch_id: adminData.regional_branch_id});
+	}
+	if(adminData.sub_branch_id) {
+		destinationBranchParams.push({sub_branch_id: adminData.sub_branch_id});
+		sourceBranchParams.push({sub_branch_id: adminData.sub_branch_id});
+	}
 
-	async.series([function(findOperators){
+	sourceBranchParams.push({status: {"$in": ['draft', 'received']}});
+	destinationBranchParams.push({status: {"$in": ['deliverable', 'delivered']}});
 
-			adminLogic.getSameBranchAdmins(adminDataParams, function(err, adminList){
-				if(adminList){
-					_.forEach(adminList, function(singleAdmin){
-						adminEmailList.push(singleAdmin.dataValues.email);
-					});
-				}
-
-				findOperators(null);
-			});
-
-		}, function(findMoneyOrders){
-
-			var filterParams = {
-				"$or":[
-					{receiver_operator: {"$in": adminEmailList}},
-					{payment_receiver_operator: {"$in": adminEmailList}},
-					{deliver_operator: {"$in": adminEmailList}},
-					{"$and": [
-						{regional_branch_id: adminData.regional_branch_id},
-						{sub_branch_id: adminData.sub_branch_id}
-					]}
-				]
-			};
+	var filterParams = {
+		"$or":[
+			{"$and": destinationBranchParams},
+			{"$and": sourceBranchParams}
+		]
+	};
 
 
-			moneyModel.findAll({where: filterParams}).then(function(moneyOrderList){
-				if(moneyOrderList) next(null, moneyOrderList);
-				else next(null, false);
-			}).catch(function(err){
-				if(err){
-					console.log(err);
-					next(err);
-				}
-			});
-
-		}], 
-		function(err){
-			if(err){
-				console.log(err);
-				next(err);
-			}
-		});
+	moneyModel.findAll({where: filterParams}).then(function(moneyOrderList){
+		if(moneyOrderList) next(null, moneyOrderList);
+		else next(null, false);
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
 
 }
 
