@@ -22,8 +22,6 @@ router.get("/" , function(req, res){
 
 router.get("/parcel/cashin", function(req, res){
 
-	console.log(req.query);
-
 	reportLogic.getOrderPaymentData(req.query, req.user, function(err, reportData){
 		if(err) res.send({"status": "error", error: err});
 		else res.send({"status": "success", data: reportData});
