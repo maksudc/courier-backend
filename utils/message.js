@@ -1,9 +1,12 @@
+var env = process.env.NODE_ENV || 'development' ;
+
 var messageConfig = require("../config/message");
 var request = require("request");
 var HttpStatus = require("http-status-codes");
 var phoneUtil = require("./phone");
 var https = require("https");
 var requestRetry = require("requestretry");
+var HttpStatus = require("http-status-codes");
 //
 // var getGatewayUrl = function(){
 //
@@ -36,24 +39,30 @@ var sendMessage = function(toPhoneNum , body , next ){
 
   requestParams.maxAttempts = 7;
   requestParams.retryDelay = 2000;
-  
-  requestRetry(requestParams , function(error , response , body){
-    // callback
 
-    if(error){
-      console.log(JSON.stringify(error));
-      next({ status: "error" , mesage:  JSON.stringify(error) + " " + JSON.stringify(body) });
-      return;
-    }
+  if(env == "production"){
 
-    if( response.statusCode >= HttpStatus.OK  && response.statusCode <= HttpStatus.ACCEPTED ){
-      next({ status:"success" , message: body });
-    }else{
-      next({ status: "error" , message: body , statusCode: response.statusCode });
-    }
+    requestRetry(requestParams , function(error , response , body){
+      // callback
 
-  });
+      if(error){
+        console.log(JSON.stringify(error));
+        next({ status: "error" , mesage:  JSON.stringify(error) + " " + JSON.stringify(body) });
+        return;
+      }
 
+      if( response.statusCode >= HttpStatus.OK  && response.statusCode <= HttpStatus.ACCEPTED ){
+        next({ status:"success" , message: body });
+      }else{
+        next({ status: "error" , message: body , statusCode: response.statusCode });
+      }
+
+    });
+  }else{
+
+    console.log("Development mode , spoofing for message sending is done");
+    next({ status: "success" , message: body , statusCode: HttpStatus.OK });
+  }  
 };
 
 exports.sendMessage = sendMessage;
