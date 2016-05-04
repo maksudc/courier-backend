@@ -27,6 +27,9 @@ module.exports = function(sequelize , DataTypes){
 		type: {
 			type: DataTypes.ENUM('general', 'virtual_delivery'),
 			defaultValue: 'general'
+		},
+		payParcelPrice: {
+			type: DataTypes.ENUM('buyer', 'seller')
 		}
 	} , {
 

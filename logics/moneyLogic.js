@@ -2,9 +2,11 @@ var DB = require("../models/index");
 var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var moneyModel = sequelize.models.money;
+var orderModel = sequelize.models.order;
 var regionalBranch = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var adminLogic = require("./admin/adminLogic");
+var orderLogic = require("./orderLogic");
 var clientLogic = require("./clientLogic");
 var _ = require("lodash");
 var async = require("async");
@@ -44,6 +46,14 @@ var create = function(operator, moneyData, next){
 		
 		postData["source_regional_branch_id"] = moneyData.source_regional_branch_id;
 		postData["source_sub_branch_id"] = moneyData.source_sub_branch_id;
+
+		if(moneyData.payParcelPrice == 'buyer'){
+			postData["payable"] = postData["payable"] + moneyData.parcelPrice;
+		}
+		else {
+			postData["amount"] = postData["amount"] - moneyData.parcelPrice;	
+		}
+		postData["payParcelPrice"] = moneyData["payParcelPrice"];
 	}
 	else {
 		postData["source_regional_branch_id"] = operator.regional_branch_id;
@@ -140,13 +150,46 @@ var findById = function(id, next){
 			subBranchLogic.findCredential(parseInt(moneyOrder.dataValues.sub_branch_id), function(err, detail){
 				if(err) next(err);
 				else{
-					var tempData = moneyOrder.dataValues;
-					tempData["subBranch"] = detail.subBranch;
-					tempData["regionalBranch"] = detail.regionalBranch;
-					tempData["region"] = detail.region;
-					tempData["sender_verification_code"] = null;
-					tempData["receiver_verification_code"] = null;
-					next(null, tempData);
+					if(moneyOrder.dataValues.type == 'virtual_delivery'){
+						//find corrensponding order price and send it
+
+						orderModel.findOne({
+							where: {uuid: moneyOrder.dataValues.money_order_id},
+							attributes: ['payment', 'payment_status']
+						}).then(function(orderData){
+							if(orderData){
+								var tempData = moneyOrder.dataValues;
+								tempData["subBranch"] = detail.subBranch;
+								tempData["regionalBranch"] = detail.regionalBranch;
+								if(detail.region) tempData["region"] = detail.region;
+								tempData["sender_verification_code"] = null;
+								tempData["receiver_verification_code"] = null;
+								
+
+								if(orderData.dataValues.payment_status == 'paid')
+									tempData["parcel_payment"] = 0;
+								else 
+									tempData["parcel_payment"] = orderData.dataValues.payment;
+
+								next(null, tempData);
+							}
+							else next("No order found by this id!");
+						}).catch(function(err){
+							if(err){
+								console.log(err);
+								next(err);
+							}
+						});
+					}
+					else{
+						var tempData = moneyOrder.dataValues;
+						tempData["subBranch"] = detail.subBranch;
+						tempData["regionalBranch"] = detail.regionalBranch;
+						if(detail.region) tempData["region"] = detail.region;
+						tempData["sender_verification_code"] = null;
+						tempData["receiver_verification_code"] = null;
+						next(null, tempData);
+					}
 				}
 			});
 		}
@@ -188,15 +231,31 @@ var receiveOrder = function(id, verification_code, operator, next){
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
-			console.log(moneyOrder);
 
 			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'draft'){
 
 				moneyOrder.status = 'received';
+				moneyOrder.paid = true;
 				moneyOrder.receiver_operator = operator.email;
-				moneyOrder.save();
-				next(null, moneyOrder);
+
+				if(moneyOrder.dataValues.type == 'virtual_delivery')
+					orderLogic.receivePayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
+						if(orderPaymentStatus.status == 'success'){
+							moneyOrder.save();
+							next(null, moneyOrder);
+						}
+						else if(orderPaymentStatus.status == 'paid'){
+							console.log("It is already paid!!!!!");
+							moneyOrder.save();
+							next(null, moneyOrder);
+						}
+						else next("Cannot set order as paid");
+					});
+				else {
+					moneyOrder.save();
+					next(null, moneyOrder);
+				}
 
 			}
 			else{
@@ -365,6 +424,69 @@ var deleteMoneyOrder = function(operator, id, next){
 }
 
 exports.deleteMoneyOrder = deleteMoneyOrder;
+
+
+var updateVDPrice = function(moneyData, next){
+
+	console.log(moneyData);
+
+	moneyModel.findOne({
+		where: {id: moneyData.id}
+	}).then(function(moneyOrderData){
+
+		if(moneyOrderData){
+			
+			var updateData = {
+				amount: parseInt(moneyData.amount),
+				charge: parseInt(moneyData.charge),
+				discount: parseInt(moneyData.discount) || 0,
+				payable: parseInt(moneyData.payable)
+			}
+
+			if(moneyData.newPayParcelPrice == 'buyer'){
+				updateData["payable"] = updateData["payable"] + parseInt(moneyData.order_total_price);
+			}
+			else if(moneyData.newPayParcelPrice == 'seller'){
+				updateData["amount"] = updateData["amount"] - parseInt(moneyData.order_total_price);
+			}
+			updateData["payParcelPrice"] = moneyData.newPayParcelPrice;
+
+			console.log(updateData);
+
+			moneyOrderData.amount = updateData.amount;
+			moneyOrderData.charge = updateData.charge;
+			moneyOrderData.discount = updateData.discount;
+			moneyOrderData.payable = updateData.payable;
+
+			console.log(updateData.payParcelPrice);
+			
+			if(updateData.payParcelPrice && updateData.payParcelPrice != '')
+				moneyOrderData.payParcelPrice = updateData.payParcelPrice;
+
+			moneyOrderData.save().then(function(newMoneyOrderData){
+				if(newMoneyOrderData){
+					next(null, {id: newMoneyOrderData.dataValues.id});
+				}
+				else next("Failed to update");
+			}).catch(function(err){
+				if(err){
+					console.log(err);
+					next(err);
+				}
+			});
+		}
+		else next("No money order found by this id");
+
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.updateVDPrice = updateVDPrice;
 
 
 

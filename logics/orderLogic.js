@@ -528,38 +528,73 @@ var receivePayment = function(paymentData, operator, next){
 	findOne(paymentData.id, function(orderData){
 		if(orderData.status == 'success'){
 
-			if(orderData.data.payment_status == 'paid'){
-				next({"status": "error", "message": "Sorry, this order is already paid"});
-				return;
-			}
+			async.series([function(checkCurrentStatus){
 
-			if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
-				if(operator.role == config.adminTypes.branch_operator.type
-					|| operator.role == config.adminTypes.super_admin.type){
-					orderData.data.payment = parseFloat(paymentData.payment);
-				}
-				else {
-					return next({"status": "error", "message": "Edit permission is not allowed for u!"});
-				}
-			}
-
-			orderData.data.payment_status = 'paid';
-			orderData.data.payment_operator = operator.email;
-
-
-			orderData.data.save().then(function(newOrderData){
-				if(newOrderData){
-					next({"status": "success", "data": newOrderData.dataValues});
-				}
-				else{
-					next({"status": "error", "message": "Unknown error while saving status"});
-				}
-
-				return;
-			}).catch(function(err){
-				if(err){
-					next({"status": "error", "message": "Error while saving status"});
+				if(orderData.data.payment_status == 'paid'){
+					
+					if(orderData.data.dataValues.type == 'general')
+						next({"status": "error", "message": "Sorry, this order is already paid"});
+					else 
+						next({"status": "paid", payment: orderData.data.dataValues.payment});
 					return;
+				}
+				else if(orderData.data.dataValues.type == 'value_delivery'){
+					orderData.data.getMoney_order().then(function(moneyOrderData){
+						if(moneyOrderData){
+							console.log("Pay parcel price by: " + moneyOrderData.dataValues.payParcelPrice);
+							if(moneyOrderData.dataValues.payParcelPrice == 'seller'){
+								moneyOrderData.payParcelPrice = null;
+								moneyOrderData.amount = parseInt(moneyOrderData.dataValues.amount) + 
+									parseInt(orderData.data.dataValues.payment);
+							}
+							else if(moneyOrderData.dataValues.payParcelPrice == 'buyer'){
+								moneyOrderData.payParcelPrice = null;
+								moneyOrderData.payable = parseInt(moneyOrderData.dataValues.payable) - 
+									parseInt(orderData.data.dataValues.payment);
+							}
+
+							moneyOrderData.save();
+							checkCurrentStatus(null);
+						}
+						else return next({"status": "error", message: "Cannot update money order!"});
+					})
+				}
+				else if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
+					if(operator.role == config.adminTypes.branch_operator.type
+						|| operator.role == config.adminTypes.super_admin.type){
+						orderData.data.payment = parseFloat(paymentData.payment);
+						checkCurrentStatus(null);
+					}
+					else {
+						return next({"status": "error", "message": "Edit permission is not allowed for u!"});
+					}
+				}
+				else checkCurrentStatus(null);
+
+
+			}, function(updateOrder){
+
+				orderData.data.payment_status = 'paid';
+				orderData.data.pay_time = new Date();
+				orderData.data.payment_operator = operator.email;
+
+				orderData.data.save().then(function(newOrderData){
+					
+					if(newOrderData) next({"status": "success", "data": newOrderData.dataValues});
+					else next({"status": "error", "message": "Unknown error while saving status"});
+					
+				}).catch(function(err){
+					if(err){
+						next({"status": "error", "message": "Error while saving status"});
+						return;
+					}
+				});
+
+			}],
+			function(err){
+				if(err){
+					console.log(err);
+					next(err);
 				}
 			});
 		}
@@ -749,7 +784,9 @@ var createByOperator = function(postData, operator, next){
 				discount: postData.vd_discount,
 				payable: postData.vd_payable,
 				type: 'virtual_delivery',
-				money_order_id: order.uuid
+				money_order_id: order.uuid,
+				payParcelPrice: postData["vd_payBySender"],
+				parcelPrice: parseInt(order.payment)
 			}
 
 			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){

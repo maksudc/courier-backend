@@ -38,6 +38,7 @@ router.use("/permission", require("./permission"));
 router.use("/client", require("./client"));
 
 router.use("/money", require("./money"));
+router.use("/report", require("./report"));
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

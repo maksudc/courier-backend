@@ -1,0 +1,148 @@
+var DB = require("../models/index");
+var sequelize = DB.sequelize;
+var Sequelize = DB.Sequelize;
+var moneyModel = sequelize.models.money;
+var orderModel = sequelize.models.order;
+var adminLogic = require('./admin/adminLogic');
+var async = require('async');
+var _ = require('lodash');
+
+var findOrderData = function(params, next){
+	orderModel.findAll({where: params, attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_status']})
+		.then(function(orderData){
+			next(null, orderData);
+		}).catch(function(err){
+			if(err){
+				console.log(err);
+				next(err);
+			}
+		});
+}
+
+var getOrderPaymentData = function(params, operator, next){
+
+	var searchParams = {};
+	var receiverAdminList = [];
+	var timeRange = 24*60*60*1000;
+
+	if(params.time_range == 'week') timeRange = timeRange * 7;
+	else if(params.time_range == 'month') timeRange = timeRange * 30;
+
+	async.series([function(findSameBranchAdmin){
+
+		if(params.regional_branch && params.regional_branch != '')
+			searchParams["regional_branch_id"] = parseInt(params.regional_branch);
+		if(params.sub_branch && params.sub_branch != '')
+			searchParams["sub_branch_id"] = parseInt(params.sub_branch);
+
+		if(searchParams["regional_branch_id"] && searchParams["sub_branch_id"] ){
+			searchParams = {
+				"$and": [
+					{"regional_branch_id": parseInt(searchParams["regional_branch_id"])},
+					{"sub_branch_id": parseInt(searchParams["sub_branch_id"])}
+				]
+			}
+		}
+
+		adminLogic.getSameBranchAdmins(searchParams, function(err, adminList){
+			if(err) next(err);
+			else {
+				_.forEach(adminList, function(singleAdmin){
+					receiverAdminList.push(singleAdmin.dataValues.email);
+				});
+
+				findSameBranchAdmin(null);
+			}
+		});
+
+	}, function(findOrders){
+
+		orderModel.findAll({
+			where: {
+				"$and": [
+					{payment_status: 'paid'},
+					{payment_operator: {"$in": receiverAdminList}},
+					{pay_time: {$gt: new Date(new Date() - timeRange)}}
+				]
+			},
+			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator']
+		}).then(function(orderData){
+			next(null, orderData);
+		}).catch(function(err){
+			if(err){
+				console.log(err);
+				next(err);
+			}
+		});
+
+	}], function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+}
+
+exports.getOrderPaymentData = getOrderPaymentData;
+
+var findMoneyData = function(params, next){
+	moneyModel.findAll({where: params})
+		.then(function(moneyData){
+
+			var moneyList = [];
+
+			_.forEach(moneyData, function(singleMoneyOrder){
+				var moneyItem = {
+					"id": singleMoneyOrder.dataValues.id,
+					"type": singleMoneyOrder.dataValues.type,
+					"status": singleMoneyOrder.dataValues.status
+				};
+
+				moneyItem["revenue"] = parseInt(
+					parseInt(singleMoneyOrder.dataValues.charge) - parseInt(singleMoneyOrder.dataValues.discount));
+
+				moneyList.push(moneyItem);
+
+			});
+
+			next(null, moneyList);
+		}).catch(function(err){
+			if(err){
+				console.log(err);
+				next(err);
+			}	
+		});
+}
+
+var getReport = function(next){
+	var reportData = {};
+
+	async.series([function(orderReport){
+
+		findOrderData({}, function(err, orderData){
+			if(err) orderReport(err);
+			else {
+				reportData["orderData"]  = orderData;
+				orderReport(null);
+			}
+		});
+
+	}, function(moneyReport){
+
+		findMoneyData({}, function(err, moneyData){
+			if(err) moneyReport(err);
+			else {
+				reportData["moneyData"] = moneyData;
+				next(null, reportData);
+			}
+		});
+
+	}],function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+}
+
+exports.getReport=getReport;
