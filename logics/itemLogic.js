@@ -386,7 +386,7 @@ var addItems = function(data, next){
 exports.addItems = addItems;
 
 var updateItemStatus = function(params, next){
-	
+
 	var findParams = {};
 	if(params["bar_code"]) findParams["bar_code"] = params["bar_code"];
 	if(params["id"]) findParams["uuid"] = params["id"];
@@ -418,10 +418,10 @@ var updateItemStatus = function(params, next){
 
 		console.log("Get route");
 		getRoute(null);
-		
+
 		/*
-			Route checking is not needed right now. This will be added later. 
-			This check will be regional branch and sub branch check of operator 
+			Route checking is not needed right now. This will be added later.
+			This check will be regional branch and sub branch check of operator
 			and current regional/sub branch
 		*/
 
@@ -540,7 +540,72 @@ var updateOrderWithBranch = function(id, next){
 
 var getRemainingItems = function(orderId, updatedStatus, next){
 
-	itemModel.findAll({where: 
+	var notUpdatedItemList = null;
+	var rootOrder = null;
+	var orderUpdated = false;
+
+	orderLogic.findOne(orderId, function(orderData){
+
+		rootOrder = orderData;
+
+		if(!rootOrder){
+
+			itemList = [];
+			next(null, {
+				"remainingItemCount": itemList.length,
+				"error": true,
+				"errorMessage": "Error while update order. No order found!",
+				"orderUpdated": false
+			});
+			return ;
+		}
+
+		return itemModel.findAll({
+			where:
+			{
+				orderUuid: orderId,
+				status: {
+					$not: updatedStatus
+				}
+			}
+		});
+	})
+	.then(function(itemList){
+
+		notUpdatedItemList = itemList;
+
+		if(rootOrder.dataValues.status == "running" && rootOrder.dataValues.status != updatedStatus && notUpdatedItemList.length == 0){
+			rootOrder.dataValues.status = updatedStatus;
+			rootOrder._changed.status = true;
+
+			orderUpdated = true;
+
+			return rootOrder.save();
+		}
+		/*else if(rootOrder.dataValues.status == updatedStatus && notUpdatedItemList.length == 0){
+			return sequelize.Promise.resolve(rootOrder);
+		}*/
+
+		return sequelize.Promise.resolve(rootOrder);
+	})
+	.then(function(savedOrderItem){
+
+		next(null, {
+			"remainingItemCount": notUpdatedItemList.length,
+			"orderUpdated": orderUpdated,
+			"orderData": savedOrderItem.dataValues
+		});
+
+	})
+	.catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+	/*
+	itemModel.findAll({where:
 	{
 		orderUuid: orderId,
 		status: {
@@ -548,11 +613,12 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 		}
 	}}).then(function(itemList){
 
-		
+		notUpdatedItemList = itemList;
+
 		orderLogic.findOne(orderId, function(orderData){
 
 			var orderUpdated = false;
-			
+
 			if(orderData.data){
 				if(orderData.data.dataValues.status != updatedStatus && itemList.length == 0){
 					orderData.data.status = updatedStatus;
@@ -562,7 +628,7 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 				else if(orderData.data.dataValues.status == updatedStatus && itemList.length == 0){
 					orderUpdated = true;
 				}
-		
+
 				next(null, {
 					"remainingItemCount": itemList.length,
 					"orderUpdated": orderUpdated,
@@ -575,17 +641,21 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 				"errorMessage": "Error while update order. No order found!",
 				"orderUpdated": false
 			});
-				
+
 		});
-		
-	}).catch(function(err){
+
+	})
+	.then(function(){
+
+	})
+	.catch(function(err){
 		if(err){
 			console.log(err);
 			next(err);
 		}
 	});
-
-}
+	*/
+};
 
 var getItemCount = function(orderUuid, next){
 	itemModel.findAll({
@@ -597,7 +667,7 @@ var getItemCount = function(orderUuid, next){
 
 		if(itemList) next(false, itemList.length);
 		else next("No order found");
-		
+
 	}).catch(function(err){
 		if(err){
 			console.log(err);
