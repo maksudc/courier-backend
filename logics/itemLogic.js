@@ -435,7 +435,7 @@ var updateItemStatus = function(params, next){
 			console.log(newItem.dataValues.status);
 			console.log("Item updated");
 
-			getRemainingItems(newItem.dataValues.orderUuid, newItem.dataValues.status, function(err, itemCredential){
+			getRemainingItems(newItem.dataValues.orderUuid, params["status"] , newItem.dataValues.status , function(err, itemCredential){
 				if(err) setStatus(err);
 				else {
 					next(null, itemCredential);
@@ -538,7 +538,7 @@ var updateOrderWithBranch = function(id, next){
 }
 
 
-var getRemainingItems = function(orderId, updatedStatus, next){
+var getRemainingItems = function(orderId, updatedStatus , finalItemStatus , next){
 
 	var notUpdatedItemList = null;
 	var rootOrder = null;
@@ -546,7 +546,7 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 
 	orderLogic.findOne(orderId, function(orderData){
 
-		rootOrder = orderData;
+		rootOrder = orderData.data;
 
 		if(!rootOrder){
 
@@ -560,48 +560,53 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 			return ;
 		}
 
-		return itemModel.findAll({
+		itemModel.findAll({
 			where:
 			{
 				orderUuid: orderId,
 				status: {
-					$not: updatedStatus
+					$not: finalItemStatus
 				}
 			}
-		});
-	})
-	.then(function(itemList){
+		})
+		.then(function(itemList){
 
-		notUpdatedItemList = itemList;
+				notUpdatedItemList = itemList;
 
-		if(rootOrder.dataValues.status == "running" && rootOrder.dataValues.status != updatedStatus && notUpdatedItemList.length == 0){
-			rootOrder.dataValues.status = updatedStatus;
-			rootOrder._changed.status = true;
+				console.log("Transitioning order from : " + rootOrder.dataValues.status + " to " + updatedStatus);
 
-			orderUpdated = true;
+				if(rootOrder.dataValues.status == "running" && rootOrder.dataValues.status != updatedStatus && notUpdatedItemList.length == 0){
 
-			return rootOrder.save();
-		}
-		/*else if(rootOrder.dataValues.status == updatedStatus && notUpdatedItemList.length == 0){
-			return sequelize.Promise.resolve(rootOrder);
-		}*/
+					rootOrder.dataValues.status = updatedStatus;
+					rootOrder._changed.status = true;
 
-		return sequelize.Promise.resolve(rootOrder);
-	})
-	.then(function(savedOrderItem){
+					orderUpdated = true;
 
-		next(null, {
-			"remainingItemCount": notUpdatedItemList.length,
-			"orderUpdated": orderUpdated,
-			"orderData": savedOrderItem.dataValues
-		});
+					return rootOrder.save();
+				}
+				/*else if(rootOrder.dataValues.status == updatedStatus && notUpdatedItemList.length == 0){
+					return sequelize.Promise.resolve(rootOrder);
+				}*/
 
-	})
-	.catch(function(err){
-		if(err){
-			console.log(err);
-			next(err);
-		}
+				return sequelize.Promise.resolve(rootOrder);
+			})
+			.then(function(savedOrderItem){
+
+				console.log("Status Changed :" + savedOrderItem.changed("status"));
+
+				next(null, {
+					"remainingItemCount": notUpdatedItemList.length,
+					"orderUpdated": orderUpdated,
+					"orderData": savedOrderItem.dataValues
+				});
+
+			})
+			.catch(function(err){
+				if(err){
+					console.log(err);
+					next(err);
+				}
+			});
 	});
 
 	/*
