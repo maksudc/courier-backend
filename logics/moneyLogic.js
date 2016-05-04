@@ -92,11 +92,11 @@ var findAll = function(adminData, next){
 
 	if(adminData.regional_branch_id) {
 		destinationBranchParams.push({regional_branch_id: adminData.regional_branch_id});
-		sourceBranchParams.push({regional_branch_id: adminData.regional_branch_id});
+		sourceBranchParams.push({source_regional_branch_id: adminData.regional_branch_id});
 	}
 	if(adminData.sub_branch_id) {
 		destinationBranchParams.push({sub_branch_id: adminData.sub_branch_id});
-		sourceBranchParams.push({sub_branch_id: adminData.sub_branch_id});
+		sourceBranchParams.push({source_sub_branch_id: adminData.sub_branch_id});
 	}
 
 	sourceBranchParams.push({status: {"$in": ['draft', 'received']}});
