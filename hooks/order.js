@@ -22,6 +22,7 @@ var messageUtils = require("../utils/message");
 var Promise = require("bluebird");
 
 var _ = require("lodash");
+var moment = require("moment");
 
 function sanitizeBranchType(branchType){
 
@@ -118,6 +119,11 @@ order.hook("afterUpdate" , function(instance , options , next){
             trackerLogData.branchType = trackerInstance.currentBranchType;
         }
         trackerLogData.branchId = trackerInstance.currentBranchId;
+
+        var eventDateTime = moment.utc();
+        trackerLogData.eventDateTime = eventDateTime;
+        trackerLogData.createdAt = eventDateTime;
+        trackerLogData.updatedAt = eventDateTime;
 
         return trackerLog
         .create(trackerLogData);
@@ -235,7 +241,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
         }
 
         console.log("Adjusted Route is : ");
-        if(firstRoute != null){
+        if(firstRoute !== null){
             console.log(firstRoute.branchType + ":" +firstRoute.id);
 
             updatedInstance.next_hub_type = firstRoute.branchType;

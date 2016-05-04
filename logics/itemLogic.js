@@ -386,7 +386,7 @@ var addItems = function(data, next){
 exports.addItems = addItems;
 
 var updateItemStatus = function(params, next){
-	
+
 	var findParams = {};
 	if(params["bar_code"]) findParams["bar_code"] = params["bar_code"];
 	if(params["id"]) findParams["uuid"] = params["id"];
@@ -418,10 +418,10 @@ var updateItemStatus = function(params, next){
 
 		console.log("Get route");
 		getRoute(null);
-		
+
 		/*
-			Route checking is not needed right now. This will be added later. 
-			This check will be regional branch and sub branch check of operator 
+			Route checking is not needed right now. This will be added later.
+			This check will be regional branch and sub branch check of operator
 			and current regional/sub branch
 		*/
 
@@ -435,7 +435,7 @@ var updateItemStatus = function(params, next){
 			console.log(newItem.dataValues.status);
 			console.log("Item updated");
 
-			getRemainingItems(newItem.dataValues.orderUuid, newItem.dataValues.status, function(err, itemCredential){
+			getRemainingItems(newItem.dataValues.orderUuid, params["status"] , newItem.dataValues.status , function(err, itemCredential){
 				if(err) setStatus(err);
 				else {
 					next(null, itemCredential);
@@ -538,9 +538,79 @@ var updateOrderWithBranch = function(id, next){
 }
 
 
-var getRemainingItems = function(orderId, updatedStatus, next){
+var getRemainingItems = function(orderId, updatedStatus , finalItemStatus , next){
 
-	itemModel.findAll({where: 
+	var notUpdatedItemList = null;
+	var rootOrder = null;
+	var orderUpdated = false;
+
+	orderLogic.findOne(orderId, function(orderData){
+
+		rootOrder = orderData.data;
+
+		if(!rootOrder){
+
+			itemList = [];
+			next(null, {
+				"remainingItemCount": itemList.length,
+				"error": true,
+				"errorMessage": "Error while update order. No order found!",
+				"orderUpdated": false
+			});
+			return ;
+		}
+
+		itemModel.findAll({
+			where:
+			{
+				orderUuid: orderId,
+				status: {
+					$not: finalItemStatus
+				}
+			}
+		})
+		.then(function(itemList){
+
+				notUpdatedItemList = itemList;
+
+				console.log("Transitioning order from : " + rootOrder.dataValues.status + " to " + updatedStatus);
+
+				if(rootOrder.dataValues.status == "running" && rootOrder.dataValues.status != updatedStatus && notUpdatedItemList.length == 0){
+
+					rootOrder.dataValues.status = updatedStatus;
+					rootOrder._changed.status = true;
+
+					orderUpdated = true;
+
+					return rootOrder.save();
+				}
+				/*else if(rootOrder.dataValues.status == updatedStatus && notUpdatedItemList.length == 0){
+					return sequelize.Promise.resolve(rootOrder);
+				}*/
+
+				return sequelize.Promise.resolve(rootOrder);
+			})
+			.then(function(savedOrderItem){
+
+				console.log("Status Changed :" + savedOrderItem.changed("status"));
+
+				next(null, {
+					"remainingItemCount": notUpdatedItemList.length,
+					"orderUpdated": orderUpdated,
+					"orderData": savedOrderItem.dataValues
+				});
+
+			})
+			.catch(function(err){
+				if(err){
+					console.log(err);
+					next(err);
+				}
+			});
+	});
+
+	/*
+	itemModel.findAll({where:
 	{
 		orderUuid: orderId,
 		status: {
@@ -548,11 +618,12 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 		}
 	}}).then(function(itemList){
 
-		
+		notUpdatedItemList = itemList;
+
 		orderLogic.findOne(orderId, function(orderData){
 
 			var orderUpdated = false;
-			
+
 			if(orderData.data){
 				if(orderData.data.dataValues.status != updatedStatus && itemList.length == 0){
 					orderData.data.status = updatedStatus;
@@ -562,7 +633,7 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 				else if(orderData.data.dataValues.status == updatedStatus && itemList.length == 0){
 					orderUpdated = true;
 				}
-		
+
 				next(null, {
 					"remainingItemCount": itemList.length,
 					"orderUpdated": orderUpdated,
@@ -575,17 +646,21 @@ var getRemainingItems = function(orderId, updatedStatus, next){
 				"errorMessage": "Error while update order. No order found!",
 				"orderUpdated": false
 			});
-				
+
 		});
-		
-	}).catch(function(err){
+
+	})
+	.then(function(){
+
+	})
+	.catch(function(err){
 		if(err){
 			console.log(err);
 			next(err);
 		}
 	});
-
-}
+	*/
+};
 
 var getItemCount = function(orderUuid, next){
 	itemModel.findAll({
@@ -597,7 +672,7 @@ var getItemCount = function(orderUuid, next){
 
 		if(itemList) next(false, itemList.length);
 		else next("No order found");
-		
+
 	}).catch(function(err){
 		if(err){
 			console.log(err);

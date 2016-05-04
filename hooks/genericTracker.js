@@ -7,6 +7,8 @@ var RouteLogic = require("../logics/branchRouteLogic");
 var genericTracker = sequelize.models.genericTracker;
 var trackerLog = sequelize.models.trackerLog;
 
+var moment = require("moment");
+
 genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
 
   var trackerLogData = {};
@@ -15,6 +17,11 @@ genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
   trackerLogData.trackerId = trackerInstance.uuid;
   trackerLogData.branchType = trackerInstance.sourceBranchType;
   trackerLogData.branchId = trackerInstance.sourceBranchId;
+
+  var eventDateTime = moment.utc();
+  trackerLogData.eventDateTime = eventDateTime;
+  trackerLogData.createdAt = eventDateTime;
+  trackerLogData.updatedAt = eventDateTime;
 
   return trackerLog
   .create(trackerLogData)
@@ -38,6 +45,11 @@ genericTracker.hook("beforeUpdate" , function(trackerInstance , options , next){
   trackerLogData.branchType = updatedInstance.currentBranchType;
   trackerLogData.branchId = updatedInstance.currentBranchId;
 
+  var eventDateTime = moment.utc();
+  trackerLogData.eventDateTime = eventDateTime;
+  trackerLogData.createdAt = eventDateTime;
+  trackerLogData.updatedAt = eventDateTime;
+
   if(snapshotInstance.currentBranchType != updatedInstance.currentBranchType || snapshotInstance.currentBranchId !=updatedInstance.currentBranchId){
     // current branch is changed , so most possible the tracked item has received in a branch
     // So the action will be `entrance`
@@ -59,6 +71,8 @@ genericTracker.hook("beforeUpdate" , function(trackerInstance , options , next){
   }
 
   if(trackerLogData.action){
+
+    trackerLogData.createdAt = new Date();
 
     return trackerLog
     .create(trackerLogData)
