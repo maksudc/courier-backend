@@ -62,7 +62,7 @@ var sendMessage = function(toPhoneNum , body , next ){
 
     console.log("Development mode , spoofing for message sending is done");
     next({ status: "success" , message: body , statusCode: HttpStatus.OK });
-  }  
+  }
 };
 
 exports.sendMessage = sendMessage;
