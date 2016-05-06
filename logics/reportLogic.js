@@ -146,3 +146,99 @@ var getReport = function(next){
 }
 
 exports.getReport=getReport;
+
+
+var findMoneyCashIn = function(params, adminData, next){
+
+	var searchParams = {};
+	var timeRange = 24*60*60*1000;
+
+	if(params.regional_branch && params.regional_branch != '')
+		searchParams["source_regional_branch_id"] = parseInt(params.regional_branch);
+	if(params.sub_branch && params.sub_branch != '')
+		searchParams["source_sub_branch_id"] = parseInt(params.sub_branch);
+
+	if(searchParams["source_regional_branch_id"] && searchParams["source_sub_branch_id"] ){
+		searchParams = {
+			"$and": [
+				{"source_regional_branch_id": parseInt(searchParams["source_regional_branch_id"])},
+				{"source_sub_branch_id": parseInt(searchParams["source_sub_branch_id"])}
+			]
+		}
+	}
+
+	if(params.time_range == 'week') timeRange = timeRange * 7;
+	else if(params.time_range == 'month') timeRange = timeRange * 30;
+
+
+	moneyModel.findAll({
+		where: {
+			"$and": [
+				{status: {"$in": ['deliverable', 'delivered']}},
+				searchParams,
+				{payment_time: {$gt: new Date(new Date() - timeRange)}}
+			]
+		},
+		attributes: ['id', 'payable', 'type']
+	}).then(function(moneyOrderData){
+		next(null, moneyOrderData);
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.findMoneyCashIn = findMoneyCashIn;
+
+
+
+var findMoneyCashOut = function(params, adminData, next){
+
+	var searchParams = {};
+	var timeRange = 24*60*60*1000;
+
+	if(params.regional_branch && params.regional_branch != '')
+		searchParams["regional_branch_id"] = parseInt(params.regional_branch);
+	if(params.sub_branch && params.sub_branch != '')
+		searchParams["sub_branch_id"] = parseInt(params.sub_branch);
+
+	if(searchParams["regional_branch_id"] && searchParams["sub_branch_id"] ){
+		searchParams = {
+			"$and": [
+				{"regional_branch_id": parseInt(searchParams["regional_branch_id"])},
+				{"sub_branch_id": parseInt(searchParams["sub_branch_id"])}
+			]
+		}
+	}
+
+	if(params.time_range == 'week') timeRange = timeRange * 7;
+	else if(params.time_range == 'month') timeRange = timeRange * 30;
+
+
+	moneyModel.findAll({
+		where: {
+			"$and": [
+				{status: 'delivered'},
+				searchParams,
+				{delivery_time: {$gt: new Date(new Date() - timeRange)}}
+			]
+		},
+		attributes: ['id', 'amount','sender_mobile', 'receiver_mobile', 'type']
+	}).then(function(moneyOrderData){
+		next(null, moneyOrderData);
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+
+}
+
+exports.findMoneyCashOut = findMoneyCashOut;
+
+
+
