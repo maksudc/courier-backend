@@ -16,7 +16,7 @@ module.exports = function(sequelize , DataTypes){
 		vat: {type: DataTypes.BOOLEAN},
 		discount: {type: DataTypes.INTEGER},
 		payable: {type: DataTypes.INTEGER, allowNull: false},
-		paid: {type: DataTypes.BOOLEAN, defaultValue: false},
+		paid: {type: DataTypes.BOOLEAN, defaultValue: false}, //used for vd
 		payment_time: {type: DataTypes.DATE},
 		delivery_time: {type: DataTypes.DATE},
 		status: {
