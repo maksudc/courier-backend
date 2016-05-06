@@ -24,6 +24,8 @@ var Promise = require("bluebird");
 var _ = require("lodash");
 var moment = require("moment");
 
+var branchUtils = require("../utils/branch");
+
 function sanitizeBranchType(branchType){
 
   parts = [];
@@ -95,11 +97,32 @@ order.hook("afterUpdate" , function(instance , options , next){
 
           console.log("Sending message...");
 
-          // Send message to the receiver about stocing of his/her order
-          content = fs.readFileSync("./views/message/stocked.handlebars");
-          contentTemplate = handlebars.compile(content.toString());
-          messageUtils.sendMessage(updatedInstance.receiver ,  contentTemplate({ updatedInstance: updatedInstance }), function(data){
-            console.log(data);
+          branchUtils
+          .getBranchInstance(updatedInstance.exit_branch_type , updatedInstance.exit_branch , null)
+          .then(function(exitBranchInstance){
+
+            if(exitBranchInstance.branchType == "sub"){
+              return Promise.all([ Promise.resolve(exitBranchInstance) , exitBranchInstance.getRegionalBranch() ]);
+            }else{
+              return Promise.all([ Promise.resolve(null) , Promise.resolve(exitBranchInstance) ]);
+            }
+          })
+          .then(function(results){
+
+            messageBranchInstance = {};
+            messageBranchInstance = results[0];
+            if(!messageBranchInstance){
+              messageBranchInstance = results[1];
+            }else{
+              messageBranchInstance.regionalBranch = results[1];
+            }
+            // Send message to the receiver about stocking of his/her order
+            content = fs.readFileSync("./views/message/stocked.handlebars");
+            contentTemplate = handlebars.compile(content.toString());
+
+            messageUtils.sendMessage(updatedInstance.receiver ,  contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }), function(data){
+              console.log(data);
+            });
           });
         }
       });
@@ -138,11 +161,33 @@ order.hook("afterUpdate" , function(instance , options , next){
       })
       .then(function(results){
 
-        content = fs.readFileSync("./views/message/delivered.handlebars");
-        contentTemplate = handlebars.compile(content.toString());
+        // Send mobile message accordingly
+        return branchUtils
+        .getBranchInstance(updatedInstance.exit_branch_type , updatedInstance.exit_branch , null)
+        .then(function(exitBranchInstance){
 
-        messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance }) , function(data){
-          console.log(data);
+          if(exitBranchInstance.branchType == "sub"){
+            return Promise.all([ Promise.resolve(exitBranchInstance) , exitBranchInstance.getRegionalBranch() ]);
+          }else{
+            return Promise.all([ Promise.resolve(null) , Promise.resolve(exitBranchInstance) ]);
+          }
+        })
+        .then(function(results){
+
+          messageBranchInstance = {};
+          messageBranchInstance = results[0];
+          if(!messageBranchInstance){
+            messageBranchInstance = results[1];
+          }else{
+            messageBranchInstance.regionalBranch = results[1];
+          }
+          // Send message to the sender about delivery of his/her order to the receiver
+          content = fs.readFileSync("./views/message/delivered.handlebars");
+          contentTemplate = handlebars.compile(content.toString());
+
+          messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }) , function(data){
+            console.log(data);
+          });
         });
       });
     }
@@ -235,9 +280,35 @@ order.hook("beforeUpdate" , function(instance , options , next){
 
           // started off directly the regional branch , so send the message since it is running
           console.log("starting the message sending to let know the sender of the starting of the journey...");
-          messageUtils.sendMessage(updatedInstance.sender , "Your order is on the way" , function(data){
-            console.log(data);
+
+          branchUtils
+          .getBranchInstance( updatedInstance.exit_branch_type , updatedInstance.exit_branch , null)
+          .then(function(exitBranchInstance){
+
+            if(exitBranchInstance.branchType == "sub"){
+              return Promise.all([ Promise.resolve(exitBranchInstance) , exitBranchInstance.getRegionalBranch() ]);
+            }else{
+              return Promise.all([ Promise.resolve(null) , Promise.resolve(exitBranchInstance) ]);
+            }
+          })
+          .then(function(results){
+
+            messageBranchInstance = {};
+            messageBranchInstance = results[0];
+            if(!messageBranchInstance){
+              messageBranchInstance = results[1];
+            }else{
+              messageBranchInstance.regionalBranch = results[1];
+            }
+            // Send message to the sender about starting of the journey of his/her order to the receiver
+            content = fs.readFileSync("./views/message/start.handlebars");
+            contentTemplate = handlebars.compile(content.toString());
+
+            messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }) , function(data){
+              console.log(data);
+            });
           });
+
         }
 
         console.log("Adjusted Route is : ");

@@ -1,1 +1,1 @@
-Order has been delivered to: {{ updatedInstance.receiver }}
+Order has been delivered to: {{ updatedInstance.receiver }} {{#if branchInstance }}at {{ branchInstance.label }} {{#if branchInstance.regionalBranch }},{{ branchInstance.regionalBranch.label }}{{/if}}{{/if}}

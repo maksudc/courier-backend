@@ -90,12 +90,12 @@ var findAllOrders = function(params, next){
 			    	async.series([function(findEntryBranch){
 
 			    		if(branchList[entryType][entry_branch_id]){
-			    			console.log("Found entry branch");
+			    			//console.log("Found entry branch");
 
 							findEntryBranch(null);
 			    		}
 			    		else branchLogic.getBranch(entryType, parseInt(entry_branch_id), function(branchData){
-			    			console.log("Fetching entry branch");
+			    			//console.log("Fetching entry branch");
 
 			    			if(branchData.status == 'error'  || !branchData.data || !branchData.data.dataValues){
 			    				console.log("No information found for entry branch: " + entry_branch_id);
@@ -129,7 +129,7 @@ var findAllOrders = function(params, next){
 			    	}, function(findExitBranch){
 
 			    		if(branchList[exitType][exit_branch_id]){
-			    			console.log("Found exit branch");
+			    			//console.log("Found exit branch");
 
 			    			findExitBranch(null);
 			    		}
@@ -164,7 +164,7 @@ var findAllOrders = function(params, next){
 			    		orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
 						orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
 
-						console.log("Setting exit branch");
+						//console.log("Setting exit branch");
 
 						count++;
 		    			callback(null);
@@ -531,10 +531,10 @@ var receivePayment = function(paymentData, operator, next){
 			async.series([function(checkCurrentStatus){
 
 				if(orderData.data.payment_status == 'paid'){
-					
+
 					if(orderData.data.dataValues.type == 'general')
 						next({"status": "error", "message": "Sorry, this order is already paid"});
-					else 
+					else
 						next({"status": "paid", payment: orderData.data.dataValues.payment});
 					return;
 				}
@@ -544,12 +544,12 @@ var receivePayment = function(paymentData, operator, next){
 							console.log("Pay parcel price by: " + moneyOrderData.dataValues.payParcelPrice);
 							if(moneyOrderData.dataValues.payParcelPrice == 'seller'){
 								moneyOrderData.payParcelPrice = null;
-								moneyOrderData.amount = parseInt(moneyOrderData.dataValues.amount) + 
+								moneyOrderData.amount = parseInt(moneyOrderData.dataValues.amount) +
 									parseInt(orderData.data.dataValues.payment);
 							}
 							else if(moneyOrderData.dataValues.payParcelPrice == 'buyer'){
 								moneyOrderData.payParcelPrice = null;
-								moneyOrderData.payable = parseInt(moneyOrderData.dataValues.payable) - 
+								moneyOrderData.payable = parseInt(moneyOrderData.dataValues.payable) -
 									parseInt(orderData.data.dataValues.payment);
 							}
 
@@ -579,10 +579,10 @@ var receivePayment = function(paymentData, operator, next){
 				orderData.data.payment_operator = operator.email;
 
 				orderData.data.save().then(function(newOrderData){
-					
+
 					if(newOrderData) next({"status": "success", "data": newOrderData.dataValues});
 					else next({"status": "error", "message": "Unknown error while saving status"});
-					
+
 				}).catch(function(err){
 					if(err){
 						next({"status": "error", "message": "Error while saving status"});
