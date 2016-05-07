@@ -77,6 +77,8 @@ router.put("/:id$" , upload.array() , function(req , res){
 **/
 router.post("/" , upload.array() , function(req , res){
 
+  console.log(req.body);
+  
   shipmentLogic.createShipmentWithOrders(req.body , function(data){
     if(data.statusCode){
       res.status(data.statusCode);
