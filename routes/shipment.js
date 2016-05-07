@@ -141,8 +141,17 @@ router.get("/" , function(req , res){
   });
 });
 
-router.post("/export" , function(req , res){
+router.get("/export/:shipmentUuid" , function(req , res){
 
+  queryVars = req.query;
+
+  shipmentLogic.exportShipment(req.params.shipmentUuid , queryVars , function(data){
+
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
 });
 
 module.exports = router;

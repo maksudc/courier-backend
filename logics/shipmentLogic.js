@@ -691,6 +691,58 @@ var manageShipmentOrders = function(shipmentId , params , next){
   });
 };
 
+var exportShipment = function(shipmentUuid , params , next ){
+
+  var resultData = {};
+  resultData.orders = {};
+  resultData.items = {};
+
+  resultData.orders.count = 0;
+  resultData.items.count = 0;
+
+  var orderCache = {};
+
+  return shipment
+  .findOne({ where: { uuid: shipmentUuid } })
+  .then(function(shipmentInstance){
+
+    resultData.shipmentUuid = shipmentInstance.uuid;
+    return shipmentInstance.getOrders();
+  })
+  .map(function(orderInstance){
+
+    resultData.orders[orderInstance.bar_code] = {
+      verified: false,
+      uuid: orderInstance.uuid
+    };
+
+    orderCache[orderInstance.uuid] = orderInstance.bar_code;
+
+    return orderInstance.getItems();
+  })
+  .map(function(itemInstances){
+
+    resultData.items.count = resultData.items.count + itemInstances.length ;
+    return Promise.map(itemInstances , function(itemInstance){
+
+      resultData.items[itemInstance.bar_code] = {
+        orderUuid: itemInstance.orderUuid,
+        orderBarcode: orderCache[itemInstance.orderUuid],
+        verified: false
+      };
+
+     });
+  })
+  .then(function(results){
+
+    resultData.orders.count =  results.length;
+
+    if(next){
+      next({ status: "success" , statusCode: HttpStatus.OK , data: resultData , message: null });
+    }
+    return Promise.resolve(resultData);
+  });
+};
 
 exports.createShipmentWithOrders = createShipmentWithOrders;
 exports.getShipmentDetails = getShipmentDetails;
@@ -700,3 +752,4 @@ exports.shipmentUpdate = shipmentUpdate;
 exports.deleteShipment = deleteShipment;
 exports.manageShipmentOrders = manageShipmentOrders;
 exports.unpackShipment = unpackShipment;
+exports.exportShipment = exportShipment;
