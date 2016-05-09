@@ -99,8 +99,8 @@ var findAll = function(adminData, next){
 		sourceBranchParams.push({source_sub_branch_id: adminData.sub_branch_id});
 	}
 
-	sourceBranchParams.push({status: {"$in": ['draft', 'received']}});
-	destinationBranchParams.push({status: {"$in": ['deliverable', 'delivered']}});
+	// sourceBranchParams.push({status: {"$in": ['draft', 'received']}});
+	// destinationBranchParams.push({status: {"$in": ['deliverable', 'delivered']}});
 
 	var filterParams = {
 		"$or":[
