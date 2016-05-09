@@ -118,7 +118,7 @@ var getTrackerLogsForOrder  = function(params , next){
   })
   .then(function(trackerLogInstances){
 
-    if(params.includeBranch==true){
+    if(params.includeBranch == "true"){
 
       return Promise.map(trackerLogInstances , function(trackerLogInstance){
 
