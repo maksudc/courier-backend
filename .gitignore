@@ -36,3 +36,4 @@ jspm_packages
 /.vscode
 # IDE related files
 app.sublime-workspace
+config.development.js
