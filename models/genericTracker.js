@@ -57,7 +57,7 @@ module.exports = function(sequelize , DataTypes){
         GenericTracker.belongsTo(GenericTracker , { foreignKey:"parentTrackerId" , as:'parentTracker' });
         GenericTracker.hasMany(GenericTracker , { foreignKey:"parentTrackerId" , as:'childTrackers' });
 
-        GenericTracker.hasMany(models.trackerLog , { foreignKey: "trackerId" , name:"logsForTracker" });
+        GenericTracker.hasMany(models.trackerLog , { foreignKey: "trackerId" , name:"logsForTracker" , as:"logs" });
 
         GenericTracker.belongsTo(models.regionalBranch , {
           foreignKey: "currentBranchId",
