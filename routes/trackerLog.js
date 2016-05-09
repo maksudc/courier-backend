@@ -21,4 +21,15 @@ router.get("/tracker/:id" , function(req , res){
   });
 });
 
+router.get("/for/order" , function(req , res){
+
+  trackerLogLogic.getTrackerLogsForOrder(req.query , function(data){
+
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
 module.exports = router;

@@ -8,6 +8,8 @@ var shipment = sequelize.models.shipment;
 var Promise = require("bluebird");
 var _ = require("lodash");
 
+var HttpStatus = require("http-status-codes");
+
 function extractParams(params){
 
   var options = {};
@@ -87,6 +89,40 @@ var getTrackerLogDetails = function(trackerLogUuid , params, next){
 
 var getTrackerLogsForOrder  = function(params , next){
 
+  var whereQuery = {};
+  if(params.bar_code){
+    whereQuery.bar_code = params.bar_code;
+  }
+
+  console.log(params);
+
+  order
+  .findOne({ where: whereQuery })
+  .then(function(orderInstance){
+
+      if(!orderInstance){
+        next({status: "error" , statusCode: HttpStatus.NOT_FOUND , message: "Order not found" , data:null });
+        return Promise.resolve(null);
+      }
+      return orderInstance.getTracker();
+  })
+  .then(function(trackerInstance){
+    return trackerInstance.getLogs({ order: "eventDateTime" });
+  })
+  .then(function(trackerLogInstances){
+
+    var resultDatas = trackerLogInstances;
+
+    next({ status: "success" , statusCode:HttpStatus.OK , message: null , data: trackerLogInstances });
+    return Promise.resolve(trackerLogInstances);
+  })
+  .catch(function(err){
+
+    if(err){
+      console.log(err);
+      next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message: err , data: null });
+    }
+  });
 
 };
 
@@ -141,3 +177,4 @@ var getTrackerLogsForTracker = function(trackerId , params , next){
 exports.getTrackerLogs = getTrackerLogs;
 exports.getTrackerLogDetails = getTrackerLogDetails;
 exports.getTrackerLogsForTracker = getTrackerLogsForTracker;
+exports.getTrackerLogsForOrder = getTrackerLogsForOrder;
