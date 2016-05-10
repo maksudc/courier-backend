@@ -213,6 +213,15 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
           }
           console.log(midNodes);
 
+          // Check whether it is a direct route or not
+          if(midNodes.length == 1){
+
+            interimMidNode  = midNodes[0];
+            if(interimMidNode === null){
+              midNodes = [];
+            }
+          }
+
           midNodes = [sourceRegionalBranchId].concat(midNodes);
           midNodes.push(destinationRegionalBranchId);
 
