@@ -226,6 +226,11 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
           midNodes.push(destinationRegionalBranchId);
 
           return midNodes;
+      }else{
+
+        if(sourceRegionalBranchId == destinationRegionalBranchId){
+          return [sourceRegionalBranchId , destinationRegionalBranchId];
+        }
       }
 
       return Promise.reject("No route defined");
