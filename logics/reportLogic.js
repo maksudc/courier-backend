@@ -179,7 +179,7 @@ var findMoneyCashIn = function(params, adminData, next){
 				{payment_time: {$gt: new Date(new Date() - timeRange)}}
 			]
 		},
-		attributes: ['id', 'payable', 'amount', 'sender_mobile', 'receiver_mobile', 'type']
+		attributes: ['id', 'payable', 'amount', 'charge', 'discount', 'sender_mobile', 'receiver_mobile', 'type']
 	}).then(function(moneyOrderData){
 		next(null, moneyOrderData);
 	}).catch(function(err){
@@ -226,7 +226,7 @@ var findMoneyCashOut = function(params, adminData, next){
 				{delivery_time: {$gt: new Date(new Date() - timeRange)}}
 			]
 		},
-		attributes: ['id', 'amount', 'payable', 'sender_mobile', 'receiver_mobile', 'type']
+		attributes: ['id', 'amount', 'charge', 'discount', 'payable', 'sender_mobile', 'receiver_mobile', 'type']
 	}).then(function(moneyOrderData){
 		next(null, moneyOrderData);
 	}).catch(function(err){
