@@ -203,7 +203,7 @@ var createShipmentWithOrders = function(postData , next){
 
 function extractParams(params){
 
-  limit = 10;
+  /*limit = 10;
   if(params.limit){
     limit = parseInt(params.limit);
   }
@@ -217,6 +217,10 @@ function extractParams(params){
   queryOptions = {
     offset: offset,
     limit: limit,
+    where:{}
+  };*/
+
+  queryOptions = {
     where:{}
   };
 

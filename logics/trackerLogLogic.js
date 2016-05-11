@@ -9,6 +9,8 @@ var Promise = require("bluebird");
 var _ = require("lodash");
 
 var HttpStatus = require("http-status-codes");
+var branchUtils = require('../utils/branch');
+
 
 function extractParams(params){
 
@@ -89,6 +91,11 @@ var getTrackerLogDetails = function(trackerLogUuid , params, next){
 
 var getTrackerLogsForOrder  = function(params , next){
 
+  if(!params.bar_code){
+    next({ status: "error" , statusCode: HttpStatus.BAD_REQUEST , message:"tracker Id not found" , data:null });
+    return Promise.resolve(null);
+  }
+
   var whereQuery = {};
   if(params.bar_code){
     whereQuery.bar_code = params.bar_code;
@@ -111,7 +118,25 @@ var getTrackerLogsForOrder  = function(params , next){
   })
   .then(function(trackerLogInstances){
 
-    var resultDatas = trackerLogInstances;
+    if(params.includeBranch == "true"){
+
+      return Promise.map(trackerLogInstances , function(trackerLogInstance){
+
+          return branchUtils
+                .getBranchInstance(trackerLogInstance.branchType , trackerLogInstance.branchId , null)
+                .then(function(branchInstance){
+
+                  trackerLogInstance.dataValues.branch = branchInstance;
+                  trackerLogInstance.branch = branchInstance;
+
+                  return Promise.resolve(trackerLogInstance);
+                });
+        });
+    }
+
+    return Promise.resolve(trackerLogInstances);
+  })
+  .then(function(trackerLogInstances){
 
     next({ status: "success" , statusCode:HttpStatus.OK , message: null , data: trackerLogInstances });
     return Promise.resolve(trackerLogInstances);
