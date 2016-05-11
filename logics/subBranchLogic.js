@@ -128,30 +128,38 @@ var findCredential = function(id, next){
 
 		}, function(findRegion){
 
-			RegionModel.findOne({where: {id: regionalBranch.regionId}}).then(function(tempRegion){
-				if(tempRegion){
-					region = tempRegion.dataValues;
+			if(regionalBranch.regionId) {
+				RegionModel.findOne({where: {id: regionalBranch.regionId}}).then(function(tempRegion){
+					if(tempRegion){
+						region = tempRegion.dataValues;
 
-					next(null, {
-						"subBranch": subBranch,
-						"regionalBranch": regionalBranch,
-						"region": region
-					});
+						next(null, {
+							"subBranch": subBranch,
+							"regionalBranch": regionalBranch,
+							"region": region
+						});
 
-					findRegion(null);
-				}
-				else {
-					findRegion("No regional branch found");
-				}
+						findRegion(null);
+					}
+					else {
+						findRegion("No regional branch found");
+					}
 
-			}).catch(function(err){
+				}).catch(function(err){
 
-				if(err){
-					findRegion(err);
-				}
-				else findRegion(null);
+					if(err){
+						findRegion(err);
+					}
+					else findRegion(null);
 
+				});
+			}
+			else next(null, {
+				"subBranch": subBranch,
+				"regionalBranch": regionalBranch,
+				"region": region
 			});
+
 
 		}],
 		function(err){
