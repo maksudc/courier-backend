@@ -222,7 +222,7 @@ var receiveOrder = function(id, verification_code, operator, next){
 				moneyOrder.payment_receiver_operator = operator.email;
 
 				if(moneyOrder.dataValues.type == 'virtual_delivery')
-					orderLogic.receivePayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
+					orderLogic.receiveVDPayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
 						if(orderPaymentStatus.status == 'success'){
 							moneyOrder.save();
 							next(null, moneyOrder);
