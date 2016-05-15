@@ -600,23 +600,30 @@ var receivePayment = function(paymentData, operator, next){
 				}
 				else if(orderData.data.dataValues.type == 'value_delivery'){
 					orderData.data.getMoney_order().then(function(moneyOrderData){
+						console.log("***************************************************");
 						if(moneyOrderData){
 							console.log("Pay parcel price by: " + moneyOrderData.dataValues.payParcelPrice);
 							if(moneyOrderData.dataValues.payParcelPrice == 'seller'){
 								moneyOrderData.payParcelPrice = null;
 								moneyOrderData.amount = parseInt(moneyOrderData.dataValues.amount) +
 									parseInt(orderData.data.dataValues.payment);
+								console.log("Saving seller price: " + moneyOrderData.amount);
 							}
 							else if(moneyOrderData.dataValues.payParcelPrice == 'buyer'){
 								moneyOrderData.payParcelPrice = null;
 								moneyOrderData.payable = parseInt(moneyOrderData.dataValues.payable) -
 									parseInt(orderData.data.dataValues.payment);
+								console.log("Saving buyer price: " + moneyOrderData.payable);
 							}
 
 							moneyOrderData.save();
 							checkCurrentStatus(null);
 						}
-						else return next({"status": "error", message: "Cannot update money order!"});
+						else {
+							console.log("No money order found");
+							return next({"status": "error", message: "Cannot update money order!"});
+						}
+						console.log("***************************************************");
 					});
 				}
 				else if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
