@@ -658,6 +658,7 @@ var receiveVDPayment = function(paymentData, operator, next){
 
 				}).catch(function(err){
 					if(err){
+						console.log(err);
 						next({"status": "error", "message": "Error while saving status"});
 						return;
 					}
