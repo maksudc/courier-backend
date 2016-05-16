@@ -946,6 +946,8 @@ var createByOperator = function(postData, operator, next){
 				contentTemplate = handlebars.compile(content.toString());
 				messageBody = null;
 
+				client = data.data;
+
 				if(data.isNew){
 
 					console.log("Sending the client password through message....");
@@ -962,7 +964,8 @@ var createByOperator = function(postData, operator, next){
 					console.log(mResponse);
 				});
 
-				createClient(null);
+				return next({"status": "success", "data": order});
+				//createClient(null);
 			}
 			else createClient("Cannot create client!");
 

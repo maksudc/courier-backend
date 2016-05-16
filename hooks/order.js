@@ -58,13 +58,13 @@ order.hook("beforeCreate" , function(instance , options , next){
   return next();
 });
 
-order.hook('afterCreate' , function(instance , options , next){
-
-    /**
-      * Need to check whether the client of the
-    **/
-
-});
+// order.hook('afterCreate' , function(instance , options , next){
+//
+//     /**
+//       * Need to check whether the client of the
+//     **/
+//
+// });
 
 order.hook("afterUpdate" , function(instance , options , next){
 
