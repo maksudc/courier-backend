@@ -87,31 +87,26 @@ var create = function(clientData, next){
 	clientData["verification_code"] = parseInt(makeVerficationCode());
 
 	findOneByMobile(clientData.mobile, function(data){
-		if(data.status == "success") return next(data);
-		else{
-			clientModel.create(clientData).catch(function(err){
-				if(err){
-					console.log(err);
-					return next({"status": "error", "data": null, "message": "Cannot create this client, an error occurred"});
-				}
-			})
+		if(data.status == "success"){
+      data.isNew = false;
+      return next(data);
+    }else{
+
+      clientModel
+      .create(clientData)
       .then(function(client){
 				if(client){
-          // send the password to the client by sms
-          // Send the sms with the password
-          data = fs.readFileSync("./views/message/client.signup.handlebars");
-          console.log("Sending the client password through message....");
-
-          contentTemplate = handlebars.compile(data.toString());
-          messageUtils.sendMessage(client.mobile , contentTemplate({ client: client }) , function(mResponse){
-            console.log(mResponse);
-            return next({"status": "success","data": client});
-          });
-
+          return next({"status": "success","data": client , "isNew": true});
 					//return next({"status": "success","data": client});
 				}
 				else{
 					return next({"status": "error","data": null, "message": "Sorry, cannot create client"});
+				}
+			})
+      .catch(function(err){
+				if(err){
+					console.log(err);
+					return next({"status": "error", "data": null, "message": "Cannot create this client, an error occurred"});
 				}
 			});
 		}

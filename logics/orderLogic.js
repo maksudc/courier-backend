@@ -13,6 +13,10 @@ var adminLogic = require("./admin/adminLogic");
 var _ = require("lodash");
 var async = require("async");
 var config = require("./../config");
+var handlebars = require("handlebars");
+var fs = require("fs");
+var messageUtils = require("../utils/message");
+var Promise = require("bluebird");
 
 
 var findOne = function(id, next){
@@ -937,7 +941,28 @@ var createByOperator = function(postData, operator, next){
 		clientLogic.create(clientData, function(data){
 
 			if(data.status == "success"){
-				return next({"status": "success", "data": order});
+
+				content = fs.readFileSync("./views/message/client.signup.handlebars");
+				contentTemplate = handlebars.compile(content.toString());
+				messageBody = null;
+
+				if(data.isNew){
+
+					console.log("Sending the client password through message....");
+					// send the password to the client by sms
+					// Send the sms with the password
+					messageBody = contentTemplate({ parcelInstance: order , client: client });
+				}else{
+					console.log("Sending the order verification code through message....");
+					//Only sends the verifcation code
+					messageBody = contentTemplate({ parcelInstance: order });
+				}
+
+				messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
+					console.log(mResponse);
+				});
+
+				createClient(null);
 			}
 			else createClient("Cannot create client!");
 

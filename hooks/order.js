@@ -16,9 +16,7 @@ var RouteLogic = require("../logics/branchRouteLogic");
 
 var handlebars = require("handlebars");
 var fs = require("fs");
-
 var messageUtils = require("../utils/message");
-
 var Promise = require("bluebird");
 
 var _ = require("lodash");
@@ -58,6 +56,14 @@ order.hook("beforeCreate" , function(instance , options , next){
   _.assignIn(instance._changed , { current_hub_type: true });
 
   return next();
+});
+
+order.hook('afterCreate' , function(instance , options , next){
+
+    /**
+      * Need to check whether the client of the
+    **/
+
 });
 
 order.hook("afterUpdate" , function(instance , options , next){
@@ -119,8 +125,9 @@ order.hook("afterUpdate" , function(instance , options , next){
             // Send message to the receiver about stocking of his/her order
             content = fs.readFileSync("./views/message/stocked.handlebars");
             contentTemplate = handlebars.compile(content.toString());
+            messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
 
-            messageUtils.sendMessage(updatedInstance.receiver ,  contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }), function(data){
+            messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
               console.log(data);
             });
           });
@@ -184,8 +191,9 @@ order.hook("afterUpdate" , function(instance , options , next){
           // Send message to the sender about delivery of his/her order to the receiver
           content = fs.readFileSync("./views/message/delivered.handlebars");
           contentTemplate = handlebars.compile(content.toString());
+          messageBody = contentTemplate({ parcelInstance: updatedInstance });
 
-          messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }) , function(data){
+          messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
             console.log(data);
           });
         });
@@ -303,8 +311,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
             // Send message to the sender about starting of the journey of his/her order to the receiver
             content = fs.readFileSync("./views/message/start.handlebars");
             contentTemplate = handlebars.compile(content.toString());
+            messageBody =  contentTemplate({ parcelInstance: updatedInstance });
 
-            messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }) , function(data){
+            messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
               console.log(data);
             });
           });
@@ -557,9 +566,10 @@ order.hook("beforeUpdate" , function(instance , options , next){
               // So let the sender know of the status
               content = fs.readFileSync( "./views/message/start.handlebars");
               contentTemplate = handlebars.compile(content.toString());
+              messageBody =  contentTemplate({ parcelInstance: updatedInstance });
 
               console.log("starting the message sending to let know the sender of the starting of the journey...");
-              messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance }) , function(data){
+              messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
                 console.log(data);
               });
             }
