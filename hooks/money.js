@@ -95,7 +95,7 @@ money.hook("afterUpdate" , function(instance , options , next){
       return next();
     }
   }
-  else if(updatedInstance.type == "value_delivery"){
+  else if(updatedInstance.type == "virtual_delivery"){
 
     if(updatedInstance.status == "deliverable"){
 
