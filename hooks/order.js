@@ -4,6 +4,7 @@ var Sequelize = DB.Sequelize;
 
 var genericTracker = sequelize.models.genericTracker;
 var order = sequelize.models.order;
+var money = sequelize.models.money;
 var item = sequelize.models.item;
 var trackerLog = sequelize.models.trackerLog;
 
@@ -116,13 +117,38 @@ order.hook("afterUpdate" , function(instance , options , next){
               messageBranchInstance.regionalBranch = results[1];
             }
             // Send message to the receiver about stocking of his/her order
-            content = fs.readFileSync("./views/message/stocked.handlebars");
-            contentTemplate = handlebars.compile(content.toString());
-            messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
 
-            messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
-              console.log(data);
-            });
+            // If the order corresponds to VD , the verification code should be for the corresponding money order instead of the
+            // order object
+            if(updatedInstance.type == "value_delivery"){
+
+              instance
+              .getMoney_order()
+              .then(function(moneyOrderItem){
+
+                if(moneyOrderItem){
+
+                  updatedInstance.sender_verification_code = moneyOrderItem.sender_verification_code;
+
+                  content = fs.readFileSync("./views/message/stocked.handlebars");
+                  contentTemplate = handlebars.compile(content.toString());
+                  messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
+
+                  messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
+                    console.log(data);
+                  });
+                }
+              });
+            }else{
+
+              content = fs.readFileSync("./views/message/stocked.handlebars");
+              contentTemplate = handlebars.compile(content.toString());
+              messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
+
+              messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
+                console.log(data);
+              });
+            }
           });
         }
       });
@@ -161,35 +187,35 @@ order.hook("afterUpdate" , function(instance , options , next){
       })
       .then(function(results){
 
-        // Send mobile message accordingly
-        return branchUtils
-        .getBranchInstance(updatedInstance.exit_branch_type , updatedInstance.exit_branch , null)
-        .then(function(exitBranchInstance){
+          if(updatedInstance.type == "general"){
+            // General delivery
+            // Send message to the sender about delivery of his/her order to the receiver
+            content = fs.readFileSync("./views/message/delivered.handlebars");
+            contentTemplate = handlebars.compile(content.toString());
+            messageBody = contentTemplate({ parcelInstance: updatedInstance });
 
-          if(exitBranchInstance.branchType == "sub"){
-            return Promise.all([ Promise.resolve(exitBranchInstance) , exitBranchInstance.getRegionalBranch() ]);
+            messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
+              console.log(data);
+            });
+
           }else{
-            return Promise.all([ Promise.resolve(null) , Promise.resolve(exitBranchInstance) ]);
-          }
-        })
-        .then(function(results){
 
-          messageBranchInstance = {};
-          messageBranchInstance = results[0];
-          if(!messageBranchInstance){
-            messageBranchInstance = results[1];
-          }else{
-            messageBranchInstance.regionalBranch = results[1];
+            // branchUtils
+            // .getInclusiveBranchInstance(updatedInstance.entry_branch_type, updatedInstance.entry_branch , next)
+            // .then(function(entryBranchItem){
+            //
+            //   // VD delivery
+            //   // Since the VD parcel is delivered we need to notify the sender that money order is on its way
+            //   // Send message to the sender about delivery of his/her order to the receiver
+            //   content = fs.readFileSync("./views/message/delivered.handlebars");
+            //   contentTemplate = handlebars.compile(content.toString());
+            //   messageBody = contentTemplate({ parcelInstance: updatedInstance });
+            //
+            //   messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
+            //     console.log(data);
+            //   });
+            // });
           }
-          // Send message to the sender about delivery of his/her order to the receiver
-          content = fs.readFileSync("./views/message/delivered.handlebars");
-          contentTemplate = handlebars.compile(content.toString());
-          messageBody = contentTemplate({ parcelInstance: updatedInstance });
-
-          messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
-            console.log(data);
-          });
-        });
       });
     }
   }

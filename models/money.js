@@ -44,7 +44,7 @@ module.exports = function(sequelize , DataTypes){
 				money.belongsTo(models.admin , { foreignKey: 'receiver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'deliver_operator' });
 				money.belongsTo(models.admin , { foreignKey: 'payment_receiver_operator' });
-				money.belongsTo(models.order , { foreignKey: 'money_order_id' });
+				money.belongsTo(models.order , { foreignKey: 'money_order_id' , as: "vd_order" });
 			}
 		}
 	});

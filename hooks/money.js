@@ -43,26 +43,26 @@ money.hook("afterUpdate" , function(instance , options , next){
   var snapshotInstance = instance._previousDataValues;
   var updatedInstance = instance.dataValues;
 
+  var destinationBranchInstance = null;
+  var destinationBranchType = null;
+  var destinationBranchId = null;
+
+  if(updatedInstance.sub_branch_id){
+
+    destinationBranchType = "sub";
+    destinationBranchId = updatedInstance.sub_branch_id;
+  }else if(updatedInstance.regional_branch_id){
+
+    destinationBranchType = "regional";
+    destinationBranchId = updatedInstance.regional_branch_id;
+  }
+
   if(updatedInstance.type == "general"){
     //Send the general message to the sender
     if(updatedInstance.status == "deliverable"){
 
+      destinationBranchInstance = null;
       // Get the destination branch
-      var destinationBranchInstance = null;
-
-      var destinationBranchType = null;
-      var destinationBranchId = null;
-
-      if(updatedInstance.sub_branch_id){
-
-        destinationBranchType = "sub";
-        destinationBranchId = updatedInstance.sub_branch_id;
-      }else if(updatedInstance.regional_branch_id){
-
-        destinationBranchType = "regional";
-        destinationBranchId = updatedInstance.regional_branch_id;
-      }
-
       branchUtils
       .getInclusiveBranchInstance(destinationBranchType , destinationBranchId , null)
       .then(function(finalBranchInstance){
@@ -93,6 +93,36 @@ money.hook("afterUpdate" , function(instance , options , next){
       });
 
       return next();
+    }
+  }
+  else if(updatedInstance.type == "value_delivery"){
+
+    if(updatedInstance.status == "deliverable"){
+
+      branchUtils
+      .getInclusiveBranchInstance(destinationBranchType , destinationBranchId , null)
+      .then(function(finalBranchInstance){
+
+        // Send message to VD sender / Money receiver that parcel is delivered and money is pending on the branch for collection
+        content = fs.readFileSync("./views/message/vd.money.deliverable.handlebars");
+        contentTemplate = handlebars.compile(content.toString());
+        messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: finalBranchInstance  });
+
+        messageUtils.sendMessage(updatedInstance.receiver_mobile , messsageBody , function(data){
+          console.log(data);
+        });
+      });
+    }
+    else if(updatedInstance.status == "delivered"){
+
+      // Send message to VD sender / Money receiver that parcel is delivered and money is pending on the branch for collection
+      content = fs.readFileSync("./views/message/vd.money.delivered.handlebars");
+      contentTemplate = handlebars.compile(content.toString());
+      messsageBody = contentTemplate({ parcelInstance: updatedInstance });
+
+      messageUtils.sendMessage(updatedInstance.sender_mobile , messsageBody , function(data){
+        console.log(data);
+      });
     }
   }
 
