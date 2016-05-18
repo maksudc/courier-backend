@@ -111,6 +111,27 @@ money.hook("afterUpdate" , function(instance , options , next){
         messageUtils.sendMessage(updatedInstance.receiver_mobile , messsageBody , function(data){
           console.log(data);
         });
+      })
+      .then(function(){
+
+        // Update the corresponding order as delivered
+        return instance.getVd_order();
+      })
+      .then(function(parentOrderItem){
+
+        if(parentOrderItem){
+          console.log("Parent VD order status: " + parentOrderItem.status);
+          if(parentOrderItem.dataValues.status == "stocked"){
+
+            console.log("Setting the status of parent to deliverable");
+            parentOrderItem.status = "delivered";
+            return parentOrderItem.save();
+          }
+        }
+        return Promise.resolve(parentOrderItem);
+      })
+      .then(function(result){
+        return next();
       });
     }
     else if(updatedInstance.status == "delivered"){
