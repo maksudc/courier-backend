@@ -17,6 +17,7 @@ var handlebars = require("handlebars");
 var fs = require("fs");
 var messageUtils = require("../utils/message");
 var Promise = require("bluebird");
+var branchUtils = require("../utils/branch");
 
 
 var findOne = function(id, next){
@@ -1030,12 +1031,50 @@ var orderDetail = function(id, next){
 			orderDetails.data.orderData.dataValues["entry_branch_label"] = 'No Entry branch!';
 			getEntryBranch(null);
 		}
-		else branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
+		else {
 
-			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["entry_branch_label"] = branchData.data.dataValues.label;
-			else orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
-			getEntryBranch(null);
-		});
+			branchUtils
+			.getInclusiveBranchInstance(entry_branch_type , entry_branch_id , null)
+			.then(function(branchItem){
+
+				if(branchItem == null){
+					orderDetails.data.orderData.dataValues["entry_branch_label"] = 'No Entry branch!';
+					getEntryBranch(null);
+					return Promise.resolve(null);
+				}
+
+				if(branchItem.regionalBranch){
+					orderDetails.data.orderData.dataValues["entry_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = branchItem.regionalBranch.label;
+				}else{
+					orderDetails.data.orderData.dataValues["entry_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = null;
+				}
+
+				getEntryBranch(null);
+			}).catch(function(err){
+
+				orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
+				orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = null;
+
+				console.log(err);
+
+				getEntryBranch(null);
+			});
+
+			// 	branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
+			//
+			// 	if(branchData.status == 'success'){
+			//
+			// 		orderDetails.data.orderData.dataValues["entry_branch_label"] = branchData.data.dataValues.label;
+			// 	}
+			// 	else{
+			//
+			// 		orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
+			// 	}
+			// 	getEntryBranch(null);
+			// });
+		}
 
 	}, function(getExitBranch){
 
@@ -1050,15 +1089,46 @@ var orderDetail = function(id, next){
 			return next(orderDetails);
 			getExitBranch(null);
 		}
-		else branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
+		else{
 
-			console.log(branchData);
+			branchUtils
+			.getInclusiveBranchInstance(exit_branch_type , exit_branch_id , null)
+			.then(function(branchItem){
 
-			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
-			else orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
-			//return next(orderDetails);
-			getExitBranch(null);
-		});
+				if(branchItem == null){
+					orderDetails.data.orderData.dataValues["exit_branch_label"] = 'No Entry branch!';
+					getExitBranch(null);
+					return Promise.resolve(null);
+				}
+
+				if(branchItem.regionalBranch){
+					orderDetails.data.orderData.dataValues["exit_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = branchItem.regionalBranch.label;
+				}else{
+					orderDetails.data.orderData.dataValues["exit_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = null;
+				}
+
+				getExitBranch(null);
+			}).catch(function(err){
+
+				orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
+				orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = null;
+
+				console.log(err);
+
+				getExitBranch(null);
+			});
+		// 	branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
+		//
+		// 	console.log(branchData);
+		//
+		// 	if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
+		// 	else orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
+		// 	//return next(orderDetails);
+		// 	getExitBranch(null);
+		// });
+	}
 
 	}, function(getClient){
 
