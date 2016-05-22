@@ -1,0 +1,20 @@
+{
+  "apps":[
+    {
+      "name":"api_process",
+      "script": "./bin/www",
+      "env":{
+        "NODE_ENV":"development",
+        "PORT":8000
+      },
+      "env_production":{
+        "NODE_ENV":"production",
+        "PORT":8000
+      },
+      "cwd":"/home/dakharkara/courierwebapp",
+      "error_file": "/var/log/pm2/api_process.err.log",
+      "out_file":"/var/log/pm2/api_process.out.log",
+      "combine_logs": true,
+    }
+  ]
+}
