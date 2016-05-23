@@ -288,7 +288,3 @@ var deleteAdmin = function(email, next){
 }
 
 exports.deleteAdmin = deleteAdmin;
-
-
-
-

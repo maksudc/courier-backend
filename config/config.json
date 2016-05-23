@@ -4,7 +4,8 @@
     "password": "6hNWSTUyBPrEv9hP",
     "database": "dak_harkara_clean",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "logging": false
   },
   "test": {
     "username": "dak_harkara",
@@ -18,6 +19,7 @@
     "password": "6hNWSTUyBPrEv9hP",
     "database": "dak_harkara",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "logging": false
   }
 }
