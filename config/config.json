@@ -4,7 +4,7 @@
     "password": "6hNWSTUyBPrEv9hP",
     "database": "dak_harkara",
     "host": "127.0.0.1",
-    "dialect": "mysql",
+    "dialect": "mysql"
   },
   "test": {
     "username": "dak_harkara",
