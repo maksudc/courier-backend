@@ -46,7 +46,7 @@ var sendMessage = function(toPhoneNum , body , next ){
       // callback
 
       if(error){
-        console.log(JSON.stringify(error));
+        console.error(JSON.stringify(error));
         next({ status: "error" , mesage:  JSON.stringify(error) + " " + JSON.stringify(body) });
         return;
       }

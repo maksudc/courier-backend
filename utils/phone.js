@@ -10,7 +10,7 @@ var standardizeNumber = function(phoneNum){
     formattedPhoneNum = phoneUtil.parse(phoneNum , "BD");
 
   }catch(err){
-    console.log(err);
+    console.error(err);
   }
 
   if(formattedPhoneNum){
