@@ -37,9 +37,8 @@ var getTrackerForTrackable = function(params , next){
   .findOne(queryParam)
   .then(function(result){
 
-    console.log(result);
-
     if(result){
+        console.log( "Tracker Id: " + result.uuid);
         next({ status:"success" , data:result , message:null });
     }else{
       next({ status:"error" , data:{} , message:"No tracker attached for this trackable" });

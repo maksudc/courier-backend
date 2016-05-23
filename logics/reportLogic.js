@@ -13,7 +13,7 @@ var findOrderData = function(params, next){
 			next(null, orderData);
 		}).catch(function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				next(err);
 			}
 		});
@@ -70,14 +70,14 @@ var getOrderPaymentData = function(params, operator, next){
 			next(null, orderData);
 		}).catch(function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				next(err);
 			}
 		});
 
 	}], function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -108,9 +108,9 @@ var findMoneyData = function(params, next){
 			next(null, moneyList);
 		}).catch(function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				next(err);
-			}	
+			}
 		});
 }
 
@@ -139,7 +139,7 @@ var getReport = function(next){
 
 	}],function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -184,7 +184,7 @@ var findMoneyCashIn = function(params, adminData, next){
 		next(null, moneyOrderData);
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -231,7 +231,7 @@ var findMoneyCashOut = function(params, adminData, next){
 		next(null, moneyOrderData);
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -239,6 +239,3 @@ var findMoneyCashOut = function(params, adminData, next){
 }
 
 exports.findMoneyCashOut = findMoneyCashOut;
-
-
-

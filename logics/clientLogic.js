@@ -105,7 +105,7 @@ var create = function(clientData, next){
 			})
       .catch(function(err){
 				if(err){
-					console.log(err);
+					console.error(err);
 					return next({"status": "error", "data": null, "message": "Cannot create this client, an error occurred"});
 				}
 			});
@@ -125,7 +125,7 @@ var getAll = function(next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});

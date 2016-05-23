@@ -200,10 +200,10 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
   })
   .then(function(routeItem){
 
-      console.log(" Found Route Item ");
-      console.log(routeItem.id);
-
       if(routeItem){
+
+        console.log(" Found Route Item ");
+        console.log(routeItem.id);
 
           var midNodes = [];
 
@@ -324,7 +324,7 @@ var newRoute = function(postData , next){
           return;
       })
       .catch(function(err){
-        console.log(err);
+        console.error(err);
         next({ status:"error" , data:null , message:err });
         return;
       });
@@ -357,7 +357,7 @@ var newRoute = function(postData , next){
         return;
     })
     .catch(function(err){
-      console.log(err);
+      console.error(err);
       next({ status:"error" , data:null , message:err });
       return;
     });
