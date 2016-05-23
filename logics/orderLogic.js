@@ -33,8 +33,9 @@ var findOne = function(id, next){
 				console.log("Value delivery");
 				order.getMoney_order().then(function(moneyOrder){
 					console.log("Money order");
-					console.log(moneyOrder);
+
 					if(moneyOrder){
+						console.log(moneyOrder.id);
 						console.log("Money order found");
 						order.dataValues["vd_status"] = moneyOrder.dataValues.status;
 						order.dataValues["vd_id"] = moneyOrder.dataValues.id;
@@ -727,7 +728,7 @@ var createByOperator = function(postData, operator, next){
 					setOperatorCredentials("error while reading admin");
 				}
 				else if(admin){
-					console.log(admin);
+					//console.log(admin);
 					postData["receiver_operator"] = admin.email;
 					//setOperatorCredentials("testing is going on");
 					setOperatorCredentials(null);
@@ -769,9 +770,12 @@ var createByOperator = function(postData, operator, next){
 			if(branchData.status == 'success'){
 				postData["exit_branch_type"] = postData["exit_branch_type"] + '-branch';
 				exitBranch = branchData.data.dataValues;
-				console.log("Exit branch**********");
-				console.log(exitBranch);
-				console.log("**********************")
+
+				if(exitBranch){
+						console.log("Exit branch**********");
+						console.log(exitBranch.label);
+						console.log("**********************");
+				}
 				testBranches(null);
 			}
 			else{
@@ -829,7 +833,7 @@ var createByOperator = function(postData, operator, next){
 			}
 		}).catch(function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				errorData = err;
 				return createDraft("Cannot create draft order");
 			}
@@ -863,14 +867,15 @@ var createByOperator = function(postData, operator, next){
 
 			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){
 				if(err) {
+					console.error(err);
 					createMoneyOrder(err);
 				}
 				else if(!moneyOrderData) {
-					console.log("Money order creation error");
+					console.error("Money order creation error");
 					createMoneyOrder("No money order created");
 				}
 				else {
-					console.log("Money order created corresponding to vd");
+					console.error("Money order created corresponding to vd");
 					createMoneyOrder(null);
 				}
 			});
@@ -1395,7 +1400,7 @@ var addItem = function(additionalData, operator, next){
 		}],
 		function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				next(err);
 			}
 		});
@@ -1502,8 +1507,8 @@ var getAnalytics = function(params , next){
 		console.log(JSON.stringify(startTime));
 		console.log(JSON.stringify(endTime));
 
-		console.log(JSON.stringify(startTimeObject));
-		console.log(JSON.stringify(endTimeObject));
+		//console.log(JSON.stringify(startTimeObject));
+		//console.log(JSON.stringify(endTimeObject));
 
 		if(startTimeObject && endTimeObject){
 
