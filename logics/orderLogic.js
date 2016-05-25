@@ -1140,18 +1140,27 @@ var orderDetail = function(id, next){
 		console.log("Get client name");
 
 		clientLogic.findNameByMobile(orderDetails.data.orderData.dataValues.sender, function(err, full_name){
-
-			if(full_name){
-				orderDetails.data.orderData.dataValues["sender_name"] = full_name;
-				return next(orderDetails);
-			}
-			else {
+			if(err){
+				console.error(err);
 				getClient("Error while getting client name");
 			}
+			if(full_name){
+				orderDetails.data.orderData.dataValues["sender_name"] = full_name;
+			}
+			else {
+				orderDetails.data.orderData.dataValues["sender_name"] = orderDetails.data.orderData.dataValues.sender;
+				//getClient("Error while getting client name");
+			}
+
+			orderDetails.statusCode = 200;
+			return next(orderDetails);
 		});
 
 	}], function(err){
 		if(err){
+			console.error(err);
+
+			errorData.statusCode = 500;
 			if(errorData) return next(errorData);
 			else return next({"status": "error", "message": "Unknown error"});
 		}

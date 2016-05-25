@@ -30,6 +30,9 @@ router.get('/getOrderView/:id', function(req, res){
 	});*/
 
 	orderLogic.orderDetail(req.params.id, function(data){
+		if(data.statusCode){
+			res.status(data.statusCode);
+		}
 		res.send(data);
 	});
 });
