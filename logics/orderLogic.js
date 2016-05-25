@@ -1159,8 +1159,14 @@ var orderDetail = function(id, next){
 	}], function(err){
 		if(err){
 			console.error(err);
+			if(!errorData){
 
-			errorData.statusCode = 500;
+				errorData = {
+					status: "error",
+					statusCode: 500,
+					message: err
+				};
+			}
 			if(errorData) return next(errorData);
 			else return next({"status": "error", "message": "Unknown error"});
 		}
