@@ -11,11 +11,12 @@ var clientLogic = require("./clientLogic");
 var _ = require("lodash");
 var async = require("async");
 var middleware = require(process.cwd()+ '/middleware');
-
+var branchUtils = require("../utils/branch");
+var Promise = require("bluebird");
 
 var create = function(operator, moneyData, next){
-	console.log(moneyData);
-	console.log(operator);
+	//console.log(moneyData);
+	//console.log(operator);
 
 	if(!operator.regional_branch_id || !operator.sub_branch_id){
 		next("Missing required operator data");
@@ -39,11 +40,11 @@ var create = function(operator, moneyData, next){
 		sub_branch_id: parseInt(moneyData.subBranch) //destination sub branch
 	}
 
-	if(moneyData.type == 'virtual_delivery') 
+	if(moneyData.type == 'virtual_delivery')
 	{
 		postData["type"] = moneyData["type"];
 		postData["money_order_id"] = moneyData["money_order_id"];
-		
+
 		postData["source_regional_branch_id"] = moneyData.source_regional_branch_id;
 		postData["source_sub_branch_id"] = moneyData.source_sub_branch_id;
 
@@ -51,7 +52,7 @@ var create = function(operator, moneyData, next){
 			postData["payable"] = postData["payable"] + moneyData.parcelPrice;
 		}
 		else {
-			postData["amount"] = postData["amount"] - moneyData.parcelPrice;	
+			postData["amount"] = postData["amount"] - moneyData.parcelPrice;
 		}
 		postData["payParcelPrice"] = moneyData["payParcelPrice"];
 	}
@@ -65,7 +66,7 @@ var create = function(operator, moneyData, next){
 	if(moneyData.vat == '1.15') postData["vat"] = true;
 	else postData["vat"] = false;
 
-	console.log("Creating moeny order right now!");
+	//console.log("Creating moeny order right now!");
 
 	moneyModel.create(postData).then(function(moneyParcel){
 
@@ -75,9 +76,9 @@ var create = function(operator, moneyData, next){
 	}).catch(function(err){
 
 		if(err){
-			console.log("***************************");
-			console.log(err);
-			console.log("***************************");
+			//console.log("***************************");
+			console.error(err);
+			//console.log("***************************");
 			next(err);
 		}
 
@@ -115,7 +116,7 @@ var findAll = function(adminData, next){
 		else next(null, false);
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -137,7 +138,9 @@ var findById = function(id, next){
 						orderModel.findOne({
 							where: {uuid: moneyOrder.dataValues.money_order_id},
 							attributes: ['payment', 'payment_status']
-						}).then(function(orderData){
+						})
+						.then(function(orderData){
+
 							if(orderData){
 								var tempData = moneyOrder.dataValues;
 								tempData["subBranch"] = detail.subBranch;
@@ -145,31 +148,111 @@ var findById = function(id, next){
 								if(detail.region) tempData["region"] = detail.region;
 								tempData["sender_verification_code"] = null;
 								tempData["receiver_verification_code"] = null;
-								
 
 								if(orderData.dataValues.payment_status == 'paid')
 									tempData["parcel_payment"] = 0;
-								else 
+								else
 									tempData["parcel_payment"] = orderData.dataValues.payment;
 
-								next(null, tempData);
+									return Promise.resolve(tempData);
 							}
-							else next("No order found by this id!");
-						}).catch(function(err){
+							else {
+								return Promise.reject("No order found by this id!");
+							}
+							//else next("No order found by this id!");
+						})
+						.then(function(tempData){
+
+							source_branch_type = null;
+							source_branch_id = null;
+
+							if(moneyOrder.source_sub_branch_id){
+								source_branch_type = "sub";
+								source_branch_id = moneyOrder.source_sub_branch_id;
+							}else{
+								source_branch_type = "regional";
+								source_branch_id = moneyOrder.source_regional_branch_id;
+							}
+
+							//console.log(moneyOrder);
+
+							//console.log(source_branch_type);
+							//console.log(source_branch_id);
+
+							return branchUtils
+							.getInclusiveBranchInstance(source_branch_type , source_branch_id , null)
+							.then(function(sourceBranchInstance){
+
+								branchData = {};
+								if(sourceBranchInstance){
+									branchData = sourceBranchInstance.dataValues;
+									if(sourceBranchInstance.regionalBranch){
+										branchData.regionalBranch = sourceBranchInstance.regionalBranch.dataValues;
+									}
+								}
+								tempData["sourceBranch"] = branchData;
+
+								next(null,tempData);
+							});
+						})
+						.catch(function(err){
+
 							if(err){
-								console.log(err);
+								console.error(err);
 								next(err);
 							}
 						});
 					}
 					else{
+
 						var tempData = moneyOrder.dataValues;
 						tempData["subBranch"] = detail.subBranch;
 						tempData["regionalBranch"] = detail.regionalBranch;
 						if(detail.region) tempData["region"] = detail.region;
 						tempData["sender_verification_code"] = null;
 						tempData["receiver_verification_code"] = null;
-						next(null, tempData);
+
+						source_branch_type = null;
+						source_branch_id = null;
+
+						if(moneyOrder.source_sub_branch_id){
+							source_branch_type = "sub";
+							source_branch_id = moneyOrder.source_sub_branch_id;
+						}else{
+							source_branch_type = "regional";
+							source_branch_id = moneyOrder.source_regional_branch_id;
+						}
+
+						//console.log(moneyOrder);
+
+						//console.log(source_branch_type);
+						//console.log(source_branch_id);
+
+						branchUtils
+						.getInclusiveBranchInstance(source_branch_type , source_branch_id , null)
+						.then(function(sourceBranchInstance){
+
+							//console.log(sourceBranchInstance);
+
+							branchData = {};
+							if(sourceBranchInstance){
+								branchData = sourceBranchInstance.dataValues;
+								if(sourceBranchInstance.regionalBranch){
+									branchData.regionalBranch = sourceBranchInstance.regionalBranch.dataValues;
+								}
+							}
+							tempData["sourceBranch"] = branchData;
+
+							next(null,tempData);
+						})
+						.catch(function(err){
+							if(err){
+								console.error(err);
+								next(err);
+								return ;
+							}
+							next(err);
+						});
 					}
 				}
 			});
@@ -178,7 +261,7 @@ var findById = function(id, next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -197,7 +280,7 @@ var findRawById = function(id, next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -228,7 +311,7 @@ var receiveOrder = function(id, verification_code, operator, next){
 							next(null, moneyOrder);
 						}
 						else if(orderPaymentStatus.status == 'paid'){
-							console.log("It is already paid!!!!!");
+							//console.log("It is already paid!!!!!");
 							moneyOrder.save();
 							next(null, moneyOrder);
 						}
@@ -257,7 +340,7 @@ var confirmOrder = function(id, operator, next){
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
-			console.log(moneyOrder);
+			//console.log(moneyOrder);
 
 			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'received'){
@@ -284,7 +367,7 @@ var deliverOrder = function(id, verification_code, operator, next){
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
-			console.log(moneyOrder);
+			//console.log(moneyOrder);
 
 			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'deliverable'){
@@ -351,14 +434,14 @@ var deleteMoneyOrder = function(operator, id, next){
 			subBranch: parseInt(receiver_operator.sub_branch_id),
 		}
 
-		
+
 
 		create(operator, newMoneyOrder, function(err, moneyOrder){
 			if(err) createMoneyOrder(err);
 			else if(!newMoneyOrder) createMoneyOrder("Could not create money order");
 			else {
-				console.log(moneyOrder);
-				console.log("Money order redirected!");
+				//console.log(moneyOrder);
+				//console.log("Money order redirected!");
 				newOrderId = moneyOrder.id;
 				createMoneyOrder(null);
 			}
@@ -394,10 +477,10 @@ var deleteMoneyOrder = function(operator, id, next){
 				}
 			});
 
-	}], 
+	}],
 	function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -411,14 +494,14 @@ exports.deleteMoneyOrder = deleteMoneyOrder;
 
 var updateVDPrice = function(moneyData, next){
 
-	console.log(moneyData);
+	//console.log(moneyData);
 
 	moneyModel.findOne({
 		where: {id: moneyData.id}
 	}).then(function(moneyOrderData){
 
 		if(moneyOrderData){
-			
+
 			var updateData = {
 				amount: parseInt(moneyData.amount),
 				charge: parseInt(moneyData.charge),
@@ -434,15 +517,15 @@ var updateVDPrice = function(moneyData, next){
 			}
 			updateData["payParcelPrice"] = moneyData.newPayParcelPrice;
 
-			console.log(updateData);
+			//console.log(updateData);
 
 			moneyOrderData.amount = updateData.amount;
 			moneyOrderData.charge = updateData.charge;
 			moneyOrderData.discount = updateData.discount;
 			moneyOrderData.payable = updateData.payable;
 
-			console.log(updateData.payParcelPrice);
-			
+			//console.log(updateData.payParcelPrice);
+
 			if(updateData.payParcelPrice && updateData.payParcelPrice != '')
 				moneyOrderData.payParcelPrice = updateData.payParcelPrice;
 
@@ -453,7 +536,7 @@ var updateVDPrice = function(moneyData, next){
 				else next("Failed to update");
 			}).catch(function(err){
 				if(err){
-					console.log(err);
+					console.error(err);
 					next(err);
 				}
 			});
@@ -462,7 +545,7 @@ var updateVDPrice = function(moneyData, next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});
@@ -470,13 +553,3 @@ var updateVDPrice = function(moneyData, next){
 }
 
 exports.updateVDPrice = updateVDPrice;
-
-
-
-
-
-
-
-
-
-
