@@ -1,7 +1,12 @@
 var DB = require("../models/index");
 var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
+
 var orderModel = sequelize.models.order;
+var itemModel = sequelize.models.item;
+var trackerLog = sequelize.models.trackerLog;
+var genericTracker = sequelize.models.genericTracker;
+
 var regionalBranchLogic = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var branchLogic = require("./branchLogic");
@@ -19,6 +24,7 @@ var messageUtils = require("../utils/message");
 var Promise = require("bluebird");
 var branchUtils = require("../utils/branch");
 
+var HttpStatus = require("http-status-codes");
 
 var findOne = function(id, next){
 	if(!id){
@@ -420,6 +426,86 @@ var deleteDraft = function(data, next){
 };
 
 exports.deleteDraft = deleteDraft;
+
+var deleteOrder = function(orderUuid , next){
+
+	/**
+	 *	Check the permission whether the current user is allowed to delete the order or not
+	 */
+
+	 //@todo: Find the order
+	 //@todo: Find the tracker
+	 //@todo: FInd the items' trackers
+	 //@todo: Delete the item
+	 //@todo: Delete the order
+	 //@todo: Delete all the logs for those trackers
+	 //@todo: delete the trackers
+
+	 var orderInstance = null;
+	 var trackerInstances = [];
+
+	 orderModel
+	 .findOne({ where: { uuid: orderUuid } })
+	 .then(function(orderItem){
+
+		 if(!orderItem){
+			 return Promise.reject("Could not found Item");
+		 }
+		 orderInstance = orderItem;
+
+		 return Promise.resolve(orderItem);
+	 })
+	 .then(function(orderItem){
+		 return orderItem.getTracker();
+	 })
+	 .then(function(trackerItem){
+		 trackerInstances.push(trackerItem.uuid);
+	 })
+	 .then(function(result){
+		 return orderInstance.getItems();
+	 })
+	 .map(function(itemInstance){
+			return itemInstance.getTracker();
+	 })
+	 .map(function(itemTrackerInstance){
+		 console.log("Adding " + itemTrackerInstance.uuid);
+		 return itemTrackerInstance.uuid ;
+	 })
+	 .then(function(results){
+
+		 console.log(results);
+		 console.log(trackerInstances);
+
+		 trackerInstances = trackerInstances.concat(results);
+
+		 console.log(trackerInstances);
+
+		 return itemModel.destroy({ where: { orderUuid: orderInstance.uuid } });
+	 })
+	 .then(function(result){
+		 return orderInstance.destroy();
+	 })
+	 .then(function(result){
+		 console.log("Mass delete initiating.....");
+		 console.log(trackerInstances);
+
+		 return trackerLog.destroy({ where: { trackerId: trackerInstances } });
+	 })
+	 .then(function(results){
+		 return genericTracker.destroy({ where:{ uuid: trackerInstances } });
+	 })
+	 .then(function(result){
+		 next({ status: "success" , statusCode: HttpStatus.OK , message:"Deleted Successfully" });
+	 })
+	 .catch(function(err){
+		 if(err){
+			 console.error(err);
+		 }
+		 next({statusCode: HttpStatus.INTERNAL_SERVER_ERROR , status: "error" , message: err });
+	 });
+};
+
+exports.deleteOrder = deleteOrder;
 
 
 var confirmOrder = function(id, code, next){

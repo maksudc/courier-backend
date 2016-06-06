@@ -118,6 +118,16 @@ router.post('/deleteDraft', upload.array(), function(req, res){
 	});
 });
 
+router.delete('/:orderUuid' , function(req , res){
+
+	orderLogic.deleteOrder(req.params.orderUuid , function(data){
+		if(data.statusCode){
+			res.status(data.statusCode);
+		}
+		res.send(data);
+	});
+});
+
 router.post('/createByOperator', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 
 		/*When operator creates an order.
