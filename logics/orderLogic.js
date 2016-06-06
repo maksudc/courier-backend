@@ -468,27 +468,17 @@ var deleteOrder = function(orderUuid , next){
 			return itemInstance.getTracker();
 	 })
 	 .map(function(itemTrackerInstance){
-		 console.log("Adding " + itemTrackerInstance.uuid);
 		 return itemTrackerInstance.uuid ;
 	 })
 	 .then(function(results){
 
-		 console.log(results);
-		 console.log(trackerInstances);
-
 		 trackerInstances = trackerInstances.concat(results);
-
-		 console.log(trackerInstances);
-
 		 return itemModel.destroy({ where: { orderUuid: orderInstance.uuid } });
 	 })
 	 .then(function(result){
 		 return orderInstance.destroy();
 	 })
 	 .then(function(result){
-		 console.log("Mass delete initiating.....");
-		 console.log(trackerInstances);
-
 		 return trackerLog.destroy({ where: { trackerId: trackerInstances } });
 	 })
 	 .then(function(results){
