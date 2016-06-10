@@ -85,6 +85,16 @@ router.post('/delete', upload.array(), function(req, res){
 	});
 });
 
+router.delete('/:id' , function(req , res){
+
+	moneyLogic.destroy(req.params.id , function(data){
+		if(data.statusCode){
+			res.status(data.statusCode);
+		}
+		res.send(data);
+	});
+});
+
 router.post('/updateVDPrice', upload.array(), function(req, res){
 
 	moneyLogic.updateVDPrice(req.body, function(err, data){

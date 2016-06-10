@@ -6,6 +6,7 @@ var orderModel = sequelize.models.order;
 var itemModel = sequelize.models.item;
 var trackerLog = sequelize.models.trackerLog;
 var genericTracker = sequelize.models.genericTracker;
+var money = sequelize.models.money;
 
 var regionalBranchLogic = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
@@ -434,6 +435,8 @@ var deleteOrder = function(orderUuid , next){
 	 */
 
 	 //@todo: Find the order
+	 //@todo: If the order is a vd , get the corresponding money order
+	 //@todo: if the order is vd , delete the corresponding money order
 	 //@todo: Find the tracker
 	 //@todo: FInd the items' trackers
 	 //@todo: Delete the item
@@ -451,9 +454,20 @@ var deleteOrder = function(orderUuid , next){
 		 if(!orderItem){
 			 return Promise.reject("Could not found Item");
 		 }
+
 		 orderInstance = orderItem;
 
-		 return Promise.resolve(orderItem);
+		 if(orderItem.vd){
+			 // Order is a VD , So delete the redundant money order as well
+			 return money
+			 .destroy({ where: { id: orderItem.vd_id } })
+			 .then(function(result){
+				 console.log("Delete corresponding money order: "+ orderItem.vd_id);
+				 return Promise.resolve(orderItem);
+			 });
+		 }
+
+			return Promise.resolve(orderItem);
 	 })
 	 .then(function(orderItem){
 		 return orderItem.getTracker();

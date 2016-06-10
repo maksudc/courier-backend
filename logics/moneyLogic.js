@@ -491,6 +491,25 @@ var deleteMoneyOrder = function(operator, id, next){
 
 exports.deleteMoneyOrder = deleteMoneyOrder;
 
+var destroy = function(moneyId , next){
+
+		moneyModel
+		.destroy({ where: { id: moneyId } })
+		.then(function(result){
+
+			if(result){
+				next({ status: "success" , statusCode: 200 , data:result , message: "successfully deleted" });
+			}else{
+				console.error(result);
+				next({ status:"error" , statusCode: 500 , data: result , message: "Something error happened" });
+			}
+		})
+		.catch(function(err){
+				console.error(err);
+				next({ status:"error" , statusCode: 500 , data:nul , message:err });
+		});
+}
+exports.destroy = destroy;
 
 var updateVDPrice = function(moneyData, next){
 
