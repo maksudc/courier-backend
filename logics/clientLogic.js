@@ -35,7 +35,7 @@ function makeVerficationCode()
 
 var findOneByMobile = function(mobile, next){
 
-	console.log("*****************Hitting API findOneByMobile**************");
+	//console.log("*****************Hitting API findOneByMobile**************");
 
 	clientModel.findOne({where: {mobile: mobile}}).then(function(client){
 
@@ -48,11 +48,11 @@ var findOneByMobile = function(mobile, next){
 
 	}).catch(function(err){
 
+    console.error(err);
+
 		if(err){
-			return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred"});
-
+			return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred" , "err": err});
 		}
-
 	});
 };
 
