@@ -215,7 +215,7 @@ order.hook("afterUpdate" , function(instance , options , next){
             //     console.log(data);
             //   });
             // });
-            
+
           }
       });
     }
@@ -678,6 +678,12 @@ order.hook("beforeUpdate" , function(instance , options , next){
         return next();
       });
 
+    }
+  }else if(snapshotInstance.status == 'stocked'){
+    if(updatedInstance.status == "delivered"){
+
+    }else{
+      updatedInstance.status = snapshotInstance.status;
     }
   }
 
