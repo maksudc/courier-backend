@@ -140,12 +140,17 @@ router.post('/createByOperator', passport.authenticate('basic', {session: false}
 				]
 			}
 		*/
-
-		orderLogic.createByOperator(req.body, req.user, function(data){
+	orderLogic.createByOperator(req.body, req.user, function(data){
 			res.send(data);
 	});
 });
 
+router.post("/markDelivered/:orderId" , upload.array() , function(req , res){
+
+	orderLogic.markDelivered(req.params.orderId , req.user , function(data){
+		res.send(data);
+	});
+});
 
 router.post('/updateStatus', upload.array(), function(req, res){
 

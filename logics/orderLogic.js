@@ -24,8 +24,8 @@ var fs = require("fs");
 var messageUtils = require("../utils/message");
 var Promise = require("bluebird");
 var branchUtils = require("../utils/branch");
-
 var HttpStatus = require("http-status-codes");
+var moment = require("moment");
 
 var findOne = function(id, next){
 	if(!id){
@@ -1660,3 +1660,105 @@ var getAnalytics = function(params , next){
 }
 
 exports.getAnalytics = getAnalytics;
+
+var markDelivered = function(orderId , user , next){
+
+		// console.log(orderId);
+		// console.log(user);
+
+		var trackerInstances = [];
+		var orderObject = null;
+
+		orderModel
+		.update({ 'status': "delivered" } , { where: { uuid: orderId } })
+		.then(function(result){
+			if(result){
+				next({ status: "success" , statusCode: 200 , data: result , message: null });
+			}else{
+				next({ status: "error" , statusCode: 500 , data: null , message: result });
+			}
+			return Promise.resolve(result);
+		})
+		.then(function(){
+				return orderModel.findOne({ where: { uuid: orderId }  });
+		})
+		.then(function(orderInstance){
+
+			orderObject = orderInstance;
+
+			if(orderInstance){
+
+				return orderInstance
+				.getTracker()
+				.then(function(trackerInstance){
+					trackerInstances.push(trackerInstance);
+				})
+				.then(function(){
+
+					return orderInstance
+					.getItems()
+					.map(function(itemInstance){
+						return itemInstance.getTracker();
+					})
+					.map(function(itemTrackerInstance){
+						return itemTrackerInstance;
+					})
+					.then(function(results){
+						for(I = 0 ; I< results.length ; I++){
+							trackerInstances.push(results[I]);
+						}
+						return Promise.resolve(trackerInstances);
+					});
+				});
+			}
+			return Promise.resolve(trackerInstances);
+		})
+		.map(function(trackerInstance){
+
+			var trackerLogData = {};
+
+			trackerLogData.action = "delivered";
+			trackerLogData.trackerId = trackerInstance.uuid;
+			if(trackerInstance.currentBranchType){
+					trackerLogData.branchType = trackerInstance.currentBranchType;
+			}
+			trackerLogData.branchId = trackerInstance.currentBranchId;
+
+			var eventDateTime = moment.utc();
+			trackerLogData.eventDateTime = eventDateTime;
+			trackerLogData.createdAt = eventDateTime;
+			trackerLogData.updatedAt = eventDateTime;
+
+			var trackerReachedLogData = {};
+			trackerReachedLogData.action = "reached";
+			trackerReachedLogData.trackerId = trackerLogData.trackerId;
+			trackerReachedLogData.branchType = trackerLogData.currentBranchType;
+			trackerReachedLogData.branchId = trackerLogData.currentBranchId;
+			trackerReachedLogData.eventDateTime = eventDateTime - 2000 ;
+			trackerLogData.createdAt = trackerReachedLogData.eventDateTime;
+			trackerLogData.updatedAt = trackerReachedLogData.eventDateTime;
+
+			return trackerLog
+			.findOne({ where: { action: "delivered" , trackerId: trackerInstance.uuid } })
+			.then(function(logData){
+				if(!logData){
+					return Promise.all( [ trackerLog.create(trackerReachedLogData) , trackerLog.create(trackerLogData) ] );
+				}
+				return Promise.resolve(logData);
+			});
+		})
+		.then(function(results){
+
+			if(orderObject){
+				return itemModel.update({ status: "delivered" } , { where: { orderUuid: orderObject.uuid } });
+			}
+		})
+		.catch(function(err){
+			if(err){
+				console.error(err);
+			}
+			next({ status: "error" , statusCode: 500 , data: null , message: err });
+		});
+
+};
+exports.markDelivered = markDelivered;
