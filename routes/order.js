@@ -151,6 +151,12 @@ router.post("/markDelivered/:orderId" , upload.array() , function(req , res){
 		res.send(data);
 	});
 });
+router.post("/markDeliverable/:orderId" , upload.array() , function(req , res){
+
+	orderLogic.markDeliverable(req.params.orderId , req.user , function(data){
+		res.send(data);
+	});
+});
 
 router.post('/updateStatus', upload.array(), function(req, res){
 
