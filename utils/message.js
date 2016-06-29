@@ -37,8 +37,8 @@ var sendMessage = function(toPhoneNum , body , next ){
   var agent = new https.Agent(agentOptions);
   requestParams.agent = agent;
 
-  requestParams.maxAttempts = 7;
-  requestParams.retryDelay = 2000;
+  // requestParams.maxAttempts = 7;
+  // requestParams.retryDelay = 2000;
 
   if(env == "production"){
 

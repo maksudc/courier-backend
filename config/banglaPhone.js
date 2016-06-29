@@ -22,6 +22,8 @@ var config = {
 };
 
 var BASE_HOST = "powersms.banglaphone.net.bd";
+var MAX_ATTEMPTS = 7;
+var RETRY_DELAY = 2*60*1000; // 2 minutes delay for retrying
 
 var getGatewayUrl = function(config_env){
 
@@ -49,8 +51,10 @@ var prepareRequest = function(config_env , data){
       "password": config_env.PASSWORD,
       //"From": config_env.From,
       "smsText": data.body,
-      "commaSeperatedReceiverNumbers": data.toPhoneNum
-    }
+      "commaSeperatedReceiverNumbers": data.toPhoneNum,
+    },
+    maxAttempts: MAX_ATTEMPTS,
+    retryDelay: RETRY_DELAY
   };
 
   return formattedData;
