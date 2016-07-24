@@ -197,7 +197,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
 
           console.log('consolidated route: ');
 
-          if(firstRoute != null){
+          if(firstRoute){
 
               updatedInstance.next_hub_type = firstRoute.branchType;
               updatedInstance.next_hub = firstRoute.id;

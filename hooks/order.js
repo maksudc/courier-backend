@@ -341,7 +341,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
         }
 
         console.log("Adjusted Route is : ");
-        if(firstRoute !== null){
+        if(firstRoute){
             console.log(firstRoute.branchType + ":" +firstRoute.id);
 
             updatedInstance.next_hub_type = firstRoute.branchType;

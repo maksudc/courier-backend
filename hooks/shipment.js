@@ -58,9 +58,12 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
             }else{
               firstRoute = routes[1];
             }
-            updatedInstance.nextBranchType = firstRoute.branchType;
-            updatedInstance.nextBranchId = firstRoute.id;
 
+            if(firstRoute){
+              updatedInstance.nextBranchType = firstRoute.branchType;
+              updatedInstance.nextBranchId = firstRoute.id;
+            }
+            
             instance.updatedInstance = updatedInstance;
 
             return Promise.resolve(updatedInstance.status);
@@ -194,11 +197,13 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
                   break;
                 }
               }
-              if( nextRouteIndex > -1 ){
+              if( nextRouteIndex > -1){
 
                 var nextRoute = routes[nextRouteIndex];
-                updatedInstance.nextBranchType = nextRoute.branchType;
-                updatedInstance.nextBranchId = nextRoute.id;
+                if(nextRoute){
+                  updatedInstance.nextBranchType = nextRoute.branchType;
+                  updatedInstance.nextBranchId = nextRoute.id;
+                }
               }
             }
 
