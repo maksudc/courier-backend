@@ -20,10 +20,10 @@ module.exports = function(sequelize , DataTypes){
 			associate: function(models){
 
 				client.belongsTo(models.region , { foreignKey: "regionId" });
-			
+
 			}
 		}
-		
+
 	});
 
 	return client;

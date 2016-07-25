@@ -36,7 +36,7 @@ item.hook("afterUpdate" ,function(instance , options , next){
   var updatedInstance = instance.dataValues;
   var snapshotInstance = instance._previousDataValues;
 
-  if(!instance.changed('status')){
+  if(!instance.changed('status') || updatedInstance.status == snapshotInstance.status){
     return next();
   }
 
@@ -197,7 +197,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
 
           console.log('consolidated route: ');
 
-          if(firstRoute != null){
+          if(firstRoute){
 
               updatedInstance.next_hub_type = firstRoute.branchType;
               updatedInstance.next_hub = firstRoute.id;
@@ -506,7 +506,12 @@ item.hook("beforeUpdate" , function(instance , options , next){
 
           return next();
         });
+      }
+    }else if(snapshotInstance.status == 'stocked'){
+      if(updatedInstance.status == "delivered"){
 
+      }else{
+        updatedInstance.status = snapshotInstance.status;
       }
     }
 

@@ -1,7 +1,13 @@
 var DB = require("../models/index");
 var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
+
 var orderModel = sequelize.models.order;
+var itemModel = sequelize.models.item;
+var trackerLog = sequelize.models.trackerLog;
+var genericTracker = sequelize.models.genericTracker;
+var money = sequelize.models.money;
+
 var regionalBranchLogic = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
 var branchLogic = require("./branchLogic");
@@ -13,7 +19,13 @@ var adminLogic = require("./admin/adminLogic");
 var _ = require("lodash");
 var async = require("async");
 var config = require("./../config");
-
+var handlebars = require("handlebars");
+var fs = require("fs");
+var messageUtils = require("../utils/message");
+var Promise = require("bluebird");
+var branchUtils = require("../utils/branch");
+var HttpStatus = require("http-status-codes");
+var moment = require("moment");
 
 var findOne = function(id, next){
 	if(!id){
@@ -28,8 +40,9 @@ var findOne = function(id, next){
 				console.log("Value delivery");
 				order.getMoney_order().then(function(moneyOrder){
 					console.log("Money order");
-					console.log(moneyOrder);
+
 					if(moneyOrder){
+						console.log(moneyOrder.id);
 						console.log("Money order found");
 						order.dataValues["vd_status"] = moneyOrder.dataValues.status;
 						order.dataValues["vd_id"] = moneyOrder.dataValues.id;
@@ -415,6 +428,89 @@ var deleteDraft = function(data, next){
 
 exports.deleteDraft = deleteDraft;
 
+var deleteOrder = function(orderUuid , next){
+
+	/**
+	 *	Check the permission whether the current user is allowed to delete the order or not
+	 */
+
+	 //@todo: Find the order
+	 //@todo: If the order is a vd , get the corresponding money order
+	 //@todo: if the order is vd , delete the corresponding money order
+	 //@todo: Find the tracker
+	 //@todo: FInd the items' trackers
+	 //@todo: Delete the item
+	 //@todo: Delete the order
+	 //@todo: Delete all the logs for those trackers
+	 //@todo: delete the trackers
+
+	 var orderInstance = null;
+	 var trackerInstances = [];
+
+	 orderModel
+	 .findOne({ where: { uuid: orderUuid } })
+	 .then(function(orderItem){
+
+		 if(!orderItem){
+			 return Promise.reject("Could not found Item");
+		 }
+
+		 orderInstance = orderItem;
+
+		 if(orderItem.vd){
+			 // Order is a VD , So delete the redundant money order as well
+			 return money
+			 .destroy({ where: { id: orderItem.vd_id } })
+			 .then(function(result){
+				 console.log("Delete corresponding money order: "+ orderItem.vd_id);
+				 return Promise.resolve(orderItem);
+			 });
+		 }
+
+			return Promise.resolve(orderItem);
+	 })
+	 .then(function(orderItem){
+		 return orderItem.getTracker();
+	 })
+	 .then(function(trackerItem){
+		 trackerInstances.push(trackerItem.uuid);
+	 })
+	 .then(function(result){
+		 return orderInstance.getItems();
+	 })
+	 .map(function(itemInstance){
+			return itemInstance.getTracker();
+	 })
+	 .map(function(itemTrackerInstance){
+		 return itemTrackerInstance.uuid ;
+	 })
+	 .then(function(results){
+
+		 trackerInstances = trackerInstances.concat(results);
+		 return itemModel.destroy({ where: { orderUuid: orderInstance.uuid } });
+	 })
+	 .then(function(result){
+		 return orderInstance.destroy();
+	 })
+	 .then(function(result){
+		 return trackerLog.destroy({ where: { trackerId: trackerInstances } });
+	 })
+	 .then(function(results){
+		 return genericTracker.destroy({ where:{ uuid: trackerInstances } });
+	 })
+	 .then(function(result){
+		 next({ status: "success" , statusCode: HttpStatus.OK , message:"Deleted Successfully" });
+	 })
+	 .catch(function(err){
+		 if(err){
+			 console.error(err);
+		 }
+		 next({statusCode: HttpStatus.INTERNAL_SERVER_ERROR , status: "error" , message: err });
+	 });
+};
+
+exports.deleteOrder = deleteOrder;
+
 
 var confirmOrder = function(id, code, next){
 	findOne(id, function(orderData){
@@ -723,7 +819,7 @@ var createByOperator = function(postData, operator, next){
 					setOperatorCredentials("error while reading admin");
 				}
 				else if(admin){
-					console.log(admin);
+					//console.log(admin);
 					postData["receiver_operator"] = admin.email;
 					//setOperatorCredentials("testing is going on");
 					setOperatorCredentials(null);
@@ -765,9 +861,12 @@ var createByOperator = function(postData, operator, next){
 			if(branchData.status == 'success'){
 				postData["exit_branch_type"] = postData["exit_branch_type"] + '-branch';
 				exitBranch = branchData.data.dataValues;
-				console.log("Exit branch**********");
-				console.log(exitBranch);
-				console.log("**********************")
+
+				if(exitBranch){
+						console.log("Exit branch**********");
+						console.log(exitBranch.label);
+						console.log("**********************");
+				}
 				testBranches(null);
 			}
 			else{
@@ -825,7 +924,7 @@ var createByOperator = function(postData, operator, next){
 			}
 		}).catch(function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				errorData = err;
 				return createDraft("Cannot create draft order");
 			}
@@ -859,14 +958,15 @@ var createByOperator = function(postData, operator, next){
 
 			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){
 				if(err) {
+					console.error(err);
 					createMoneyOrder(err);
 				}
 				else if(!moneyOrderData) {
-					console.log("Money order creation error");
+					console.error("Money order creation error");
 					createMoneyOrder("No money order created");
 				}
 				else {
-					console.log("Money order created corresponding to vd");
+					console.error("Money order created corresponding to vd");
 					createMoneyOrder(null);
 				}
 			});
@@ -938,7 +1038,31 @@ var createByOperator = function(postData, operator, next){
 		clientLogic.create(clientData, function(data){
 
 			if(data.status == "success"){
+
+				content = fs.readFileSync("./views/message/client.signup.handlebars");
+				contentTemplate = handlebars.compile(content.toString());
+				messageBody = null;
+
+				client = data.data;
+
+				if(data.isNew){
+
+					console.log("Sending the client password through message....");
+					// send the password to the client by sms
+					// Send the sms with the password
+					messageBody = contentTemplate({ parcelInstance: order , client: client });
+				}else{
+					console.log("Sending the order verification code through message....");
+					//Only sends the verifcation code
+					messageBody = contentTemplate({ parcelInstance: order });
+				}
+
+				messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
+					console.log(mResponse);
+				});
+
 				return next({"status": "success", "data": order});
+				//createClient(null);
 			}
 			else createClient("Cannot create client!");
 
@@ -1003,12 +1127,50 @@ var orderDetail = function(id, next){
 			orderDetails.data.orderData.dataValues["entry_branch_label"] = 'No Entry branch!';
 			getEntryBranch(null);
 		}
-		else branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
+		else {
 
-			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["entry_branch_label"] = branchData.data.dataValues.label;
-			else orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
-			getEntryBranch(null);
-		});
+			branchUtils
+			.getInclusiveBranchInstance(entry_branch_type , entry_branch_id , null)
+			.then(function(branchItem){
+
+				if(branchItem == null){
+					orderDetails.data.orderData.dataValues["entry_branch_label"] = 'No Entry branch!';
+					getEntryBranch(null);
+					return Promise.resolve(null);
+				}
+
+				if(branchItem.regionalBranch){
+					orderDetails.data.orderData.dataValues["entry_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = branchItem.regionalBranch.label;
+				}else{
+					orderDetails.data.orderData.dataValues["entry_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = null;
+				}
+
+				getEntryBranch(null);
+			}).catch(function(err){
+
+				orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
+				orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = null;
+
+				console.log(err);
+
+				getEntryBranch(null);
+			});
+
+			// 	branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
+			//
+			// 	if(branchData.status == 'success'){
+			//
+			// 		orderDetails.data.orderData.dataValues["entry_branch_label"] = branchData.data.dataValues.label;
+			// 	}
+			// 	else{
+			//
+			// 		orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
+			// 	}
+			// 	getEntryBranch(null);
+			// });
+		}
 
 	}, function(getExitBranch){
 
@@ -1023,33 +1185,79 @@ var orderDetail = function(id, next){
 			return next(orderDetails);
 			getExitBranch(null);
 		}
-		else branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
+		else{
 
-			console.log(branchData);
+			branchUtils
+			.getInclusiveBranchInstance(exit_branch_type , exit_branch_id , null)
+			.then(function(branchItem){
 
-			if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
-			else orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
-			//return next(orderDetails);
-			getExitBranch(null);
-		});
+				if(branchItem == null){
+					orderDetails.data.orderData.dataValues["exit_branch_label"] = 'No Entry branch!';
+					getExitBranch(null);
+					return Promise.resolve(null);
+				}
+
+				if(branchItem.regionalBranch){
+					orderDetails.data.orderData.dataValues["exit_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = branchItem.regionalBranch.label;
+				}else{
+					orderDetails.data.orderData.dataValues["exit_branch_label"] = branchItem.label;
+					orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = null;
+				}
+
+				getExitBranch(null);
+			}).catch(function(err){
+
+				orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
+				orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = null;
+
+				console.log(err);
+
+				getExitBranch(null);
+			});
+		// 	branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
+		//
+		// 	console.log(branchData);
+		//
+		// 	if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
+		// 	else orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
+		// 	//return next(orderDetails);
+		// 	getExitBranch(null);
+		// });
+	}
 
 	}, function(getClient){
 
 		console.log("Get client name");
 
 		clientLogic.findNameByMobile(orderDetails.data.orderData.dataValues.sender, function(err, full_name){
-
-			if(full_name){
-				orderDetails.data.orderData.dataValues["sender_name"] = full_name;
-				return next(orderDetails);
-			}
-			else {
+			if(err){
+				console.error(err);
 				getClient("Error while getting client name");
 			}
+			if(full_name){
+				orderDetails.data.orderData.dataValues["sender_name"] = full_name;
+			}
+			else {
+				orderDetails.data.orderData.dataValues["sender_name"] = orderDetails.data.orderData.dataValues.sender;
+				//getClient("Error while getting client name");
+			}
+
+			orderDetails.statusCode = 200;
+			return next(orderDetails);
 		});
 
 	}], function(err){
 		if(err){
+			console.error(err);
+			if(!errorData){
+
+				errorData = {
+					status: "error",
+					statusCode: 500,
+					message: err
+				};
+			}
 			if(errorData) return next(errorData);
 			else return next({"status": "error", "message": "Unknown error"});
 		}
@@ -1298,7 +1506,7 @@ var addItem = function(additionalData, operator, next){
 		}],
 		function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				next(err);
 			}
 		});
@@ -1405,8 +1613,8 @@ var getAnalytics = function(params , next){
 		console.log(JSON.stringify(startTime));
 		console.log(JSON.stringify(endTime));
 
-		console.log(JSON.stringify(startTimeObject));
-		console.log(JSON.stringify(endTimeObject));
+		//console.log(JSON.stringify(startTimeObject));
+		//console.log(JSON.stringify(endTimeObject));
 
 		if(startTimeObject && endTimeObject){
 
@@ -1453,3 +1661,272 @@ var getAnalytics = function(params , next){
 }
 
 exports.getAnalytics = getAnalytics;
+
+var markDeliverable = function(orderId , user  , next){
+
+		// console.log(orderId);
+		// console.log(user);
+		var trackerInstances = [];
+		var orderObject = null;
+		var updateData = {};
+
+		orderModel
+		.findOne({ where: { uuid: orderId }  })
+		.then(function(orderInstance){
+			orderObject = orderInstance;
+
+			updateData.current_hub_type = branchUtils.sanitizeBranchType(orderObject.dataValues.exit_branch_type);
+			updateData.current_hub = orderObject.dataValues.exit_branch;
+
+			updateData.next_hub_type = updateData.current_hub_type;
+			updateData.next_hub = updateData.current_hub;
+
+			updateData.status = "stocked";
+
+			return orderModel.update(updateData , { where: { uuid: orderId } });
+		})
+		.then(function(result){
+			if(result){
+				next({ status: "success" , statusCode: 200 , data: result , message: null });
+			}else{
+				next({ status: "error" , statusCode: 500 , data: null , message: result });
+			}
+			return Promise.resolve(result);
+		})
+		.then(function(){
+				return orderModel.findOne({ where: { uuid: orderId }  });
+		})
+		.then(function(orderInstance){
+
+			orderObject = orderInstance;
+
+			if(orderInstance){
+
+				return orderInstance
+				.getTracker()
+				.then(function(trackerInstance){
+					trackerInstances.push(trackerInstance);
+				})
+				.then(function(){
+
+					return orderInstance
+					.getItems()
+					.map(function(itemInstance){
+						return itemInstance.getTracker();
+					})
+					.map(function(itemTrackerInstance){
+						return itemTrackerInstance;
+					})
+					.then(function(results){
+						for(I = 0 ; I< results.length ; I++){
+							trackerInstances.push(results[I]);
+						}
+						return Promise.resolve(trackerInstances);
+					});
+				});
+			}
+			return Promise.resolve(trackerInstances);
+		})
+		.map(function(trackerInstance){
+
+			var trackerLogData = {};
+
+			// trackerLogData.action = "delivered";
+			trackerLogData.trackerId = trackerInstance.uuid;
+			if(trackerInstance.destinationBranchType){
+					trackerLogData.branchType = trackerInstance.destinationBranchType;
+			}
+			trackerLogData.branchId = trackerInstance.destinationBranchId;
+
+			var eventDateTime = moment.utc();
+			trackerLogData.eventDateTime = eventDateTime;
+			trackerLogData.createdAt = eventDateTime;
+			trackerLogData.updatedAt = eventDateTime;
+
+			var trackerReachedLogData = {};
+			trackerReachedLogData.action = "reached";
+			trackerReachedLogData.trackerId = trackerLogData.trackerId;
+			trackerReachedLogData.branchType = trackerLogData.branchType;
+			trackerReachedLogData.branchId = trackerLogData.branchId;
+			trackerReachedLogData.eventDateTime = eventDateTime - 2000 ;
+			trackerLogData.createdAt = trackerReachedLogData.eventDateTime;
+			trackerLogData.updatedAt = trackerReachedLogData.eventDateTime;
+
+			return trackerLog
+			.findOne({ where: { action: "reached" , trackerId: trackerInstance.uuid } })
+			.then(function(logData){
+				if(!logData){
+					return Promise.all( [ trackerLog.create(trackerReachedLogData) /*, trackerLog.create(trackerLogData)*/ ] );
+				}
+				return Promise.resolve([logData]);
+			})
+			.then(function(results){
+
+				trackerUpdateData = {};
+
+				trackerUpdateData.previousBranchType = trackerInstance.currentBranchType;
+				trackerUpdateData.previousBranchId = trackerInstance.currentBranchId;
+
+				trackerUpdateData.currentBranchType = trackerInstance.destinationBranchType;
+				trackerUpdateData.currentBranchId = trackerInstance.destinationBranchId;
+
+				trackerUpdateData.nextBranchType = trackerInstance.destinationBranchType;
+				trackerUpdateData.nextBranchId = trackerInstance.destinationBranchId;
+
+				return genericTracker.update(trackerUpdateData , { where: { uuid: trackerInstance.uuid } });
+			});
+		})
+		.then(function(results){
+
+			if(orderObject){
+				return itemModel.update( updateData , { where: { orderUuid: orderObject.uuid } });
+			}
+		})
+		.catch(function(err){
+			if(err){
+				console.error(err);
+			}
+			next({ status: "error" , statusCode: 500 , data: null , message: err });
+		});
+
+}
+exports.markDeliverable = markDeliverable;
+
+var markDelivered = function(orderId , user , next){
+
+		// console.log(orderId);
+		// console.log(user);
+		var trackerInstances = [];
+		var orderObject = null;
+		var updateData = {};
+
+		orderModel
+		.findOne({ where: { uuid: orderId }  })
+		.then(function(orderInstance){
+			orderObject = orderInstance;
+
+			updateData.current_hub_type = branchUtils.sanitizeBranchType(orderObject.dataValues.exit_branch_type);
+			updateData.current_hub = orderObject.dataValues.exit_branch;
+
+			updateData.next_hub_type = updateData.current_hub_type;
+			updateData.next_hub = updateData.current_hub;
+
+			updateData.status = "delivered";
+
+			return orderModel.update(updateData , { where: { uuid: orderId } });
+		})
+		.then(function(result){
+			if(result){
+				next({ status: "success" , statusCode: 200 , data: result , message: null });
+			}else{
+				next({ status: "error" , statusCode: 500 , data: null , message: result });
+			}
+			return Promise.resolve(result);
+		})
+		.then(function(){
+				return orderModel.findOne({ where: { uuid: orderId }  });
+		})
+		.then(function(orderInstance){
+
+			orderObject = orderInstance;
+
+			if(orderInstance){
+
+				return orderInstance
+				.getTracker()
+				.then(function(trackerInstance){
+					trackerInstances.push(trackerInstance);
+				})
+				.then(function(){
+
+					return orderInstance
+					.getItems()
+					.map(function(itemInstance){
+						return itemInstance.getTracker();
+					})
+					.map(function(itemTrackerInstance){
+						return itemTrackerInstance;
+					})
+					.then(function(results){
+						for(I = 0 ; I< results.length ; I++){
+							trackerInstances.push(results[I]);
+						}
+						return Promise.resolve(trackerInstances);
+					});
+				});
+			}
+			return Promise.resolve(trackerInstances);
+		})
+		.map(function(trackerInstance){
+
+			var trackerLogData = {};
+
+			trackerLogData.action = "delivered";
+			trackerLogData.trackerId = trackerInstance.uuid;
+			if(trackerInstance.destinationBranchType){
+					trackerLogData.branchType = trackerInstance.destinationBranchType;
+			}
+			trackerLogData.branchId = trackerInstance.destinationBranchId;
+
+			var eventDateTime = moment.utc();
+			trackerLogData.eventDateTime = eventDateTime;
+			trackerLogData.createdAt = eventDateTime;
+			trackerLogData.updatedAt = eventDateTime;
+
+			var trackerReachedLogData = {};
+			trackerReachedLogData.action = "reached";
+			trackerReachedLogData.trackerId = trackerLogData.trackerId;
+			trackerReachedLogData.branchType = trackerLogData.branchType;
+			trackerReachedLogData.branchId = trackerLogData.branchId;
+			trackerReachedLogData.eventDateTime = eventDateTime - 2000 ;
+			trackerLogData.createdAt = trackerReachedLogData.eventDateTime;
+			trackerLogData.updatedAt = trackerReachedLogData.eventDateTime;
+
+			return trackerLog
+			.findOne({ where: { action: "delivered" , trackerId: trackerInstance.uuid } })
+			.then(function(logData){
+				if(!logData){
+					return Promise.all( [trackerLog.create(trackerLogData) ] );
+				}
+				return Promise.resolve([logData]);
+			})
+			.then(function(results){
+				return trackerLog.findOne({ where: { action: "reached" , trackerId: trackerInstance.uuid } })
+			})
+			.then(function(logData){
+				if(!logData){
+					return Promise.all( [ trackerLog.create(trackerReachedLogData) ] );
+				}
+				return Promise.resolve([logData]);
+			})
+			.then(function(results){
+
+				trackerUpdateData = {};
+
+				trackerUpdateData.previousBranchType = trackerInstance.currentBranchType;
+				trackerUpdateData.previousBranchId = trackerInstance.currentBranchId;
+
+				trackerUpdateData.currentBranchType = trackerInstance.destinationBranchType;
+				trackerUpdateData.currentBranchId = trackerInstance.destinationBranchId;
+
+				trackerUpdateData.nextBranchType = trackerInstance.destinationBranchType;
+				trackerUpdateData.nextBranchId = trackerInstance.destinationBranchId;
+
+				return genericTracker.update(trackerUpdateData , { where: { uuid: trackerInstance.uuid } });
+			});
+		})
+		.then(function(results){
+
+			if(orderObject){
+				return itemModel.update( updateData , { where: { orderUuid: orderObject.uuid } });
+			}
+		})
+		.catch(function(err){
+			if(err){
+				console.error(err);
+			}
+			next({ status: "error" , statusCode: 500 , data: null , message: err });
+		});
+
+};
+exports.markDelivered = markDelivered;

@@ -53,7 +53,7 @@ var getTrackerLogs = function(params , next){
     next({ status:"success" , data:results , messgae:null });
   })
   .catch(function(err){
-    console.log(err);
+    console.error(err);
     next({ status:"error" , data:null , message:err });
   });
 };

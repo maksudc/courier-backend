@@ -30,6 +30,9 @@ router.get('/getOrderView/:id', function(req, res){
 	});*/
 
 	orderLogic.orderDetail(req.params.id, function(data){
+		if(data.statusCode){
+			res.status(data.statusCode);
+		}
 		res.send(data);
 	});
 });
@@ -115,6 +118,16 @@ router.post('/deleteDraft', upload.array(), function(req, res){
 	});
 });
 
+router.delete('/:orderUuid' , function(req , res){
+
+	orderLogic.deleteOrder(req.params.orderUuid , function(data){
+		if(data.statusCode){
+			res.status(data.statusCode);
+		}
+		res.send(data);
+	});
+});
+
 router.post('/createByOperator', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 
 		/*When operator creates an order.
@@ -127,12 +140,23 @@ router.post('/createByOperator', passport.authenticate('basic', {session: false}
 				]
 			}
 		*/
-
-		orderLogic.createByOperator(req.body, req.user, function(data){
+	orderLogic.createByOperator(req.body, req.user, function(data){
 			res.send(data);
 	});
 });
 
+router.post("/markDelivered/:orderId" , upload.array() , function(req , res){
+
+	orderLogic.markDelivered(req.params.orderId , req.user , function(data){
+		res.send(data);
+	});
+});
+router.post("/markDeliverable/:orderId" , upload.array() , function(req , res){
+
+	orderLogic.markDeliverable(req.params.orderId , req.user , function(data){
+		res.send(data);
+	});
+});
 
 router.post('/updateStatus', upload.array(), function(req, res){
 

@@ -120,7 +120,7 @@ var createOne = function(data, next){
 
 		itemModel.create(data).catch(function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				next({"status": "error", "data": null, "message": "Cannot create this item, an error occurred"});
 				return;
 			}
@@ -144,7 +144,7 @@ var createMany = function(data, next){
 
 	//final release: items will be created with predefined price
 	var missingIndex = _.findIndex(data, function(item){
-		console.log(item);
+		//console.log(item);
 		return !item.amount || !item.product_name || !item.orderUuid;
 	});
 
@@ -200,7 +200,7 @@ var createMany = function(data, next){
 	})
 	.catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next({"status": "error", "message": "error while creating items"});
 			return;
 		}
@@ -310,7 +310,7 @@ var deleteOne = function(data, next){
 
 		if(err){
 			next({"status": "error", "message": "Error while deleting this entry"});
-			console.log(err);
+			console.error(err);
 			return;
 		}
 
@@ -368,8 +368,9 @@ var addItems = function(data, next){
 			});
 
 			create(data.item_list, function(createdItemList){
-				console.log(createdItemList);
+
 				if(createdItemList){
+					//console.log(createdItemList);
 					next({"status": "success", data: createdItemList.data});
 				}
 				else{
@@ -444,7 +445,7 @@ var updateItemStatus = function(params, next){
 
 		}).catch(function(err){
 			if(err){
-				console.log(err);
+				console.error(err);
 				setStatus(err);
 			}
 		});
@@ -468,6 +469,10 @@ var setItemRunning  = function(params, next){
 	console.log(findParams);
 
 	itemModel.findOne({where: findParams}).then(function(item){
+		if(item == null){
+			console.error("Not found the item.. with params " + JSON.stringify(findParams) );
+			return null;
+		}
 
 		console.log(item);
 		if(item.dataValues.status == 'received' || item.dataValues.status == 'reached'){
@@ -519,7 +524,7 @@ var updateOrderWithBranch = function(id, next){
 						else next(null, true);
 					}).catch(function(err){
 						if(err){
-							console.log(err);
+							console.error(err);
 							next(null, true);
 						}
 					});
@@ -603,7 +608,7 @@ var getRemainingItems = function(orderId, updatedStatus , finalItemStatus , next
 			})
 			.catch(function(err){
 				if(err){
-					console.log(err);
+					console.error(err);
 					next(err);
 				}
 			});
@@ -675,7 +680,7 @@ var getItemCount = function(orderUuid, next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(err);
 		}
 	});

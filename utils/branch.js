@@ -60,6 +60,34 @@ var getBranchInstance = function(branchType , branchId , next){
   return Promise.resolve(null);
 };
 
+var getInclusiveBranchInstance = function(branchType , branchId , next){
+
+  return getBranchInstance(branchType , branchId , null)
+  .then(function(branchItem){
+
+    if(branchItem.branchType == 'sub'){
+
+      return branchItem
+            .getRegionalBranch()
+            .then(function(parentBranchItem){
+                branchItem.regionalBranch = parentBranchItem;
+                return Promise.resolve(branchItem);
+            });
+    }
+    return Promise.resolve(branchItem);
+
+  })
+  .then(function(finalBranchItem){
+
+    if(next){
+      next(finalBranchItem);
+    }
+
+    return Promise.resolve(finalBranchItem);
+  });
+};
+
 exports.sanitizeBranchType = sanitizeBranchType;
 exports.desanitizeBranchType = desanitizeBranchType;
 exports.getBranchInstance = getBranchInstance;
+exports.getInclusiveBranchInstance = getInclusiveBranchInstance;

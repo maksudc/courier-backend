@@ -4,6 +4,7 @@ var Sequelize = DB.Sequelize;
 
 var genericTracker = sequelize.models.genericTracker;
 var order = sequelize.models.order;
+var money = sequelize.models.money;
 var item = sequelize.models.item;
 var trackerLog = sequelize.models.trackerLog;
 
@@ -16,9 +17,7 @@ var RouteLogic = require("../logics/branchRouteLogic");
 
 var handlebars = require("handlebars");
 var fs = require("fs");
-
 var messageUtils = require("../utils/message");
-
 var Promise = require("bluebird");
 
 var _ = require("lodash");
@@ -59,6 +58,7 @@ order.hook("beforeCreate" , function(instance , options , next){
 
   return next();
 });
+
 
 order.hook("afterUpdate" , function(instance , options , next){
 
@@ -117,12 +117,38 @@ order.hook("afterUpdate" , function(instance , options , next){
               messageBranchInstance.regionalBranch = results[1];
             }
             // Send message to the receiver about stocking of his/her order
-            content = fs.readFileSync("./views/message/stocked.handlebars");
-            contentTemplate = handlebars.compile(content.toString());
 
-            messageUtils.sendMessage(updatedInstance.receiver ,  contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }), function(data){
-              console.log(data);
-            });
+            // If the order corresponds to VD , the verification code should be for the corresponding money order instead of the
+            // order object
+            if(updatedInstance.type == "value_delivery"){
+
+              instance
+              .getMoney_order()
+              .then(function(moneyOrderItem){
+
+                if(moneyOrderItem){
+
+                  updatedInstance.sender_verification_code = moneyOrderItem.sender_verification_code;
+
+                  content = fs.readFileSync("./views/message/stocked.handlebars");
+                  contentTemplate = handlebars.compile(content.toString());
+                  messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
+
+                  messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
+                    console.log(data);
+                  });
+                }
+              });
+            }else{
+
+              content = fs.readFileSync("./views/message/stocked.handlebars");
+              contentTemplate = handlebars.compile(content.toString());
+              messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
+
+              messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
+                console.log(data);
+              });
+            }
           });
         }
       });
@@ -161,34 +187,36 @@ order.hook("afterUpdate" , function(instance , options , next){
       })
       .then(function(results){
 
-        // Send mobile message accordingly
-        return branchUtils
-        .getBranchInstance(updatedInstance.exit_branch_type , updatedInstance.exit_branch , null)
-        .then(function(exitBranchInstance){
+          if(updatedInstance.type == "general"){
+            // General delivery
+            // Send message to the sender about delivery of his/her order to the receiver
+            content = fs.readFileSync("./views/message/delivered.handlebars");
+            contentTemplate = handlebars.compile(content.toString());
+            messageBody = contentTemplate({ parcelInstance: updatedInstance });
 
-          if(exitBranchInstance.branchType == "sub"){
-            return Promise.all([ Promise.resolve(exitBranchInstance) , exitBranchInstance.getRegionalBranch() ]);
+            messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
+              console.log(data);
+            });
+
           }else{
-            return Promise.all([ Promise.resolve(null) , Promise.resolve(exitBranchInstance) ]);
-          }
-        })
-        .then(function(results){
 
-          messageBranchInstance = {};
-          messageBranchInstance = results[0];
-          if(!messageBranchInstance){
-            messageBranchInstance = results[1];
-          }else{
-            messageBranchInstance.regionalBranch = results[1];
-          }
-          // Send message to the sender about delivery of his/her order to the receiver
-          content = fs.readFileSync("./views/message/delivered.handlebars");
-          contentTemplate = handlebars.compile(content.toString());
+            // branchUtils
+            // .getInclusiveBranchInstance(updatedInstance.entry_branch_type, updatedInstance.entry_branch , next)
+            // .then(function(entryBranchItem){
+            //
+            //   // VD delivery
+            //   // Since the VD parcel is delivered we need to notify the sender that money order is on its way
+            //   // Send message to the sender about delivery of his/her order to the receiver
+            //   content = fs.readFileSync("./views/message/delivered.handlebars");
+            //   contentTemplate = handlebars.compile(content.toString());
+            //   messageBody = contentTemplate({ parcelInstance: updatedInstance });
+            //
+            //   messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
+            //     console.log(data);
+            //   });
+            // });
 
-          messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }) , function(data){
-            console.log(data);
-          });
-        });
+          }
       });
     }
   }
@@ -303,8 +331,9 @@ order.hook("beforeUpdate" , function(instance , options , next){
             // Send message to the sender about starting of the journey of his/her order to the receiver
             content = fs.readFileSync("./views/message/start.handlebars");
             contentTemplate = handlebars.compile(content.toString());
+            messageBody =  contentTemplate({ parcelInstance: updatedInstance });
 
-            messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance , branchInstance: messageBranchInstance }) , function(data){
+            messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
               console.log(data);
             });
           });
@@ -312,7 +341,7 @@ order.hook("beforeUpdate" , function(instance , options , next){
         }
 
         console.log("Adjusted Route is : ");
-        if(firstRoute !== null){
+        if(firstRoute){
             console.log(firstRoute.branchType + ":" +firstRoute.id);
 
             updatedInstance.next_hub_type = firstRoute.branchType;
@@ -557,9 +586,10 @@ order.hook("beforeUpdate" , function(instance , options , next){
               // So let the sender know of the status
               content = fs.readFileSync( "./views/message/start.handlebars");
               contentTemplate = handlebars.compile(content.toString());
+              messageBody =  contentTemplate({ parcelInstance: updatedInstance });
 
               console.log("starting the message sending to let know the sender of the starting of the journey...");
-              messageUtils.sendMessage(updatedInstance.sender , contentTemplate({ updatedInstance: updatedInstance }) , function(data){
+              messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
                 console.log(data);
               });
             }
@@ -648,6 +678,12 @@ order.hook("beforeUpdate" , function(instance , options , next){
         return next();
       });
 
+    }
+  }else if(snapshotInstance.status == 'stocked'){
+    if(updatedInstance.status == "delivered"){
+
+    }else{
+      updatedInstance.status = snapshotInstance.status;
     }
   }
 

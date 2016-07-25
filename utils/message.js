@@ -37,8 +37,8 @@ var sendMessage = function(toPhoneNum , body , next ){
   var agent = new https.Agent(agentOptions);
   requestParams.agent = agent;
 
-  requestParams.maxAttempts = 7;
-  requestParams.retryDelay = 2000;
+  // requestParams.maxAttempts = 7;
+  // requestParams.retryDelay = 2000;
 
   if(env == "production"){
 
@@ -46,7 +46,7 @@ var sendMessage = function(toPhoneNum , body , next ){
       // callback
 
       if(error){
-        console.log(JSON.stringify(error));
+        console.error(JSON.stringify(error));
         next({ status: "error" , mesage:  JSON.stringify(error) + " " + JSON.stringify(body) });
         return;
       }

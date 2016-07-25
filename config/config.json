@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": "dak_harkara",
-    "password": "6hNWSTUyBPrEv9hP",
-    "database": "dak_harkara",
+    "username": "training_dak",
+    "password": "A98D5QRZNYenjPtD",
+    "database": "training_dak_harkara",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
@@ -18,6 +18,15 @@
     "password": "6hNWSTUyBPrEv9hP",
     "database": "dak_harkara",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "logging": false
+  },
+  "training": {
+    "username": "training_dak",
+    "password": "A98D5QRZNYenjPtD",
+    "database": "training_dak_harkara",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
   }
 }

@@ -14,14 +14,14 @@ var findAll = function(next){
 		regionalBranchModel.findAll({attributes: ['id', 'label', 'position', 'regionId']}).then(function(regionalBranches){
 
 			subBranchModel.findAll({attributes: ['id', 'label', 'position', 'regionalBranchId']}).then(function(subBranches){
-			
+
 				regionalBranchList = {};
 				_.forEach(subBranches, function(singleSubBranch){
 					if(!regionalBranchList[singleSubBranch.dataValues.regionalBranchId])
 						regionalBranchList[singleSubBranch.dataValues.regionalBranchId] = [];
 					regionalBranchList[singleSubBranch.dataValues.regionalBranchId].push(singleSubBranch.dataValues);
 
-				})
+				});
 
 				var tempRegionList = {};
 				_.forEach(regionalBranches, function(singleRegionalBranch){

@@ -684,7 +684,7 @@ var manageShipmentOrders = function(shipmentId , params , next){
     });
   })
   .then(function(results){
-    console.log(results);
+    //console.log(results);
 
     if(results){
       next({ status:"success" , statusCode:HttpStatus.OK , data:null , message:null });
