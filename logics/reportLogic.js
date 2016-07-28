@@ -6,6 +6,7 @@ var orderModel = sequelize.models.order;
 var adminLogic = require('./admin/adminLogic');
 var async = require('async');
 var _ = require('lodash');
+var moment = require('moment-timezone');
 
 var findOrderData = function(params, next){
 	orderModel.findAll({where: params, attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_status']})
@@ -24,9 +25,41 @@ var getOrderPaymentData = function(params, operator, next){
 	var searchParams = {};
 	var receiverAdminList = [];
 	var timeRange = 24*60*60*1000;
+	var filteringDateParam = {};
+	var timeSearchParams = {};
+
+	var currentDate = moment.tz(new Date(), "Asia/Dhaka");
+	var filteringDate = currentDate.toDate();
 
 	if(params.time_range == 'week') timeRange = timeRange * 7;
 	else if(params.time_range == 'month') timeRange = timeRange * 30;
+	else if(params.time_range == "last_day"){
+
+		var startDateTime = currentDate.toDate();
+		var endDateTime = currentDate.toDate();
+
+		startDateTime.setDate(startDateTime.getDate() - 1);
+		startDateTime.setHours(6, 0, 0, 0);
+
+		endDateTime.setHours(6, 0, 0, 0);
+
+		timeSearchParams = {
+			"$and": [
+				{$gt: startDateTime},
+				{$lt: endDateTime}
+			]
+		}
+
+	}
+	else {
+		//Means today
+		if(filteringDate.getHours() < 6){
+			filteringDate.setDate(filteringDate.getDate() - 1);
+		}
+		filteringDate.setHours(6, 0, 0, 0);
+
+		timeSearchParams = {$gt: filteringDate};
+	}
 
 	async.series([function(findSameBranchAdmin){
 
@@ -62,7 +95,7 @@ var getOrderPaymentData = function(params, operator, next){
 				"$and": [
 					{payment_status: 'paid'},
 					{payment_operator: {"$in": receiverAdminList}},
-					{pay_time: {$gt: new Date(new Date() - timeRange)}}
+					{pay_time: timeSearchParams}
 				]
 			},
 			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator']
