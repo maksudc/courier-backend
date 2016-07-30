@@ -44,9 +44,6 @@ var getOrderPaymentData = function(params, operator, next){
 			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
 			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
 
-		console.log(startDateTime);
-		console.log(endDateTime);
-
 		timeSearchParams = {
 			"$and": [
 				{$gt: startDateTime},
@@ -119,7 +116,7 @@ var getOrderPaymentData = function(params, operator, next){
 					{pay_time: timeSearchParams}
 				]
 			},
-			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator']
+			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator', 'pay_time']
 		}).then(function(orderData){
 			next(null, orderData);
 		}).catch(function(err){
@@ -225,9 +222,6 @@ var findMoneyCashIn = function(params, adminData, next){
 			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
 			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
 
-		console.log(startDateTime);
-		console.log(endDateTime);
-
 		timeSearchParams = {
 			"$and": [
 				{$gt: startDateTime},
@@ -277,9 +271,6 @@ var findMoneyCashIn = function(params, adminData, next){
 		}
 	}
 
-	console.log("Search params: " + searchParams);
-	console.log(searchParams);
-
 
 	moneyModel.findAll({
 		where: {
@@ -289,7 +280,7 @@ var findMoneyCashIn = function(params, adminData, next){
 				{payment_time: timeSearchParams}
 			]
 		},
-		attributes: ['id', 'payable', 'amount', 'charge', 'discount', 'sender_mobile', 'receiver_mobile', 'type']
+		attributes: ['id', 'payable', 'amount', 'charge', 'discount', 'sender_mobile', 'receiver_mobile', 'type', 'payment_time']
 	}).then(function(moneyOrderData){
 		next(null, moneyOrderData);
 	}).catch(function(err){
@@ -327,9 +318,6 @@ var findMoneyCashOut = function(params, adminData, next){
 			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T" 
 			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
 			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
-
-		console.log(startDateTime);
-		console.log(endDateTime);
 
 		timeSearchParams = {
 			"$and": [
@@ -391,7 +379,7 @@ var findMoneyCashOut = function(params, adminData, next){
 				{delivery_time: timeSearchParams}
 			]
 		},
-		attributes: ['id', 'amount', 'charge', 'discount', 'payable', 'sender_mobile', 'receiver_mobile', 'type']
+		attributes: ['id', 'amount', 'charge', 'discount', 'payable', 'sender_mobile', 'receiver_mobile', 'type', 'delivery_time']
 	}).then(function(moneyOrderData){
 		next(null, moneyOrderData);
 	}).catch(function(err){
