@@ -307,36 +307,36 @@ order.hook("beforeUpdate" , function(instance , options , next){
           firstRoute = routes[1];
 
           // started off directly the regional branch , so send the message since it is running
-          console.log("starting the message sending to let know the sender of the starting of the journey...");
-
-          branchUtils
-          .getBranchInstance( updatedInstance.exit_branch_type , updatedInstance.exit_branch , null)
-          .then(function(exitBranchInstance){
-
-            if(exitBranchInstance.branchType == "sub"){
-              return Promise.all([ Promise.resolve(exitBranchInstance) , exitBranchInstance.getRegionalBranch() ]);
-            }else{
-              return Promise.all([ Promise.resolve(null) , Promise.resolve(exitBranchInstance) ]);
-            }
-          })
-          .then(function(results){
-
-            messageBranchInstance = {};
-            messageBranchInstance = results[0];
-            if(!messageBranchInstance){
-              messageBranchInstance = results[1];
-            }else{
-              messageBranchInstance.regionalBranch = results[1];
-            }
-            // Send message to the sender about starting of the journey of his/her order to the receiver
-            content = fs.readFileSync("./views/message/start.handlebars");
-            contentTemplate = handlebars.compile(content.toString());
-            messageBody =  contentTemplate({ parcelInstance: updatedInstance });
-
-            messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
-              console.log(data);
-            });
-          });
+          // console.log("starting the message sending to let know the sender of the starting of the journey...");
+          //
+          // branchUtils
+          // .getBranchInstance( updatedInstance.exit_branch_type , updatedInstance.exit_branch , null)
+          // .then(function(exitBranchInstance){
+          //
+          //   if(exitBranchInstance.branchType == "sub"){
+          //     return Promise.all([ Promise.resolve(exitBranchInstance) , exitBranchInstance.getRegionalBranch() ]);
+          //   }else{
+          //     return Promise.all([ Promise.resolve(null) , Promise.resolve(exitBranchInstance) ]);
+          //   }
+          // })
+          // .then(function(results){
+          //
+          //   messageBranchInstance = {};
+          //   messageBranchInstance = results[0];
+          //   if(!messageBranchInstance){
+          //     messageBranchInstance = results[1];
+          //   }else{
+          //     messageBranchInstance.regionalBranch = results[1];
+          //   }
+          //   // Send message to the sender about starting of the journey of his/her order to the receiver
+          //   content = fs.readFileSync("./views/message/start.handlebars");
+          //   contentTemplate = handlebars.compile(content.toString());
+          //   messageBody =  contentTemplate({ parcelInstance: updatedInstance });
+          //
+          //   messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
+          //     console.log(data);
+          //   });
+          // });
 
         }
 
@@ -584,14 +584,15 @@ order.hook("beforeUpdate" , function(instance , options , next){
             if(nextRouteIndex==1){
               // just started off the regional branch
               // So let the sender know of the status
-              content = fs.readFileSync( "./views/message/start.handlebars");
-              contentTemplate = handlebars.compile(content.toString());
-              messageBody =  contentTemplate({ parcelInstance: updatedInstance });
 
-              console.log("starting the message sending to let know the sender of the starting of the journey...");
-              messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
-                console.log(data);
-              });
+              // content = fs.readFileSync( "./views/message/start.handlebars");
+              // contentTemplate = handlebars.compile(content.toString());
+              // messageBody =  contentTemplate({ parcelInstance: updatedInstance });
+              //
+              // console.log("starting the message sending to let know the sender of the starting of the journey...");
+              // messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
+              //   console.log(data);
+              // });
             }
           }
         }
