@@ -24,15 +24,36 @@ var getOrderPaymentData = function(params, operator, next){
 
 	var searchParams = {};
 	var receiverAdminList = [];
-	var timeRange = 24*60*60*1000;
 	var filteringDateParam = {};
 	var timeSearchParams = {};
 
 	var currentDate = moment.tz(new Date(), "Asia/Dhaka");
 	var filteringDate = currentDate.toDate();
 
-	if(params.time_range == 'week') timeRange = timeRange * 7;
-	else if(params.time_range == 'month') timeRange = timeRange * 30;
+	if(params.time_range == 'custom_range') {
+		var startDateTimeObj = JSON.parse(params.startDate), endDateTimeObj = JSON.parse(params.endDate);
+
+		var startDateTime = moment.tz(startDateTimeObj.year + "-" 
+			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-" 
+			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T" 
+			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":" 
+			+ (startDateTimeObj.minute < 10? "0" : "") + startDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
+		var endDateTime = moment.tz(endDateTimeObj.year + "-" 
+			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-" 
+			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T" 
+			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
+			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
+
+		console.log(startDateTime);
+		console.log(endDateTime);
+
+		timeSearchParams = {
+			"$and": [
+				{$gt: startDateTime},
+				{$lt: endDateTime}
+			]
+		}
+	}
 	else if(params.time_range == "last_day"){
 
 		var startDateTime = currentDate.toDate();
@@ -184,7 +205,63 @@ exports.getReport=getReport;
 var findMoneyCashIn = function(params, adminData, next){
 
 	var searchParams = {};
-	var timeRange = 24*60*60*1000;
+	var filteringDateParam = {};
+	var timeSearchParams = {};
+
+	var currentDate = moment.tz(new Date(), "Asia/Dhaka");
+	var filteringDate = currentDate.toDate();
+
+	if(params.time_range == 'custom_range') {
+		var startDateTimeObj = JSON.parse(params.startDate), endDateTimeObj = JSON.parse(params.endDate);
+
+		var startDateTime = moment.tz(startDateTimeObj.year + "-" 
+			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-" 
+			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T" 
+			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":" 
+			+ (startDateTimeObj.minute < 10? "0" : "") + startDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
+		var endDateTime = moment.tz(endDateTimeObj.year + "-" 
+			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-" 
+			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T" 
+			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
+			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
+
+		console.log(startDateTime);
+		console.log(endDateTime);
+
+		timeSearchParams = {
+			"$and": [
+				{$gt: startDateTime},
+				{$lt: endDateTime}
+			]
+		}
+	}
+	else if(params.time_range == "last_day"){
+
+		var startDateTime = currentDate.toDate();
+		var endDateTime = currentDate.toDate();
+
+		startDateTime.setDate(startDateTime.getDate() - 1);
+		startDateTime.setHours(6, 0, 0, 0);
+
+		endDateTime.setHours(6, 0, 0, 0);
+
+		timeSearchParams = {
+			"$and": [
+				{$gt: startDateTime},
+				{$lt: endDateTime}
+			]
+		}
+
+	}
+	else {
+		//Means today
+		if(filteringDate.getHours() < 6){
+			filteringDate.setDate(filteringDate.getDate() - 1);
+		}
+		filteringDate.setHours(6, 0, 0, 0);
+
+		timeSearchParams = {$gt: filteringDate};
+	}
 
 	if(params.regional_branch && params.regional_branch != '')
 		searchParams["source_regional_branch_id"] = parseInt(params.regional_branch);
@@ -200,8 +277,8 @@ var findMoneyCashIn = function(params, adminData, next){
 		}
 	}
 
-	if(params.time_range == 'week') timeRange = timeRange * 7;
-	else if(params.time_range == 'month') timeRange = timeRange * 30;
+	console.log("Search params: " + searchParams);
+	console.log(searchParams);
 
 
 	moneyModel.findAll({
@@ -209,7 +286,7 @@ var findMoneyCashIn = function(params, adminData, next){
 			"$and": [
 				{status: {"$in": ['deliverable', 'delivered']}},
 				searchParams,
-				{payment_time: {$gt: new Date(new Date() - timeRange)}}
+				{payment_time: timeSearchParams}
 			]
 		},
 		attributes: ['id', 'payable', 'amount', 'charge', 'discount', 'sender_mobile', 'receiver_mobile', 'type']
@@ -231,7 +308,63 @@ exports.findMoneyCashIn = findMoneyCashIn;
 var findMoneyCashOut = function(params, adminData, next){
 
 	var searchParams = {};
-	var timeRange = 24*60*60*1000;
+	var filteringDateParam = {};
+	var timeSearchParams = {};
+
+	var currentDate = moment.tz(new Date(), "Asia/Dhaka");
+	var filteringDate = currentDate.toDate();
+
+	if(params.time_range == 'custom_range') {
+		var startDateTimeObj = JSON.parse(params.startDate), endDateTimeObj = JSON.parse(params.endDate);
+
+		var startDateTime = moment.tz(startDateTimeObj.year + "-" 
+			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-" 
+			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T" 
+			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":" 
+			+ (startDateTimeObj.minute < 10? "0" : "") + startDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
+		var endDateTime = moment.tz(endDateTimeObj.year + "-" 
+			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-" 
+			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T" 
+			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
+			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
+
+		console.log(startDateTime);
+		console.log(endDateTime);
+
+		timeSearchParams = {
+			"$and": [
+				{$gt: startDateTime},
+				{$lt: endDateTime}
+			]
+		}
+	}
+	else if(params.time_range == "last_day"){
+
+		var startDateTime = currentDate.toDate();
+		var endDateTime = currentDate.toDate();
+
+		startDateTime.setDate(startDateTime.getDate() - 1);
+		startDateTime.setHours(6, 0, 0, 0);
+
+		endDateTime.setHours(6, 0, 0, 0);
+
+		timeSearchParams = {
+			"$and": [
+				{$gt: startDateTime},
+				{$lt: endDateTime}
+			]
+		}
+
+	}
+	else {
+		//Means today
+		if(filteringDate.getHours() < 6){
+			filteringDate.setDate(filteringDate.getDate() - 1);
+		}
+		filteringDate.setHours(6, 0, 0, 0);
+
+		timeSearchParams = {$gt: filteringDate};
+	}
 
 	if(params.regional_branch && params.regional_branch != '')
 		searchParams["regional_branch_id"] = parseInt(params.regional_branch);
@@ -247,8 +380,7 @@ var findMoneyCashOut = function(params, adminData, next){
 		}
 	}
 
-	if(params.time_range == 'week') timeRange = timeRange * 7;
-	else if(params.time_range == 'month') timeRange = timeRange * 30;
+	console.log("search params: " + searchParams);
 
 
 	moneyModel.findAll({
@@ -256,7 +388,7 @@ var findMoneyCashOut = function(params, adminData, next){
 			"$and": [
 				{status: 'delivered'},
 				searchParams,
-				{delivery_time: {$gt: new Date(new Date() - timeRange)}}
+				{delivery_time: timeSearchParams}
 			]
 		},
 		attributes: ['id', 'amount', 'charge', 'discount', 'payable', 'sender_mobile', 'receiver_mobile', 'type']
