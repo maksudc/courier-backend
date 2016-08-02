@@ -69,6 +69,14 @@ exports.findOne = findOne;
 
 var findAllOrders = function(params, next){
 
+	if(params.range == 'week'){
+		var currentDate = new Date();
+		currentDate.setDate(currentDate.getDate() - 7);
+		params["createdAt"] = {$gt: currentDate};
+	}
+
+	delete params["range"];
+
 	orderModel.findAll({where: params}).then(function(orderList){
 		if(orderList){
 
@@ -197,47 +205,6 @@ var findAllOrders = function(params, next){
 			        next({"status": "success", data: orderList});
 			    }
 			);
-
-
-			/*
-			_.forEach(orderList, function(singleOrder){
-				if(idList.indexOf(parseInt(singleOrder.entry_branch)) < 0 && !isNaN(parseInt(singleOrder.entry_branch)))
-					idList.push({id: parseInt(singleOrder.entry_branch), type: singleOrder.entry_branch_type});
-				if(idList.indexOf(parseInt(singleOrder.exit_branch)) < 0 && !isNaN(parseInt(singleOrder.exit_branch)))
-					idList.push({id: parseInt(singleOrder.exit_branch), type: singleOrder.exit_branch_type});
-			});
-
-			var branchLabels = {};
-
-			subBranchLogic.findBranchesByIdList(idList, function(branchList){
-
-				if(branchList.status == 'error'){
-					next({"status": "error", "message": "Error while reading branch names"});
-					return;
-				}
-
-				_.forEach(branchList.data, function(singleBranch){
-					singleBranch.dataValues.regionalBranch = singleBranch.regionalBranch;
-					branchLabels[singleBranch.dataValues.id] = singleBranch.dataValues;
-				});
-
-				_.forEach(orderList, function(singleOrder){
-					if(branchLabels[singleOrder.dataValues.entry_branch])
-					{
-						singleOrder.dataValues.entry_branch = branchLabels[singleOrder.dataValues.entry_branch];
-						singleOrder.dataValues["entry_branch_id"] = singleOrder.dataValues.entry_branch.id;
-					}
-					if(branchLabels[singleOrder.dataValues.exit_branch])
-					{
-						singleOrder.dataValues.exit_branch = branchLabels[singleOrder.dataValues.exit_branch];
-						singleOrder.dataValues["exit_branch_id"] = singleOrder.dataValues.exit_branch.id;
-					}
-
-				});
-
-				next({"status": "success", data: orderList});
-			});
-			*/
 
 
 		}
