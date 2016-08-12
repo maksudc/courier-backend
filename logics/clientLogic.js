@@ -149,3 +149,47 @@ var findManyByMobile = function(mobile, next){
 };
 
 exports.findManyByMobile = findManyByMobile;
+
+var updateClient = function(params, next){
+
+	console.log(params);
+	clientModel.update({
+		mobile: params.new_mobile_no,
+		national_id: params.nid,
+		address: params.address,
+		full_name: params.full_name
+	}, {where: {mobile: params.mobile}}).then(function(updatedClient){
+		console.log(updatedClient);
+		params["mobile"] = params["new_mobile_no"];
+		if(params["new_mobile_no"]) delete params["new_mobile_no"];
+		next(null, params);
+	}).catch(function(err){
+		if(err){
+			console.log(err);
+			next(err);
+		}
+	});
+};
+
+exports.updateClient = updateClient;
+
+
+var deleteClient = function(params, next){
+
+	console.log(params);
+	clientModel.findOne({where: {mobile: params.mobile}}).then(function(client){
+		console.log(client);
+		client.destroy();
+		next(null);
+
+	}).catch(function(err){
+
+    	console.error(err);
+
+		if(err){
+			return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred" , "err": err});
+		}
+	});
+};
+
+exports.deleteClient = deleteClient;

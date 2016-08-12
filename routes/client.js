@@ -17,6 +17,20 @@ router.get('/getAll', function(req, res){
 	});
 });
 
+router.put('/update', upload.array(), function(req, res){
+	clientLogic.updateClient(req.body, function(err, client){
+		if(err) res.send({status: "error", message: err});
+		else res.send({"status": "success", client: client});
+	});
+});
+
+router.delete('/delete', upload.array(), function(req, res){
+	clientLogic.deleteClient(req.body, function(err){
+		if(err) res.send({status: "error", message: err});
+		else res.send({"status": "success"});
+	});
+});
+
 router.get('/get/:mobile', function(req, res){
 	if(!req.params.mobile) res.send({"status":"error", "message": "Mobile number requried"});
 	else{
