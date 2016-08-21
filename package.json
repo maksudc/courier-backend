@@ -18,10 +18,12 @@
     "express-session": "^1.13.0",
     "google-libphonenumber": "^1.0.17",
     "handlebars": "^4.0.5",
+    "http": "0.0.0",
     "http-status-codes": "^1.0.6",
     "jade": "~1.11.0",
     "lodash": "^4.13.1",
     "moment": "^2.12.0",
+    "moment-timezone": "~0.5.5",
     "morgan": "~1.6.1",
     "multer": "^1.1.0",
     "mysql": "^2.10.2",
@@ -34,8 +36,7 @@
     "requestretry": "^1.6.0",
     "sequelize": "^3.19.3",
     "sequelize-cli": "^2.3.1",
-    "serve-favicon": "~2.3.0",
-    "moment-timezone": "~0.5.5"
+    "serve-favicon": "~2.3.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
