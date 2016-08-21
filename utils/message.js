@@ -5,6 +5,7 @@ var request = require("request");
 var HttpStatus = require("http-status-codes");
 var phoneUtil = require("./phone");
 var https = require("https");
+var http = require("http");
 var requestRetry = require("requestretry");
 var HttpStatus = require("http-status-codes");
 //
@@ -24,6 +25,17 @@ var sendMessage = function(toPhoneNum , body , next ){
 
   // https://www.twilio.com/docs/api/rest/sending-messages
 
+  var agentOptions = {
+    rejectUnauthorized: false
+  };
+
+  var agent = null;
+  if(messageConfig.getProtocol()=="https"){
+    agent = new https.Agent(agentOptions);
+  }else{
+    agent = new http.Agent(agentOptions);
+  }
+
   var receiverPhoneNumber = phoneUtil.standardizeNumber(toPhoneNum);
   var URL = messageConfig.getGatewayUrl();
   var requestParams = messageConfig.prepareRequest({
@@ -31,12 +43,9 @@ var sendMessage = function(toPhoneNum , body , next ){
                          body: body
                       });
 
-  var agentOptions = {
-    rejectUnauthorized: false
-  };
-  var agent = new https.Agent(agentOptions);
-  requestParams.agent = agent;
+  console.log(requestParams);
 
+  requestParams.agent = agent;
   // requestParams.maxAttempts = 7;
   // requestParams.retryDelay = 2000;
 
