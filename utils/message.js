@@ -43,8 +43,6 @@ var sendMessage = function(toPhoneNum , body , next ){
                          body: body
                       });
 
-  console.log(requestParams);
-
   requestParams.agent = agent;
   // requestParams.maxAttempts = 7;
   // requestParams.retryDelay = 2000;
