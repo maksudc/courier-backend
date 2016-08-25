@@ -15,7 +15,13 @@ module.exports = function(sequelize , DataTypes){
 			defaultValue: 'operator',
 			allowNull: false
 		},
-		mobile: {type: DataTypes.STRING, allowNull: false, unique: true}
+		state: {
+	      type: DataTypes.ENUM('active', 'blocked'), 
+	      defaultValue: 'active',
+	      allowNull: false
+	    },
+	    mobile: {type: DataTypes.STRING, allowNull: false, unique: true}
+
 	} , {
 
 		classMethods: {

@@ -54,6 +54,7 @@ var getAdminToChage = function(email, next){
         where: {email: email}}
     ).then(function(admin){
         if(admin){
+            console.log(admin.dataValues);
             next(null, {
                 full_name: admin.dataValues.full_name || '',
                 regional_branch_id: admin.dataValues.regional_branch_id,
@@ -63,7 +64,8 @@ var getAdminToChage = function(email, next){
                 national_id: admin.dataValues.national_id || '',
                 address: admin.dataValues.address || '',
                 username: admin.dataValues.username || '',
-                role: admin.dataValues.role
+                role: admin.dataValues.role,
+                state: admin.dataValues.state
             });
         }
         else{
@@ -234,6 +236,7 @@ var updateAdmin = function(updateData, next){
                 if(updateData.mobile) admin.mobile = updateData.mobile;
                 if(updateData.username) admin.username = updateData.username;
                 if(updateData.address) admin.address = updateData.address;
+                if(updateData.state) admin.state = updateData.state;
 
                 if(updateData.role) admin.role = updateData.role;
 
