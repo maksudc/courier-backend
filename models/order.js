@@ -55,6 +55,7 @@ module.exports = function(sequelize, DataTypes) {
 		payment_status: {type: DataTypes.ENUM('unpaid', 'paid'), defaultValue: 'unpaid'}, //status of payment
 		vat: {type: DataTypes.BOOLEAN, defaultValue: false},
 		vat_amount: {type: DataTypes.INTEGER, defaultValue: 15},
+		discount : { type: DataTypes.FLOAT , defaultValue: 0 },
 
 		receiver_operator: {type: DataTypes.STRING}, //operator who received this product
 		delivery_operator: {type: DataTypes.STRING}, //operator who delivered this product. In 2nd release, operator id

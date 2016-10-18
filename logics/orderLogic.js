@@ -863,7 +863,6 @@ var createByOperator = function(postData, operator, next){
 			return;
 		}
 
-
 		var draftOrder = {
 			sender: postData.sender,
 			receiver: postData.receiver,
@@ -871,9 +870,12 @@ var createByOperator = function(postData, operator, next){
 			exit_branch: postData["exit_branch_id"],
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"],
-			payment: parseInt(postData["total_price"])
+			payment: parseInt(postData["total_price"]),
 		};
 
+		if(postData.order_discount && parseFloat(postData.order_discount)){
+			draftOrder["discount"] = postData.order_discount;
+		}
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
 		if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
 		if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
@@ -883,8 +885,6 @@ var createByOperator = function(postData, operator, next){
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
 		if(postData.type == 'vd') draftOrder["type"] = 'value_delivery';
 		if(postData.receiver_name) draftOrder["receiver_name"] = postData.receiver_name;
-
-
 
 		orderModel.create(draftOrder).then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
