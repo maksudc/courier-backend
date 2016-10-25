@@ -962,10 +962,6 @@ var createByOperator = function(postData, operator, next){
 					  price: item["price"],
 					  product_name: item["product_name"],
 					  unit: item["unit"],
-					  // length: item["length"],
-					  // width: item["width"],
-					  // height: item["height"],
-					  // weight: item["weight"],
 					  bar_code: barCode + itemCount.toString(),
 					  orderUuid: order.uuid
 					};
