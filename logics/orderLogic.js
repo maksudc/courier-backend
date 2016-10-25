@@ -962,12 +962,25 @@ var createByOperator = function(postData, operator, next){
 					  price: item["price"],
 					  product_name: item["product_name"],
 					  unit: item["unit"],
-					  length: item["length"],
-					  width: item["width"],
-					  height: item["height"],
-					  weight: item["weight"],
+					  // length: item["length"],
+					  // width: item["width"],
+					  // height: item["height"],
+					  // weight: item["weight"],
 					  bar_code: barCode + itemCount.toString(),
 					  orderUuid: order.uuid
+					};
+
+					if(item["length"]){
+						singleItem["length"] = item["length"];
+					}
+					if(item["width"]){
+						singleItem["width"] = item["width"];
+					}
+					if(item["height"]){
+						singleItem["height"] = item["height"];
+					}
+					if(item["weight"]){
+						singleItem["weight"] = item["weight"];
 					}
 
 					itemCount++;
