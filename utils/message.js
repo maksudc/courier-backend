@@ -47,7 +47,7 @@ var sendMessage = function(toPhoneNum , body , next ){
   // requestParams.maxAttempts = 7;
   // requestParams.retryDelay = 2000;
 
-  if(env == "production"){
+  if(env == "production" || env=="training"){
 
     requestRetry(requestParams , function(error , response , body){
       // callback

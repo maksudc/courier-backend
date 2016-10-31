@@ -37,3 +37,4 @@ jspm_packages
 # IDE related files
 app.sublime-workspace
 config.development.js
+local_config.js

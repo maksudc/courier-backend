@@ -18,6 +18,12 @@ var config = {
     "PASSWORD": "Rta7vvMdZmDNRRHY",
     "PHONE_NUM": "+8803598182210",
     "From": "+8803598182210"
+  },
+  'training':{
+   "USER_ID": "omex",
+   "PASSWORD": "Rta7vvMdZmDNRRHY",
+   "PHONE_NUM": "+8803598182210",
+   "From": "+8803598182210"
   }
 };
 

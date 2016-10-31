@@ -15,7 +15,13 @@ var config = {
     "USER_ID": "omexcourier",
     "PASSWORD": "Rta7vvMd",
     "BRAND_NAME": "OmexCourier"
+  },
+  'training':{
+   "USER_ID": "omexcourier",
+   "PASSWORD": "Rta7vvMd",
+   "BRAND_NAME": "OmexCourier"
   }
+
 };
 
 var BACKEND_NAME = "sslwireless";
