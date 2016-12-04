@@ -953,30 +953,34 @@ var createByOperator = function(postData, operator, next){
 
 		_.forEach(postData.item_list, function(item){
 
-			if(parseInt(item["amount"])>1){
+			if(parseInt(item["amount"])>0){
 				var length = parseInt(item["amount"]);
 
 				for(var i=0; i<length; i++) {
-					var singleItem = {
+					singleItem = {
 					  amount: 1,
 					  price: item["price"],
 					  product_name: item["product_name"],
 					  unit: item["unit"],
 					  bar_code: barCode + itemCount.toString(),
-					  orderUuid: order.uuid
+					  orderUuid: order.uuid,
+						length: 0,
+						width: 0,
+						height: 0,
+						weight: 0
 					};
 
-					if(item["length"]){
-						singleItem["length"] = item["length"];
+					if(item["length"] && parseInt(item["length"])){
+						singleItem["length"] = parseInt(item["length"]);
 					}
-					if(item["width"]){
-						singleItem["width"] = item["width"];
+					if(item["width"] && parseInt(item["width"])){
+						singleItem["width"] = parseInt(item["width"]);
 					}
-					if(item["height"]){
-						singleItem["height"] = item["height"];
+					if(item["height"] && parseInt(item["height"])){
+						singleItem["height"] = parseInt(item["height"]);
 					}
-					if(item["weight"]){
-						singleItem["weight"] = item["weight"];
+					if(item["weight"] && parseFloat(item["weight"])){
+						singleItem["weight"] = parseFloat(item["weight"]);
 					}
 
 					itemCount++;
@@ -984,12 +988,12 @@ var createByOperator = function(postData, operator, next){
 				}
 
 			}
-			else{
-				item["bar_code"] = barCode + itemCount.toString();
-				itemCount++;
-				item["orderUuid"] = order.uuid;
-				seperateItems.push(item);
-			}
+			// else{
+			// 	item["bar_code"] = barCode + itemCount.toString();
+			// 	itemCount++;
+			// 	item["orderUuid"] = order.uuid;
+			// 	seperateItems.push(item);
+			// }
 		});
 
 		delete postData["item_list"];
