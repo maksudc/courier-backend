@@ -50,11 +50,13 @@ module.exports = function(sequelize, DataTypes) {
 		next_hub_type: {type: DataTypes.ENUM('regional', 'sub')},
 		next_hub: {type: DataTypes.STRING}, //Next destination of this product, In 2nd release, branch id
 
-
 		payment: {type: DataTypes.FLOAT}, //cost of the order
 		payment_status: {type: DataTypes.ENUM('unpaid', 'paid'), defaultValue: 'unpaid'}, //status of payment
 
-		payment_tag: { type: DataTypes.ENUM('booking' , 'delivery') , allowNull: true }
+		payment_tag: { type: DataTypes.ENUM('booking' , 'delivery') , allowNull: true },
+
+		payment_hub_type: {type: DataTypes.ENUM('regional', 'sub') , allowNull: true},
+		payment_hub: {type: DataTypes.STRING , allowNull:true},
 
 		vat: {type: DataTypes.BOOLEAN, defaultValue: false},
 		vat_amount: {type: DataTypes.INTEGER, defaultValue: 15},
