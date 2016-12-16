@@ -53,6 +53,9 @@ module.exports = function(sequelize, DataTypes) {
 
 		payment: {type: DataTypes.FLOAT}, //cost of the order
 		payment_status: {type: DataTypes.ENUM('unpaid', 'paid'), defaultValue: 'unpaid'}, //status of payment
+
+		payment_tag: { type: DataTypes.ENUM('booking' , 'delivery') , allowNull: true }
+
 		vat: {type: DataTypes.BOOLEAN, defaultValue: false},
 		vat_amount: {type: DataTypes.INTEGER, defaultValue: 15},
 		discount : { type: DataTypes.FLOAT , defaultValue: 0 },
