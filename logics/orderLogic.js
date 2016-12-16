@@ -713,6 +713,15 @@ var receivePayment = function(paymentData, operator, next){
 				orderData.data.pay_time = new Date();
 				orderData.data.payment_operator = operator.email;
 
+				orderData.data.payment_hub = paymentData.payment_branch_id;
+				orderData.data.payment_hub_type = paymentData.payment_branch_type;
+
+				if( orderData.data.entry_branch == paymentData.payment_branch_id && branchUtils.sanitizeBranchType(orderData.data.entry_branch_type) == paymentData.payment_branch_type ){
+							orderData.data.payment_tag = "booking";
+				}else if(orderData.data.exit_branch == paymentData.payment_branch_id && branchUtils.sanitizeBranchType(orderData.data.exit_branch_type) == paymentData.payment_branch_type){
+							orderData.data.payment_tag = "delivery";
+				}
+
 				orderData.data.save().then(function(newOrderData){
 
 					if(newOrderData) next({"status": "success", "data": newOrderData.dataValues});
@@ -729,7 +738,7 @@ var receivePayment = function(paymentData, operator, next){
 			}],
 			function(err){
 				if(err){
-					console.log(err);
+					console.error(err);
 					next(err);
 				}
 			});
