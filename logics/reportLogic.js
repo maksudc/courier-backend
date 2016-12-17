@@ -117,7 +117,7 @@ var getOrderPaymentData = function(params, operator, next){
 					{pay_time: timeSearchParams}
 				]
 			},
-			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator', 'pay_time' , 'payment_hub_type' , 'payment_hub']
+			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator', 'pay_time' , 'payment_hub_type' , 'payment_hub','payment_tag']
 		}).map(function(orderData){
 			return branchUtils
 						.getInclusiveBranchInstance(orderData.payment_hub_type , orderData.payment_hub , null)
