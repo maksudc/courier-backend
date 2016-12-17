@@ -87,7 +87,21 @@ var getInclusiveBranchInstance = function(branchType , branchId , next){
   });
 };
 
+var prepareLabel = function(aBranchData){
+  data = "";
+
+  if(!aBranchData) return null;
+  if(!aBranchData.label) return null;
+
+  data = aBranchData.label;
+  if(aBranchData.regionalBranch && aBranchData.regionalBranch.label){
+    data = data + "," +aBranchData.regionalBranch.label;
+  }
+  return data;
+};
+
 exports.sanitizeBranchType = sanitizeBranchType;
 exports.desanitizeBranchType = desanitizeBranchType;
 exports.getBranchInstance = getBranchInstance;
 exports.getInclusiveBranchInstance = getInclusiveBranchInstance;
+exports.prepareLabel = prepareLabel;

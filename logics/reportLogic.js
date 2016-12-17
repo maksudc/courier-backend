@@ -4,6 +4,7 @@ var Sequelize = DB.Sequelize;
 var moneyModel = sequelize.models.money;
 var orderModel = sequelize.models.order;
 var adminLogic = require('./admin/adminLogic');
+var branchUtils = require('../utils/branch');
 var async = require('async');
 var _ = require('lodash');
 var moment = require('moment-timezone');
@@ -33,15 +34,15 @@ var getOrderPaymentData = function(params, operator, next){
 	if(params.time_range == 'custom_range') {
 		var startDateTimeObj = JSON.parse(params.startDate), endDateTimeObj = JSON.parse(params.endDate);
 
-		var startDateTime = moment.tz(startDateTimeObj.year + "-" 
-			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-" 
-			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T" 
-			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":" 
+		var startDateTime = moment.tz(startDateTimeObj.year + "-"
+			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-"
+			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T"
+			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":"
 			+ (startDateTimeObj.minute < 10? "0" : "") + startDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
-		var endDateTime = moment.tz(endDateTimeObj.year + "-" 
-			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-" 
-			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T" 
-			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
+		var endDateTime = moment.tz(endDateTimeObj.year + "-"
+			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-"
+			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T"
+			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":"
 			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
 
 		timeSearchParams = {
@@ -116,7 +117,14 @@ var getOrderPaymentData = function(params, operator, next){
 					{pay_time: timeSearchParams}
 				]
 			},
-			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator', 'pay_time']
+			attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_operator', 'pay_time' , 'payment_hub_type' , 'payment_hub']
+		}).map(function(orderData){
+			return branchUtils
+						.getInclusiveBranchInstance(orderData.payment_hub_type , orderData.payment_hub , null)
+						.then(function(aBranchData){
+								orderData.dataValues.payment_branch = branchUtils.prepareLabel(aBranchData);
+								return orderData;
+						});
 		}).then(function(orderData){
 			next(null, orderData);
 		}).catch(function(err){
@@ -211,15 +219,15 @@ var findMoneyCashIn = function(params, adminData, next){
 	if(params.time_range == 'custom_range') {
 		var startDateTimeObj = JSON.parse(params.startDate), endDateTimeObj = JSON.parse(params.endDate);
 
-		var startDateTime = moment.tz(startDateTimeObj.year + "-" 
-			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-" 
-			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T" 
-			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":" 
+		var startDateTime = moment.tz(startDateTimeObj.year + "-"
+			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-"
+			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T"
+			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":"
 			+ (startDateTimeObj.minute < 10? "0" : "") + startDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
-		var endDateTime = moment.tz(endDateTimeObj.year + "-" 
-			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-" 
-			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T" 
-			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
+		var endDateTime = moment.tz(endDateTimeObj.year + "-"
+			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-"
+			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T"
+			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":"
 			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
 
 		timeSearchParams = {
@@ -308,15 +316,15 @@ var findMoneyCashOut = function(params, adminData, next){
 	if(params.time_range == 'custom_range') {
 		var startDateTimeObj = JSON.parse(params.startDate), endDateTimeObj = JSON.parse(params.endDate);
 
-		var startDateTime = moment.tz(startDateTimeObj.year + "-" 
-			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-" 
-			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T" 
-			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":" 
+		var startDateTime = moment.tz(startDateTimeObj.year + "-"
+			+ (startDateTimeObj.month < 10? "0" : "") + startDateTimeObj.month + "-"
+			+ (startDateTimeObj.day < 10? "0" : "") + startDateTimeObj.day + "T"
+			+ (startDateTimeObj.hour < 10? "0" : "") + startDateTimeObj.hour + ":"
 			+ (startDateTimeObj.minute < 10? "0" : "") + startDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
-		var endDateTime = moment.tz(endDateTimeObj.year + "-" 
-			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-" 
-			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T" 
-			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":" 
+		var endDateTime = moment.tz(endDateTimeObj.year + "-"
+			+ (endDateTimeObj.month < 10? "0" : "") + endDateTimeObj.month + "-"
+			+ (endDateTimeObj.day < 10? "0" : "") + endDateTimeObj.day + "T"
+			+ (endDateTimeObj.hour < 10? "0" : "") + endDateTimeObj.hour + ":"
 			+ (endDateTimeObj.minute < 10? "0" : "") + endDateTimeObj.minute + ":00.000", "Asia/Dhaka").toDate();
 
 		timeSearchParams = {
