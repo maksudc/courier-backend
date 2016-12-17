@@ -64,9 +64,7 @@ var getInclusiveBranchInstance = function(branchType , branchId , next){
 
   return getBranchInstance(branchType , branchId , null)
   .then(function(branchItem){
-
-    if(branchItem.branchType == 'sub'){
-
+    if( branchItem && branchItem.branchType == 'sub'){
       return branchItem
             .getRegionalBranch()
             .then(function(parentBranchItem){
