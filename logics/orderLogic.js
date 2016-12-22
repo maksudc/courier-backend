@@ -947,7 +947,7 @@ var createByOperator = function(postData, operator, next){
 					createMoneyOrder("No money order created");
 				}
 				else {
-					console.error("Money order created corresponding to vd");
+					console.log("Money order created corresponding to vd");
 					createMoneyOrder(null);
 				}
 			});
@@ -1007,6 +1007,10 @@ var createByOperator = function(postData, operator, next){
 
 		delete postData["item_list"];
 
+		if(seperateItems.length == 0){
+			return addItems(null);
+		}
+
 		itemLogic.createMany(seperateItems, function(tempItemList){
 			if(tempItemList && tempItemList.status == 'success'){
 				addItems(null);
@@ -1054,8 +1058,7 @@ var createByOperator = function(postData, operator, next){
 				messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
 					console.log(mResponse);
 				});
-
-				return next({"status": "success", "data": order});
+				createClient(null);
 				//createClient(null);
 			}
 			else createClient("Cannot create client!");
@@ -1064,9 +1067,12 @@ var createByOperator = function(postData, operator, next){
 
 	}], function(err){
 		if(err){
-			console.log(err);
+			console.error(err);
 			next(errorData);
 			return;
+		}
+		if(order){
+				next({"status": "success", "data": order});
 		}
 	});
 };

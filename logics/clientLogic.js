@@ -100,6 +100,7 @@ var create = function(clientData, next){
 					//return next({"status": "success","data": client});
 				}
 				else{
+          console.error("Cannot create client");
 					return next({"status": "error","data": null, "message": "Sorry, cannot create client"});
 				}
 			})
