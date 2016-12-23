@@ -70,25 +70,26 @@ var findByOrderId = function(orderId, next){
 		return;
 	}
 
-	itemModel.findAll({where: {orderUuid: orderId}}).catch(function(err){
+	itemModel
+	.findAll({where: {orderUuid: orderId}})
+	.then(function(itemList){
+		//if(itemList){
 
-		if(err){
-			next({"status": "error", "message": "Error while fetching items of order"});
-			return;
-		}
-
-	}).then(function(itemList){
-		if(itemList){
-
-			var newItemList = [];
+			newItemList = [];
 			_.forEach(itemList, function(item){
 				newItemList.push(item.dataValues);
 			});
 
 			next({"status": "success", "data": newItemList});
-		}
-		else{
-			next({"status": "error", "message": "No item found"});
+		//}
+		// else{
+		// 	next({"status": "error", "message": "No item found"});
+		// }
+	})
+	.catch(function(err){
+		if(err){
+			next({"status": "error", "message": "Error while fetching items of order"});
+			return;
 		}
 	});
 

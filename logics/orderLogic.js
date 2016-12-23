@@ -869,6 +869,7 @@ var createByOperator = function(postData, operator, next){
 
 		if(message != ""){
 			next({"status": "error", "message": message});
+			createDraft(message);
 			return;
 		}
 
@@ -907,7 +908,7 @@ var createByOperator = function(postData, operator, next){
 			if(err){
 				console.error(err);
 				errorData = err;
-				return createDraft("Cannot create draft order");
+				createDraft("Cannot create draft order");
 			}
 		});
 
@@ -1034,41 +1035,42 @@ var createByOperator = function(postData, operator, next){
 		if(postData.sender_name) clientData["full_name"] = postData.sender_name;
 
 		clientLogic.create(clientData, function(data){
-
 			if(data.status == "success"){
-
-				content = fs.readFileSync("./views/message/client.signup.handlebars");
-				contentTemplate = handlebars.compile(content.toString());
-				messageBody = null;
-
 				client = data.data;
 
-				if(data.isNew){
+				fs.readFile("./views/message/client.signup.handlebars" , function(err , content){
+					if(err){
+						console.error(err);
+						return;
+					}
+					contentTemplate = handlebars.compile(content.toString());
+					messageBody = null;
 
-					console.log("Sending the client password through message....");
-					// send the password to the client by sms
-					// Send the sms with the password
-					messageBody = contentTemplate({ parcelInstance: order , client: client });
-				}else{
-					console.log("Sending the order verification code through message....");
-					//Only sends the verifcation code
-					messageBody = contentTemplate({ parcelInstance: order });
-				}
+					if(data.isNew){
 
-				messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
-					console.log(mResponse);
-				});
+						console.log("Sending the client password through message....");
+						// send the password to the client by sms
+						// Send the sms with the password
+						messageBody = contentTemplate({ parcelInstance: order , client: client });
+					}else{
+						console.log("Sending the order verification code through message....");
+						//Only sends the verifcation code
+						messageBody = contentTemplate({ parcelInstance: order });
+					}
+
+					messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
+						console.log(mResponse);
+					});
+				})
 				createClient(null);
-				//createClient(null);
 			}
 			else createClient("Cannot create client!");
-
 		});
 
 	}], function(err){
 		if(err){
 			console.error(err);
-			next(errorData);
+			next({ "status":"error" , "message":err , "trace":errorData });
 			return;
 		}
 		if(order){
@@ -1115,6 +1117,7 @@ var orderDetail = function(id, next){
 			else{
 				errorData = itemList;
 				findOrder(errorData);
+				getItems("Can not retrieve items");
 			}
 		});
 
@@ -1122,6 +1125,9 @@ var orderDetail = function(id, next){
 
 		var entry_branch_id = parseInt(orderDetails.data.orderData.dataValues.entry_branch);
 		var entry_branch_type = orderDetails.data.orderData.dataValues.entry_branch_type == 'regional-branch'? 'regional' : 'sub';
+
+		console.log(entry_branch_type);
+		console.log(entry_branch_id);
 
 		if(!entry_branch_id){
 			orderDetails.data.orderData.dataValues["entry_branch_label"] = 'No Entry branch!';
@@ -1153,9 +1159,9 @@ var orderDetail = function(id, next){
 				orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
 				orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = null;
 
-				console.log(err);
+				console.error(err);
 
-				getEntryBranch(null);
+				getEntryBranch(err);
 			});
 
 			// 	branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
@@ -1182,7 +1188,6 @@ var orderDetail = function(id, next){
 
 		if(!exit_branch_id){
 			orderDetails.data.orderData.dataValues["exit_branch_label"] = 'No Entry branch!';
-			return next(orderDetails);
 			getExitBranch(null);
 		}
 		else{
@@ -1208,12 +1213,12 @@ var orderDetail = function(id, next){
 				getExitBranch(null);
 			}).catch(function(err){
 
-				orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
+				orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting exit branch';
 				orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = null;
 
-				console.log(err);
+				console.error(err);
 
-				getExitBranch(null);
+				getExitBranch(err);
 			});
 		// 	branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
 		//
