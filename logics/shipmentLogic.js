@@ -523,7 +523,11 @@ var shipmentUpdate = function(shipmentId , postData , next){
     individualHooks: true
   })
   .then(function(result){
-    next({ status:"success" , statusCode:HttpStatus.OK , data:result , message:null });
+    updatedCount = 0;
+    if(result && result.length > 1){
+      updatedCount = result[0];
+    }
+    next({ status:"success" , statusCode:HttpStatus.OK , data:updatedCount , message:null });
   })
   .catch(function(err){
     console.error(err);
