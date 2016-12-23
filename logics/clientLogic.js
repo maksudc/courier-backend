@@ -175,7 +175,6 @@ var updateClient = function(params, next){
 
 exports.updateClient = updateClient;
 
-
 var deleteClient = function(params, next){
 
 	console.log(params);
