@@ -38,6 +38,7 @@ var findOneByParams = function(params, next){
 	itemModel.findOne({where: params}).catch(function(err){
 
 		if(err){
+			console.error(err.stack);
 			next({"status": "error","data": null, "message": "Cannot get this item, an error occurred"});
 			return;
 		}

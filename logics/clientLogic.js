@@ -36,7 +36,6 @@ function makeVerficationCode()
 var findOneByMobile = function(mobile, next){
 
 	//console.log("*****************Hitting API findOneByMobile**************");
-
 	clientModel.findOne({where: {mobile: mobile}}).then(function(client){
 
 		if(client){
@@ -47,12 +46,10 @@ var findOneByMobile = function(mobile, next){
 		}
 
 	}).catch(function(err){
-
-    console.error(err);
-
 		if(err){
-			return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred" , "err": err});
-		}
+      console.error(err.stack);
+    }
+    return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred" , "err": err});
 	});
 };
 
@@ -73,6 +70,7 @@ var findNameByMobile = function(mobile, next){
 	}).catch(function(err){
 
 		if(err){
+      console.error(err.stack);
 			return next(err);
 		}
 
@@ -106,7 +104,7 @@ var create = function(clientData, next){
 			})
       .catch(function(err){
 				if(err){
-					console.error(err);
+					console.error(err.stack);
 					return next({"status": "error", "data": null, "message": "Cannot create this client, an error occurred"});
 				}
 			});
@@ -126,7 +124,7 @@ var getAll = function(next){
 
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -144,7 +142,10 @@ var findManyByMobile = function(mobile, next){
 		else next(null, false);
 
 	}).catch(function(err){
-		if(err) next(err);
+		if(err){
+      console.error(err.stack);
+      next(err);
+    }
 	});
 
 };
@@ -166,7 +167,7 @@ var updateClient = function(params, next){
 		next(null, params);
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -184,10 +185,8 @@ var deleteClient = function(params, next){
 		next(null);
 
 	}).catch(function(err){
-
-    	console.error(err);
-
 		if(err){
+      console.error(err.stack);
 			return next({"status": "error","data": null, "message": "Cannot get this client, an error occurred" , "err": err});
 		}
 	});

@@ -19,7 +19,7 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
   **/
     //console.log(instance);
     console.log("Shipment Uuid: "  + instance.uuid);
-    console.log("Update Options: " + JSON.stringify(options));
+    //console.log("Update Options: " + JSON.stringify(options));
 
     //ShipmentModel
     //.findOne({ where: { uuid: instance.uuid } })
@@ -63,7 +63,7 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
               updatedInstance.nextBranchType = firstRoute.branchType;
               updatedInstance.nextBranchId = firstRoute.id;
             }
-            
+
             instance.updatedInstance = updatedInstance;
 
             return Promise.resolve(updatedInstance.status);

@@ -17,7 +17,7 @@ var checkLogin = function(email, password, next){
         }
     }).catch(function(err){
         if(err){
-            console.log(err);
+            console.error(err.stack);
             next("Error while reading admin");
         }
     });
@@ -73,7 +73,7 @@ var getAdminToChage = function(email, next){
         }
     }).catch(function(err){
         if(err){
-            console.log(err);
+            console.error(err.stack);
             next("Error while reading admin");
         }
     });
@@ -95,8 +95,8 @@ var createAdmin = function(data, next){
                 emailCheck(null);
             }
             else {
-                console.log(err);
-                console.log("error occurred in admin");
+                console.error(err);
+                console.error("error occurred in admin");
                 emailCheck("This email is taken already!");
             }
         });
@@ -124,8 +124,9 @@ var createAdmin = function(data, next){
                 createThisAdmin(null);
             }
         }).catch(function(err){
-
-            console.log(err);
+            if(err){
+                console.error(err.stack);
+            }
             createThisAdmin(err.errors[0]["message"]);
 
         });
@@ -197,9 +198,9 @@ var getAdminsToChange = function(next){
         })
         .catch(function(err){
             if(err){
-                console.log(err);
-                return next(err);
+                console.error(err.stack);
             }
+            return next(err);
         });
 }
 
@@ -215,7 +216,7 @@ var getSameBranchAdmins = function(adminDataParams, next){
             else next(null, false);
         }).catch(function(err){
             if(err){
-                console.log(err);
+                console.error(err.stack);
                 next(err);
             }
         });
@@ -263,7 +264,7 @@ var updateAdmin = function(updateData, next){
         })
         .catch(function(err){
             if(err){
-                console.log(err);
+                console.error(err.stack);
                 return next(err);
             }
         });
@@ -284,8 +285,9 @@ var deleteAdmin = function(email, next){
         else next(null, false);
     }).catch(function(err){
         if(err){
-            next(err);
+            console.error(err.stack);
         }
+        next(err);
     });
 
 }

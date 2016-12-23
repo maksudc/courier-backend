@@ -29,7 +29,9 @@ genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
     return next();
   })
   .catch(function(err){
-    console.error(err);
+    if(err){
+        console.error(err.stack);
+    }
     return next();
   });
 });

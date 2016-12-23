@@ -21,6 +21,9 @@ var getDefinedRoutes = function(next){
     next({ status: "success" , statusCode: HttpStatus.OK , message:null , data:routeItems });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     message = commonUtils.getErrorMessage(err);
     next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message: message , data:null });
   });
@@ -122,6 +125,9 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
         .catch(function(err){
 
             if(err){
+                if(err){
+                  console.error(err.stack);
+                }
                 next({ "status":"error" , "data":null ,"message":JSON.stringify(err) });
                 return;
             }
@@ -258,6 +264,9 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
       }
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
 
     if(next){
       return next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message:commonUtils.getErrorMessage(err) , data:null  });
@@ -326,7 +335,9 @@ var newRoute = function(postData , next){
           return;
       })
       .catch(function(err){
-        console.error(err);
+        if(err){
+          console.error(err.stack);
+        }
         next({ status:"error" , data:null , message:err });
         return;
       });
@@ -359,7 +370,9 @@ var newRoute = function(postData , next){
         return;
     })
     .catch(function(err){
-      console.error(err);
+      if(err){
+          console.error(err.stack);
+      }
       next({ status:"error" , data:null , message:err });
       return;
     });

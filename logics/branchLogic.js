@@ -37,6 +37,9 @@ var updateBranch = function(branchType , branchId , postData , next){
     next({ status: "success" , statusCode: HttpStatus.OK , data:result , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 
@@ -51,7 +54,7 @@ var getBranch = function(branchType , branchId , next){
     next({ status: "success" , statusCode: HttpStatus.OK , data:branchItem , message:null });
   })
   .catch(function(err){
-    if(err) console.error(err);
+    if(err) console.error(err.stack);
     next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 };
@@ -66,7 +69,7 @@ var getBranches = function(branchType , params , next){
   })
   .catch(function(err){
     if(err){
-      console.error(err);
+      console.error(err.stack);
     }
     next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
@@ -81,6 +84,9 @@ var deleteBranch = function(branchType , branchId , next){
     next({ status:"success" , statusCode:HttpStatus.OK , data:result , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 };
