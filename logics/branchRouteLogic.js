@@ -5,6 +5,7 @@ var RouteModel = sequelize.models.branchRoute;
 var RegionalBranchModel = sequelize.models.regionalBranch;
 var SubBranchModel = sequelize.models.subBranch;
 var HttpStatus = require("http-status-codes");
+var commonUtils = require("./utils/common");
 
 var _ = require("lodash");
 
@@ -20,7 +21,8 @@ var getDefinedRoutes = function(next){
     next({ status: "success" , statusCode: HttpStatus.OK , message:null , data:routeItems });
   })
   .catch(function(err){
-    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message: JSON.stringify(err) , data:null });
+    message = commonUtils.getErrorMessage(err);
+    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message: message , data:null });
   });
 };
 
@@ -258,9 +260,9 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
   .catch(function(err){
 
     if(next){
-      return next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message:err , data:null  });
+      return next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message:commonUtils.getErrorMessage(err) , data:null  });
     }else{
-      return Promise.reject(JSON.stringify(err));
+      return Promise.reject(commonUtils.getErrorMessage(err));
     }
   });
 };

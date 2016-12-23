@@ -11,6 +11,7 @@ var subBranch = sequelize.models.subBranch;
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
 var shipmentBarCodeConfig = require("../config/shipmentBarcode");
+var commonUtils = require("./utils/common");
 
 
 function prepareBarCode(shipmentInstance){
@@ -70,7 +71,7 @@ var unpackShipment = function(postData ,  next){
       next({ status:"success" , statusCode: HttpStatus.OK , message:null , data:results });
   })
   .catch(function(err){
-    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:JSON.stringify(err) , data:null });
+    next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , message:commonUtils.getErrorMessage(err) , data:null });
   });
 
   // shipment
@@ -197,7 +198,7 @@ var createShipmentWithOrders = function(postData , next){
   })
   .catch(function(err){
     console.log(err);
-    next({ status:"error", statusCode: HttpStatus.INTERNAL_SERVER_ERROR ,  "message": JSON.stringify(err) , data:null });
+    next({ status:"error", statusCode: HttpStatus.INTERNAL_SERVER_ERROR ,  "message": commonUtils.getErrorMessage(err) , data:null });
   });
 };
 

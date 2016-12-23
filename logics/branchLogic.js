@@ -18,7 +18,7 @@ var standardizeBranchType = function(branchType){
 
 var getBranchModel = function(branchType){
 
-    var branchModel = null;
+    branchModel = null;
 
     stdBranchType = standardizeBranchType(branchType);
     if(stdBranchType !== null){
@@ -29,7 +29,7 @@ var getBranchModel = function(branchType){
 
 var updateBranch = function(branchType , branchId , postData , next){
 
-  var branchModel = getBranchModel(branchType);
+  branchModel = getBranchModel(branchType);
 
   branchModel
   .update(postData , { where: { id: branchId } , individualHooks:true })
@@ -37,14 +37,14 @@ var updateBranch = function(branchType , branchId , postData , next){
     next({ status: "success" , statusCode: HttpStatus.OK , data:result , message:null });
   })
   .catch(function(err){
-    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:JSON.stringify(err) });
+    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 
 };
 
 var getBranch = function(branchType , branchId , next){
 
-  var branchModel = getBranchModel(branchType);
+  branchModel = getBranchModel(branchType);
   branchModel
   .findOne({ where:{ id: branchId } })
   .then(function(branchItem){
@@ -52,13 +52,13 @@ var getBranch = function(branchType , branchId , next){
   })
   .catch(function(err){
     if(err) console.error(err);
-    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:JSON.stringify(err) });
+    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 };
 
 var getBranches = function(branchType , params , next){
 
-  var branchModel = getBranchModel(branchType);
+  branchModel = getBranchModel(branchType);
   branchModel
   .findAll()
   .then(function(branchItems){
@@ -68,20 +68,20 @@ var getBranches = function(branchType , params , next){
     if(err){
       console.error(err);
     }
-    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:JSON.stringify(err) });
+    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 };
 
 var deleteBranch = function(branchType , branchId , next){
 
-  var branchModel = getBranchModel(branchType);
+  branchModel = getBranchModel(branchType);
   branchModel
   .destroy({ where:{ id: branchId } , individualHooks:true })
   .then(function(result){
     next({ status:"success" , statusCode:HttpStatus.OK , data:result , message:null });
   })
   .catch(function(err){
-    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:JSON.stringify(err) });
+    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
   });
 };
 
