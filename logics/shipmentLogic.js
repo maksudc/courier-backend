@@ -526,6 +526,7 @@ var shipmentUpdate = function(shipmentId , postData , next){
     next({ status:"success" , statusCode:HttpStatus.OK , data:result , message:null });
   })
   .catch(function(err){
+    console.error(err);
     next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message: err });
   });
 };
