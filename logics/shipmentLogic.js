@@ -11,7 +11,7 @@ var subBranch = sequelize.models.subBranch;
 var _=require("lodash");
 var HttpStatus = require("http-status-codes");
 var shipmentBarCodeConfig = require("../config/shipmentBarcode");
-var commonUtils = require("./utils/common");
+var commonUtils = require("../utils/common");
 
 
 function prepareBarCode(shipmentInstance){

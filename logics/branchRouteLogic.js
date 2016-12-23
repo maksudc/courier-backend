@@ -5,7 +5,7 @@ var RouteModel = sequelize.models.branchRoute;
 var RegionalBranchModel = sequelize.models.regionalBranch;
 var SubBranchModel = sequelize.models.subBranch;
 var HttpStatus = require("http-status-codes");
-var commonUtils = require("./utils/common");
+var commonUtils = require("../utils/common");
 
 var _ = require("lodash");
 
