@@ -895,7 +895,12 @@ var createByOperator = function(postData, operator, next){
 		}
 		if(postData.sender_addr) draftOrder["sender_addr"] = postData.sender_addr;
 		if(postData.receiver_addr) draftOrder["receiver_addr"] = postData.receiver_addr;
+		// home_delivery might be here for legacy reason. Needs some testing to remove it. Instead a more general
+		// delivery type is added which delegates the responsidbility
 		if(postData.home_delivery) draftOrder["deliveryType"] = 'home';
+		if(postData.deliveryType){
+			draftOrder["deliveryType"] = postData.deliveryType;
+		}
 		if(postData.payment) draftOrder["payment"] = parseFloat(postData.payment);
 		if(postData.nid) draftOrder["nid"] = postData.nid;
 		if(postData.receiver_operator) draftOrder["receiver_operator"] = postData.receiver_operator;
