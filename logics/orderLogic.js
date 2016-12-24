@@ -1680,7 +1680,7 @@ var getAnalytics = function(params , next){
 				message = err.message;
 				console.error(err.stack);
 			}
-			next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message: });
+			next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message: err });
 			return;
 		});
 }
