@@ -15,7 +15,7 @@ var findOrderData = function(params, next){
 			next(null, orderData);
 		}).catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				next(err);
 			}
 		});
@@ -97,7 +97,10 @@ var getOrderPaymentData = function(params, operator, next){
 		}
 
 		adminLogic.getSameBranchAdmins(searchParams, function(err, adminList){
-			if(err) next(err);
+			if(err){
+				 console.error(err.stack);
+				 next(err);
+			}
 			else {
 				_.forEach(adminList, function(singleAdmin){
 					receiverAdminList.push(singleAdmin.dataValues.email);
@@ -129,14 +132,14 @@ var getOrderPaymentData = function(params, operator, next){
 			next(null, orderData);
 		}).catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				next(err);
 			}
 		});
 
 	}], function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -167,7 +170,7 @@ var findMoneyData = function(params, next){
 			next(null, moneyList);
 		}).catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				next(err);
 			}
 		});
@@ -179,7 +182,9 @@ var getReport = function(next){
 	async.series([function(orderReport){
 
 		findOrderData({}, function(err, orderData){
-			if(err) orderReport(err);
+			if(err){
+				orderReport(err);
+			}
 			else {
 				reportData["orderData"]  = orderData;
 				orderReport(null);
@@ -198,7 +203,7 @@ var getReport = function(next){
 
 	}],function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -293,7 +298,7 @@ var findMoneyCashIn = function(params, adminData, next){
 		next(null, moneyOrderData);
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -392,7 +397,7 @@ var findMoneyCashOut = function(params, adminData, next){
 		next(null, moneyOrderData);
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});

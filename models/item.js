@@ -159,7 +159,9 @@ module.exports = function(sequelize , DataTypes){
 			console.log(" Post Update parent tracker:  " + results);
 		})
 		.catch(function(err){
-			console.log(err);
+			if(err){
+				console.error(err.stack);
+			}
 		});
 	});
 
@@ -179,7 +181,10 @@ module.exports = function(sequelize , DataTypes){
 			console.log(result);
 		})
 		.catch(function(err){
-			console.log(err);
+			//console.log(err);
+			if(err){
+				console.error(err.stack);
+			}
 		});
 	});
 

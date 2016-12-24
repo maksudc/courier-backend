@@ -15,6 +15,9 @@ router.use(middleware.checkPermission);
 
 router.post('/create', upload.array(), function(req, res){
 	moneyLogic.create(req.user, req.body, function(err, data){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err || !data){
 			res.send({"status": "error", "error": err});
 		}
@@ -27,6 +30,9 @@ router.post('/create', upload.array(), function(req, res){
 router.get('/viewAll', function(req, res){
 
 	moneyLogic.findAll(req.user, function(err, data){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({"status": "error", error: err});
 		else if(!data) res.send({"status": "error", data: []});
 		else res.send({"status": "success", data: data});
@@ -39,6 +45,9 @@ router.get('/view/:id', function(req, res){
 	var id = req.params.id;
 
 	moneyLogic.findById(id, function(err, data){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({"status": "error", error: err});
 		else if(!data) res.send({"status": "error", data: []});
 		else res.send({"status": "success", data: data});
@@ -49,6 +58,9 @@ router.get('/view/:id', function(req, res){
 router.post('/receive', upload.array(), function(req, res){
 
 	moneyLogic.receiveOrder(req.body.money_order_id, req.body.verification_code, req.user, function(err, data){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err || !data) res.send({"status": "error", message: err || "Cannot receive this order"});
 		else res.send({"status": "success", data: data});
 	});
@@ -58,6 +70,9 @@ router.post('/receive', upload.array(), function(req, res){
 router.post('/confirm', upload.array(), function(req, res){
 
 	moneyLogic.confirmOrder(req.body.money_order_id, req.user, function(err, data){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err || !data) res.send({"status": "error", message: err || "Cannot receive this order"});
 		else res.send({"status": "success", data: data});
 	});
@@ -67,6 +82,9 @@ router.post('/confirm', upload.array(), function(req, res){
 router.post('/deliver', upload.array(), function(req, res){
 
 	moneyLogic.deliverOrder(req.body.money_order_id, req.body.verification_code, req.user, function(err, data){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err || !data) res.send({"status": "error", message: err || "Cannot receive this order"});
 		else res.send({"status": "success", data: data});
 	});
@@ -98,6 +116,9 @@ router.delete('/:id' , function(req , res){
 router.post('/updateVDPrice', upload.array(), function(req, res){
 
 	moneyLogic.updateVDPrice(req.body, function(err, data){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err || !data){
 			res.send({"status": "error", "error": err});
 		}

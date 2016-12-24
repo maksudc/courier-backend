@@ -105,6 +105,9 @@ describe("Shipment Tests" , function(){
         });
       })
       .catch(function(err){
+        if(err){
+  				console.error(err.stack);
+  			}
         done(err);
       });
     });

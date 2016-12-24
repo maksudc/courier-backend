@@ -70,7 +70,7 @@ router.get('/view', function(req, res){
 
 			}], function(err){
 				if(err){
-					console.log(err);
+					console.error(err.stack);
 					res.send({"status": "error", data: err});
 				}
 			});
@@ -86,7 +86,7 @@ router.get('/types', function(req, res){
 router.post('/create', function(req, res){
 
 	console.log("Hitting here!!!");
-	
+
 	var adminData = req.body;
 	console.log(adminData);
 	if(!adminData.email) return res.send({"err": JSON.stringify({"message": "Must have email"})});
@@ -98,7 +98,7 @@ router.post('/create', function(req, res){
 
 	adminLogic.createAdmin(adminData, function(err, admin){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			res.send({"err": {"message": JSON.stringify(err)}});
 		}
 		else if(admin){
@@ -110,7 +110,7 @@ router.post('/create', function(req, res){
 
 
 router.post('/updateSelf', function(req, res){
-	
+
 	adminLogic.updateSelf(req.body, function(err, admin){
 		if(err) res.send({"status": "error"});
 		else res.send({"status": "success"});
@@ -158,7 +158,7 @@ router.get('/update/:email', function(req, res){
 
 
 router.post('/update', upload.array(), function(req, res){
-	
+
 	adminLogic.updateAdmin(req.body, function(err, admin){
 		if(err) return res.send({"status": "error", error: err});
 		else return res.send({"status": "success", data: admin});

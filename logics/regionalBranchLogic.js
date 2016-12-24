@@ -11,6 +11,7 @@ var findOneById = function(id, next){
 
 	regionalBranchModel.findOne({where: {id: id}}).catch(function(err){
 		if(err){
+			console.error(err.stack);
 			return next({"status": "error", "message": "Error while finding branch by id"});
 		}
 	}).then(function(branch){

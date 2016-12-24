@@ -12,6 +12,9 @@ var getTracker = function(trackerId , next){
     next({ status: "success" , data:result , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message: err });
   });
 };
@@ -45,6 +48,9 @@ var getTrackerForTrackable = function(params , next){
     }
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message: err });
   });
 };
@@ -100,6 +106,9 @@ var getTrackers = function(params , next){
     next({ status:"success" , data:results , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message: err });
   });
 };
@@ -118,6 +127,9 @@ var getTrackerCurrentBranch = function(trackerId , next){
         next({ status:"success" , data: subBranch , message:null });
       })
       .catch(function(err){
+        if(err){
+          console.error(err.stack);
+        }
         next({ status:"error" , data:null , message:err });
       });
 
@@ -129,11 +141,17 @@ var getTrackerCurrentBranch = function(trackerId , next){
         next({ status:"success" , data: regionalBranch , message:null });
       })
       .catch(function(err){
+        if(err){
+          console.error(err.stack);
+        }
         next({ status:"error" , data:null , message:err });
       });
     }
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message: err });
   });
 };
@@ -149,6 +167,9 @@ var updateCurrentLocation = function(trackerId , branchType , branchId , next){
     next({ status:"success" , data:numRowsAffected , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message:err });
   });
 };
@@ -161,6 +182,9 @@ var createTracker = function(postData , next){
     next({ status:"success" , data:result , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message:err });
   });
 };

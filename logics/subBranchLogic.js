@@ -27,7 +27,7 @@ var findOneById = function(id, next){
 		else return next({"status": "error", "message": "No sub-branch by given id"});
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			return next({"status": "error", "message": "Error while finding sub-branch by id"});
 		}
 	});
@@ -74,7 +74,7 @@ var findByIdList = function(idList, next){
 		else return next({"status": "error", "message": "No sub-branchList by given ids"});
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			return next({"status": "error", "message": "Error while finding sub-branchList by ids"});
 		}
 	});
@@ -164,7 +164,7 @@ var findCredential = function(id, next){
 		}],
 		function(err){
 			if(err){
-				console.log(err);
+				console.error(err.stack);
 				next(err);
 			}
 		}

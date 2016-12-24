@@ -77,7 +77,7 @@ var create = function(operator, moneyData, next){
 
 		if(err){
 			//console.log("***************************");
-			console.error(err);
+			console.error(err.stack);
 			//console.log("***************************");
 			next(err);
 		}
@@ -116,7 +116,7 @@ var findAll = function(adminData, next){
 		else next(null, false);
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -130,11 +130,13 @@ var findById = function(id, next){
 	moneyModel.findOne({where: {id: id}}).then(function(moneyOrder){
 		if(moneyOrder) {
 			subBranchLogic.findCredential(parseInt(moneyOrder.dataValues.sub_branch_id), function(err, detail){
-				if(err) next(err);
+				if(err) {
+					console.error(err.stack);
+					next(err);
+				}
 				else{
 					if(moneyOrder.dataValues.type == 'virtual_delivery'){
 						//find corrensponding order price and send it
-
 						orderModel.findOne({
 							where: {uuid: moneyOrder.dataValues.money_order_id},
 							attributes: ['payment', 'payment_status']
@@ -198,7 +200,7 @@ var findById = function(id, next){
 						.catch(function(err){
 
 							if(err){
-								console.error(err);
+								console.error(err.stack);
 								next(err);
 							}
 						});
@@ -247,7 +249,7 @@ var findById = function(id, next){
 						})
 						.catch(function(err){
 							if(err){
-								console.error(err);
+								console.error(err.stack);
 								next(err);
 								return ;
 							}
@@ -261,7 +263,7 @@ var findById = function(id, next){
 
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -280,7 +282,7 @@ var findRawById = function(id, next){
 
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -291,7 +293,10 @@ exports.findRawById = findRawById;
 
 var receiveOrder = function(id, verification_code, operator, next){
 	findRawById(id, function(err, moneyOrder){
-		if(err) next(err);
+		if(err){
+			console.error(err.stack);
+			next(err);
+		}
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
@@ -336,7 +341,10 @@ exports.receiveOrder = receiveOrder;
 
 var confirmOrder = function(id, operator, next){
 	findRawById(id, function(err, moneyOrder){
-		if(err) next(err);
+		if(err) {
+			console.error(err.stack);
+			next(err);
+		}
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
@@ -363,7 +371,10 @@ exports.confirmOrder = confirmOrder;
 
 var deliverOrder = function(id, verification_code, operator, next){
 	findRawById(id, function(err, moneyOrder){
-		if(err) next(err);
+		if(err){
+			console.error(err.stack);
+			next(err);
+		}
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
@@ -396,7 +407,10 @@ var deleteMoneyOrder = function(operator, id, next){
 	function(findOrder){
 
 		findById(id, function(err, moneyOrder){
-			if(err) findOrder(err);
+			if(err){
+				console.error(err.stack);
+				findOrder(err);
+			}
 			else if(!moneyOrder) findOrder("No money order found");
 			else {
 				oldMoneyOrder = moneyOrder;
@@ -407,7 +421,10 @@ var deleteMoneyOrder = function(operator, id, next){
 	}, function(findOperator){
 
 		adminLogic.findAdmin(oldMoneyOrder.receiver_operator, function(err, admin){
-			if(err) findOperator(err);
+			if(err) {
+				console.error(err.stack);
+				findOperator(err);
+			}
 			else if(!admin) findOperator("This money order was created by a ghost!");
 			else {
 				receiver_operator = admin.dataValues;
@@ -437,7 +454,10 @@ var deleteMoneyOrder = function(operator, id, next){
 
 
 		create(operator, newMoneyOrder, function(err, moneyOrder){
-			if(err) createMoneyOrder(err);
+			if(err) {
+				console.error(err.stack);
+				createMoneyOrder(err);
+			}
 			else if(!newMoneyOrder) createMoneyOrder("Could not create money order");
 			else {
 				//console.log(moneyOrder);
@@ -457,6 +477,7 @@ var deleteMoneyOrder = function(operator, id, next){
 				confirmNewOrder(null);
 			}).catch(function(err){
 				if(err){
+					console.error(err.stack);
 					confirmNewOrder(err);
 				}
 			});
@@ -473,6 +494,7 @@ var deleteMoneyOrder = function(operator, id, next){
 				deliverOldOrder(null);
 			}).catch(function(err){
 				if(err){
+					console.error(err.stack);
 					confirmNewOrder(err);
 				}
 			});
@@ -480,7 +502,7 @@ var deleteMoneyOrder = function(operator, id, next){
 	}],
 	function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -505,7 +527,9 @@ var destroy = function(moneyId , next){
 			}
 		})
 		.catch(function(err){
-				console.error(err);
+				if(err){
+						console.error(err.stack);
+				}
 				next({ status:"error" , statusCode: 500 , data:nul , message:err });
 		});
 }
@@ -555,7 +579,7 @@ var updateVDPrice = function(moneyData, next){
 				else next("Failed to update");
 			}).catch(function(err){
 				if(err){
-					console.error(err);
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -564,7 +588,7 @@ var updateVDPrice = function(moneyData, next){
 
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});

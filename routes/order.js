@@ -161,6 +161,9 @@ router.post("/markDeliverable/:orderId" , upload.array() , function(req , res){
 router.post('/updateStatus', upload.array(), function(req, res){
 
 	orderLogic.updateStatus(req.body, function(err, order){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({"status": "error", error: err});
 		else res.send({"status": "success", data: order});
 	});
@@ -208,6 +211,9 @@ router.post('/receiveOrder', passport.authenticate('basic', {session: false}), u
 router.get('/getOrderByClient/:client', function(req, res){
 
 	orderLogic.findOrderByClient(req.params.client, function(err, orderList){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({status: "error", message:"Error while getting order list by client"});
 		else res.send({"status": "success", data: orderList});
 	});
@@ -218,6 +224,9 @@ router.get('/getOrderByClient/:client', function(req, res){
 router.post('/addItem', function(req, res){
 
 	orderLogic.addItem(req.body, req.user, function(err, order){
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({status: "error", message:"Error while getting order list by client"});
 		else res.send({"status": "success", data: order});
 	});

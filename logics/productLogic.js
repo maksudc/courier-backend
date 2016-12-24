@@ -14,6 +14,7 @@ var findOneById = function(id, next){
 
 	productModel.findOne({where: {uuid: id}}).catch(function(err){
 		if(err){
+			console.error(err.stack);
 			next({"status": "error", "message": "Unknown error", "data": null });
 			return;
 		}
@@ -40,6 +41,7 @@ var findManyById = function(ids, next){
 
 	productModel.findAll({where: {uuid: ids}}).catch(function(err){
 		if(err){
+			console.error(err.stack);
 			next({"status": "error", "message": "Unknown error", "data": null });
 			return;
 		}
@@ -276,8 +278,10 @@ var updateOne = function(data, next){
 	}
 
 	productModel.findOne({where: {uuid: data.id}}).catch(function(err){
-		if(err)
-			next({"status": "error", "message": "Cannot update this entry", "data": null});
+		if(err){
+				console.error(err.stack);
+				next({"status": "error", "message": "Cannot update this entry", "data": null});
+		}
 		else
 			next({"status": "error", "message": "Cannot update this entry, unknown error", "data": null});
 
@@ -317,8 +321,8 @@ var updateOne = function(data, next){
 			}
 
 			product.save().catch(function(err){
-
 				if(err){
+					console.error(err.stack);
 					next({"status": "error", "message": "Error while updating", "data": null});
 					return;
 				}
@@ -347,8 +351,8 @@ var deleteOne = function(data, next){
 	}
 
 	productModel.findOne({where: {uuid: data.id}}).catch(function(err){
-
 		if(err){
+			console.error(err.stack);
 			next({"status": "error", "message": "Error while deleting this entry", "data": null});
 			return;
 		}

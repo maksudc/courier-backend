@@ -122,7 +122,7 @@ var createOne = function(data, next){
 
 		itemModel.create(data).catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				next({"status": "error", "data": null, "message": "Cannot create this item, an error occurred"});
 				return;
 			}
@@ -202,7 +202,7 @@ var createMany = function(data, next){
 	})
 	.catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next({"status": "error", "message": "error while creating items"});
 			return;
 		}
@@ -254,6 +254,7 @@ var updateOne = function(data, next){
 	itemModel.findOne({where: {uuid: data.id}, attributes: ['uuid', 'amount', 'productUuid']}).catch(function(err){
 
 		if(err){
+			console.error(err.stack);
 			next({"status": "error", "message": "Cannot get this item, an error occurred"});
 			return;
 		}
@@ -276,6 +277,7 @@ var updateOne = function(data, next){
 				item.save().catch(function(err){
 
 					if(err){
+						console.error(err.stack);
 						next({"status": "error", "message": "Cannot get this item, an error occurred"});
 						return;
 					}
@@ -311,8 +313,8 @@ var deleteOne = function(data, next){
 	itemModel.findOne({where: {uuid: data.id}, attributes: ['uuid']}).catch(function(err){
 
 		if(err){
+			console.error(err.stack);
 			next({"status": "error", "message": "Error while deleting this entry"});
-			console.error(err);
 			return;
 		}
 
@@ -342,6 +344,7 @@ var deleteByOrderId = function(id, next){
 
 	itemModel.destroy({where: {orderUuid: id}}).catch(function(err){
 		if(err){
+			console.error(err.stack);
 			next({"status": "error", "message": "Error while deleting itemList"});
 			return;
 		}
@@ -439,7 +442,10 @@ var updateItemStatus = function(params, next){
 			console.log("Item updated");
 
 			getRemainingItems(newItem.dataValues.orderUuid, params["status"] , newItem.dataValues.status , function(err, itemCredential){
-				if(err) setStatus(err);
+				if(err){
+					console.error(err.stack);
+					setStatus(err);
+				}
 				else {
 					next(null, itemCredential);
 				}
@@ -447,7 +453,7 @@ var updateItemStatus = function(params, next){
 
 		}).catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				setStatus(err);
 			}
 		});
@@ -455,7 +461,10 @@ var updateItemStatus = function(params, next){
 	}],
 	function(err){
 
-		if(err) next(err);
+		if(err) {
+			console.error(err.stack);
+			next(err);
+		}
 
 	});
 };
@@ -484,7 +493,7 @@ var setItemRunning  = function(params, next){
 				else next(null, false);
 			}).catch(function(err){
 				if(err){
-					console.log(err);
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -495,7 +504,7 @@ var setItemRunning  = function(params, next){
 
 	}).catch(function(err){
 		if(err) {
-			console.log(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -526,7 +535,7 @@ var updateOrderWithBranch = function(id, next){
 						else next(null, true);
 					}).catch(function(err){
 						if(err){
-							console.error(err);
+							console.error(err.stack);
 							next(null, true);
 						}
 					});
@@ -540,7 +549,10 @@ var updateOrderWithBranch = function(id, next){
 		}
 
 	}).catch(function(err){
-		if(err) next(err);
+		if(err) {
+			console.error(err.stack);
+			next(err);
+		}
 	});
 }
 
@@ -610,7 +622,7 @@ var getRemainingItems = function(orderId, updatedStatus , finalItemStatus , next
 			})
 			.catch(function(err){
 				if(err){
-					console.error(err);
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -682,7 +694,7 @@ var getItemCount = function(orderUuid, next){
 
 	}).catch(function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});

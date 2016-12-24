@@ -42,6 +42,9 @@ router.post("/regional$" , upload.array() , function(req , res){
     res.send({ status:"success" , data:result , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     res.send({ status:"error" , data:null , message:err });
   });
 });
@@ -62,6 +65,9 @@ router.post("/sub$" , upload.array() , function(req , res){
     res.send({ status:"success" , data:result , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     res.send({ status:"error" , data:null , message:err });
   });
 });

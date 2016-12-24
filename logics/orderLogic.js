@@ -57,7 +57,7 @@ var findOne = function(id, next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			next({"status":"error", "message": "Error occurred while searching order"});
 		}
 	});
@@ -193,7 +193,7 @@ var findAllOrders = function(params, next){
 
 			    	}], function(err){
 			    		if(err){
-			    			console.log(err);
+			    			console.error(err.stack);
 			    			count++;
 			    			callback(null);
 			    		}
@@ -201,6 +201,9 @@ var findAllOrders = function(params, next){
 
 			    },
 			    function (err) {
+							if(err){
+								console.error(err.stack);
+							}
 			        // 5 seconds have passed, n = 5
 			        next({"status": "success", data: orderList});
 			    }
@@ -213,7 +216,7 @@ var findAllOrders = function(params, next){
 		}
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			next({"status": "error", "message": "Error while getting all orders"});
 			return;
 		}
@@ -268,7 +271,7 @@ var findAllOrdersByMobile = function(params, next){
 		}
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			next({"status": "error", "message": "Error while getting all orders"});
 			return;
 		}
@@ -470,7 +473,7 @@ var deleteOrder = function(orderUuid , next){
 	 })
 	 .catch(function(err){
 		 if(err){
-			 console.error(err);
+			 console.error(err.stack);
 		 }
 		 next({statusCode: HttpStatus.INTERNAL_SERVER_ERROR , status: "error" , message: err });
 	 });
@@ -497,6 +500,7 @@ var confirmOrder = function(id, code, next){
 				return;
 			}).catch(function(err){
 				if(err){
+					console.error(err.stack);
 					next({"status": "error", "message": "Error while saving status"});
 					return;
 				}
@@ -530,6 +534,7 @@ var receiveOrder = function(id, operator, next){
 				return;
 			}).catch(function(err){
 				if(err){
+					console.error(err.stack);
 					next({"status": "error", "message": "Error while saving status"});
 					return;
 				}
@@ -577,6 +582,7 @@ var deliverOrder = function(id, operator, next){
 				return;
 			}).catch(function(err){
 				if(err){
+					console.error(err.stack);
 					next({"status": "error", "message": "Error while saving status"});
 					return;
 				}
@@ -629,7 +635,7 @@ var receiveVDPayment = function(paymentData, operator, next){
 
 				}).catch(function(err){
 					if(err){
-						console.log(err);
+						console.error(err.stack);
 						next({"status": "error", "message": "Error while saving status"});
 						return;
 					}
@@ -638,7 +644,7 @@ var receiveVDPayment = function(paymentData, operator, next){
 			}],
 			function(err){
 				if(err){
-					console.log(err);
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -729,7 +735,7 @@ var receivePayment = function(paymentData, operator, next){
 
 				}).catch(function(err){
 					if(err){
-						console.log(err);
+						console.error(err.stack);
 						next({"status": "error", "message": "Error while saving status"});
 						return;
 					}
@@ -738,7 +744,7 @@ var receivePayment = function(paymentData, operator, next){
 			}],
 			function(err){
 				if(err){
-					console.error(err);
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -797,6 +803,7 @@ var createByOperator = function(postData, operator, next){
 		else{
 			adminLogic.findAdmin(postData["admin"], function(err, admin){
 				if(err){
+					console.error(err.stack);
 					setOperatorCredentials("error while reading admin");
 				}
 				else if(admin){
@@ -906,7 +913,7 @@ var createByOperator = function(postData, operator, next){
 			}
 		}).catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				errorData = err;
 				createDraft("Cannot create draft order");
 			}
@@ -940,7 +947,7 @@ var createByOperator = function(postData, operator, next){
 
 			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){
 				if(err) {
-					console.error(err);
+					console.error(err.stack);
 					createMoneyOrder(err);
 				}
 				else if(!moneyOrderData) {
@@ -1040,7 +1047,7 @@ var createByOperator = function(postData, operator, next){
 
 				fs.readFile("./views/message/client.signup.handlebars" , function(err , content){
 					if(err){
-						console.error(err);
+						console.error(err.stack);
 						return;
 					}
 					contentTemplate = handlebars.compile(content.toString());
@@ -1069,7 +1076,7 @@ var createByOperator = function(postData, operator, next){
 
 	}], function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			next({ "status":"error" , "message":err , "trace":errorData });
 			return;
 		}
@@ -1159,8 +1166,9 @@ var orderDetail = function(id, next){
 				orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
 				orderDetails.data.orderData.dataValues["entry_regional_branch_label"] = null;
 
-				console.error(err);
-
+				if(err){
+						console.error(err.stack);
+				}
 				getEntryBranch(err);
 			});
 
@@ -1215,9 +1223,9 @@ var orderDetail = function(id, next){
 
 				orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting exit branch';
 				orderDetails.data.orderData.dataValues["exit_regional_branch_label"] = null;
-
-				console.error(err);
-
+				if(err){
+						console.error(err.stack);
+				}
 				getExitBranch(err);
 			});
 		// 	branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
@@ -1237,7 +1245,7 @@ var orderDetail = function(id, next){
 
 		clientLogic.findNameByMobile(orderDetails.data.orderData.dataValues.sender, function(err, full_name){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				getClient("Error while getting client name");
 			}
 			if(full_name){
@@ -1254,7 +1262,7 @@ var orderDetail = function(id, next){
 
 	}], function(err){
 		if(err){
-			console.error(err);
+			console.error(err.stack);
 			if(!errorData){
 
 				errorData = {
@@ -1346,6 +1354,7 @@ var orderDetailView = function(id, next){
 
 	}], function(err){
 		if(err){
+			console.error(err.stack);
 			if(errorData) return next(errorData);
 			else return next({"status": "error", "message": "Unknown error"});
 		}
@@ -1376,7 +1385,7 @@ var findOrderByClient = function(mobile, next){
 	}).catch(function(err){
 
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			next(err);
 		}
 
@@ -1400,7 +1409,7 @@ var updateStatus = function(data, next){
 				else next("cannot update order");
 			}).catch(function(err){
 				if(err){
-					console.log(err);
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -1409,7 +1418,7 @@ var updateStatus = function(data, next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});
@@ -1438,7 +1447,10 @@ var addItem = function(additionalData, operator, next){
 					else checkStatus("No order found by this id");
 				})
 				.catch(function(err){
-					if(err) checkStatus(err);
+					if(err){
+						console.error(err.stack);
+						checkStatus(err);
+					}
 				});
 		}, function(addPayment){
 
@@ -1448,7 +1460,10 @@ var addItem = function(additionalData, operator, next){
 		}, function(countItem){
 
 			itemLogic.getItemCount(additionalData.uuid, function(err, itemCount){
-				if(err) countItem(err);
+				if(err){
+					 console.error(err.stack);
+					 countItem(err);
+				}
 				else{
 					existingItemCount = parseInt(itemCount);
 					countItem(null);
@@ -1511,7 +1526,7 @@ var addItem = function(additionalData, operator, next){
 		}],
 		function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 				next(err);
 			}
 		});
@@ -1660,7 +1675,12 @@ var getAnalytics = function(params , next){
 			return;
 		})
 		.catch(function(err){
-			next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:JSON.stringify(err) });
+			message = "";
+			if(err){
+				message = err.message;
+				console.error(err.stack);
+			}
+			next({ status:"error" , statusCode:HttpStatus.INTERNAL_SERVER_ERROR , data:null , message: });
 			return;
 		});
 }
@@ -1789,7 +1809,7 @@ var markDeliverable = function(orderId , user  , next){
 		})
 		.catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 			}
 			next({ status: "error" , statusCode: 500 , data: null , message: err });
 		});
@@ -1928,7 +1948,7 @@ var markDelivered = function(orderId , user , next){
 		})
 		.catch(function(err){
 			if(err){
-				console.error(err);
+				console.error(err.stack);
 			}
 			next({ status: "error" , statusCode: 500 , data: null , message: err });
 		});

@@ -53,7 +53,9 @@ var getTrackerLogs = function(params , next){
     next({ status:"success" , data:results , messgae:null });
   })
   .catch(function(err){
-    console.error(err);
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message:err });
   });
 };
@@ -85,6 +87,9 @@ var getTrackerLogDetails = function(trackerLogUuid , params, next){
     next({ status:"status" , data:result , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message:err });
   });
 };
@@ -144,7 +149,7 @@ var getTrackerLogsForOrder  = function(params , next){
   .catch(function(err){
 
     if(err){
-      console.log(err);
+      console.error(err.stack);
       next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , message: err , data: null });
     }
   });
@@ -180,6 +185,9 @@ var getTrackerLogsForTracker = function(trackerId , params , next){
     next({ status:"success" , data:results , message:null });
   })
   .catch(function(err){
+    if(err){
+      console.error(err.stack);
+    }
     next({ status:"error" , data:null , message:err });
   });
 };

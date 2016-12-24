@@ -134,10 +134,13 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		})
 		.then(function(result){
-			console.log(result);
+			//console.log(result);
 		})
 		.catch(function(err){
-			console.log(err);
+      if(err){
+        console.error(err.stack);
+      }
+      //console.log(err);
 		});
 	});
 

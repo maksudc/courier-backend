@@ -29,7 +29,7 @@ var create = function(data, next){
 			}).catch(function(err){
 				if(err)
 				{
-					console.log(err);
+					console.error(err.stack);
 					return next(err);
 				}
 			});
@@ -68,6 +68,7 @@ var update = function(data, next){
 				else return next("error while updating");
 			}).catch(function(err){
 				if(err){
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -87,6 +88,7 @@ var deletedPermission = function(data, next){
 	}
 	else findByURL(data.url, function(err, permission){
 		if(err){
+			console.error(err.stack);
 			next(err);
 		}
 		else if(!permission){
@@ -101,6 +103,7 @@ var deletedPermission = function(data, next){
 				else return next("error while deleting");
 			}).catch(function(err){
 				if(err){
+					console.error(err.stack);
 					next(err);
 				}
 			});
@@ -121,9 +124,8 @@ var findByURL = function(url, next){
 
 	}).catch(function(err){
 		if(err){
-
+			console.error(err.stack);
 			next(err);
-
 		}
 	});
 };
@@ -132,12 +134,15 @@ exports.findByURL = findByURL;
 
 var checkPermission = function(url, role, next){
 	findByURL(url, function(err, permission){
-		if(err) next(err);
+		if(err){
+			console.error(err.stack);
+			next(err);
+		}
 		else if(permission){
 			next(null, permission[role]);
 		}
 		else next(null, true);
-		/*here, true is sending because it is assumed that api endpoint 
+		/*here, true is sending because it is assumed that api endpoint
 		which is not using permission has global permission to everyone*/
 	});
 };
@@ -152,7 +157,7 @@ var findAll = function(next){
 
 	}).catch(function(err){
 		if(err){
-			console.log(err);
+			console.error(err.stack);
 			next(err);
 		}
 	});

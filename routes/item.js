@@ -88,7 +88,9 @@ router.post('/receiveItem', upload.array(), function(req, res){
 	}
 
 	itemLogic.receiveItem(req.body, function(err, item){
-		console.log(err);
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({"status": "error", data: err});
 		else res.send({"status": "success", data: item});
 	});
@@ -102,7 +104,9 @@ router.post('/updateItemStatus', upload.array(), function(req, res){
 	}
 
 	itemLogic.updateItemStatus(req.body, function(err, item){
-		console.log(err);
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({"status": "error", data: err});
 		else res.send({"status": "success", data: item});
 	});
@@ -115,7 +119,9 @@ router.post('/setItemRunning', upload.array(), function(req, res){
 	}
 
 	itemLogic.setItemRunning(req.body, function(err, item){
-		console.log(err);
+		if(err){
+			console.error(err.stack);
+		}
 		if(err) res.send({"status": "error", data: err});
 		else res.send({"status": "success", data: item});
 	});
