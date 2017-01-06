@@ -10,7 +10,7 @@ module.exports = function(sequelize , DataTypes){
 		verification_code: {type: DataTypes.INTEGER},
 		national_id: {type: DataTypes.STRING},
 		status: {
-			type: DataTypes.ENUM('draft', 'verified'), 
+			type: DataTypes.ENUM('draft', 'verified'),
 			defaultValue: 'draft',
 			allowNull: false
 		}
@@ -18,9 +18,7 @@ module.exports = function(sequelize , DataTypes){
 
 		classMethods: {
 			associate: function(models){
-
 				client.belongsTo(models.region , { foreignKey: "regionId" });
-
 			}
 		}
 

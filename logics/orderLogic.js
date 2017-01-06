@@ -7,6 +7,7 @@ var itemModel = sequelize.models.item;
 var trackerLog = sequelize.models.trackerLog;
 var genericTracker = sequelize.models.genericTracker;
 var money = sequelize.models.money;
+var clientModel = sequelize.models.client;
 
 var regionalBranchLogic = require("./regionalBranchLogic");
 var subBranchLogic = require("./subBranchLogic");
@@ -1036,7 +1037,7 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	}, function(createClient){
-		console.log("Creating client");
+		console.log("Creating Sender client");
 
 		var clientData = {};
 
@@ -1077,6 +1078,49 @@ var createByOperator = function(postData, operator, next){
 				createClient(null);
 			}
 			else createClient("Cannot create client!");
+		});
+
+	}, function(createReceiverClient){
+		console.log("Creating Receiver client");
+
+		clientData = {};
+
+		if(postData.receiver) clientData["mobile"] = postData.receiver;
+		if(postData.receiver_name) clientData["full_name"] = postData.receiver_name;
+		if(postData.receiver_addr) clientData["address"] = postData.receiver_addr;
+		//if(postData.nid) clientData["national_id"] = postData.nid;
+		//if(postData.senderRegion) clientData["regionId"] = postData.senderRegion;
+		clientLogic.create(clientData, function(data){
+			if(data.status == "success"){
+				client = data.data;
+
+				fs.readFile("./views/message/client.signup.handlebars" , function(err , content){
+					if(err){
+						console.error(err.stack);
+						return;
+					}
+					contentTemplate = handlebars.compile(content.toString());
+					messageBody = null;
+
+					if(data.isNew){
+
+						console.log("Sending the client password through message....");
+						// send the password to the client by sms
+						// Send the sms with the password
+						messageBody = contentTemplate({ parcelInstance: order , client: client });
+					}else{
+						console.log("Sending the order verification code through message....");
+						//Only sends the verifcation code
+						messageBody = contentTemplate({ parcelInstance: order });
+					}
+
+					messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
+						console.log(mResponse);
+					});
+				});
+				createReceiverClient(null);
+			}
+			else createReceiverClient("Cannot create client!");
 		});
 
 	}], function(err){
