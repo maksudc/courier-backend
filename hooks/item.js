@@ -8,6 +8,7 @@ var item = sequelize.models.item;
 var subBranch = sequelize.models.subBranch;
 var regionalBranch = sequelize.models.regionalBranch;
 var trackerLog = sequelize.models.trackerLog;
+var moduleSettings = require("../config/moduleSettings");
 
 var itemLogic = require("../logics/itemLogic");
 var RouteLogic = require("../logics/branchRouteLogic");
@@ -47,7 +48,7 @@ item.hook("afterUpdate" ,function(instance , options , next){
     .getTracker()
     .then(function(trackerInstance){
 
-      if(trackerInstance){
+      if(moduleSettings.ENABLE_ITEM_TRACKING && trackerInstance){
 
         var trackerLogData = {};
 
@@ -215,7 +216,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
           return instance.getTracker();
         }).then(function(trackerItem){
 
-          if(trackerItem){
+          if(moduleSettings.ENABLE_ITEM_TRACKING && trackerItem){
 
             console.log("Got the tracker item: "+ trackerItem.uuid);
             // Update the tracker for consistency
@@ -279,7 +280,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
           })
           .then(function(trackerItem){
 
-            if(trackerItem){
+            if(moduleSettings.ENABLE_ITEM_TRACKING && trackerItem){
 
               console.log("Got the tracker Item: "+ trackerItem.uuid);
 
@@ -355,7 +356,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
             })
             .then(function(trackerItem){
 
-              if(trackerItem){
+              if(moduleSettings.ENABLE_ITEM_TRACKING && trackerItem){
 
                 console.log("Got the tracker Item: "+ trackerItem.uuid);
 
@@ -437,7 +438,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
         })
         .then(function(trackerItem){
 
-          if(trackerItem){
+          if(moduleSettings.ENABLE_ITEM_TRACKING && trackerItem){
             trackerItem.currentBranchType = updatedInstance.current_hub_type;
             trackerItem.currentBranchId = updatedInstance.current_hub;
 
@@ -479,7 +480,7 @@ item.hook("beforeUpdate" , function(instance , options , next){
         return instance.getTracker()
         .then(function(trackerItem){
 
-          if(trackerItem){
+          if(moduleSettings.ENABLE_ITEM_TRACKING && trackerItem){
             trackerItem.currentBranchType = updatedInstance.current_hub_type;
             trackerItem.currentBranchId = updatedInstance.current_hub;
 
