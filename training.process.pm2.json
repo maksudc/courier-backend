@@ -21,7 +21,10 @@
       "combine_logs": true,
       "merge_logs":true,
       "log_file": "/var/log/pm2/training.api_process.combined.log",
-      "log_date_format" : "YYYY-MM-DD HH:mm Z"
+      "log_date_format" : "YYYY-MM-DD HH:mm Z",
+      "max_memory_restart": "1G",
+      "exec_mode":"cluster",
+      "instances": 0
     }
   ]
 }
