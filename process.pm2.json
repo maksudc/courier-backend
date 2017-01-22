@@ -15,7 +15,9 @@
       "error_file": "/var/log/pm2/api_process.err.log",
       "out_file":"/var/log/pm2/api_process.out.log",
       "combine_logs": true,
-      "merge_logs":true
+      "merge_logs":true,
+      "log_file": "/var/log/pm2/api_process.combined.log",
+      "log_date_format" : "YYYY-MM-DD HH:mm Z"
     }
   ]
 }
