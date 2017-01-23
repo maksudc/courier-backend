@@ -12,8 +12,11 @@ var moment = require("moment");
 
 genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
 
-  var trackerLogData = {};
+  if(trackerInstance.trackableType == "orderItem" && !moduleSettings.ENABLE_ITEM_TRACKING){
+    return next();
+  }
 
+  var trackerLogData = {};
   trackerLogData.action = "created";
   trackerLogData.trackerId = trackerInstance.uuid;
   trackerLogData.branchType = trackerInstance.sourceBranchType;
@@ -23,10 +26,6 @@ genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
   trackerLogData.eventDateTime = eventDateTime;
   trackerLogData.createdAt = eventDateTime;
   trackerLogData.updatedAt = eventDateTime;
-
-  if(!moduleSettings.ENABLE_ITEM_TRACKING && trackerInstance.trackableType == "orderItem"){
-    return next();
-  }
 
   return trackerLog
   .create(trackerLogData)
@@ -42,6 +41,10 @@ genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
 });
 
 genericTracker.hook("beforeUpdate" , function(trackerInstance , options , next){
+
+  if(trackerInstance.trackableType == "orderItem" && !moduleSettings.ENABLE_ITEM_TRACKING){
+    return next();
+  }
 
   var snapshotInstance = trackerInstance._previousDataValues;
   var updatedInstance = trackerInstance.dataValues;

@@ -41,42 +41,41 @@ item.hook("afterUpdate" ,function(instance , options , next){
     return next();
   }
 
-  var pstatus = Promise.resolve(null);
   if(updatedInstance.status == 'delivered'){
+    if(moduleSettings.ENABLE_ITEM_TRACKING && instance){
 
-    pstatus = instance
-    .getTracker()
-    .then(function(trackerInstance){
+      instance
+      .getTracker()
+      .then(function(trackerInstance){
+          var trackerLogData = {};
+          trackerLogData.action = "delivered";
+          trackerLogData.trackerId = trackerInstance.uuid;
+          if(trackerInstance.currentBranchType){
+              trackerLogData.branchType = trackerInstance.currentBranchType;
+          }
+          trackerLogData.branchId = trackerInstance.currentBranchId;
 
-      if(moduleSettings.ENABLE_ITEM_TRACKING && trackerInstance){
+          var eventDateTime = moment.utc();
+          trackerLogData.eventDateTime = eventDateTime;
+          trackerLogData.createdAt = eventDateTime;
+          trackerLogData.updatedAt = eventDateTime;
 
-        var trackerLogData = {};
-
-        trackerLogData.action = "delivered";
-        trackerLogData.trackerId = trackerInstance.uuid;
-        if(trackerInstance.currentBranchType){
-            trackerLogData.branchType = trackerInstance.currentBranchType;
+          return trackerLog
+                .create(trackerLogData);
+      })
+      .then(function(result){
+        return next();
+      })
+      .catch(function(err){
+        if(err){
+          console.error(err.stack);
         }
-        trackerLogData.branchId = trackerInstance.currentBranchId;
-
-        var eventDateTime = moment.utc();
-        trackerLogData.eventDateTime = eventDateTime;
-        trackerLogData.createdAt = eventDateTime;
-        trackerLogData.updatedAt = eventDateTime;
-
-        return trackerLog
-        .create(trackerLogData);
-      }
-    })
-    .then(function(trackerLogItem){
-      //return next();
-    });
+        console.error("**Log addition for order item error. Ignored and passed**");
+        return next();
+      });
+    }
   }
-
-  pstatus
-  .then(function(){
-    return next();
-  });
+  return next();
 });
 
 item.hook("beforeCreate" , function(instance , options , next){
@@ -162,11 +161,9 @@ item.hook("beforeUpdate" , function(instance , options , next){
     var updatedInstance = instance.dataValues;
     var snapshotInstance = instance._previousDataValues;
 
-    console.log("Snapshot : " + snapshotInstance.uuid);
-    console.log("Instance Id: " + updatedInstance.uuid);
-
-    console.log(" Snapshot Status:  " + snapshotInstance.status);
-    console.log("Instance status: " + updatedInstance.status);
+    console.log("Snapshot order Item : " + snapshotInstance.uuid);
+    console.log("Snapshot Status:  " + snapshotInstance.status);
+    console.log("Order Item Updated status: " + updatedInstance.status);
 
     if(!instance.changed('status')){
       return next();
@@ -213,7 +210,10 @@ item.hook("beforeUpdate" , function(instance , options , next){
         .then(function(currentStatus){
 
           // Get the tracker
-          return instance.getTracker();
+          if(moduleSettings.ENABLE_ITEM_TRACKING && instance){
+              return instance.getTracker();
+          }
+          return Promise.resolve(null);
         }).then(function(trackerItem){
 
           if(moduleSettings.ENABLE_ITEM_TRACKING && trackerItem){
@@ -253,12 +253,8 @@ item.hook("beforeUpdate" , function(instance , options , next){
     else if(snapshotInstance.status == "running"){
       //  a running shipment can be recieved or expired or reached
       if(updatedInstance.status == 'received'){
-
         //instance.previousBranchType = instance.currentBranchType;
         //instance.previousBranchId = instance.currentBranchId;
-
-        console.log("Inside processor");
-
         updatedInstance.current_hub_type = updatedInstance.next_hub_type;
         updatedInstance.current_hub = updatedInstance.next_hub;
 
@@ -266,17 +262,18 @@ item.hook("beforeUpdate" , function(instance , options , next){
 
         var p1 = sequelize.Promise.resolve(updatedInstance.status);
 
-        if(updatedInstance.current_hub_type == sanitizeBranchType(updatedInstance.exit_branch_type) && updatedInstance.current_hub == updatedInstance.exit_branch){
+        if(updatedInstance.current_hub_type == sanitizeBranchType(updatedInstance.exit_branch_type) &&
+              updatedInstance.current_hub == updatedInstance.exit_branch){
+
           updatedInstance.status = "stocked";
 
           return sequelize.Promise.resolve(updatedInstance.status).then(function(updatedStatus){
+            console.log("Extra Updated item instance");
             console.log(updatedStatus);
-            console.log("On instance story...");
-            //console.log(instance);
-            console.log("Updated instance");
-            //console.log(updatedInstance);
-
-            return instance.getTracker();
+            if(moduleSettings.ENABLE_ITEM_TRACKING && instance){
+                return instance.getTracker();
+            }
+            return Promise.resolve(null);
           })
           .then(function(trackerItem){
 
@@ -298,10 +295,6 @@ item.hook("beforeUpdate" , function(instance , options , next){
             return Promise.resolve(trackerItem);
           })
           .then(function(updatedResult){
-
-            console.log("Returning to saving shipment");
-          })
-          .then(function(){
 
             instance.dataValues = updatedInstance;
 
@@ -346,13 +339,13 @@ item.hook("beforeUpdate" , function(instance , options , next){
               return Promise.resolve(updatedInstance.status);
 
             }).then(function(updatedStatus){
+              console.log("Extra Updated order item Status");
               console.log(updatedStatus);
-              console.log("On instance story...");
-              //console.log(instance);
-              console.log("Updated instance");
               //console.log(updatedInstance);
-
-              return instance.getTracker();
+              if(moduleSettings.ENABLE_ITEM_TRACKING && instance){
+                  return instance.getTracker();
+              }
+              return Promise.resolve(null);
             })
             .then(function(trackerItem){
 
@@ -374,8 +367,6 @@ item.hook("beforeUpdate" , function(instance , options , next){
               return Promise.resolve(trackerItem);
             })
             .then(function(updatedResult){
-
-              console.log("Returning to saving shipment");
               instance.dataValues = updatedInstance;
 
                 _.assignIn(instance._changed , { status: true });
@@ -433,8 +424,10 @@ item.hook("beforeUpdate" , function(instance , options , next){
           instance.updatedInstance = updatedInstance;
         })
         .then(function(){
-
-          return instance.getTracker();
+          if(moduleSettings.ENABLE_ITEM_TRACKING && instance){
+              return instance.getTracker();
+          }
+          return Promise.resolve(null);
         })
         .then(function(trackerItem){
 
@@ -450,7 +443,6 @@ item.hook("beforeUpdate" , function(instance , options , next){
 
             return trackerItem.save();
           }
-
           return Promise.resolve(trackerItem);
         })
         .then(function(updatedResult){
@@ -477,7 +469,13 @@ item.hook("beforeUpdate" , function(instance , options , next){
           updatedInstance.next_hub = updatedInstance.exit_branch;
         }
 
-        return instance.getTracker()
+        return Promise.resolve(null)
+        .then(function(){
+          if(moduleSettings.ENABLE_ITEM_TRACKING && instance){
+              return instance.getTracker();
+          }
+          return Promise.resolve(null);
+        })
         .then(function(trackerItem){
 
           if(moduleSettings.ENABLE_ITEM_TRACKING && trackerItem){
