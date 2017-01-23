@@ -6,6 +6,7 @@ var ShipmentModel = sequelize.models.shipment;
 var RouteLogic = require("../logics/branchRouteLogic");
 var genericTracker = sequelize.models.genericTracker;
 var trackerLog = sequelize.models.trackerLog;
+var moduleSettings = require("../config/moduleSettings");
 
 var moment = require("moment");
 
@@ -22,6 +23,10 @@ genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
   trackerLogData.eventDateTime = eventDateTime;
   trackerLogData.createdAt = eventDateTime;
   trackerLogData.updatedAt = eventDateTime;
+
+  if(!moduleSettings.ENABLE_ITEM_TRACKING && trackerInstance.trackableType == "orderItem"){
+    return next();
+  }
 
   return trackerLog
   .create(trackerLogData)
