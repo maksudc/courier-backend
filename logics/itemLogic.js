@@ -449,6 +449,7 @@ var updateItemStatus = function(params, next){
 				else {
 					next(null, itemCredential);
 				}
+				setStatus(null);
 			});
 
 		}).catch(function(err){
