@@ -1040,6 +1040,7 @@ var createByOperator = function(postData, operator, next){
 		console.log("Creating Sender client");
 
 		var clientData = {};
+		var client  = null;
 
 		if(postData.sender) clientData["mobile"] = postData.sender;
 		if(postData.sender_addr) clientData["address"] = postData.sender_addr;
@@ -1061,7 +1062,7 @@ var createByOperator = function(postData, operator, next){
 
 					if(data.isNew){
 
-						console.log("Sending the client password through message....");
+						console.log("Sending the sender client password through message....");
 						// send the password to the client by sms
 						// Send the sms with the password
 						messageBody = contentTemplate({ parcelInstance: order , client: client });
@@ -1070,20 +1071,20 @@ var createByOperator = function(postData, operator, next){
 						//Only sends the verifcation code
 						messageBody = contentTemplate({ parcelInstance: order });
 					}
-
 					messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
 						console.log(mResponse);
 					});
-				})
-				createClient(null);
+					createClient(null);
+				});
 			}
-			else createClient("Cannot create client!");
+			else createClient("Cannot create Sender client!");
 		});
 
 	}, function(createReceiverClient){
 		console.log("Creating Receiver client");
 
 		clientData = {};
+		var client = null;
 
 		if(postData.receiver) clientData["mobile"] = postData.receiver;
 		if(postData.receiver_name) clientData["full_name"] = postData.receiver_name;
@@ -1094,33 +1095,34 @@ var createByOperator = function(postData, operator, next){
 			if(data.status == "success"){
 				client = data.data;
 
-				fs.readFile("./views/message/client.signup.handlebars" , function(err , content){
-					if(err){
-						console.error(err.stack);
-						return;
-					}
-					contentTemplate = handlebars.compile(content.toString());
-					messageBody = null;
-
-					if(data.isNew){
-
-						console.log("Sending the client password through message....");
-						// send the password to the client by sms
-						// Send the sms with the password
-						messageBody = contentTemplate({ parcelInstance: order , client: client });
-					}else{
-						console.log("Sending the order verification code through message....");
-						//Only sends the verifcation code
-						messageBody = contentTemplate({ parcelInstance: order });
-					}
-
-					messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
-						console.log(mResponse);
-					});
-				});
+				// fs.readFile("./views/message/client.signup.handlebars" , function(err , content){
+				// 	if(err){
+				// 		console.error(err.stack);
+				// 		return;
+				// 	}
+				// 	contentTemplate = handlebars.compile(content.toString());
+				// 	messageBody = null;
+				//
+				// 	if(data.isNew){
+				//
+				// 		console.log("Sending the client password through message....");
+				// 		// send the password to the client by sms
+				// 		// Send the sms with the password
+				// 		messageBody = contentTemplate({ parcelInstance: order , client: client });
+				// 	}else{
+				// 		console.log("Sending the order verification code through message....");
+				// 		//Only sends the verifcation code
+				// 		messageBody = contentTemplate({ parcelInstance: order });
+				// 	}
+				//
+				// 	messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
+				// 		console.log(mResponse);
+				// 	});
+				// 	createReceiverClient(null);
+				// });
 				createReceiverClient(null);
 			}
-			else createReceiverClient("Cannot create client!");
+			else createReceiverClient("Cannot create Receiver client!");
 		});
 
 	}], function(err){
