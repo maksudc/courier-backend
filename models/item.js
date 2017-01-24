@@ -13,6 +13,7 @@ var item = sequelize.define('item', {
 
 module.exports = item;*/
 var Promise = require("bluebird");
+var moduleSettings = require("../config/moduleSettings");
 
 module.exports = function(sequelize , DataTypes){
 
@@ -65,6 +66,10 @@ module.exports = function(sequelize , DataTypes){
 		/**
 			* Create a tracker item corresponding to the order
 		**/
+		if(!moduleSettings.ENABLE_ITEM_TRACKING){
+			return;
+		}
+
 		orderItem
 		.getTracker()
 		.then(function(currentTrackerItem){
@@ -166,8 +171,7 @@ module.exports = function(sequelize , DataTypes){
 	});
 
 
-	item.hook("beforeDestroy" , function(orderItem , options){
-
+	item.hook("beforeDestroy" , function(orderItem , options){		
 		orderItem
 		.getTracker()
 		.then(function(trackerItem){
