@@ -27,6 +27,7 @@ var Promise = require("bluebird");
 var branchUtils = require("../utils/branch");
 var HttpStatus = require("http-status-codes");
 var moment = require("moment");
+var adminUtils = require("../utils/admin");
 
 var findOne = function(id, next){
 	if(!id){
@@ -609,6 +610,8 @@ var receiveVDPayment = function(paymentData, operator, next){
 						next({"status": "error", "message": "Sorry, this order is already paid"});
 					else
 						next({"status": "paid", payment: orderData.data.dataValues.payment});
+
+					checkCurrentStatus({"status": "paid"});
 					return;
 				}
 				else if(orderData.data.dataValues.type == 'value_delivery'){
@@ -628,6 +631,21 @@ var receiveVDPayment = function(paymentData, operator, next){
 				orderData.data.payment_status = 'paid';
 				orderData.data.pay_time = new Date();
 				orderData.data.payment_operator = operator.email;
+
+				if(!paymentData.payment_branch_type){
+					paymentData.payment_branch_type = branchUtils.sanitizeBranchType(adminUtils.getAdminBranchType(operator));
+				}
+				if(!paymentData.payment_branch_id){
+					paymentData.payment_branch_id = adminUtils.getAdminBranchId(operator);
+				}
+				orderData.data.payment_hub = paymentData.payment_branch_id;
+				orderData.data.payment_hub_type = paymentData.payment_branch_type;
+
+				if( orderData.data.entry_branch == paymentData.payment_branch_id && branchUtils.sanitizeBranchType(orderData.data.entry_branch_type) == paymentData.payment_branch_type ){
+							orderData.data.payment_tag = "booking";
+				}else if(orderData.data.exit_branch == paymentData.payment_branch_id && branchUtils.sanitizeBranchType(orderData.data.exit_branch_type) == paymentData.payment_branch_type){
+							orderData.data.payment_tag = "delivery";
+				}
 
 				orderData.data.save().then(function(newOrderData){
 
@@ -657,7 +675,6 @@ var receiveVDPayment = function(paymentData, operator, next){
 exports.receiveVDPayment = receiveVDPayment;
 
 
-
 var receivePayment = function(paymentData, operator, next){
 
 	findOne(paymentData.id, function(orderData){
@@ -671,7 +688,9 @@ var receivePayment = function(paymentData, operator, next){
 						next({"status": "error", "message": "Sorry, this order is already paid"});
 					else
 						next({"status": "paid", payment: orderData.data.dataValues.payment});
-					return;
+
+					checkCurrentStatus({"status": "paid"});
+					return ;
 				}
 				else if(orderData.data.dataValues.type == 'value_delivery'){
 					orderData.data.getMoney_order().then(function(moneyOrderData){
@@ -720,6 +739,12 @@ var receivePayment = function(paymentData, operator, next){
 				orderData.data.pay_time = new Date();
 				orderData.data.payment_operator = operator.email;
 
+				if(!paymentData.payment_branch_type){
+					paymentData.payment_branch_type = branchUtils.sanitizeBranchType(adminUtils.getAdminBranchType(operator));
+				}
+				if(!paymentData.payment_branch_id){
+					paymentData.payment_branch_id = adminUtils.getAdminBranchId(operator);
+				}
 				orderData.data.payment_hub = paymentData.payment_branch_id;
 				orderData.data.payment_hub_type = paymentData.payment_branch_type;
 
