@@ -444,31 +444,37 @@ var deleteOrder = function(orderUuid , next){
 	 .then(function(orderItem){
 		 return orderItem.getTracker();
 	 })
-	 .then(function(trackerItem){
-		 trackerInstances.push(trackerItem.uuid);
+	//  .then(function(trackerItem){
+	// 	 trackerInstances.push(trackerItem.uuid);
+	//  })
+	//  .then(function(result){
+	// 	 return orderInstance.getItems();
+	//  })
+	//  .map(function(itemInstance){
+	// 		return itemInstance.getTracker();
+	//  })
+	//  .map(function(itemTrackerInstance){
+	// 	 return itemTrackerInstance.uuid ;
+	//  })
+	//  .then(function(result){
+	// 	 return trackerLog.destroy({ where: { trackerId: trackerInstances } });
+	//  })
+	 .then(function(trackerInstance){
+		 if(trackerInstance){
+			 	trackerLog.destroy({ where: { trackerId: trackerInstance.uuid } });
+		 }
+		 return Promise.resolve(trackerInstance);
 	 })
-	 .then(function(result){
-		 return orderInstance.getItems();
+	 .then(function(trackerInstance){
+		 if(trackerInstance){
+			 	return genericTracker.destroy({ where:{ uuid: trackerInstance.uuid } });
+		 }
 	 })
-	 .map(function(itemInstance){
-			return itemInstance.getTracker();
-	 })
-	 .map(function(itemTrackerInstance){
-		 return itemTrackerInstance.uuid ;
-	 })
-	 .then(function(results){
-
-		 trackerInstances = trackerInstances.concat(results);
+	 .then(function(){
 		 return itemModel.destroy({ where: { orderUuid: orderInstance.uuid } });
 	 })
 	 .then(function(result){
 		 return orderInstance.destroy();
-	 })
-	 .then(function(result){
-		 return trackerLog.destroy({ where: { trackerId: trackerInstances } });
-	 })
-	 .then(function(results){
-		 return genericTracker.destroy({ where:{ uuid: trackerInstances } });
 	 })
 	 .then(function(result){
 		 next({ status: "success" , statusCode: HttpStatus.OK , message:"Deleted Successfully" });
