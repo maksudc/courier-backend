@@ -12,7 +12,7 @@ router.use(middleware.checkPermission);
 
 
 router.get("/" , function(req, res){
-	
+
 	console.log("In report router");
 	reportLogic.getReport(function(err, reportData){
 		if(err) res.send({"status": "error", error: err});
@@ -22,7 +22,7 @@ router.get("/" , function(req, res){
 
 router.get("/parcel/cashin", function(req, res){
 
-	reportLogic.getOrderPaymentData(req.query, req.user, function(err, reportData){
+	reportLogic.getOrderPaymentByBranch(req.query, req.user, function(err, reportData){
 		if(err) res.send({"status": "error", error: err});
 		else res.send({"status": "success", data: reportData});
 	});
