@@ -3,7 +3,7 @@ var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;
 var adminModel = sequelize.models.admin;
 var async = require('async');
-
+var adminUtils = require("../../utils/admin");
 
 var checkLogin = function(email, password, next){
     adminModel.find({
@@ -162,7 +162,14 @@ var updateSelf = function(adminData, next){
                     admin.address = adminData.address;
                 if(adminData.password && adminData.password != '')
                     admin.password = adminData.password;
-
+                if(adminData.regionalBranch && adminUtils.isPrivileged(admin.role)){
+                    admin.regional_branch_id = adminData.regionalBranch;
+                }
+                if(adminData.subBranch && adminUtils.isPrivileged(admin.role)){
+                    admin.sub_branch_id = adminData.subBranch;
+                }else if(!adminData.subBranch && adminUtils.isPrivileged(admin.role)){
+                    admin.sub_branch_id = null;
+                }
                 admin.save().then(function(admin){
                     next(null, admin);
                     emailCheck(null);
