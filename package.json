@@ -21,6 +21,7 @@
     "handlebars": "^4.0.5",
     "http-status-codes": "^1.0.6",
     "jade": "~1.11.0",
+    "json2csv": "^3.7.3",
     "lodash": "^4.13.1",
     "moment": "^2.12.0",
     "moment-timezone": "~0.5.5",

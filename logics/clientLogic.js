@@ -132,6 +132,24 @@ var getAll = function(next){
 
 exports.getAll = getAll;
 
+var getAllForExport = function(next){
+
+  clientModel
+  .findAll({
+    attributes: ['mobile' , 'full_name' , 'address' , 'national_id' , 'created_at']
+  })
+  .then(function(clientList){
+
+  })
+  .catch(function(err){
+      if(err){
+        console.error(err.stack);
+        next(err);
+      }
+  })
+  ;
+}
+
 var findManyByMobile = function(mobile, next){
 
 	console.log("Adsasdfadsf");
