@@ -8,8 +8,12 @@ var handlebars = require("handlebars");
 
 var messageUtils = require("../utils/message");
 
-
 var _ = require('lodash');
+
+var exportableFields = ['mobile' , 'full_name' , 'address' , 'national_id' ];
+var exportableColumnNames = ["Phone" , "Name" , "Address" , "National Id"];
+exports.exportableFields = exportableFields;
+exports.exportableColumnNames = exportableColumnNames;
 
 function makePass()
 {
@@ -136,19 +140,21 @@ var getAllForExport = function(next){
 
   clientModel
   .findAll({
-    attributes: ['mobile' , 'full_name' , 'address' , 'national_id' , 'created_at']
+    attributes: exportableFields
   })
   .then(function(clientList){
-
+      next(null , clientList);
   })
   .catch(function(err){
       if(err){
         console.error(err.stack);
         next(err);
+      }else{
+        next({ status:"error",message:"api error while exporting clients" });
       }
-  })
-  ;
+  });
 }
+exports.getAllForExport = getAllForExport;
 
 var findManyByMobile = function(mobile, next){
 

@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 var messageUtils = require("../utils/message");
 var Promise = require("bluebird");
 var phoneUtils = require("../utils/phone");
+var json2csv = require("json2csv");
 
 router.get('/getAll', function(req, res){
 	clientLogic.getAll(function(err, clientList){
@@ -41,6 +42,44 @@ router.get('/get/:mobile', function(req, res){
 			else res.send({"status": "success", data: clientList});
 		});
 	}
+});
+
+router.get("/getForExport" , function(req , res){
+		// if(!req.params || !req.params.format){
+		// 	res.status(400);
+		// 	res.send({ status:"error" , message:"format must be sent with parameter" });
+		// 	return;
+		// }
+		//if(req.params.format == "csv"){
+	      clientLogic.getAllForExport(function(err , clientList){
+					if(err){
+						res.status(500);
+						res.send({status: "error", message: "Error while getting clients"});
+					}
+					else if(!clientList){
+						res.status(200);
+						res.send({"status": "success", data: null, message: "No Clients found"});
+					}
+					else{
+						csvData = json2csv({ data: clientList , fields: clientLogic.exportableFields  , fieldNames: clientLogic.exportableColumnNames} , function(err , fcsv){
+								if(err){
+									res.status(500);
+									res.send({ status:"error" , message:"error while preparing csv exports" });
+									return;
+								}
+
+								res.setHeader('Content-disposition', 'attachment; filename=clients.csv');
+								res.set('Content-Type', 'text/csv');
+
+								res.status(200);
+								res.send(fcsv);
+						});
+					}
+				});
+		// }else{
+		// 	res.status(415);
+		// 	res.send({ status:"error" , message:"format is not supported" });
+		// }
 });
 
 router.post("/password/resend" , upload.array() , function(req , res){
