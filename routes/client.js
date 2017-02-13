@@ -10,6 +10,7 @@ var messageUtils = require("../utils/message");
 var Promise = require("bluebird");
 var phoneUtils = require("../utils/phone");
 var json2csv = require("json2csv");
+var adminUtils = require("../utils/admin");
 
 router.get('/getAll', function(req, res){
 	clientLogic.getAll(function(err, clientList){
@@ -44,13 +45,13 @@ router.get('/get/:mobile', function(req, res){
 	}
 });
 
-router.get("/getForExport" , function(req , res){
-		// if(!req.params || !req.params.format){
-		// 	res.status(400);
-		// 	res.send({ status:"error" , message:"format must be sent with parameter" });
-		// 	return;
-		// }
-		//if(req.params.format == "csv"){
+router.get("/getAllForExport" , function(req , res){
+		if(!req.query || !req.query.format){
+			res.status(400);
+			res.send({ status:"error" , message:"format must be sent with parameter" });
+			return;
+		}
+		if(req.query.format == "csv"){
 	      clientLogic.getAllForExport(function(err , clientList){
 					if(err){
 						res.status(500);
@@ -76,10 +77,10 @@ router.get("/getForExport" , function(req , res){
 						});
 					}
 				});
-		// }else{
-		// 	res.status(415);
-		// 	res.send({ status:"error" , message:"format is not supported" });
-		// }
+		}else{
+			res.status(415);
+			res.send({ status:"error" , message:"format is not supported" });
+		}
 });
 
 router.post("/password/resend" , upload.array() , function(req , res){
