@@ -1790,7 +1790,7 @@ var markDeliverable = function(orderId , user  , next){
 
 			updateData.status = "stocked";
 
-			return orderModel.update(updateData , { where: { uuid: orderId } });
+			return orderModel.update(updateData , { where: { uuid: orderId }, individualHooks: true });
 		})
 		.then(function(result){
 			if(result){
