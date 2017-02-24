@@ -10,6 +10,7 @@ var branchUtils = require('../utils/branch');
 var async = require('async');
 var _ = require('lodash');
 var moment = require('moment-timezone');
+var Promise = require("bluebird");
 
 var findOrderData = function(params, next){
 	orderModel.findAll({where: params, attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_status']})
@@ -150,8 +151,6 @@ var getOrderPaymentData = function(params, operator, next){
 exports.getOrderPaymentData = getOrderPaymentData;
 
 var getOrderPaymentByBranch = function(params, operator, next){
-	var Promise = require("bluebird");
-
 	var searchParams = {};
 	var receiverAdminList = [];
 	var filteringDateParam = {};
@@ -178,7 +177,7 @@ var getOrderPaymentByBranch = function(params, operator, next){
 
 		timeSearchParams = {
 			"$and": [
-				{$gt: startDateTime},
+				{$gte: startDateTime},
 				{$lt: endDateTime}
 			]
 		}
@@ -189,13 +188,13 @@ var getOrderPaymentByBranch = function(params, operator, next){
 		var endDateTime = currentDate.toDate();
 
 		startDateTime.setDate(startDateTime.getDate() - 1);
-		startDateTime.setHours(6, 0, 0, 0);
 
+		startDateTime.setHours(6, 0, 0, 0);
 		endDateTime.setHours(6, 0, 0, 0);
 
 		timeSearchParams = {
 			"$and": [
-				{$gt: startDateTime},
+				{$gte: startDateTime},
 				{$lt: endDateTime}
 			]
 		}
@@ -203,12 +202,13 @@ var getOrderPaymentByBranch = function(params, operator, next){
 	}
 	else {
 		//Means today
+		// Server is configured with UTC.
 		if(filteringDate.getHours() < 6){
 			filteringDate.setDate(filteringDate.getDate() - 1);
 		}
 		filteringDate.setHours(6, 0, 0, 0);
 
-		timeSearchParams = {$gt: filteringDate};
+		timeSearchParams = {$gte: filteringDate};
 	}
 
 	var whereParams = [
@@ -231,11 +231,12 @@ var getOrderPaymentByBranch = function(params, operator, next){
 		return Promise.resolve(subBranchIdList);
 	})
 	.then(function(subBranchIds){
-		console.log(subBranchIds);
-		console.log(subBranchIdList);
 		if(subBranchIdList.length > 0){
 			 whereParams.push({ payment_hub_type: "sub" });
 			 whereParams.push({ payment_hub: { "$in": subBranchIdList } });
+		}
+		if(params.payment_tag){
+			whereParams.push({ payment_tag: params.payment_tag });
 		}
 	})
 	.then(function(){
