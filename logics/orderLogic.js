@@ -1771,15 +1771,14 @@ exports.getAnalytics = getAnalytics;
 
 var markDeliverable = function(orderId , user  , next){
 
-		// console.log(orderId);
-		// console.log(user);
-		var trackerInstances = [];
 		var orderObject = null;
+		var trackerInstance = null;
 		var updateData = {};
 
 		orderModel
 		.findOne({ where: { uuid: orderId }  })
 		.then(function(orderInstance){
+
 			orderObject = orderInstance;
 
 			updateData.current_hub_type = branchUtils.sanitizeBranchType(orderObject.dataValues.exit_branch_type);
@@ -1792,102 +1791,67 @@ var markDeliverable = function(orderId , user  , next){
 
 			return orderModel.update(updateData , { where: { uuid: orderId }, individualHooks: true });
 		})
-		.then(function(result){
-			if(result){
-				next({ status: "success" , statusCode: 200 , data: result , message: null });
-			}else{
-				next({ status: "error" , statusCode: 500 , data: null , message: result });
-			}
-			return Promise.resolve(result);
-		})
-		.then(function(){
-				return orderModel.findOne({ where: { uuid: orderId }  });
-		})
-		.then(function(orderInstance){
-
-			orderObject = orderInstance;
-
-			if(orderInstance){
-
-				return orderInstance
-				.getTracker()
-				.then(function(trackerInstance){
-					trackerInstances.push(trackerInstance);
-				})
-				.then(function(){
-
-					return orderInstance
-					.getItems()
-					.map(function(itemInstance){
-						return itemInstance.getTracker();
-					})
-					.map(function(itemTrackerInstance){
-						return itemTrackerInstance;
-					})
-					.then(function(results){
-						for(I = 0 ; I< results.length ; I++){
-							trackerInstances.push(results[I]);
-						}
-						return Promise.resolve(trackerInstances);
-					});
-				});
-			}
-			return Promise.resolve(trackerInstances);
-		})
-		.map(function(trackerInstance){
-
-			var trackerLogData = {};
-
-			// trackerLogData.action = "delivered";
-			trackerLogData.trackerId = trackerInstance.uuid;
-			if(trackerInstance.destinationBranchType){
-					trackerLogData.branchType = trackerInstance.destinationBranchType;
-			}
-			trackerLogData.branchId = trackerInstance.destinationBranchId;
-
-			var eventDateTime = moment.utc();
-			trackerLogData.eventDateTime = eventDateTime;
-			trackerLogData.createdAt = eventDateTime;
-			trackerLogData.updatedAt = eventDateTime;
-
-			var trackerReachedLogData = {};
-			trackerReachedLogData.action = "reached";
-			trackerReachedLogData.trackerId = trackerLogData.trackerId;
-			trackerReachedLogData.branchType = trackerLogData.branchType;
-			trackerReachedLogData.branchId = trackerLogData.branchId;
-			trackerReachedLogData.eventDateTime = eventDateTime - 2000 ;
-			trackerLogData.createdAt = trackerReachedLogData.eventDateTime;
-			trackerLogData.updatedAt = trackerReachedLogData.eventDateTime;
-
-			return trackerLog
-			.findOne({ where: { action: "reached" , trackerId: trackerInstance.uuid } })
-			.then(function(logData){
-				if(!logData){
-					return Promise.all( [ trackerLog.create(trackerReachedLogData) /*, trackerLog.create(trackerLogData)*/ ] );
-				}
-				return Promise.resolve([logData]);
-			})
-			.then(function(results){
-
-				trackerUpdateData = {};
-
-				trackerUpdateData.previousBranchType = trackerInstance.currentBranchType;
-				trackerUpdateData.previousBranchId = trackerInstance.currentBranchId;
-
-				trackerUpdateData.currentBranchType = trackerInstance.destinationBranchType;
-				trackerUpdateData.currentBranchId = trackerInstance.destinationBranchId;
-
-				trackerUpdateData.nextBranchType = trackerInstance.destinationBranchType;
-				trackerUpdateData.nextBranchId = trackerInstance.destinationBranchId;
-
-				return genericTracker.update(trackerUpdateData , { where: { uuid: trackerInstance.uuid } });
-			});
-		})
 		.then(function(results){
 
 			if(orderObject){
 				return itemModel.update( updateData , { where: { orderUuid: orderObject.uuid } });
 			}
+		})
+		.then(function(){
+
+			orderInstance = orderObject;
+			if(orderInstance){
+
+				return orderInstance
+				.getTracker();
+			}
+			return Promise.resolve(null);
+		})
+		.then(function(orderTrackerInstance){
+
+			trackerInstance = orderTrackerInstance;
+			if(!trackerInstance){
+				return Promise.resolve(null);
+			}
+
+			trackerUpdateData = {};
+			trackerUpdateData.previousBranchType = trackerInstance.currentBranchType;
+			trackerUpdateData.previousBranchId = trackerInstance.currentBranchId;
+
+			trackerUpdateData.currentBranchType = trackerInstance.destinationBranchType;
+			trackerUpdateData.currentBranchId = trackerInstance.destinationBranchId;
+
+			trackerUpdateData.nextBranchType = trackerInstance.destinationBranchType;
+			trackerUpdateData.nextBranchId = trackerInstance.destinationBranchId;
+
+			return genericTracker.update(trackerUpdateData , { where: { uuid: trackerInstance.uuid } });
+		})
+		.then(function(result){
+
+			return trackerLog
+						.findOne({ where: { action: "reached" , trackerId: trackerInstance.uuid } });
+		})
+		.then(function(logData){
+
+			if(!trackerInstance){ return Promise.resolve(null);  }
+
+			if(!logData){
+
+				trackerReachedLogData = {};
+				trackerReachedLogData.action = "reached";
+				trackerReachedLogData.trackerId = trackerInstance.uuid;
+				trackerReachedLogData.branchType = trackerInstance.destinationBranchType;
+				trackerReachedLogData.branchId = trackerInstance.destinationBranchId;
+				trackerReachedLogData.eventDateTime = moment.utc();
+				trackerReachedLogData.createdAt = moment.utc();
+				trackerReachedLogData.updatedAt = trackerReachedLogData.createdAt;
+
+				return Promise.all( [ trackerLog.create(trackerReachedLogData) ] );
+			}
+			return Promise.resolve([logData]);
+		})
+		.then(function(results){
+			next({ status: "success" , statusCode: 200 , data: null , message: null });
 		})
 		.catch(function(err){
 			if(err){
