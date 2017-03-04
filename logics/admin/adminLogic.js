@@ -150,6 +150,7 @@ var updateSelf = function(adminData, next){
                 emailCheck("Admin doesnot exists");
             }
             else {
+                console.log(adminData);
                 if(adminData.fullName && adminData.fullName != '')
                     admin.full_name = adminData.fullName;
                 if(adminData.nationalID && adminData.nationalID != '')
@@ -162,10 +163,10 @@ var updateSelf = function(adminData, next){
                     admin.address = adminData.address;
                 if(adminData.password && adminData.password != '')
                     admin.password = adminData.password;
-                if(adminData.regionalBranch && adminUtils.isPrivileged(admin.role)){
+                if(adminData.regionalBranch && adminUtils.isPivilegedForProfileBranchUpdate(admin.role)){
                     admin.regional_branch_id = adminData.regionalBranch;
                 }
-                if(adminData.subBranch && adminUtils.isPrivileged(admin.role)){
+                if(adminData.subBranch && adminUtils.isPivilegedForProfileBranchUpdate(admin.role)){
                     admin.sub_branch_id = adminData.subBranch;
                 }else if(!adminData.subBranch && adminUtils.isPrivileged(admin.role)){
                     admin.sub_branch_id = null;

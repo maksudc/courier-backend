@@ -7,7 +7,7 @@ var checkPermission = function(req, res, next){
 
 	if(req.user.role == Config.adminTypes.super_admin.type) next();
 	else permissionLogic.checkPermission(req.baseUrl + req.path, req.user.role, function(err, result){
-		console.log(err);
+		console.error(err);
 		console.log(result);
 		if(err || !result) return res.sendStatus(401);
 		else next();
@@ -37,4 +37,3 @@ var makeVerficationCode = function()
 }
 
 exports.makeVerficationCode = makeVerficationCode;
-
