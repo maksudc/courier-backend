@@ -137,9 +137,9 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           .findOne({ where: { trackableType: "shipment" , trackableId:instance.uuid } })
           .then(function(trackerItem){
 
-            console.log("Got the tracker Item: "+ trackerItem.uuid);
-
             if(trackerItem){
+
+              console.log("Got the tracker Item: "+ trackerItem.uuid);
 
               trackerItem.currentBranchType = updatedInstance.currentBranchType;
               trackerItem.currentBranchId = updatedInstance.currentBranchId;
