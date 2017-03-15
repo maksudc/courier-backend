@@ -9,6 +9,8 @@ var bodyParser = require('body-parser');
 //Authentication support
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
+var HttpStatus = require("http-status-codes");
+
 router.use(passport.authenticate('basic', {session: false}));
 router.use(middleware.checkPermission);
 
@@ -36,6 +38,22 @@ router.get('/viewAll', function(req, res){
 		if(err) res.send({"status": "error", error: err});
 		else if(!data) res.send({"status": "error", data: []});
 		else res.send({"status": "success", data: data});
+	});
+
+});
+
+router.get('/all', function(req, res){
+
+	moneyLogic.genericFindAll(req.query, function(err, data){
+		if(err){
+			console.error(err.stack);
+			res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+			res.send({"status": "error", error: err});
+			return;
+		}
+		// else if(!data) res.send({"status": "error", data: []});
+		res.status(HttpStatus.OK);
+		res.send({"status": "success", data: data});
 	});
 
 });

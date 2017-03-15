@@ -125,6 +125,41 @@ var findAll = function(adminData, next){
 
 exports.findAll = findAll;
 
+var genericFindAll = function(params , next){
+
+	params = params || {};
+
+	// sourceBranchParams.push({status: {"$in": ['draft', 'received']}});
+	// destinationBranchParams.push({status: {"$in": ['deliverable', 'delivered']}});
+
+
+	var filterParams = {
+		"$and":[
+			{"$and": destinationBranchParams},
+			{"$and": sourceBranchParams}
+		]
+	};
+
+	for(param_key in params){
+		if(params.hasOwnProperty(param_key)){
+			filterParams["$and"].push({
+					
+			});
+		}
+	}
+
+	moneyModel.findAll({where: filterParams}).then(function(moneyOrderList){
+		if(moneyOrderList) next(null, moneyOrderList);
+		else next(null, false);
+	}).catch(function(err){
+		if(err){
+			console.error(err.stack);
+			next(err);
+		}
+	});
+};
+exports.genericFindAll = genericFindAll;
+
 var findById = function(id, next){
 
 	moneyModel.findOne({where: {id: id}}).then(function(moneyOrder){
