@@ -132,23 +132,12 @@ var genericFindAll = function(params , next){
 	// sourceBranchParams.push({status: {"$in": ['draft', 'received']}});
 	// destinationBranchParams.push({status: {"$in": ['deliverable', 'delivered']}});
 
-
-	var filterParams = {
-		"$and":[
-			{"$and": destinationBranchParams},
-			{"$and": sourceBranchParams}
-		]
-	};
-
-	for(param_key in params){
-		if(params.hasOwnProperty(param_key)){
-			filterParams["$and"].push({
-					
-			});
-		}
+	whereQuery = {};
+	if(params.where){
+		whereQuery = JSON.parse(params.where);
 	}
 
-	moneyModel.findAll({where: filterParams}).then(function(moneyOrderList){
+	moneyModel.findAll({where: whereQuery}).then(function(moneyOrderList){
 		if(moneyOrderList) next(null, moneyOrderList);
 		else next(null, false);
 	}).catch(function(err){
