@@ -149,6 +149,72 @@ var genericFindAll = function(params , next){
 };
 exports.genericFindAll = genericFindAll;
 
+var findBookings = function(params ,next){
+
+	var adminUtils = require("../utils/admin");
+
+	params = params || {};
+
+	var filterParams = {};
+
+	if(params["source_regional_branch_id"]){
+		filterParams["source_regional_branch_id"] = params["source_regional_branch_id"];
+	}
+	if(params["source_sub_branch_id"]){
+		filterParams["source_sub_branch_id"] = params["source_sub_branch_id"];
+	}
+
+	// isAllowed = false;
+	// if(adminUtils.isPrivileged(adminData["role"])){
+	// 		isAllowed = true;
+	// }else if(adminData["regional_branch_id"]==params["source_regional_branch_id"] && adminData["sub_branch_id"]==params["source_sub_branch_id"]){
+	// 		isAllowed = true;
+	// }
+	// if(!isAllowed){
+	//
+	// 	next({ status:"error" , message:"Not allowed to fetch the money orders with spcified paramters and privilege" });
+	// 	return;
+	// }
+
+	var queryParams = {};
+	queryParams["where"] = filterParams;
+
+	if(params.where){
+		queryParams["where"] = JSON.parse(params.where);
+	}
+	if(params.order){
+		queryParams["order"] = params.order;
+	}
+	if(params.limit){
+			queryParams["limit"] = parseInt(params.limit);
+	}
+	if(params.page && parseInt(params.page) > 0 && queryParams["limit"]){
+			queryParams["offset"] = (parseInt(params.page)-1) * queryParams["limit"];
+	}
+
+	moneyModel
+		.findAll(queryParams)
+		.then(function(moneyOrderList){
+			if(moneyOrderList){
+
+				resultData = {};
+				resultData["objects"] = moneyOrderList;
+				resultData["pagination"] = {};
+				resultData["pagination"]["page"] = params.page;
+				resultData["pagination"]["limit"] = params.limit;
+				next(null, resultData);
+			}
+			else next(null, false);
+		})
+		.catch(function(err){
+			if(err){
+				console.error(err.stack);
+				next(err);
+			}
+	});
+}
+exports.findBookings = findBookings;
+
 var findById = function(id, next){
 
 	moneyModel.findOne({where: {id: id}}).then(function(moneyOrder){

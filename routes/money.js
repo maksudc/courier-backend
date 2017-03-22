@@ -42,9 +42,9 @@ router.get('/viewAll', function(req, res){
 
 });
 
-router.get('/all', function(req, res){
+router.get('/bookings', function(req, res){
 
-	moneyLogic.genericFindAll(req.query, function(err, data){
+	moneyLogic.findBookings(req.query , function(err, data){
 		if(err){
 			console.error(err.stack);
 			res.status(HttpStatus.INTERNAL_SERVER_ERROR);
