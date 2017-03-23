@@ -193,6 +193,18 @@ var findBookings = function(params ,next){
 					resultData["pagination"]["maxPage"] = 1;
 				}
 
+				if(params.page >= 1 && params.page < resultData["pagination"]["maxPage"] ){
+					resultData["pagination"]["nextPageNo"] = params.page + 1;
+				}else{
+					resultData["pagination"]["nextPageNo"] = null;
+				}
+
+				if(params.page > 1 && params.page <= resultData["pagination"]["maxPage"]){
+					resultData["pagination"]["previousPageNo"] = params.page -1;
+				}else{
+					resultData["pagination"]["previousPageNo"] = null;
+				}
+
 				resultData["pagination"]["page"] = params.page;
 				resultData["pagination"]["limit"] = params.limit;
 				next(null, resultData);
