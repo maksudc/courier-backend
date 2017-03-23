@@ -13,6 +13,7 @@ var async = require("async");
 var middleware = require(process.cwd()+ '/middleware');
 var branchUtils = require("../utils/branch");
 var Promise = require("bluebird");
+var adminUtils = require("../utils/admin");
 
 var create = function(operator, moneyData, next){
 	//console.log(moneyData);
@@ -125,33 +126,7 @@ var findAll = function(adminData, next){
 
 exports.findAll = findAll;
 
-var genericFindAll = function(params , next){
-
-	params = params || {};
-
-	// sourceBranchParams.push({status: {"$in": ['draft', 'received']}});
-	// destinationBranchParams.push({status: {"$in": ['deliverable', 'delivered']}});
-
-	whereQuery = {};
-	if(params.where){
-		whereQuery = JSON.parse(params.where);
-	}
-
-	moneyModel.findAll({where: whereQuery}).then(function(moneyOrderList){
-		if(moneyOrderList) next(null, moneyOrderList);
-		else next(null, false);
-	}).catch(function(err){
-		if(err){
-			console.error(err.stack);
-			next(err);
-		}
-	});
-};
-exports.genericFindAll = genericFindAll;
-
 var findBookings = function(params ,next){
-
-	var adminUtils = require("../utils/admin");
 
 	params = params || {};
 
@@ -162,6 +137,12 @@ var findBookings = function(params ,next){
 	}
 	if(params["source_sub_branch_id"]){
 		filterParams["source_sub_branch_id"] = params["source_sub_branch_id"];
+	}
+	if(params["status"]){
+		filterParams["status"] = params["status"];
+	}
+	if(params["paid"]){
+		filterParams["paid"] = params["paid"];
 	}
 
 	// isAllowed = false;
@@ -186,31 +167,43 @@ var findBookings = function(params ,next){
 		queryParams["order"] = params.order;
 	}
 	if(params.limit){
-			queryParams["limit"] = parseInt(params.limit);
+			params.limit = parseInt(params.limit);
+	}else{
+		params.limit = 10;
 	}
+	queryParams["limit"] = params.limit;
+
 	if(params.page && parseInt(params.page) > 0 && queryParams["limit"]){
-			queryParams["offset"] = (parseInt(params.page)-1) * queryParams["limit"];
+			params.page = parseInt(params.page);
+	}else{
+		params.page = 1;
 	}
+	queryParams["offset"] = (params.page-1) * queryParams["limit"];
+	queryParams["count"] = true;
 
 	moneyModel
-		.findAll(queryParams)
+		.findAndCountAll(queryParams)
 		.then(function(moneyOrderList){
-			if(moneyOrderList){
-
 				resultData = {};
 				resultData["objects"] = moneyOrderList;
 				resultData["pagination"] = {};
+
+				resultData["pagination"]["maxPage"] = Math.ceil(resultData["objects"].count / params.limit);
+				if(resultData["pagination"]["maxPage"]==0){
+					resultData["pagination"]["maxPage"] = 1;
+				}
+
 				resultData["pagination"]["page"] = params.page;
 				resultData["pagination"]["limit"] = params.limit;
 				next(null, resultData);
-			}
-			else next(null, false);
 		})
 		.catch(function(err){
 			if(err){
 				console.error(err.stack);
 				next(err);
+				return;
 			}
+			next({ status:"error" , message:"Error occured" });
 	});
 }
 exports.findBookings = findBookings;
