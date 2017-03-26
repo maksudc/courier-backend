@@ -14,7 +14,6 @@ var HttpStatus = require("http-status-codes");
 router.use(passport.authenticate('basic', {session: false}));
 router.use(middleware.checkPermission);
 
-
 router.post('/create', upload.array(), function(req, res){
 	moneyLogic.create(req.user, req.body, function(err, data){
 		if(err){
@@ -38,22 +37,6 @@ router.get('/viewAll', function(req, res){
 		if(err) res.send({"status": "error", error: err});
 		else if(!data) res.send({"status": "error", data: []});
 		else res.send({"status": "success", data: data});
-	});
-
-});
-
-router.get('/bookings', function(req, res){
-
-	moneyLogic.findBookings(req.query , function(err, data){
-		if(err){
-			console.error(err.stack);
-			res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-			res.send({"status": "error", error: err});
-			return;
-		}
-		// else if(!data) res.send({"status": "error", data: []});
-		res.status(HttpStatus.OK);
-		res.send({"status": "success", data: data});
 	});
 
 });

@@ -14,6 +14,7 @@ var middleware = require(process.cwd()+ '/middleware');
 var branchUtils = require("../utils/branch");
 var Promise = require("bluebird");
 var adminUtils = require("../utils/admin");
+var Promise = require("bluebird");
 
 var create = function(operator, moneyData, next){
 	//console.log(moneyData);
@@ -122,8 +123,7 @@ var findAll = function(adminData, next){
 		}
 	});
 
-}
-
+};
 exports.findAll = findAll;
 
 var findBookings = function(params ,next){
@@ -691,3 +691,22 @@ var updateVDPrice = function(moneyData, next){
 }
 
 exports.updateVDPrice = updateVDPrice;
+
+var getTotalMoneyCount = function(next){
+
+	return moneyModel
+	.count()
+	.then(function(c){
+		if(next){
+			next(null , c);
+		}
+		return Promise.resolve(c);
+	})
+	.catch(function(err){
+		if(err){
+			console.error(err.stack);
+		}
+		next(err);
+	});
+};
+exports.getTotalMoneyCount = getTotalMoneyCount;

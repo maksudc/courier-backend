@@ -31,6 +31,9 @@ router.use("/routes" , routeRouter);
 var regionRouter = require("./region");
 router.use("/region" , regionRouter);
 
+var dataBinderRouter = require("./data_binder");
+router.use("/data-binder" , dataBinderRouter);
+
 router.use("/admin", require("./admin"));
 
 router.use("/permission", require("./permission"));
