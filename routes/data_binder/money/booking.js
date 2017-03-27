@@ -21,15 +21,21 @@ router.get('/', function(req, res){
 		.getTotalMoneyCount(null)
 		.then(function(c){
 
-			recordsTotal = c;
-			recordsFiltered = data.objects.count;
+			recordsTotal = data.objects.count;
+			recordsFiltered = data.objects.rows.length;
+
+			queryDrawCount = req.query["draw"];
+			if(!queryDrawCount){
+				queryDrawCount = 1;
+			}
 
 			res.status(HttpStatus.OK);
 			res.send({
 				"status": "success",
 				data: data ,
 				recordsTotal: recordsTotal ,
-				recordsFiltered: recordsFiltered
+				recordsFiltered: recordsFiltered,
+				draw: queryDrawCount
 			});
 		})
 		.catch(function(err){
