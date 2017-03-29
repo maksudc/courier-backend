@@ -116,8 +116,8 @@ DataTableHelper.prototype.getWhere = function(){
 		}
 	}
 
-	finalQuery = {};
-
+	finalQuery = null;
+	
 	combinedQuery = {
 		"$and":[]
 	};
@@ -128,8 +128,11 @@ DataTableHelper.prototype.getWhere = function(){
 			finalQuery = combinedQuery;
 	}else if(combinedQuery["$and"].length > 0){
 		  finalQuery = combinedQuery;
-	}else{
-		finalQuery = globalSearchQuery;
+	}else if(globalSearchQuery["$or"].length > 0){
+			finalQuery = globalSearchQuery;
+	}
+	else{
+		finalQuery = {};
 	}
 
 	return finalQuery;
