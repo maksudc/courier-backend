@@ -49,6 +49,11 @@ DataTableHelper.prototype.getOrder = function(){
 		columnIndex = columnOrderDescriptor["column"];
 		sortDir = columnOrderDescriptor["dir"];
 		columnObject = this.config.columns[columnIndex];
+
+		if(!columnObject["orderable"]){
+			continue;
+		}
+
 		if(orderStatement){
 			orderStatement = orderStatement + ", ";
 		}
@@ -90,20 +95,51 @@ DataTableHelper.prototype.getWhere = function(){
 		}
 	}
 
-	combinedQuery = {};
-	if(whereStatement.length > 0){
-		combinedQuery = {
-			"$and": whereStatement
-		};
+	globalSearchQuery = {
+		"$or":[]
+	};
+	if(this.config.search.value){
+		operationType = "$eq";
+		if(this.config.search.regex){
+			operationType = "$like";
+		}
+		for(I=0 ; I<this.config.columns.length ; I++){
+			columnDef = this.config.columns[I];
+			if(!columnDef["searchable"]){
+				continue;
+			}
+			columnName = columnDef["data"];
+			columnGlobalSearchQuery = {};
+			columnGlobalSearchQuery[columnName] = {};
+			columnGlobalSearchQuery[columnName][operationType] = this.config.search["value"];
+			globalSearchQuery["$or"].push(columnGlobalSearchQuery);
+		}
 	}
-	return combinedQuery;
+
+	finalQuery = {};
+
+	combinedQuery = {
+		"$and":[]
+	};
+	combinedQuery["$and"] = whereStatement;
+
+	if(combinedQuery["$and"].length > 0 && globalSearchQuery["$or"].length > 0){
+			combinedQuery["$and"].push(globalSearchQuery);
+			finalQuery = combinedQuery;
+	}else if(combinedQuery["$and"].length > 0){
+		  finalQuery = combinedQuery;
+	}else{
+		finalQuery = globalSearchQuery;
+	}
+
+	return finalQuery;
 };
 
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
 	console.log(tableHelper.config);
-	console.log(tableHelper.getWhere());
+	console.log(JSON.stringify(tableHelper.getWhere()));
 	console.log(tableHelper.getOrder());
 	console.log(tableHelper.getOffset());
 	console.log(tableHelper.getLimit());
