@@ -161,10 +161,10 @@ var findBookings = function(params ,next){
 	queryParams["where"] = filterParams;
 
 	if(params.where){
-		queryParams["where"] = JSON.parse(params.where);
+		//queryParams["where"] = JSON.parse(params.where);
 	}
 	if(params.order){
-		queryParams["order"] = params.order;
+		//queryParams["order"] = params.order;
 	}
 	if(params.limit){
 			params.limit = parseInt(params.limit);
