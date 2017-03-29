@@ -62,11 +62,35 @@ DataTableHelper.prototype.getOrder = function(){
 	return orderStatement;
 };
 
+var User = function(role , subBranchId , regionalBranchId){
+	this.role = role;
+	this.subBranch = subBranchId;
+	this.regionalBranchId = regionalBranchId;
+};
+
+User.prototype.getRole = function(){
+	return this.role;
+};
+
+User.prototype.getSubBranchId = function(){
+	return this.subBranchId;
+};
+
+User.prototype.getRegionalBranchId = function(){
+	return this.regionalBranchId;
+};
+
+
+DataTableHelper.prototype.getUser = function(){
+	userObject = new User(this.config.role , this.config.sub_branch_id , this.config.regional_branch_id);
+	return userObject;
+};
+
 DataTableHelper.prototype.getDraw = function(){
 	return this.config.draw;
 };
 
-DataTableHelper.prototype.getWhere = function(){
+DataTableHelper.prototype.getWhere = function(queryWrapper){
 	whereStatement = [];
 	for(I=0; I < this.config.columns.length ; I++){
 		columnDef = this.config.columns[I];
@@ -117,7 +141,7 @@ DataTableHelper.prototype.getWhere = function(){
 	}
 
 	finalQuery = null;
-	
+
 	combinedQuery = {
 		"$and":[]
 	};
@@ -135,6 +159,15 @@ DataTableHelper.prototype.getWhere = function(){
 		finalQuery = {};
 	}
 
+	if(queryWrapper){
+		tempQuery = {
+			"$and":[]
+		};
+		tempQuery["$and"].push(finalQuery);
+		tempQuery["$and"].push(queryWrapper);
+		finalQuery = tempQuery;
+	}
+
 	return finalQuery;
 };
 
@@ -147,6 +180,7 @@ router.get('/', function(req, res){
 	console.log(tableHelper.getOffset());
 	console.log(tableHelper.getLimit());
 
+	userObj = tableHelper.getUser();
 	queryParams  = {};
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
