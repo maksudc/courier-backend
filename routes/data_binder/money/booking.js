@@ -115,7 +115,7 @@ DataTableHelper.prototype.getWhere = function(queryWrapper){
 					currentQuery[columnDef["data"]] = columnDef["search"]["value"];
 			}else if(["LIKE"].indexOf(operationType) > -1){
 					currentQuery[columnDef["data"]] = {
-						"$like": columnDef["search"]["value"]
+						"$like": columnDef["search"]["value"] + "%"
 					};
 			}
 
@@ -139,7 +139,7 @@ DataTableHelper.prototype.getWhere = function(queryWrapper){
 			columnName = columnDef["data"];
 			columnGlobalSearchQuery = {};
 			columnGlobalSearchQuery[columnName] = {};
-			columnGlobalSearchQuery[columnName][operationType] = this.config.search["value"];
+			columnGlobalSearchQuery[columnName][operationType] = this.config.search["value"] + "%";
 			globalSearchQuery["$or"].push(columnGlobalSearchQuery);
 		}
 	}
