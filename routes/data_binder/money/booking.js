@@ -5,6 +5,7 @@ var multer = require("multer");
 var upload = multer();
 var bodyParser = require('body-parser');
 var HttpStatus = require("http-status-codes");
+var adminUtils = require("./../../../utils/admin");
 var moneyLogic = require("./../../../logics/moneyLogic");
 var DB = require("./../../../models/index");
 var moneyModel = DB.sequelize.models.money;
@@ -64,7 +65,7 @@ DataTableHelper.prototype.getOrder = function(){
 
 var User = function(role , subBranchId , regionalBranchId){
 	this.role = role;
-	this.subBranch = subBranchId;
+	this.subBranchId = subBranchId;
 	this.regionalBranchId = regionalBranchId;
 };
 
@@ -82,7 +83,10 @@ User.prototype.getRegionalBranchId = function(){
 
 
 DataTableHelper.prototype.getUser = function(){
-	userObject = new User(this.config.role , this.config.sub_branch_id , this.config.regional_branch_id);
+	userObject = null;
+	if(this.config.extra && this.config.extra.user){
+			userObject = new User(this.config.extra.user.role , this.config.extra.user.sub_branch_id , this.config.extra.user.regional_branch_id);
+	}
 	return userObject;
 };
 
@@ -181,10 +185,28 @@ router.get('/', function(req, res){
 	console.log(tableHelper.getLimit());
 
 	userObj = tableHelper.getUser();
+
+	console.log(userObj);
+	whereQuery = null;
+
+	if(userObj){
+		//&& !adminUtils.isPrivileged(userObj.getRole())){
+		extraQuery = {};
+		if(userObj.getSubBranchId()){
+			extraQuery["source_sub_branch_id"] = userObj.getSubBranchId();
+		}
+		if(userObj.getRegionalBranchId()){
+			extraQuery["source_regional_branch_id"] = userObj.getRegionalBranchId();
+		}
+		whereQuery = tableHelper.getWhere(extraQuery);
+	}else{
+		whereQuery = tableHelper.getWhere();
+	}
 	queryParams  = {};
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
-	queryParams["where"] = tableHelper.getWhere();
+	queryParams["where"] = whereQuery;
+	queryParams["order"] = tableHelper.getOrder();
 
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
@@ -199,27 +221,6 @@ router.get('/', function(req, res){
 
 				res.status(HttpStatus.OK);
 				res.send(resultData);
-				//resultData["pagination"] = {};
-				// resultData["pagination"]["maxPage"] = Math.ceil(resultData["objects"].count / queryParams["limit"]);
-				// if(resultData["pagination"]["maxPage"]==0){
-				// 	resultData["pagination"]["maxPage"] = 1;
-				// }
-				//
-				// if(params.page >= 1 && params.page < resultData["pagination"]["maxPage"] ){
-				// 	resultData["pagination"]["nextPageNo"] = params.page + 1;
-				// }else{
-				// 	resultData["pagination"]["nextPageNo"] = null;
-				// }
-				//
-				// if(params.page > 1 && params.page <= resultData["pagination"]["maxPage"]){
-				// 	resultData["pagination"]["previousPageNo"] = params.page -1;
-				// }else{
-				// 	resultData["pagination"]["previousPageNo"] = null;
-				// }
-
-				// resultData["pagination"]["page"] = params.page;
-				// resultData["pagination"]["limit"] = params.limit;
-				// next(null, resultData);
 		})
 		.catch(function(err){
 			if(err){
@@ -228,42 +229,6 @@ router.get('/', function(req, res){
 			res.status(HttpStatus.INTERNAL_SERVER_ERROR);
 			res.send({ error:"Internal Server error occured" });
 	});
-
-	// moneyLogic.findBookings(req.query , function(err, data){
-	// 	if(err){
-	// 		console.error(err.stack);
-	// 		res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-	// 		res.send({"status": "error", error: err});
-	// 		return;
-	// 	}
-	//
-	// 	moneyLogic
-	// 	.getTotalMoneyCount(null)
-	// 	.then(function(c){
-	//
-	// 		recordsTotal = data.objects.count;
-	// 		recordsFiltered = data.objects.rows.length;
-	//
-	// 		queryDrawCount = req.query["draw"];
-	// 		if(!queryDrawCount){
-	// 			queryDrawCount = 1;
-	// 		}
-	//
-	// 		res.status(HttpStatus.OK);
-	// 		res.send({
-	// 			"status": "success",
-	// 			data: data ,
-	// 			recordsTotal: recordsTotal ,
-	// 			recordsFiltered: recordsFiltered,
-	// 			draw: queryDrawCount
-	// 		});
-	// 	})
-	// 	.catch(function(err){
-	// 		res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-	// 		res.send({"status": "error", error: err});
-	// 	});
-	// 	// else if(!data) res.send({"status": "error", data: []});
-	// });
 
 });
 
