@@ -24,20 +24,20 @@ router.get('/', function(req, res){
 	console.log(userObj);
 	whereQuery = null;
 
-	extraQuery = {
-		"status": "draft"
-	};
+  extraQuery = {
+    "status": "deliverable"
+  };
+
 	if(userObj){
 		//&& !adminUtils.isPrivileged(userObj.getRole())){
 		if(userObj.getSubBranchId()){
-			extraQuery["source_sub_branch_id"] = userObj.getSubBranchId();
+			extraQuery["sub_branch_id"] = userObj.getSubBranchId();
 		}
 		if(userObj.getRegionalBranchId()){
-			extraQuery["source_regional_branch_id"] = userObj.getRegionalBranchId();
+			extraQuery["regional_branch_id"] = userObj.getRegionalBranchId();
 		}
 	}
-
-	whereQuery = tableHelper.getWhere(extraQuery);
+  whereQuery = tableHelper.getWhere(extraQuery);
 
 	queryParams  = {};
 	queryParams["limit"] = tableHelper.getLimit();
