@@ -69,6 +69,7 @@ var getInclusiveBranchInstance = function(branchType , branchId , next){
             .getRegionalBranch()
             .then(function(parentBranchItem){
                 branchItem.regionalBranch = parentBranchItem;
+                branchItem.dataValues.regionalBranch = parentBranchItem;
                 return Promise.resolve(branchItem);
             });
     }

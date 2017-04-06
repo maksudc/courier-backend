@@ -11,6 +11,7 @@ var async = require('async');
 var _ = require('lodash');
 var moment = require('moment-timezone');
 var Promise = require("bluebird");
+var branchUtils = require("../utils/branch");
 
 var findOrderData = function(params, next){
 	orderModel.findAll({where: params, attributes: ['uuid', 'bar_code', 'type', 'payment', 'payment_status']})
@@ -545,10 +546,62 @@ var findMoneyCashIn = function(params, adminData, next){
 				{payment_time: timeSearchParams}
 			]
 		},
-		attributes: ['id', 'payable', 'amount', 'charge', 'discount', 'sender_mobile', 'receiver_mobile', 'type', 'payment_time']
-	}).then(function(moneyOrderData){
-		next(null, moneyOrderData);
-	}).catch(function(err){
+		attributes: [
+			'id', 'payable', 'amount',
+			'charge', 'discount', 'sender_mobile', 'receiver_mobile',
+			'type', 'payment_time' ,
+			'source_sub_branch_id' , 'source_regional_branch_id',
+			'sub_branch_id' , 'regional_branch_id'
+		]
+	})
+	.map(function(moneyOrderData){
+
+			branchType = null;
+			branchId = null;
+			if(moneyOrderData["source_sub_branch_id"]){
+				branchType = "sub";
+				branchId = moneyOrderData["source_sub_branch_id"];
+			}else{
+				branchType = "regional";
+				branchId = moneyOrderData["source_regional_branch_id"];
+			}
+			return Promise.all([
+				Promise.resolve( moneyOrderData ) ,
+				branchUtils.getInclusiveBranchInstance(branchType , branchId , null)
+			]);
+	})
+	.map(function(bundle){
+		moneyOrderData = bundle[0];
+		moneyOrderData.dataValues.sourceBranch = bundle[1];
+
+		return Promise.resolve(moneyOrderData);
+	})
+	.map(function(moneyOrderData){
+
+			branchType = null;
+			branchId = null;
+			if(moneyOrderData["sub_branch_id"]){
+				branchType = "sub";
+				branchId = moneyOrderData["sub_branch_id"];
+			}else{
+				branchType = "regional";
+				branchId = moneyOrderData["regional_branch_id"];
+			}
+			return Promise.all([
+				Promise.resolve( moneyOrderData ) ,
+				branchUtils.getInclusiveBranchInstance(branchType , branchId , null)
+			]);
+	})
+	.map(function(bundle){
+		moneyOrderData = bundle[0];
+		moneyOrderData.dataValues.destinationBranch = bundle[1];
+
+		return Promise.resolve(moneyOrderData);
+	})
+	.then(function(results){
+			next(null, results);
+	})
+	.catch(function(err){
 		if(err){
 			console.error(err.stack);
 			next(err);
