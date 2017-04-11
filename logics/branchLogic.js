@@ -91,6 +91,7 @@ var deleteBranch = function(branchType , branchId , next){
   });
 };
 
+
 exports.updateBranch = updateBranch;
 exports.getBranchModel = getBranchModel;
 exports.getBranches = getBranches;

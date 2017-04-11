@@ -79,6 +79,8 @@ module.exports = function(sequelize, DataTypes) {
 		vd : {type: DataTypes.BOOLEAN},
 		vd_id: {type: DataTypes.STRING},
 		vd_price: {type: DataTypes.INTEGER},
+
+		payment_branch_migrate_affected: { type: DataTypes.BOOLEAN , defaultValue: false }
 	} , {
 
 		classMethods: {
