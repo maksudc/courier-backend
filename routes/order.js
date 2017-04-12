@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var branchLogic = require("../logics/branchLogic");
 var orderLogic = require("../logics/orderLogic");
 var multer = require("multer");
 var upload = multer();
@@ -242,6 +243,26 @@ router.get("/analytics" , function(req , res){
 		}
 		res.send(data);
 	});
+});
+
+router.post("/legacy/payment_branch/datafixer/forward$" , function(req , res){
+
+  branchLogic.adjustMissingPaymentBranch(function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
+});
+
+router.post("/legacy/payment_branch/datafixer/backward$" , function(req , res){
+
+  branchLogic.revertMissingPaymentBranch(function(data){
+    if(data.statusCode){
+      res.status(data.statusCode);
+    }
+    res.send(data);
+  });
 });
 
 
