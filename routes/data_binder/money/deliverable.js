@@ -18,10 +18,6 @@ router.get('/', function(req, res){
 	var resultData = {};
 
 	tableHelper = new DataTableHelper(req.query);
-	console.log(JSON.stringify(tableHelper.getWhere()));
-	console.log(tableHelper.getOrder());
-	console.log(tableHelper.getOffset());
-	console.log(tableHelper.getLimit());
 
 	userObj = tableHelper.getUser();
 
