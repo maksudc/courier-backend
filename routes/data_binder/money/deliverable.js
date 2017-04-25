@@ -16,7 +16,7 @@ var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 router.get('/', function(req, res){
 
 	var resultData = {};
-	
+
 	tableHelper = new DataTableHelper(req.query);
 	console.log(JSON.stringify(tableHelper.getWhere()));
 	console.log(tableHelper.getOrder());
