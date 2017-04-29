@@ -28,60 +28,60 @@ router.get('/', function(req, res){
 	console.log(userObj);
 	whereQuery = null;
 
-	var vdOrderIds = [];
-
-	orderExitBranchType = null;
-	orderExitBranchId = null;
-
-	if(userObj){
-		if(userObj.getSubBranchId()){
-			orderExitBranchType = branchUtils.desanitizeBranchType("sub");
-			orderExitBranchId = userObj.getSubBranchId();
-		}
-		else if(userObj.getRegionalBranchId()){
-			orderExitBranchType = branchUtils.desanitizeBranchType("regional");
-			orderExitBranchId = userObj.getRegionalBranchId();
-		}
-	}
-
-	vdOrderQuery = {
-		"$and":[
-			{ "type": { "$eq": "value_delivery" } },
-			{ "status": { "$eq": "stocked" }  }
-		]
-	};
-	if(orderExitBranchType){
-		vdOrderQuery["$and"].push({ "exit_branch_type": { "$eq": orderExitBranchType } });
-	}
-	if(orderExitBranchId){
-		vdOrderQuery["$and"].push({ "exit_branch": { "$eq": orderExitBranchId } });
-	}
-
-	orderModel
-	.findAll({
-		where: vdOrderQuery ,
-		attributes: ["uuid"]
-	})
-	.map(function(vdOrderInstance){
-		return vdOrderInstance["uuid"];
-	})
-	.then(function(datas){
-		vdOrderIds = datas;
-	})
-	.then(function(){
+	// var vdOrderIds = [];
+	//
+	// orderExitBranchType = null;
+	// orderExitBranchId = null;
+	//
+	// if(userObj){
+	// 	if(userObj.getSubBranchId()){
+	// 		orderExitBranchType = branchUtils.desanitizeBranchType("sub");
+	// 		orderExitBranchId = userObj.getSubBranchId();
+	// 	}
+	// 	else if(userObj.getRegionalBranchId()){
+	// 		orderExitBranchType = branchUtils.desanitizeBranchType("regional");
+	// 		orderExitBranchId = userObj.getRegionalBranchId();
+	// 	}
+	// }
+	//
+	// vdOrderQuery = {
+	// 	"$and":[
+	// 		//{ "type": { "$eq": "value_delivery" } }//,
+	// 		// { "status": { "$in": "stocked" }  }
+	// 	]
+	// };
+	// if(orderExitBranchType){
+	// 	vdOrderQuery["$and"].push({ "exit_branch_type": { "$eq": orderExitBranchType } });
+	// }
+	// if(orderExitBranchId){
+	// 	vdOrderQuery["$and"].push({ "exit_branch": { "$eq": orderExitBranchId } });
+	// }
+	//
+	// orderModel
+	// .findAll({
+	// 	where: vdOrderQuery ,
+	// 	attributes: ["uuid"]
+	// })
+	// .map(function(vdOrderInstance){
+	// 	return vdOrderInstance["uuid"];
+	// })
+	// .then(function(datas){
+	// 	vdOrderIds = datas;
+	// })
+	// .then(function(){
 
 		pureMoneyOrderQuery = {
 			"$and":[
-				{
-					"type":{
-						"$eq": "general"
-					}
-				},
-				{
-					"money_order_id":{
-						"$eq": null
-					}
-				},
+				// {
+				// 	"type":{
+				// 		"$eq": "general"
+				// 	}
+				// },
+				// {
+				// 	"money_order_id":{
+				// 		"$eq": null
+				// 	}
+				// },
 				{
 					"status": {
 						"$eq": "deliverable"
@@ -99,18 +99,19 @@ router.get('/', function(req, res){
 			}
 		}
 
-		vdMoneyOrderQuery = {
-			"money_order_id":{
-				"$in": vdOrderIds
-			}
-		};
-
-		extraQuery = {
-			"$or":[
-				vdMoneyOrderQuery,
-				pureMoneyOrderQuery
-			]
-		};
+		// vdMoneyOrderQuery = {
+		// 	"money_order_id":{
+		// 		"$in": vdOrderIds
+		// 	}
+		// };
+		//
+		// extraQuery = {
+		// 	"$or":[
+		// 		vdMoneyOrderQuery,
+		// 		pureMoneyOrderQuery
+		// 	]
+		// };
+		extraQuery = pureMoneyOrderQuery;
 
 	  whereQuery = tableHelper.getWhere(extraQuery);
 
@@ -124,24 +125,24 @@ router.get('/', function(req, res){
 		resultData["draw"] = tableHelper.getDraw();
 
 		return moneyModel
-			.findAndCountAll(queryParams);
-	})
-	.then(function(moneyOrderList){
+			.findAndCountAll(queryParams)
+			.then(function(moneyOrderList){
 
-			resultData["data"] = moneyOrderList;
-			resultData["recordsTotal"] = moneyOrderList.count;
-			resultData["recordsFiltered"] = moneyOrderList.count;
+						resultData["data"] = moneyOrderList;
+						resultData["recordsTotal"] = moneyOrderList.count;
+						resultData["recordsFiltered"] = moneyOrderList.count;
 
-			res.status(HttpStatus.OK);
-			res.send(resultData);
-	})
-	.catch(function(err){
-			if(err){
-				console.error(err.stack);
-			}
-			res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-			res.send({ error:"Internal Server error occured" });
-	});
+						res.status(HttpStatus.OK);
+						res.send(resultData);
+				})
+				.catch(function(err){
+						if(err){
+							console.error(err.stack);
+						}
+						res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+						res.send({ error:"Internal Server error occured" });
+				});
+	// });
 });
 
 
