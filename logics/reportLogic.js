@@ -358,9 +358,17 @@ var  getSalesDataByBranch = function(params, operator, next){
 		return Promise.resolve(subBranchIdList);
 	})
 	.then(function(subBranchIds){
-		if(subBranchIdList.length > 0){
-			 whereParams.push({ entry_branch_type: "sub-branch" });
-			 whereParams.push({ entry_branch: { "$in": subBranchIdList } });
+		if (params.sales_type == "booking_sale"){
+			if(subBranchIdList.length > 0){
+			 	whereParams.push({ entry_branch_type: "sub-branch" });
+			 	whereParams.push({ entry_branch: { "$in": subBranchIdList } });
+			}
+		}
+		if (params.sales_type == "delivery_sale"){
+			if(subBranchIdList.length > 0){
+			 	whereParams.push({ exit_branch_type: "sub-branch" });
+			 	whereParams.push({ exit_branch: { "$in": subBranchIdList } });
+			}
 		}
 		if(params.payment_tag){
 			whereParams.push({ payment_tag: params.payment_tag });
