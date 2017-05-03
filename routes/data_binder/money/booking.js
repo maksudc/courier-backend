@@ -26,6 +26,7 @@ router.get('/', function(req, res){
 
 	extraQuery = {
 		//"status": "draft"
+		"type": "general"
 	};
 	if(userObj){
 		//&& !adminUtils.isPrivileged(userObj.getRole())){
