@@ -19,4 +19,7 @@ router.use('/received/view' , receivedDataBinder);
 var incomingDataBinder = require("./viewIncoming");
 router.use('/incoming/view' , incomingDataBinder);
 
+var awaitingDataBinder = require("./viewAwaiting");
+router.use('/awaiting/view' , awaitingDataBinder);
+
 module.exports = router;
