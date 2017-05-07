@@ -26,7 +26,7 @@ router.get('/', function(req, res){
 	whereQuery = null;
 
   extraQuery = {
-    "status": "stocked"
+    "status": "delivered"
   };
 
 	if(userObj){
@@ -46,7 +46,7 @@ router.get('/', function(req, res){
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
 	queryParams["where"] = whereQuery;
-	queryParams["order"] = tableHelper.getOrder();
+	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();

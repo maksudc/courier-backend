@@ -10,4 +10,7 @@ router.use('/draft/view' , draftViewDataBinder);
 var deliverableDataBinder = require("./viewDeliverable");
 router.use('/deliverable/view' , deliverableDataBinder);
 
+var deliveredDataBinder = require("./viewDelivered");
+router.use('/delivered/view' , deliveredDataBinder);
+
 module.exports = router;
