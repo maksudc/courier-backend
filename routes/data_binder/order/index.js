@@ -13,4 +13,7 @@ router.use('/deliverable/view' , deliverableDataBinder);
 var deliveredDataBinder = require("./viewDelivered");
 router.use('/delivered/view' , deliveredDataBinder);
 
+var receivedDataBinder = require("./viewReceived");
+router.use('/received/view' , receivedDataBinder);
+
 module.exports = router;
