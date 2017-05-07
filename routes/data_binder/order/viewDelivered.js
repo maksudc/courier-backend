@@ -6,6 +6,7 @@ var upload = multer();
 var bodyParser = require('body-parser');
 var HttpStatus = require("http-status-codes");
 var adminUtils = require("./../../../utils/admin");
+var branchUtils = require("./../../../utils/branch");
 var orderLogic = require("./../../../logics/orderLogic");
 var DB = require("./../../../models/index");
 var orderModel = DB.sequelize.models.order;
@@ -25,18 +26,18 @@ router.get('/', function(req, res){
 	whereQuery = null;
 
   extraQuery = {
-    "status": "draft"
+    "status": "stocked"
   };
 
 	if(userObj){
 		//&& !adminUtils.isPrivileged(userObj.getRole())){
 		if(userObj.getSubBranchId()){
-			extraQuery["current_hub"] = userObj.getSubBranchId();
-      extraQuery["current_hub_type"] = "sub";
+			extraQuery["exit_branch"] = userObj.getSubBranchId();
+      extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("sub");
 		}
 		else if(userObj.getRegionalBranchId()){
-			extraQuery["current_hub"] = userObj.getRegionalBranchId();
-      extraQuery["current_hub_type"] = "regional"
+			extraQuery["exit_branch"] = userObj.getRegionalBranchId();
+      extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("regional");
 		}
 	}
   whereQuery = tableHelper.getWhere(extraQuery);
@@ -45,7 +46,7 @@ router.get('/', function(req, res){
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
 	queryParams["where"] = whereQuery;
-	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
+	queryParams["order"] = tableHelper.getOrder();
 
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();

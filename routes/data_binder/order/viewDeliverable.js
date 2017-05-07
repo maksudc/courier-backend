@@ -22,7 +22,6 @@ router.get('/', function(req, res){
 
 	userObj = tableHelper.getUser();
 
-	console.log(userObj);
 	whereQuery = null;
 
   extraQuery = {
@@ -46,8 +45,10 @@ router.get('/', function(req, res){
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
 	queryParams["where"] = whereQuery;
-	queryParams["order"] = "createdAt DESC";//tableHelper.getOrder();
+	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
+	console.log(queryParams["order"]);
+	
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
 
