@@ -364,7 +364,7 @@ var  getSalesDataByBranch = function(params, operator, next){
 			 	whereParams.push({ entry_branch: { "$in": subBranchIdList } });
 			}
 		}
-		if (params.sales_type == "delivery_sale"){
+		else if (params.sales_type == "delivery_sale"){
 			if(subBranchIdList.length > 0){
 			 	whereParams.push({ exit_branch_type: "sub-branch" });
 			 	whereParams.push({ exit_branch: { "$in": subBranchIdList } });
