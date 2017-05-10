@@ -6,52 +6,57 @@ var upload = multer();
 var bodyParser = require('body-parser');
 var HttpStatus = require("http-status-codes");
 var adminUtils = require("./../../../utils/admin");
-var moneyLogic = require("./../../../logics/moneyLogic");
+var orderLogic = require("./../../../logics/orderLogic");
 var DB = require("./../../../models/index");
-var moneyModel = DB.sequelize.models.money;
+var orderModel = DB.sequelize.models.order;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
+	// console.log(JSON.stringify(tableHelper.getWhere()));
+	// console.log(tableHelper.getOrder());
+	// console.log(tableHelper.getOffset());
+	// console.log(tableHelper.getLimit());
 
 	userObj = tableHelper.getUser();
 
 	console.log(userObj);
 	whereQuery = null;
 
-	extraQuery = {
-		//"status": "draft"
-		"type": "general"
-	};
+  extraQuery = {
+    "status": "running"
+  };
+
 	if(userObj){
 		//&& !adminUtils.isPrivileged(userObj.getRole())){
 		if(userObj.getSubBranchId()){
-			extraQuery["source_sub_branch_id"] = userObj.getSubBranchId();
+			extraQuery["next_hub"] = userObj.getSubBranchId();
+      extraQuery["next_hub_type"] = "sub";
 		}
-		if(userObj.getRegionalBranchId()){
-			extraQuery["source_regional_branch_id"] = userObj.getRegionalBranchId();
+		else if(userObj.getRegionalBranchId()){
+			extraQuery["next_hub"] = userObj.getRegionalBranchId();
+      extraQuery["next_hub_type"] = "regional"
 		}
 	}
-
-	whereQuery = tableHelper.getWhere(extraQuery);
+  whereQuery = tableHelper.getWhere(extraQuery);
 
 	queryParams  = {};
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
 	queryParams["where"] = whereQuery;
-	queryParams["order"] = tableHelper.getOrder();
+	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
 
-	moneyModel
+	orderModel
 		.findAndCountAll(queryParams)
-		.then(function(moneyOrderList){
+		.then(function(orderList){
 
-				resultData["data"] = moneyOrderList;
-				resultData["recordsTotal"] = moneyOrderList.count;
-				resultData["recordsFiltered"] = moneyOrderList.count;
+				resultData["data"] = orderList;
+				resultData["recordsTotal"] = orderList.count;
+				resultData["recordsFiltered"] = orderList.count;
 
 				res.status(HttpStatus.OK);
 				res.send(resultData);
