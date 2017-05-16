@@ -70,20 +70,19 @@ var create = function(operator, moneyData, next){
 
 	//console.log("Creating moeny order right now!");
 
-	moneyModel.create(postData).then(function(moneyParcel){
+	moneyModel
+	.create(postData)
+	.then(function(moneyParcel){
 
 		if(moneyParcel) next(null, moneyParcel.dataValues);
 		else next(null, false);
-
-	}).catch(function(err){
-
+	})
+	.catch(function(err){
+		console.error("error while money order creation");
 		if(err){
-			//console.log("***************************");
 			console.error(err.stack);
-			//console.log("***************************");
-			next(err);
 		}
-
+		next(err);
 	});
 };
 

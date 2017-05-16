@@ -1940,3 +1940,57 @@ var markDelivered = function(orderId , user , next){
 
 };
 exports.markDelivered = markDelivered;
+
+
+var checkTrackingHealth = function(bar_code){
+
+	//Check whether it has tracker id properly or not
+
+	var orderInstance = null;
+	var orderTrackerInstance = null;
+
+	return
+	orderModel
+	.findOne({ where: { bar_code: bar_code } })
+	.then(function(oInstance){
+		orderInstance = oInstance;
+		return orderInstance.getTracker();
+	})
+	.then(function(trackerInstance){
+		if(!trackerInstance){
+			return Promise.reject(new Error("tracker instance not attached"));
+		}
+		orderTrackerInstance = trackerInstance;
+	});
+};
+
+exports.checkTrackingHealth = checkTrackingHealth;
+
+var checkMoneyOrderHealth = function(bar_code){
+
+	var orderInstance = null;
+	var moneyOrderInstance = null;
+
+	return
+	orderModel
+	.findOne({ where: { bar_code: bar_code } })
+	.then(function(oInstance){
+		orderInstance = oInstance;
+		if(orderInstance.type == "value_delivery"){
+			return orderInstance.getMoney_order();
+		}
+		return Promise.reject(new Error("general order do not have money order associated"));
+	});
+}
+
+var fixMissingMoneyOrder = function(bar_code){
+
+	return
+	orderModel
+	.findOne({ where: { bar_code: bar_code } })
+	.then(function(oInstance){
+		
+	});
+
+};
+exports.fixMissingMoneyOrder = fixMissingMoneyOrder;
