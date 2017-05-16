@@ -839,9 +839,7 @@ var createByOperator = function(postData, operator, next){
 					setOperatorCredentials("error while reading admin");
 				}
 				else if(admin){
-					//console.log(admin);
 					postData["receiver_operator"] = admin.email;
-					//setOperatorCredentials("testing is going on");
 					setOperatorCredentials(null);
 				}
 			});
@@ -858,24 +856,6 @@ var createByOperator = function(postData, operator, next){
 		then, blame munna
 		*/
 		console.log("Setting branches");
-
-		// subBranchLogic.findOneById(parseInt(postData.exit_branch_id), function(branch){
-		// 	if(branch.status == "error") testBranches(branch.message);
-		// 	else {
-		// 		postData["exit_branch_id"] = branch.data.id;
-		// 		postData["exit_branch_type"] = "sub-branch";
-		// 		exitBranch = branch.data;
-
-		// 		setting some dummy data for entry branch type and entry branch id.
-		// 		 This will be read from req.user
-
-		// 		 //Set dummy data if no oprator working branch is defined
-		// 		if(!postData["entry_branch"]) postData["entry_branch"] = "2";
-		// 		if(!postData["entry_branch_type"]) postData["entry_branch_type"] = "sub-branch";
-
-		// 		testBranches(null);
-		// 	}
-		// });
 
 		branchLogic.getBranch(postData["exit_branch_type"], postData["exit_branch_id"], function(branchData){
 			if(branchData.status == 'success'){
@@ -940,20 +920,23 @@ var createByOperator = function(postData, operator, next){
 		if(postData.type == 'vd') draftOrder["type"] = 'value_delivery';
 		if(postData.receiver_name) draftOrder["receiver_name"] = postData.receiver_name;
 
-		orderModel.create(draftOrder).then(function(tempOrder){
+		orderModel
+		.create(draftOrder)
+		.then(function(tempOrder){
 			if(tempOrder && tempOrder.dataValues){
 				order = tempOrder.dataValues;
-				return createDraft(null);
+				createDraft(null);
 			}
 			else {
-				return createDraft("Cannot create order");
+				createDraft("Cannot create order");
 			}
-		}).catch(function(err){
+		})
+		.catch(function(err){
 			if(err){
 				console.error(err.stack);
-				errorData = err;
-				createDraft("Cannot create draft order");
 			}
+			errorData = err;
+			createDraft("Cannot create draft order");
 		});
 
 	}, function(createMoneyOrder){
@@ -982,7 +965,8 @@ var createByOperator = function(postData, operator, next){
 				parcelPrice: parseInt(order.payment)
 			}
 
-			moneyLogic.create(operator, moneyData, function(err, moneyOrderData){
+			moneyLogic
+			.create(operator, moneyData, function(err, moneyOrderData){
 				if(err) {
 					console.error(err.stack);
 					createMoneyOrder(err);
@@ -1042,12 +1026,6 @@ var createByOperator = function(postData, operator, next){
 				}
 
 			}
-			// else{
-			// 	item["bar_code"] = barCode + itemCount.toString();
-			// 	itemCount++;
-			// 	item["orderUuid"] = order.uuid;
-			// 	seperateItems.push(item);
-			// }
 		});
 
 		delete postData["item_list"];
@@ -1125,32 +1103,6 @@ var createByOperator = function(postData, operator, next){
 		clientLogic.create(clientData, function(data){
 			if(data.status == "success"){
 				client = data.data;
-
-				// fs.readFile("./views/message/client.signup.handlebars" , function(err , content){
-				// 	if(err){
-				// 		console.error(err.stack);
-				// 		return;
-				// 	}
-				// 	contentTemplate = handlebars.compile(content.toString());
-				// 	messageBody = null;
-				//
-				// 	if(data.isNew){
-				//
-				// 		console.log("Sending the client password through message....");
-				// 		// send the password to the client by sms
-				// 		// Send the sms with the password
-				// 		messageBody = contentTemplate({ parcelInstance: order , client: client });
-				// 	}else{
-				// 		console.log("Sending the order verification code through message....");
-				// 		//Only sends the verifcation code
-				// 		messageBody = contentTemplate({ parcelInstance: order });
-				// 	}
-				//
-				// 	messageUtils.sendMessage(client.mobile , messageBody , function(mResponse){
-				// 		console.log(mResponse);
-				// 	});
-				// 	createReceiverClient(null);
-				// });
 				createReceiverClient(null);
 			}
 			else createReceiverClient("Cannot create Receiver client!");
@@ -1253,19 +1205,6 @@ var orderDetail = function(id, next){
 				}
 				getEntryBranch(err);
 			});
-
-			// 	branchLogic.getBranch(entry_branch_type, entry_branch_id, function(branchData){
-			//
-			// 	if(branchData.status == 'success'){
-			//
-			// 		orderDetails.data.orderData.dataValues["entry_branch_label"] = branchData.data.dataValues.label;
-			// 	}
-			// 	else{
-			//
-			// 		orderDetails.data.orderData.dataValues["entry_branch_label"] = 'Error while getting entry branch';
-			// 	}
-			// 	getEntryBranch(null);
-			// });
 		}
 
 	}, function(getExitBranch){
