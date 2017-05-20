@@ -12,7 +12,8 @@ module.exports = function(sequelize , DataTypes){
   var SubBranch = sequelize.define("subBranch" , {
       label: DataTypes.STRING,
       branchType: DataTypes.STRING,
-      position: DataTypes.GEOMETRY
+      position: DataTypes.GEOMETRY,
+      enabled: { type: DataTypes.BOOLEAN , defaultValue: true , allowNull:false }
   } , {
     classMethods:{
       associate: function(models){
