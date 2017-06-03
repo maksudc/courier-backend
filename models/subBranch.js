@@ -55,6 +55,13 @@ module.exports = function(sequelize , DataTypes){
           as:"destinedShipment"
         });
 
+        SubBranch.belongsToMany(models.bundle , {
+          as: 'destinedBundles',
+          through: models.bundle_destination_subBranches,
+          foreignKey: 'subBranchId',
+          otherKey: 'bundleId'
+        });
+
       }
     }
   });
