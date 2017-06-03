@@ -57,6 +57,12 @@ module.exports = function(sequelize , DataTypes){
 					scope:{ trackableType: "orderItem" },
 					as: "tracker"
 				});
+
+				item.belongsTo(models.bundle , {
+					as: "containerBundle",
+					foreignKey: "bundleId",
+					targetKey: "id"
+				});
 			}
 		}
 
@@ -171,7 +177,7 @@ module.exports = function(sequelize , DataTypes){
 	});
 
 
-	item.hook("beforeDestroy" , function(orderItem , options){		
+	item.hook("beforeDestroy" , function(orderItem , options){
 		orderItem
 		.getTracker()
 		.then(function(trackerItem){

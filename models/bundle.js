@@ -46,6 +46,12 @@ module.exports = function(sequelize , DataTypes){
           foreignKey: 'bundleId',
           otherKey: 'subBranchId'
         });
+
+        Bundle.hasMany(models.item , {
+          as: "attachedItems",
+          foreignKey: "bundleId",
+          sourceKey: "id"
+        });
       }
     }
   });
