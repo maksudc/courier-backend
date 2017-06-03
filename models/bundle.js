@@ -19,6 +19,10 @@ module.exports = function(sequelize , DataTypes){
       type: DataTypes.DATE,
       allowNull: true
     },
+    name:{
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     createdAtBranchType: {
       type: DataTypes.ENUM('regional' , 'sub'),
       allowNull: false
