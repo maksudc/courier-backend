@@ -20,20 +20,6 @@ router.post("/$" , upload.array() , function(req , res){
   var postData = req.body;
   console.log(postData);
 
-  // banchIds = [];
-  // if(postData["destinationBranchIds"]){
-  //   if(typeof(postData["destinationBranchIds"])=="string"){
-  //     try{
-  //         banchIds = JSON.parse(postData["destinationBranchIds"]) || [];
-  //     }catch(err){
-  //         console.err(err);
-  //     }
-  //   }else {
-  //     branchIds = postData["destinationBranchIds"];
-  //   }
-  // }
-  //postData["destinationBranchIds"] = branchIds;
-
   branchIds = postData["destinationBranchIds"] || [];
   if(!branchIds.length){
     res.status(HttpStatus.BAD_REQUEST);
