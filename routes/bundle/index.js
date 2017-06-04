@@ -14,6 +14,9 @@ var HttpStatus = require("http-status-codes");
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
+var detailsRouter = require("./details");
+router.use("" , detailsRouter);
+
 router.post("/$" , upload.array() , function(req , res){
 
   var bundleInstance = null;
