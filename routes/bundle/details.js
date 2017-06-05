@@ -10,6 +10,7 @@ var Promise = require("bluebird");
 router.get("/:id" , function(req , res){
 
   var bundleInstance = null;
+  var branchesDatas = null;
 
   bundleModel
   .findOne({
@@ -24,7 +25,18 @@ router.get("/:id" , function(req , res){
     }
   })
   .then(function(){
-    return bundleInstance.getAttachedItems();
+    return bundleInstance.getDestinationSubBranches();
+  })
+  .map(function(destBranch){
+    return destBranch.label;
+  })
+  .then(function(destBranchDatas){
+    branchesDatas = destBranchDatas;
+  })
+  .then(function(){
+    return bundleInstance.getAttachedItems({
+      order: "updatedAt DESC"
+    });
   })
   .map(function(itemInstance){
     itemMap = {
@@ -57,6 +69,7 @@ router.get("/:id" , function(req , res){
 
     resultData = bundleInstance.dataValues;
     resultData.items = itemMaps;
+    resultData.branches = branchesDatas;
 
     res.status(HttpStatus.OK);
     res.send({

@@ -17,6 +17,9 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 var detailsRouter = require("./details");
 router.use("" , detailsRouter);
 
+var itemAdditionRouter = require("./itemAddition");
+router.use("/add/items" , itemAdditionRouter );
+
 router.post("/$" , upload.array() , function(req , res){
 
   var bundleInstance = null;
