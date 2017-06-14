@@ -20,6 +20,9 @@ router.use("" , detailsRouter);
 var itemAdditionRouter = require("./itemAddition");
 router.use("/add/items" , itemAdditionRouter );
 
+var itemRemovalRouter = require("./itemRemoval");
+router.use("/remove/items" , itemRemovalRouter);
+
 router.post("/$" , upload.array() , function(req , res){
 
   var bundleInstance = null;
