@@ -46,23 +46,25 @@ router.get("/:id" , function(req , res){
 
     return Promise.all([
       Promise.resolve(itemMap),
-      branchUtils.getInclusiveBranchInstance(itemInstance.exit_branch_type , itemInstance.exit_branch) ]
-    );
+      branchUtils.getInclusiveBranchInstance(itemInstance.entry_branch_type , itemInstance.entry_branch),
+      branchUtils.getInclusiveBranchInstance(itemInstance.exit_branch_type , itemInstance.exit_branch)
+    ]);
   })
   .map(function(resultList){
     itemMap = resultList[0];
-    branchInstance = resultList[1];
+    entryBranchInstance = resultList[1];
+    exitBranchInstane = resultList[2];
 
-    itemMap["entry_branch_label"] = branchInstance.label;
-    if(branchInstance.regionalBranch){
-      itemMap["entry_branch_label"] = itemMap["entry_branch_label"] + "," + branchInstance.regionalBranch.label;
+    itemMap["entry_branch_label"] = entryBranchInstance.label;
+    if(entryBranchInstance.regionalBranch){
+      itemMap["entry_branch_label"] = itemMap["entry_branch_label"] + "," + entryBranchInstance.regionalBranch.label;
     }
 
-    itemMap["exit_branch_label"] = branchInstance.label;
-    if(branchInstance.regionalBranch){
-      itemMap["exit_branch_label"] = itemMap["exit_branch_label"] + "," + branchInstance.regionalBranch.label;
+    itemMap["exit_branch_label"] = exitBranchInstane.label;
+    if(exitBranchInstane.regionalBranch){
+      itemMap["exit_branch_label"] = itemMap["exit_branch_label"] + "," + exitBranchInstane.regionalBranch.label;
     }
-
+    
     return Promise.resolve(itemMap);
   })
   .then(function(itemMaps){
