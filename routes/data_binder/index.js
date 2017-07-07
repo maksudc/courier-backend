@@ -10,4 +10,7 @@ router.use('/order' , orderDataBinderRouter);
 var bundleDataBinderRouter = require("./bundle");
 router.use("/bundle" , bundleDataBinderRouter);
 
+var clientDataBinderRouter = require("./client");
+router.use("/client" , clientDataBinderRouter);
+
 module.exports = router;
