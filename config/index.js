@@ -18,6 +18,10 @@ exports.adminTypes = {
 	super_admin: {
 		name: 'Super admin',
 		type: 'super_admin'
-	}	
-	
+	},
+	monitor_operator: {
+		name: "Monitor Operator",
+		type: "monitor_operator"
+	}
+
 };

@@ -11,12 +11,12 @@ module.exports = function(sequelize , DataTypes){
 		address: { type: DataTypes.STRING},
 		national_id: {type: DataTypes.STRING},
 		role: {
-			type: DataTypes.ENUM('super_admin', 'system_operator', 'accountant', 'branch_operator', 'operator'), 
+			type: DataTypes.ENUM('super_admin', 'system_operator', 'accountant', 'branch_operator', 'operator' , 'monitor_operator'),
 			defaultValue: 'operator',
 			allowNull: false
 		},
 		state: {
-	      type: DataTypes.ENUM('active', 'blocked'), 
+	      type: DataTypes.ENUM('active', 'blocked'),
 	      defaultValue: 'active',
 	      allowNull: false
 	    },
