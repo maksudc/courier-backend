@@ -18,7 +18,7 @@ var isPrivileged = function(role){
 };
 
 var isPivilegedForProfileBranchUpdate = function(role){
-   return ["super_admin","system_operator" , "accountant"].indexOf(role) > -1;
+   return ["super_admin","system_operator" , "accountant" , "monitor_operator"].indexOf(role) > -1;
 };
 
 exports.getAdminBranchType = getAdminBranchType;
