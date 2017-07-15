@@ -1,5 +1,5 @@
-
 var User = require("./user");
+var Aggregation  require("./aggrgation");
 
 var DataTableHelper = function(tableConfig){
 	this.config = tableConfig;
@@ -60,6 +60,31 @@ DataTableHelper.prototype.getUser = function(){
 			userObject = new User(this.config.extra.user.role , this.config.extra.user.sub_branch_id , this.config.extra.user.regional_branch_id);
 	}
 	return userObject;
+};
+
+DataTableHelper.prototype.getAggregations = function(){
+	aggregations = [];
+
+	if(this.config.extra){
+			aggregation_query = this.config.extra.aggregation;
+			aggregation_query.fields = aggregation_query.fields || [];
+
+			for(I=0; I<aggregation_query.fields.length ; I++){
+				field_name = aggregation_query.fields[I];
+				field_parts = field_name.split("__");
+				if(field_parts != 2){
+					continue;
+				}
+				column_name = field_parts[0];
+				aggregation_function_name = field_parts[1].toUpperCase();
+				aggregation_function = [ Sequelize.fn(aggregation_function_name , Sequelize.col(column_name)) , field_name ];
+				aggregation_obj = Aggregation( aggregation_function_name , column_name , aggregation_function );
+
+				aggregations.push(aggregation_obj);
+			}
+	}
+
+	return aggregations;
 };
 
 DataTableHelper.prototype.getDraw = function(){

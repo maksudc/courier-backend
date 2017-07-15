@@ -17,67 +17,15 @@ router.get('/', function(req, res){
 
 	var resultData = {};
 
-	tableHelper = new DataTableHelper(req.query);
+	var tableHelper = new DataTableHelper(req.query);
 
 	userObj = tableHelper.getUser();
 
 	console.log(userObj);
 	whereQuery = null;
 
-	// var vdOrderIds = [];
-	//
-	// orderExitBranchType = null;
-	// orderExitBranchId = null;
-	//
-	// if(userObj){
-	// 	if(userObj.getSubBranchId()){
-	// 		orderExitBranchType = branchUtils.desanitizeBranchType("sub");
-	// 		orderExitBranchId = userObj.getSubBranchId();
-	// 	}
-	// 	else if(userObj.getRegionalBranchId()){
-	// 		orderExitBranchType = branchUtils.desanitizeBranchType("regional");
-	// 		orderExitBranchId = userObj.getRegionalBranchId();
-	// 	}
-	// }
-	//
-	// vdOrderQuery = {
-	// 	"$and":[
-	// 		//{ "type": { "$eq": "value_delivery" } }//,
-	// 		// { "status": { "$in": "stocked" }  }
-	// 	]
-	// };
-	// if(orderExitBranchType){
-	// 	vdOrderQuery["$and"].push({ "exit_branch_type": { "$eq": orderExitBranchType } });
-	// }
-	// if(orderExitBranchId){
-	// 	vdOrderQuery["$and"].push({ "exit_branch": { "$eq": orderExitBranchId } });
-	// }
-	//
-	// orderModel
-	// .findAll({
-	// 	where: vdOrderQuery ,
-	// 	attributes: ["uuid"]
-	// })
-	// .map(function(vdOrderInstance){
-	// 	return vdOrderInstance["uuid"];
-	// })
-	// .then(function(datas){
-	// 	vdOrderIds = datas;
-	// })
-	// .then(function(){
-
 		pureMoneyOrderQuery = {
 			"$and":[
-				// {
-				// 	"type":{
-				// 		"$eq": "general"
-				// 	}
-				// },
-				// {
-				// 	"money_order_id":{
-				// 		"$eq": null
-				// 	}
-				// },
 				{
 					"status": {
 						"$eq": "deliverable"
@@ -95,30 +43,21 @@ router.get('/', function(req, res){
 			}
 		}
 
-		// vdMoneyOrderQuery = {
-		// 	"money_order_id":{
-		// 		"$in": vdOrderIds
-		// 	}
-		// };
-		//
-		// extraQuery = {
-		// 	"$or":[
-		// 		vdMoneyOrderQuery,
-		// 		pureMoneyOrderQuery
-		// 	]
-		// };
 		extraQuery = pureMoneyOrderQuery;
 
 	  whereQuery = tableHelper.getWhere(extraQuery);
 
 		queryParams  = {};
-		queryParams["limit"] = tableHelper.getLimit();
-		queryParams["offset"] = tableHelper.getOffset();
 		queryParams["where"] = whereQuery;
 		queryParams["order"] = tableHelper.getOrder();
 
 		var resultData = {};
 		resultData["draw"] = tableHelper.getDraw();
+
+		var baseQueryParams = queryParams;
+
+		queryParams["limit"] = tableHelper.getLimit();
+		queryParams["offset"] = tableHelper.getOffset();
 
 		return moneyModel
 			.findAndCountAll(queryParams)
@@ -131,6 +70,18 @@ router.get('/', function(req, res){
 						res.status(HttpStatus.OK);
 						res.send(resultData);
 				})
+				.then(function(){
+					return tableHelper.getAggregations();
+				})
+				.map(function(aggregation_obj){
+					if(aggregation_obj.getOperation() == "sum"){
+							return Promise.all( aggregation_obj ,  moneyModel.sum(aggregation_obj.getColumn() , baseQueryParams));
+					}
+					return Promise.resolve();
+				})
+				.then(function(results){
+					//@TODO: Add further integration
+				})
 				.catch(function(err){
 						if(err){
 							console.error(err.stack);
@@ -138,7 +89,6 @@ router.get('/', function(req, res){
 						res.status(HttpStatus.INTERNAL_SERVER_ERROR);
 						res.send({ error:"Internal Server error occured" });
 				});
-	// });
 });
 
 
