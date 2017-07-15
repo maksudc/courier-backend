@@ -136,13 +136,27 @@ money.hook("afterUpdate" , function(instance , options , next){
     }
     else if(updatedInstance.status == "delivered"){
 
-      // Send message to VD sender / Money receiver that parcel is delivered and money is pending on the branch for collection
+      // Send message to VD Receiver / Money Sender that Money is delivered
       content = fs.readFileSync("./views/message/vd.money.delivered.handlebars");
       contentTemplate = handlebars.compile(content.toString());
       messsageBody = contentTemplate({ parcelInstance: updatedInstance });
 
       messageUtils.sendMessage(updatedInstance.sender_mobile , messsageBody , function(data){
         console.log(data);
+      });
+
+      // Send message to VD Sender / Money Receiver Confirming that Money is delivered
+      branchUtils
+      .getInclusiveBranchInstance(destinationBranchType , destinationBranchId , null)
+      .then(function(finalBranchInstance){
+
+        receiverConfirmationContent = fs.readFileSync("./views/message/vd.money.delivered.confirmation.handlebars");
+        receiverConfirmationTemplate = handlebars.compile(receiverConfirmationContent.toString());
+        receiverConfirmationMessageBody = receiverConfirmationTemplate({ parcelInstance: updatedInstance , branchInstance: finalBranchInstance });
+
+        messageUtils.sendMessage(updatedInstance.receiver_mobile , receiverConfirmationMessageBody , function(data){
+          console.log(data);
+        });
       });
     }
   }
