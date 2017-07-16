@@ -63,9 +63,15 @@ DataTableHelper.prototype.getUser = function(){
 	return userObject;
 };
 
-DataTableHelper.prototype.getExtraFiltering(){
-	filterings = [];
-}
+DataTableHelper.prototype.getExtraFiltering = function(){
+	filtering = null;
+
+	if(this.config.extra){
+		filtering = this.config.extra.filtering;
+	}
+
+	return filtering;
+};
 
 DataTableHelper.prototype.getAggregations = function(){
 	aggregations = [];

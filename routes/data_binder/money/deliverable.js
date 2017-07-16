@@ -43,6 +43,11 @@ router.get('/', function(req, res){
 			}
 		}
 
+		extraParamFilterQuery = tableHelper.getExtraFiltering();
+		if(extraParamFilterQuery){
+			pureMoneyOrderQuery["$and"].push( extraParamFilterQuery );
+		}
+
 		extraQuery = pureMoneyOrderQuery;
 
 	  whereQuery = tableHelper.getWhere(extraQuery);
@@ -51,10 +56,10 @@ router.get('/', function(req, res){
 		queryParams["where"] = whereQuery;
 		queryParams["order"] = tableHelper.getOrder();
 
+		var baseQueryParams = Object.assign({} , queryParams);
+
 		var resultData = {};
 		resultData["draw"] = tableHelper.getDraw();
-
-		var baseQueryParams = queryParams;
 
 		queryParams["limit"] = tableHelper.getLimit();
 		queryParams["offset"] = tableHelper.getOffset();
