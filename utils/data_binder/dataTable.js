@@ -63,6 +63,10 @@ DataTableHelper.prototype.getUser = function(){
 	return userObject;
 };
 
+DataTableHelper.prototype.getExtraFiltering(){
+	filterings = [];
+}
+
 DataTableHelper.prototype.getAggregations = function(){
 	aggregations = [];
 
