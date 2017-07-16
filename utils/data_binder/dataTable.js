@@ -1,5 +1,6 @@
 var User = require("./user");
-var Aggregation  require("./aggrgation");
+var Aggregation = require("./aggregation");
+var Sequelize = require("sequelize");
 
 var DataTableHelper = function(tableConfig){
 	this.config = tableConfig;
@@ -69,21 +70,21 @@ DataTableHelper.prototype.getAggregations = function(){
 			aggregation_query = this.config.extra.aggregation;
 			aggregation_query.fields = aggregation_query.fields || [];
 
-			for(I=0; I<aggregation_query.fields.length ; I++){
+			for(I=0; I< aggregation_query.fields.length ; I++){
 				field_name = aggregation_query.fields[I];
 				field_parts = field_name.split("__");
-				if(field_parts != 2){
+
+				if(field_parts.length != 2){
 					continue;
 				}
 				column_name = field_parts[0];
-				aggregation_function_name = field_parts[1].toUpperCase();
-				aggregation_function = [ Sequelize.fn(aggregation_function_name , Sequelize.col(column_name)) , field_name ];
-				aggregation_obj = Aggregation( aggregation_function_name , column_name , aggregation_function );
+				aggregation_function_name = field_parts[1].toLowerCase();
+				aggregation_function = [ Sequelize.fn(aggregation_function_name.toUpperCase() , Sequelize.col(column_name)) , field_name ];
 
+				aggregation_obj = new Aggregation( aggregation_function_name , column_name , aggregation_function );
 				aggregations.push(aggregation_obj);
 			}
 	}
-
 	return aggregations;
 };
 

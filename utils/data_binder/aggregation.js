@@ -16,4 +16,8 @@ Aggregation.prototype.getSequelizeFunction = function() {
   return this.sequelize_function;
 };
 
+Aggregation.prototype.getQueryField = function(arguments) {
+	return this.column + "__" + this.operation;
+};
+
 module.exports = Aggregation;

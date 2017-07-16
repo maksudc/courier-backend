@@ -66,21 +66,36 @@ router.get('/', function(req, res){
 						resultData["data"] = moneyOrderList;
 						resultData["recordsTotal"] = moneyOrderList.count;
 						resultData["recordsFiltered"] = moneyOrderList.count;
-
-						res.status(HttpStatus.OK);
-						res.send(resultData);
 				})
 				.then(function(){
-					return tableHelper.getAggregations();
+
+					return Promise.resolve(tableHelper.getAggregations());
 				})
 				.map(function(aggregation_obj){
+
 					if(aggregation_obj.getOperation() == "sum"){
-							return Promise.all( aggregation_obj ,  moneyModel.sum(aggregation_obj.getColumn() , baseQueryParams));
+
+							return Promise.all([
+								aggregation_obj ,
+								moneyModel.sum(aggregation_obj.getColumn() , baseQueryParams)
+							]);
 					}
-					return Promise.resolve();
+					return Promise.resolve(null);
 				})
-				.then(function(results){
-					//@TODO: Add further integration
+				.map(function(complexResult){
+
+					if(!complexResult){
+						return Promise.resolve(null);
+					}
+					aggregation_obj = complexResult[0];
+					aggregation_result = complexResult[1];
+
+					resultData["data"][aggregation_obj.getQueryField()] = aggregation_result;
+				})
+				.then(function(complexResult){
+
+					res.status(HttpStatus.OK);
+					res.send(resultData);
 				})
 				.catch(function(err){
 						if(err){
