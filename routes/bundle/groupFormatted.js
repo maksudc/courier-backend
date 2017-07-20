@@ -6,6 +6,7 @@ var sequelize = DB.sequelize;
 var bundleModel = sequelize.models.bundle;
 var HttpStatus = require("http-status-codes");
 var Promise = require("bluebird");
+var _ = require("underscore");
 
 router.get("/:id" , function(req , res){
 
@@ -69,8 +70,12 @@ router.get("/:id" , function(req , res){
   .map(function(resultList){
     itemMap = resultList[0];
     entryBranchInstance = resultList[1];
-    
+
     exitBranchInstane = exitBranchMap[itemMap.exitBranchKey];
+
+    // Cleansup unnecessary branch id reference to preserve bandwidth
+    delete itemMap["exitBranchKey"];
+    delete itemMap["entryBranchKey"];
 
     itemMap["entry_branch_label"] = entryBranchInstance.label;
     if(entryBranchInstance.regionalBranch){
@@ -89,6 +94,21 @@ router.get("/:id" , function(req , res){
     resultData = bundleInstance.dataValues;
     resultData.items = itemMaps;
     resultData.branches = branchesDatas;
+
+    groupedItemMaps = _.groupBy(itemMaps , "exit_branch_label");
+    for(dest in groupedItemMaps ){
+      groupedItemMaps[dest] = _.groupBy(groupedItemMaps[dest] , "entry_branch_label");
+
+      // Cleansup unnecessary entry and exit branch reference since they are already enclosed in the proper format
+      for(source in groupedItemMaps[dest]){
+        for(I=0 ; I< groupedItemMaps[dest][source].length ; I++){
+          delete groupedItemMaps[dest][source][I]["exit_branch_label"];
+          delete groupedItemMaps[dest][source][I]["entry_branch_label"];
+        }
+      }
+    }
+
+    resultData.items = groupedItemMaps;
 
     res.status(HttpStatus.OK);
     res.send({
