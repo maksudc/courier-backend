@@ -23,6 +23,9 @@ router.use("/add/items" , itemAdditionRouter );
 var itemRemovalRouter = require("./itemRemoval");
 router.use("/remove/items" , itemRemovalRouter);
 
+var groupFormattedRouter = require("./groupFormatted");
+router.use("/formatted" , groupFormattedRouter);
+
 router.post("/$" , upload.array() , function(req , res){
 
   var bundleInstance = null;
