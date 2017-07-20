@@ -168,7 +168,7 @@ var updateSelf = function(adminData, next){
                 }
                 if(adminData.subBranch && adminUtils.isPivilegedForProfileBranchUpdate(admin.role)){
                     admin.sub_branch_id = adminData.subBranch;
-                }else if(!adminData.subBranch && adminUtils.isPrivileged(admin.role)){
+                }else if(!adminData.subBranch && adminUtils.isPivilegedForProfileBranchUpdate(admin.role)){
                     admin.sub_branch_id = null;
                 }
                 admin.save().then(function(admin){
