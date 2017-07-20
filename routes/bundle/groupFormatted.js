@@ -50,8 +50,6 @@ router.get("/:id" , function(req , res){
   })
   .map(function(itemInstance){
 
-    console.log("inside map");
-
     exitBranchKey = itemInstance.exit_branch_type + "/" + itemInstance.exit_branch;
     entryBranchKey = itemInstance.entry_branch_type + "/" + itemInstance.entry_branch;
 
