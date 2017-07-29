@@ -96,12 +96,21 @@ router.get("/:id" , function(req , res){
     groupedItemMaps = _.groupBy(itemMaps , "exit_branch_label");
     for(dest in groupedItemMaps ){
       groupedItemMaps[dest] = _.groupBy(groupedItemMaps[dest] , "entry_branch_label");
-
       // Cleansup unnecessary entry and exit branch reference since they are already enclosed in the proper format
       for(source in groupedItemMaps[dest]){
+        groupedItemMaps[dest][source] = _.sortBy(groupedItemMaps[dest][source] , function(iMap){
+          parts = iMap["bar_code"].split("-");
+          ocode = parseInt(parts[0]);
+          icount = parseInt(parts[1]);
+          base = 10000000;
+
+          return ocode + base + icount;
+        });
         for(I=0 ; I< groupedItemMaps[dest][source].length ; I++){
+
           delete groupedItemMaps[dest][source][I]["exit_branch_label"];
           delete groupedItemMaps[dest][source][I]["entry_branch_label"];
+          //delete groupedItemMaps[dest][source][I]["item_count"];
         }
       }
     }
