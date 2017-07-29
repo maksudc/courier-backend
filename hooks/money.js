@@ -137,13 +137,13 @@ money.hook("afterUpdate" , function(instance , options , next){
     else if(updatedInstance.status == "delivered"){
 
       // Send message to VD Receiver / Money Sender that Money is delivered
-      content = fs.readFileSync("./views/message/vd.money.delivered.handlebars");
-      contentTemplate = handlebars.compile(content.toString());
-      messsageBody = contentTemplate({ parcelInstance: updatedInstance });
-
-      messageUtils.sendMessage(updatedInstance.sender_mobile , messsageBody , function(data){
-        console.log(data);
-      });
+      // content = fs.readFileSync("./views/message/vd.money.delivered.handlebars");
+      // contentTemplate = handlebars.compile(content.toString());
+      // messsageBody = contentTemplate({ parcelInstance: updatedInstance });
+      //
+      // messageUtils.sendMessage(updatedInstance.sender_mobile , messsageBody , function(data){
+      //   console.log(data);
+      // });
 
       // Send message to VD Sender / Money Receiver Confirming that Money is delivered
       branchUtils
