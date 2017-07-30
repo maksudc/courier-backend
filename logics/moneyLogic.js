@@ -449,9 +449,13 @@ var confirmOrder = function(id, operator, next){
 
 				moneyOrder.status = 'deliverable';
 				moneyOrder.payment_receiver_operator = operator.email;
-				moneyOrder.save();
-				next(null, moneyOrder);
-
+				moneyOrder
+				.save()
+				.then(function(){
+						next(null, moneyOrder);
+				}).catch(function(exc){
+						next(exc);
+				});
 			}
 			else{
 				//Not in desired state
