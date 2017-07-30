@@ -10,6 +10,11 @@ module.exports = function(sequelize , DataTypes){
 		accountant : { type: DataTypes.BOOLEAN, defaultValue: false},
 		branch_operator : { type: DataTypes.BOOLEAN, defaultValue: false},
 		operator : { type: DataTypes.BOOLEAN, defaultValue: false},
+		monitor_operator: {
+      type: DataTypes.BOOLEAN,
+			defaultValue: false,
+			allowNull: false
+    },
 		client : { type: DataTypes.BOOLEAN, defaultValue: false}
 	} , {
 
