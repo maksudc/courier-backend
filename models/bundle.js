@@ -38,6 +38,11 @@ module.exports = function(sequelize , DataTypes){
       type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
       defaultValue: 'draft',
       allowNull: false
+    },
+    sealed:{
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
     }
   },
   {

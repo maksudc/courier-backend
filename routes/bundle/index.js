@@ -23,6 +23,9 @@ router.use("/add/items" , itemAdditionRouter );
 var itemRemovalRouter = require("./itemRemoval");
 router.use("/remove/items" , itemRemovalRouter);
 
+var sealRouter = require("./seal");
+router.use("/seal" , sealRouter);
+
 var groupFormattedRouter = require("./groupFormatted");
 router.use("/formatted" , groupFormattedRouter);
 
