@@ -418,13 +418,15 @@ var deleteOrder = function(orderUuid , next){
 
 	 var orderInstance = null;
 	 var trackerInstances = [];
+	 var itemUuids = [];
+	 var itemTrackerUuids = [];
 
 	 orderModel
 	 .findOne({ where: { uuid: orderUuid } })
 	 .then(function(orderItem){
 
 		 if(!orderItem){
-			 return Promise.reject("Could not found Item");
+			 return Promise.reject("Could not found Order");
 		 }
 
 		 orderInstance = orderItem;
@@ -442,33 +444,13 @@ var deleteOrder = function(orderUuid , next){
 			return Promise.resolve(orderItem);
 	 })
 	 .then(function(orderItem){
-		 return orderItem.getTracker();
+		 return orderInstance.getTracker();
 	 })
-	//  .then(function(trackerItem){
-	// 	 trackerInstances.push(trackerItem.uuid);
-	//  })
-	//  .then(function(result){
-	// 	 return orderInstance.getItems();
-	//  })
-	//  .map(function(itemInstance){
-	// 		return itemInstance.getTracker();
-	//  })
-	//  .map(function(itemTrackerInstance){
-	// 	 return itemTrackerInstance.uuid ;
-	//  })
-	//  .then(function(result){
-	// 	 return trackerLog.destroy({ where: { trackerId: trackerInstances } });
-	//  })
 	 .then(function(trackerInstance){
 		 if(trackerInstance){
 			 	trackerLog.destroy({ where: { trackerId: trackerInstance.uuid } });
 		 }
 		 return Promise.resolve(trackerInstance);
-	 })
-	 .then(function(trackerInstance){
-		 if(trackerInstance){
-			 	return genericTracker.destroy({ where:{ uuid: trackerInstance.uuid } });
-		 }
 	 })
 	 .then(function(){
 		 return itemModel.destroy({ where: { orderUuid: orderInstance.uuid } });
@@ -516,7 +498,7 @@ var confirmOrder = function(id, code, next){
 		}
 		else return next({"status": "error", "message": "Cannot confirm this order"});
 	});
-}
+};
 
 exports.confirmOrder = confirmOrder;
 
@@ -1989,7 +1971,7 @@ var fixMissingMoneyOrder = function(bar_code){
 	orderModel
 	.findOne({ where: { bar_code: bar_code } })
 	.then(function(oInstance){
-		
+
 	});
 
 };
