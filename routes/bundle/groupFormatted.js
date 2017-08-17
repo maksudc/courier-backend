@@ -104,11 +104,7 @@ router.get("/:id" , function(req , res){
           return orderCode;
         });
 
-        console.log(groupedItemMaps[dest][source]);
-
         groupedItemMaps[dest][source] = _.groupBy(groupedItemMaps[dest][source] , "order_bar_code");
-
-        console.log(groupedItemMaps[dest][source]);
 
         for(orderCode in groupedItemMaps[dest][source]){
 
@@ -126,7 +122,6 @@ router.get("/:id" , function(req , res){
           }
         }
 
-        console.log(groupedItemMaps[dest][source]);
       }
     }
 
