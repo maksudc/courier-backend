@@ -98,20 +98,35 @@ router.get("/:id" , function(req , res){
       groupedItemMaps[dest] = _.groupBy(groupedItemMaps[dest] , "entry_branch_label");
       // Cleansup unnecessary entry and exit branch reference since they are already enclosed in the proper format
       for(source in groupedItemMaps[dest]){
+
         groupedItemMaps[dest][source] = _.sortBy(groupedItemMaps[dest][source] , function(iMap){
-          parts = iMap["bar_code"].split("-");
-          ocode = parseInt(parts[0]);
-          icount = parseInt(parts[1]);
-          base = 10000000;
-
-          return ocode + base + icount;
+          orderCode = parseInt(iMap["order_bar_code"]);
+          return orderCode;
         });
-        for(I=0 ; I< groupedItemMaps[dest][source].length ; I++){
 
-          delete groupedItemMaps[dest][source][I]["exit_branch_label"];
-          delete groupedItemMaps[dest][source][I]["entry_branch_label"];
-          //delete groupedItemMaps[dest][source][I]["item_count"];
+        console.log(groupedItemMaps[dest][source]);
+
+        groupedItemMaps[dest][source] = _.groupBy(groupedItemMaps[dest][source] , "order_bar_code");
+
+        console.log(groupedItemMaps[dest][source]);
+
+        for(orderCode in groupedItemMaps[dest][source]){
+
+          groupedItemMaps[dest][source][orderCode] = _.sortBy(groupedItemMaps[dest][source][orderCode]  , function(iMap){
+            parts = iMap["bar_code"].split("-");
+            icount = parseInt(parts[1]);
+            return icount;
+          });
+
+          for(I=0 ; I< groupedItemMaps[dest][source][orderCode].length ; I++){
+
+            delete groupedItemMaps[dest][source][orderCode][I]["exit_branch_label"];
+            delete groupedItemMaps[dest][source][orderCode][I]["entry_branch_label"];
+            delete groupedItemMaps[dest][source][orderCode][I]["order_bar_code"];
+          }
         }
+
+        console.log(groupedItemMaps[dest][source]);
       }
     }
 
