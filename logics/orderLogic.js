@@ -447,11 +447,14 @@ var deleteOrder = function(orderUuid , next){
 		 return orderInstance.getTracker();
 	 })
 	 .then(function(trackerInstance){
-		 if(trackerInstance){
-			 	trackerLog.destroy({ where: { trackerId: trackerInstance.uuid } });
-		 }
-		 return Promise.resolve(trackerInstance);
+		 return trackerInstance.destroy();
 	 })
+	//  .then(function(trackerInstance){
+	// 	 if(trackerInstance){
+	// 		 	trackerLog.destroy({ where: { trackerId: trackerInstance.uuid } });
+	// 	 }
+	// 	 return Promise.resolve(trackerInstance);
+	//  })
 	 .then(function(){
 		 return itemModel.destroy({ where: { orderUuid: orderInstance.uuid } });
 	 })
