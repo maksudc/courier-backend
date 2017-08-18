@@ -447,7 +447,9 @@ var deleteOrder = function(orderUuid , next){
 		 return orderInstance.getTracker();
 	 })
 	 .then(function(trackerInstance){
-		 return trackerInstance.destroy();
+		 if(trackerInstance){
+			 return trackerInstance.destroy();
+		 }
 	 })
 	//  .then(function(trackerInstance){
 	// 	 if(trackerInstance){
