@@ -431,19 +431,21 @@ var deleteOrder = function(orderUuid , next){
 
 		 orderInstance = orderItem;
 
-		 if(orderItem.vd){
+		 if(orderItem.type == "value_delivery"){
 			 // Order is a VD , So delete the redundant money order as well
 			 return money
-			 .destroy({ where: { id: orderItem.vd_id } })
-			 .then(function(result){
-				 console.log("Delete corresponding money order: "+ orderItem.vd_id);
-				 return Promise.resolve(orderItem);
+			 .destroy({
+				 where: {
+					 "type":"virtual_delivery",
+					 money_order_id: orderInstance.uuid
+				 }
 			 });
 		 }
 
 			return Promise.resolve(orderItem);
 	 })
-	 .then(function(orderItem){
+	 .then(function(result){
+
 		 return orderInstance.getTracker();
 	 })
 	 .then(function(trackerInstance){
