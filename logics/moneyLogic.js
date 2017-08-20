@@ -398,9 +398,13 @@ var receiveOrder = function(id, verification_code, operator, next){
 			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'draft'){
 
-				moneyOrder.status = 'received';
 				moneyOrder.paid = true;
 				moneyOrder.payment_time = new Date();
+				// @issue: https://trello.com/c/F6RFn7Fn/226-money-vd-confirm-in-popup-ux
+				// moneyOrder.status = 'received';
+				// moneyOrder.payment_receiver_operator = operator.email;
+
+				moneyOrder.status = 'deliverable';
 				moneyOrder.payment_receiver_operator = operator.email;
 
 				if(moneyOrder.dataValues.type == 'virtual_delivery')
