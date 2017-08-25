@@ -6,6 +6,7 @@ var sequelize = DB.sequelize;
 var bundleModel = sequelize.models.bundle;
 var HttpStatus = require("http-status-codes");
 var Promise = require("bluebird");
+var _ = require("underscore");
 
 router.get("/:id" , function(req , res){
 
@@ -39,9 +40,11 @@ router.get("/:id" , function(req , res){
     });
   })
   .map(function(itemInstance){
+    itemParts = itemInstance.bar_code.split("-");
     itemMap = {
-      "order_bar_code": itemInstance.bar_code.split("-")[0],
+      "order_bar_code": parseInt(itemParts[0]),
       "bar_code": itemInstance.bar_code,
+      "item_no": parseInt(itemParts[1])
     };
 
     return Promise.all([
@@ -64,7 +67,7 @@ router.get("/:id" , function(req , res){
     if(exitBranchInstane.regionalBranch){
       itemMap["exit_branch_label"] = itemMap["exit_branch_label"] + "," + exitBranchInstane.regionalBranch.label;
     }
-    
+
     return Promise.resolve(itemMap);
   })
   .then(function(itemMaps){
