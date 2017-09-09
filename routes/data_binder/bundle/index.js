@@ -26,9 +26,6 @@ router.get("/" , function(req , res){
 
 	};
 	if(userObj){
-		// if(!adminUtils.isPrivileged(userObj.getRole())){
-    //
-    // }
     if(userObj.getSubBranchId()){
       extraQuery["createdAtBranchType"] = "sub";
     }else{
@@ -37,6 +34,10 @@ router.get("/" , function(req , res){
 		if(userObj.getRegionalBranchId()){
 			extraQuery["createdAtBranchId"] = userObj.getRegionalBranchId();
 		}
+	}
+	extraParamFilterQuery = tableHelper.getExtraFiltering();
+	for(key in extraParamFilterQuery){
+		extraQuery[key] = extraParamFilterQuery[key];
 	}
 
   whereQuery = tableHelper.getWhere(extraQuery);
