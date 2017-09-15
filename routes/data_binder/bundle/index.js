@@ -26,14 +26,14 @@ router.get("/" , function(req , res){
 
 	};
 	if(userObj){
+		
     if(userObj.getSubBranchId()){
       extraQuery["createdAtBranchType"] = "sub";
+			extraQuery["createdAtBranchId"] = userObj.getSubBranchId();
     }else{
       extraQuery["createdAtBranchType"] = "regional";
-    }
-		if(userObj.getRegionalBranchId()){
 			extraQuery["createdAtBranchId"] = userObj.getRegionalBranchId();
-		}
+    }
 	}
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
 	for(key in extraParamFilterQuery){
