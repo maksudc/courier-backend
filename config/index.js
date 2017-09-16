@@ -22,6 +22,10 @@ exports.adminTypes = {
 	monitor_operator: {
 		name: "Monitor Operator",
 		type: "monitor_operator"
+	},
+	scan_operator:{
+		name: "Scan operator",
+		type: "scan_operator"
 	}
 
 };

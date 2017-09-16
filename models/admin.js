@@ -11,7 +11,10 @@ module.exports = function(sequelize , DataTypes){
 		address: { type: DataTypes.STRING},
 		national_id: {type: DataTypes.STRING},
 		role: {
-			type: DataTypes.ENUM('super_admin', 'system_operator', 'accountant', 'branch_operator', 'operator' , 'monitor_operator'),
+			type: DataTypes.ENUM('super_admin', 'system_operator',
+													 'accountant', 'branch_operator',
+													 'operator' , 'monitor_operator',
+													 'scan_operator'),
 			defaultValue: 'operator',
 			allowNull: false
 		},
