@@ -6,7 +6,7 @@ var orderModel = sequelize.models.order;
 var itemModel = sequelize.models.item;
 var trackerLog = sequelize.models.trackerLog;
 var genericTracker = sequelize.models.genericTracker;
-var money = sequelize.models.money;
+var moneyModel = sequelize.models.money;
 var clientModel = sequelize.models.client;
 
 var _ = require("lodash");
@@ -107,31 +107,40 @@ var editOrder = function(orderUuid , user, payload , callback){
 
   sequelize.transaction(function(t){
 
-    orderModel.findOne({ where: { uuid: orderUuid } } , { transaction: t })
+    return orderModel.findOne({ where: { uuid: orderUuid } } , { transaction: t })
     .then(function(orderObject){
 
       orderInstance = orderObject;
 
       orderMap = getOrderUpdateMap(payload);
-      return orderModel.update(orderMap , { transaction: t });
+      return orderInstance.update(orderMap , { transaction: t });
     })
     .then(function(){
 
-      return orderInstance.getMoney_order();
+      return moneyModel.findOne({
+        where: { type: "virtual_delivery", money_order_id: orderUuid } } ,
+        { transaction: t }
+      );
+      //return orderInstance.getMoney_order();
     })
     .then(function(moneyObject){
 
-      if(moneyObject){
-
-        moneyInstance = moneyObject;
-      }
-    })
-    .then(function(){
-
+      moneyInstance = moneyObject;
       if(orderInstance.type == "value_delivery"){
+
           moneyMap = getVDparams(payload);
           return moneyInstance.update(moneyMap , { transaction: t });
       }
+
+      return Promise.resolve(true);
+    })
+    .then(function(){
+
+      callback(null , {
+        status: "success",
+        orderUuid: orderUuid
+      });
+      return Promise.resolve(true);
     })
     .catch(function(err){
 
@@ -147,11 +156,10 @@ var editOrder = function(orderUuid , user, payload , callback){
 
       callback(new Error("Unknown error") , {
         status: "error",
-        message:
       });
     });
 
   });
-}
+};
 
 exports.editOrder = editOrder;
