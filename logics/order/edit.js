@@ -105,6 +105,8 @@ var editOrder = function(orderUuid , user, payload , callback){
   var orderInstance = null;
   var moneyInstance = null;
 
+  var itemMaps = {};
+
   sequelize.transaction(function(t){
 
     return orderModel.findOne({ where: { uuid: orderUuid } } , { transaction: t })
@@ -133,6 +135,29 @@ var editOrder = function(orderUuid , user, payload , callback){
       }
 
       return Promise.resolve(true);
+    })
+    .then(function(){
+
+      return itemModel.findAll({ where: { orderUuid: orderUuid } } , { transaction: t });
+    })
+    .then(function(itemObjects){
+
+      for(I = 0 ; I < itemObjects.length ; I++){
+
+        currentItemObject = itemObjects[I];
+        if(itemMaps[currentItemObject.dataValues.product_name]){
+
+          itemMaps[currentItemObject.dataValues.product_name]["amount"]++;
+          itemMaps[currentItemObject.dataValues.product_name]["uuids"].push(currentItemObject.dataValues.uuid);
+
+        }else{
+
+          itemMaps[currentItemObject.dataValues.product_name] = {
+            "amount": 1,
+            "uuids":[ currentItemObject.dataValues.uuid ]
+          };
+        }
+      }
     })
     .then(function(){
 
