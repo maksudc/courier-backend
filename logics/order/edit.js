@@ -138,7 +138,37 @@ var editOrder = function(orderUuid , user, payload , callback){
     })
     .then(function(){
 
-      return itemModel.findAll({ where: { orderUuid: orderUuid } } , { transaction: t });
+      return Promise.resolve(payload.item_ops);
+    })
+    .map(function(itemOp){
+
+      if(itemOp){
+
+        if(itemOp["op"] == "insert"){
+
+          newInstanceData = itemOp["data"];
+          
+          branchUtils.desanitizeBranchType(orderInstance.entry_branch_type);
+        }else if(itemOp["op"] == "update"){
+
+          path_parts = itemOp["path"].split("/");
+          itemUuid = path_parts[2];
+
+          // Since this only updates the basic descriptions of the item associated
+          // We do not need to call the hooks.
+          // Status can not be changed by editing the other attributes of item instance
+          itemModel.update(itemOp["data"] , { where: { uuid: itemUuid } , transaction: t });
+
+        }else if(itemOp["op"] == "delete"){
+
+          path_parts = itemOp["path"].split("/");
+          itemUuid = path_parts[2];
+
+          itemModel.destroy({ where: { uuid: itemUuid } , transaction: t });
+        }
+      }
+
+      return Promise.resolve(false);
     })
     .then(function(itemObjects){
 
