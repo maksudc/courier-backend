@@ -107,9 +107,17 @@ var editOrder = function(orderUuid , user, payload , callback){
 
   var itemMaps = {};
 
+  var itemPreviousCount = 0;
+
+  var itemAvailaleIndexes = [];
+
+  var insertOpCount = 0;
+  var deleteOpCount = 0;
+  var finalItemCount = 0;
+
   sequelize.transaction(function(t){
 
-    return orderModel.findOne({ where: { uuid: orderUuid } } , { transaction: t })
+    return orderModel.findOne({ where: { uuid: orderUuid } , transaction: t }) //, { transaction: t })
     .then(function(orderObject){
 
       orderInstance = orderObject;
@@ -119,11 +127,20 @@ var editOrder = function(orderUuid , user, payload , callback){
     })
     .then(function(){
 
+      return itemModel.count({ where: { orderUuid: orderInstance.uuid } , transaction: t });
+    })
+    .then(function(count){
+
+      itemPreviousCount = count;
+    })
+    .then(function(){
+
       return moneyModel.findOne({
-        where: { type: "virtual_delivery", money_order_id: orderUuid } } ,
-        { transaction: t }
+          where: { type: "virtual_delivery", money_order_id: orderUuid },
+          transaction: t
+        }
+        //,{ transaction: t }
       );
-      //return orderInstance.getMoney_order();
     })
     .then(function(moneyObject){
 
@@ -138,18 +155,54 @@ var editOrder = function(orderUuid , user, payload , callback){
     })
     .then(function(){
 
+      for(I=0 ; I < payload.item_ops ; I++){
+
+        if(payload.item_ops[I]["op"]=="delete"){
+          deleteOpCount++;
+        }else if(payload.item_ops[I]["op"]=="insert"){
+          insertOpCount++;
+        }
+      }
+      finalItemCount = itemPreviousCount - deleteOpCount + insertOpCount;
+      for(I=0 ; I< finalItemCount ; I++){
+        itemAvailaleIndexes[I] = true;
+      }
+
       return Promise.resolve(payload.item_ops);
     })
     .map(function(itemOp){
 
       if(itemOp){
 
-        if(itemOp["op"] == "insert"){
+        // if(itemOp["op"] == "insert"){
+        //
+        //   newInstanceData = itemOp["data"];
+        //
+        //   newInstanceData["orderUuid"] = orderInstance.uuid;
+        //
+        //   newInstanceData["entry_branch_type"] = branchUtils.desanitizeBranchType(orderInstance.entry_branch_type);
+        //   newInstanceData["entry_branh"] = orderInstance.entry_branch;
+        //
+        //   newInstanceData["exit_branch_type"] = branchUtils.desanitizeBranchType(orderInstance.exit_branch_type);
+        //   newInstanceData["exit_branch"] = orderInstance.exit_branch;
+        //
+        //   newInstanceData["current_hub_type"] = branchUtils.desanitizeBranchType(orderInstance.current_hub_type);
+        //   newInstanceData["current_hub"] = orderInstance.current_hub;
+        //
+        //   newInstanceData["next_hub_type"] = branchUtils.desanitizeBranchType(orderInstance.next_hub_type);
+        //   newInstanceData["next_hub"] = orderInstance.next_hub;
+        //
+        //   if(orderInstance.status != "draft"){
+        //     newInstanceData["status"] = orderInstance.status;
+        //   }
+        //
+        //   itemModel.create(newInstanceData);
+        //
+        //
+        //
+        // }
 
-          newInstanceData = itemOp["data"];
-          
-          branchUtils.desanitizeBranchType(orderInstance.entry_branch_type);
-        }else if(itemOp["op"] == "update"){
+        if(itemOp["op"] == "update"){
 
           path_parts = itemOp["path"].split("/");
           itemUuid = path_parts[2];
@@ -158,7 +211,6 @@ var editOrder = function(orderUuid , user, payload , callback){
           // We do not need to call the hooks.
           // Status can not be changed by editing the other attributes of item instance
           itemModel.update(itemOp["data"] , { where: { uuid: itemUuid } , transaction: t });
-
         }else if(itemOp["op"] == "delete"){
 
           path_parts = itemOp["path"].split("/");
@@ -169,6 +221,29 @@ var editOrder = function(orderUuid , user, payload , callback){
       }
 
       return Promise.resolve(false);
+    })
+    .then(function(results){
+
+      return itemModel.findAll({ where: { orderUuid: orderInstance.uuid } , attributes:[ "uuid" , "bar_code" ] , transaction: t });
+    })
+    .map(function(itemObj){
+
+      return parseInt(itemObj.bar_code.split("-")[1]);
+    })
+    .then(function(placeHolderIndexes){
+
+      for(I=0 ; I < placeHolderIndexes.length ; I++){
+        itemAvailaleIndexes[placeHolderIndexes[I]] = false;
+      }
+
+      newCodeIndexes = []
+      for(I=0 ; I< itemAvailaleIndexes.length ; I++){
+        if(itemAvailaleIndexes[I]){
+          codeIndexes.push(I);
+        }
+      }
+
+      return Promise.resolve(newCodeIndexes);
     })
     .then(function(itemObjects){
 
