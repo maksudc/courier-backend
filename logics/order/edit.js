@@ -55,7 +55,11 @@ function getOrderUpdateMap(payload){
 
   if(payload.nid) updateMap["nid"] = payload.nid;
 
-  if(payload.order_vat != '0') updateMap["vat"] = true;
+  if(payload.order_vat != '0'){
+      updateMap["vat"] = true;
+  }else{
+      updateMap["vat"] = false;
+  }
 
   return updateMap;
 }
@@ -139,7 +143,6 @@ var editOrder = function(orderUuid , user, payload , callback){
           where: { type: "virtual_delivery", money_order_id: orderUuid },
           transaction: t
         }
-        //,{ transaction: t }
       );
     })
     .then(function(moneyObject){
@@ -174,35 +177,31 @@ var editOrder = function(orderUuid , user, payload , callback){
 
       if(itemOp){
 
-        // if(itemOp["op"] == "insert"){
-        //
-        //   newInstanceData = itemOp["data"];
-        //
-        //   newInstanceData["orderUuid"] = orderInstance.uuid;
-        //
-        //   newInstanceData["entry_branch_type"] = branchUtils.desanitizeBranchType(orderInstance.entry_branch_type);
-        //   newInstanceData["entry_branh"] = orderInstance.entry_branch;
-        //
-        //   newInstanceData["exit_branch_type"] = branchUtils.desanitizeBranchType(orderInstance.exit_branch_type);
-        //   newInstanceData["exit_branch"] = orderInstance.exit_branch;
-        //
-        //   newInstanceData["current_hub_type"] = branchUtils.desanitizeBranchType(orderInstance.current_hub_type);
-        //   newInstanceData["current_hub"] = orderInstance.current_hub;
-        //
-        //   newInstanceData["next_hub_type"] = branchUtils.desanitizeBranchType(orderInstance.next_hub_type);
-        //   newInstanceData["next_hub"] = orderInstance.next_hub;
-        //
-        //   if(orderInstance.status != "draft"){
-        //     newInstanceData["status"] = orderInstance.status;
-        //   }
-        //
-        //   itemModel.create(newInstanceData);
-        //
-        //
-        //
-        // }
+        if(itemOp["op"] == "insert"){
 
-        if(itemOp["op"] == "update"){
+          newInstanceData = itemOp["data"];
+
+          newInstanceData["orderUuid"] = orderInstance.uuid;
+
+          newInstanceData["entry_branch_type"] = branchUtils.sanitizeBranchType(orderInstance.entry_branch_type);
+          newInstanceData["entry_branh"] = parseInt(orderInstance.entry_branch);
+
+          newInstanceData["exit_branch_type"] = branchUtils.sanitizeBranchType(orderInstance.exit_branch_type);
+          newInstanceData["exit_branch"] = parseInt(orderInstance.exit_branch);
+
+          newInstanceData["current_hub_type"] = orderInstance.current_hub_type;
+          newInstanceData["current_hub"] = orderInstance.current_hub;
+
+          newInstanceData["next_hub_type"] = orderInstance.next_hub_type;
+          newInstanceData["next_hub"] = orderInstance.next_hub;
+
+          if(orderInstance.status != "draft"){
+            newInstanceData["status"] = orderInstance.status;
+          }
+
+          return itemModel.create(newInstanceData , { transaction: t , hooks: false });
+
+        }else if(itemOp["op"] == "update"){
 
           path_parts = itemOp["path"].split("/");
           itemUuid = path_parts[2];
@@ -210,13 +209,14 @@ var editOrder = function(orderUuid , user, payload , callback){
           // Since this only updates the basic descriptions of the item associated
           // We do not need to call the hooks.
           // Status can not be changed by editing the other attributes of item instance
-          itemModel.update(itemOp["data"] , { where: { uuid: itemUuid } , transaction: t });
+          return itemModel.update(itemOp["data"] , { where: { uuid: itemUuid } , transaction: t });
+
         }else if(itemOp["op"] == "delete"){
 
           path_parts = itemOp["path"].split("/");
           itemUuid = path_parts[2];
 
-          itemModel.destroy({ where: { uuid: itemUuid } , transaction: t });
+          return itemModel.destroy({ where: { uuid: itemUuid } , transaction: t });
         }
       }
 
@@ -226,69 +226,42 @@ var editOrder = function(orderUuid , user, payload , callback){
 
       return itemModel.findAll({ where: { orderUuid: orderInstance.uuid } , attributes:[ "uuid" , "bar_code" ] , transaction: t });
     })
+    .then(function(itemObjs){
+
+      for(I=0 ; I < itemObjs.length ; I++){
+        itemObjs[I].set("bar_code" , "" + orderInstance.bar_code + "-" + I);
+      }
+
+      return Promise.resolve(itemObjs);
+    })
     .map(function(itemObj){
 
-      return parseInt(itemObj.bar_code.split("-")[1]);
-    })
-    .then(function(placeHolderIndexes){
-
-      for(I=0 ; I < placeHolderIndexes.length ; I++){
-        itemAvailaleIndexes[placeHolderIndexes[I]] = false;
-      }
-
-      newCodeIndexes = []
-      for(I=0 ; I< itemAvailaleIndexes.length ; I++){
-        if(itemAvailaleIndexes[I]){
-          codeIndexes.push(I);
-        }
-      }
-
-      return Promise.resolve(newCodeIndexes);
-    })
-    .then(function(itemObjects){
-
-      for(I = 0 ; I < itemObjects.length ; I++){
-
-        currentItemObject = itemObjects[I];
-        if(itemMaps[currentItemObject.dataValues.product_name]){
-
-          itemMaps[currentItemObject.dataValues.product_name]["amount"]++;
-          itemMaps[currentItemObject.dataValues.product_name]["uuids"].push(currentItemObject.dataValues.uuid);
-
-        }else{
-
-          itemMaps[currentItemObject.dataValues.product_name] = {
-            "amount": 1,
-            "uuids":[ currentItemObject.dataValues.uuid ]
-          };
-        }
-      }
-    })
-    .then(function(){
-
-      callback(null , {
-        status: "success",
-        orderUuid: orderUuid
-      });
-      return Promise.resolve(true);
-    })
-    .catch(function(err){
-
-      if(err){
-
-        callback(err , {
-          status: "error",
-          message: err.message
-        });
-
-        return;
-      }
-
-      callback(new Error("Unknown error") , {
-        status: "error",
-      });
+      return itemObj.save({ transaction: t , hooks: false });
     });
+  })
+  .then(function(results){
 
+    callback(null , {
+      status: "success",
+      orderUuid: orderUuid
+    });
+    return Promise.resolve(true);
+  })
+  .catch(function(err){
+
+    if(err){
+
+      callback(err , {
+        status: "error",
+        message: err.message
+      });
+
+      return;
+    }
+
+    callback(new Error("Unknown error") , {
+      status: "error"
+    });
   });
 };
 
