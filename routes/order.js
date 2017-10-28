@@ -130,7 +130,7 @@ router.delete('/:orderUuid' , function(req , res){
 	});
 });
 
-router.post('/createByOperator', passport.authenticate('Basic', {session: false}), upload.array(), function(req, res){
+router.post('/createByOperator', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 
 		/*When operator creates an order.
 		1st release.....
@@ -264,11 +264,6 @@ router.post("/legacy/payment_branch/datafixer/backward$" , function(req , res){
     }
     res.send(data);
   });
-});
-
-router.get("/health_check/:orderUuid" , upload.array() ,function(req , res){
-
-
 });
 
 router.post("/edit/:orderUuid" , passport.authenticate('basic' , { session: false }) , upload.array() , function(req , res){
