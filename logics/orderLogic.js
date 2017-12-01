@@ -888,7 +888,7 @@ var createByOperator = function(postData, operator, next){
 			exit_branch: postData["exit_branch_id"],
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"],
-			payment: parseFloat(postData["total_price"]),
+			payment: parseInt(postData["total_price"]),
 		};
 
 		if(postData.order_discount && parseFloat(postData.order_discount)){
