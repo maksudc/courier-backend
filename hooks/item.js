@@ -94,7 +94,7 @@ item.hook("beforeCreate" , function(instance , options , next){
   if(updatedInstance.orderUuid){
 
     return order
-    .findOne({ where: { uuid: updatedInstance.orderUuid } })
+    .findOne({ where: { uuid: updatedInstance.orderUuid } , transaction: options.transaction })
     .then(function(parentOrderInstance){
 
       //console.log("Parent Order Instance...");

@@ -6,6 +6,7 @@ var multer = require("multer");
 var upload = multer();
 var passport = require('passport');
 var bodyParser = require('body-parser');
+var HttpStatus = require("http-status-codes");
 
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -265,9 +266,21 @@ router.post("/legacy/payment_branch/datafixer/backward$" , function(req , res){
   });
 });
 
-router.get("/health_check/:orderUuid" , upload.array() ,function(req , res){
-	
+router.post("/edit/:orderUuid" , passport.authenticate('basic' , { session: false }) , upload.array() , function(req , res){
 
+	var orderEditLogic = require("../logics/order/edit");
+
+	orderEditLogic.editOrder(req.params.orderUuid , req.user , req.body , function(err , response){
+
+		if(err){
+			console.error(err);
+			console.error(err.stack);
+			res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR).send(err);
+			return;
+		}
+
+		res.status(HttpStatus.ACCEPTED).send(response);
+	});
 });
 
 
