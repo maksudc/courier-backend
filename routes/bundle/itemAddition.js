@@ -3,6 +3,7 @@ var router = express.Router();
 var multer = require("multer");
 var upload = multer();
 var DB = require("./../../models/index");
+var bundleUtils = require('./../../utils/bundle');
 var sequelize  = DB.sequelize;
 var itemModel = sequelize.models.item;
 var bundleModel = sequelize.models.bundle;
@@ -23,6 +24,7 @@ router.post("/" , upload.array() , function(req , res){
 
   var bundleInstance = null;
   var itemInstance = null;
+  var orderInstance = null;
 
   bundleModel
   .findOne({
@@ -42,11 +44,18 @@ router.post("/" , upload.array() , function(req , res){
     itemInstance = itemobj;
   })
   .then(function(){
+    return itemInstance.getOrder();
+  })
+  .then(function(orderObj){
+    orderInstance = orderObj;
+  })
+  .then(function(){
     if(!bundleInstance){
       return Promise.reject({ code: HttpStatus.BAD_REQUEST ,  message: "Bundle does not exist" });
-    }
-    else if(!itemInstance){
+    }else if(!itemInstance){
       return Promise.reject({ code: HttpStatus.BAD_REQUEST ,  message: "Item Does not exist" });
+    }else if(bundleUtils.isApplicableOrderForBundleProcessing(orderInstance.status)){
+      return Promise.reject({ code: HttpStatus.LOCKED ,  message: "Item belonging to the order is locked" });
     }
   })
   .then(function(){
