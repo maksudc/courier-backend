@@ -44,17 +44,21 @@ router.post("/" , upload.array() , function(req , res){
     itemInstance = itemobj;
   })
   .then(function(){
-    return itemInstance.getOrder();
-  })
-  .then(function(orderObj){
-    orderInstance = orderObj;
-  })
-  .then(function(){
     if(!bundleInstance){
       return Promise.reject({ code: HttpStatus.BAD_REQUEST ,  message: "Bundle does not exist" });
     }else if(!itemInstance){
       return Promise.reject({ code: HttpStatus.BAD_REQUEST ,  message: "Item Does not exist" });
-    }else if(bundleUtils.isApplicableOrderForBundleProcessing(orderInstance.status)){
+    }
+  })
+  .then(function(){
+      return itemInstance.getOrder({
+        attributes: [ "uuid" , "status" , "bar_code" ]
+      });
+  })
+  .then(function(orderObj){
+
+    orderInstance = orderObj;
+    if(bundleUtils.isApplicableOrderForBundleProcessing(orderInstance.status)){
       return Promise.reject({ code: HttpStatus.LOCKED ,  message: "Item belonging to the order is locked" });
     }
   })
