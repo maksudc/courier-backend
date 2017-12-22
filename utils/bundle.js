@@ -1,5 +1,5 @@
 var isApplicableOrderForBundleProcessing = function(status){
-   return ["stocked","delivered"].indexOf(status) > -1;
+   return [/*"stocked",*/"delivered"].indexOf(status) > -1;
 };
 
 exports.isApplicableOrderForBundleProcessing = isApplicableOrderForBundleProcessing;
