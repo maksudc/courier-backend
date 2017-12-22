@@ -37,6 +37,9 @@ router.use("/data-binder" , dataBinderRouter);
 var bundleRouter = require("./bundle");
 router.use("/bundles" , bundleRouter);
 
+var siteSettingRouter = require("./siteSetting");
+router.use("/siteSetting" , siteSettingRouter);
+
 router.use("/admin", require("./admin"));
 
 router.use("/permission", require("./permission"));
