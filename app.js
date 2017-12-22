@@ -28,6 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
 app.use(cors());
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -44,6 +45,10 @@ app.use(cookieParser());
 //     resave: false
 //     // cookie: { maxAge: 60*60000 }
 // }));
+
+// Panic mode detection and header addition
+var panicMiddleware = require("./middleware/panic");
+app.use(panicMiddleware);
 
 app.use(passport.initialize());
 //app.use(passport.session());
@@ -101,19 +106,16 @@ if (app.get('env') === 'development') {
     });
   });
 }else{
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
+  // production error handler
+  // no stacktraces leaked to user
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: {}
+    });
   });
-});
-
 }
-
 //app.use(regionResource.controllers);
 
 //app.use(regionResource.use);
