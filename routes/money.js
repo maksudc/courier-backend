@@ -14,6 +14,10 @@ var HttpStatus = require("http-status-codes");
 router.use(passport.authenticate('basic', {session: false}));
 router.use(middleware.checkPermission);
 
+// Panic mode detection and header addition
+var panicMiddleware = require("./../middleware/panic");
+router.use(panicMiddleware);
+
 router.post('/create', upload.array(), function(req, res){
 	moneyLogic.create(req.user, req.body, function(err, data){
 		if(err){

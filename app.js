@@ -46,10 +46,6 @@ app.use(cookieParser());
 //     // cookie: { maxAge: 60*60000 }
 // }));
 
-// Panic mode detection and header addition
-var panicMiddleware = require("./middleware/panic");
-app.use(panicMiddleware);
-
 app.use(passport.initialize());
 //app.use(passport.session());
 
