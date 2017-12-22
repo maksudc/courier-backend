@@ -1,15 +1,15 @@
 var DB = require("./../models");
-var siteSettingModel = DB.sequelize.models.SiteSetting;
+var siteSettingModel = DB.sequelize.models.siteSetting;
 var panicModeDef = require("./../config/siteSettings/panicModeDef");
 
 module.exports = function(req,res,next){
 
   siteSettingModel
-  .findOne({ where: { slug: panicModeDef.slug } })
+  .findOne({ where: { slug: panicModeDef["slug"] } })
   .then(function(settingObj){
 
     if( settingObj && settingObj.value == "true"){
-      res.set(panicModeDef.slug , "true");
+      res.set(panicModeDef["slug"] , "true");
     }
     next();
   })
