@@ -14,6 +14,7 @@ var branchUtils = require("./../../../utils/branch");
 
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var Promise = require("bluebird");
+var panicUtils = require("./../../../utils/panic");
 
 router.get("/" , function(req , res){
 
@@ -26,7 +27,7 @@ router.get("/" , function(req , res){
 
 	};
 	if(userObj){
-		
+
     if(userObj.getSubBranchId()){
       extraQuery["createdAtBranchType"] = "sub";
 			extraQuery["createdAtBranchId"] = userObj.getSubBranchId();
@@ -35,9 +36,14 @@ router.get("/" , function(req , res){
 			extraQuery["createdAtBranchId"] = userObj.getRegionalBranchId();
     }
 	}
+
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
 	for(key in extraParamFilterQuery){
 		extraQuery[key] = extraParamFilterQuery[key];
+	}
+
+	if(panicUtils.isPanicked(req)){
+		extraQuery = panicUtils.attachPanicQuery(extraQuery);
 	}
 
   whereQuery = tableHelper.getWhere(extraQuery);

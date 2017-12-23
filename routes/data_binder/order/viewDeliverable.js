@@ -11,6 +11,7 @@ var orderLogic = require("./../../../logics/orderLogic");
 var DB = require("./../../../models/index");
 var orderModel = DB.sequelize.models.order;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
+var panicUtils = require("./../../../utils/panic");
 
 router.get('/', function(req, res){
 
@@ -39,6 +40,9 @@ router.get('/', function(req, res){
       extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("regional");
 		}
 	}
+	if(panicUtils.isPanicked(req)){
+		extraQuery = panicUtils.attachPanicQuery(extraQuery);
+	}
   whereQuery = tableHelper.getWhere(extraQuery);
 
 	queryParams  = {};
@@ -48,7 +52,7 @@ router.get('/', function(req, res){
 	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
 	console.log(queryParams["order"]);
-	
+
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
 

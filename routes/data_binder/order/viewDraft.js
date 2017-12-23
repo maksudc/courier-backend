@@ -10,6 +10,7 @@ var orderLogic = require("./../../../logics/orderLogic");
 var DB = require("./../../../models/index");
 var orderModel = DB.sequelize.models.order;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
+var panicUtils = require("./../../../utils/panic");
 
 router.get('/', function(req, res){
 
@@ -38,6 +39,9 @@ router.get('/', function(req, res){
 			extraQuery["current_hub"] = userObj.getRegionalBranchId();
       extraQuery["current_hub_type"] = "regional"
 		}
+	}
+	if(panicUtils.isPanicked(req)){
+		extraQuery = panicUtils.attachPanicQuery(extraQuery);
 	}
   whereQuery = tableHelper.getWhere(extraQuery);
 
