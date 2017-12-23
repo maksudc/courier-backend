@@ -8,4 +8,7 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 var panicRouter = require("./panic");
 router.use("/panic" , panicRouter);
 
+var updateRouter = require("./update");
+router.use("/update" , updateRouter);
+
 module.exports = router;
