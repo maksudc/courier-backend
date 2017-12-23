@@ -10,6 +10,7 @@ module.exports = function(req,res,next){
 
     if( settingObj && settingObj.value == "true"){
       res.set(panicModeDef["slug"] , "true");
+      req.headers[panicModeDef["slug"]] = "true";
     }
     next();
   })
