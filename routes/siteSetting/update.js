@@ -18,7 +18,14 @@ router.post("/" , upload.array(), function(req , res){
   .update({ value: value } , {
     where: { slug: req.body.slug }
   })
+  .then(function(settingUpdateOpObj){
+    return siteSettingModel.findOne({ where: { slug: req.body.slug } });
+  })
   .then(function(settingObj){
+
+    settingObj = settingObj || panicModeDef;
+    settingObj["value"] = settingObj["value"] == "true";
+
     res.status(200);
     res.send(settingObj);
   })
