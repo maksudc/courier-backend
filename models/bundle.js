@@ -34,17 +34,17 @@ module.exports = function(sequelize , DataTypes){
     createdBy:{
       type: DataTypes.STRING
     },
-    status: {
-      type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
-      defaultValue: 'draft',
-      allowNull: false
-    },
     phase:{
       type: DataTypes.ENUM("load" , "unload"),
       defaultValue: null,
       allowNull: true
     },
     sealed:{
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
+    archived:{
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false
@@ -70,9 +70,9 @@ module.exports = function(sequelize , DataTypes){
     },
     indexes:[
       {
-        name: "bundles_phase",
+        name: "bundles_archived_phase",
         method: "BTREE",
-        fields: [ "phase" ]
+        fields: ["archived" , "phase"]
       }
     ]
   });

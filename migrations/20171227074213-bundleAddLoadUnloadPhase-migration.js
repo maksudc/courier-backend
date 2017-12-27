@@ -10,16 +10,26 @@ module.exports = {
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
     return queryInterface.addColumn("bundles" , "phase" , {
-          type: Sequelize.ENUM("load" , "unload"),
-          defaultValue: null,
-          allowNull: true
+
+      type: Sequelize.ENUM("load" , "unload"),
+      defaultValue: null,
+      allowNull: true
+    })
+    .then(function(){
+
+      return queryInterface.addColumn("bundles" , "archived" , {
+
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+      })
     })
     .then(function(){
 
       return queryInterface.addIndex("bundles" , {
-        name: "bundles_phase",
+        name: "bundles_archived_phase",
         method: "BTREE",
-        fields: ["phase"]
+        fields: ["archived" , "phase"]
       });
     });
   },
@@ -33,9 +43,12 @@ module.exports = {
       return queryInterface.dropTable('users');
     */
     return queryInterface
-          .removeIndex("bundles" , "bundles_phase")
+          .removeIndex("bundles" , "bundles_archived_phase")
           .then(function(){
             return queryInterface.removeColumn("bundles" , "phase");
+          })
+          .then(function(){
+            return queryInterface.removeColumn("bundles" , "archived");
           });
   }
 };
