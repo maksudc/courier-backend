@@ -39,6 +39,11 @@ module.exports = function(sequelize , DataTypes){
       defaultValue: 'draft',
       allowNull: false
     },
+    phase:{
+      type: DataTypes.ENUM("load" , "unload"),
+      defaultValue: null,
+      allowNull: true
+    },
     sealed:{
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -62,7 +67,14 @@ module.exports = function(sequelize , DataTypes){
           sourceKey: "id"
         });
       }
-    }
+    },
+    indexes:[
+      {
+        name: "bundles_phase",
+        method: "BTREE",
+        fields: [ "phase" ]
+      }
+    ]
   });
 
   return Bundle;
