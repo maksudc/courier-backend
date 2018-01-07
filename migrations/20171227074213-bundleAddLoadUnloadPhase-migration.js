@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false
-      })
+      });
     })
     .then(function(){
 
