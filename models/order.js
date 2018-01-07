@@ -99,6 +99,16 @@ module.exports = function(sequelize, DataTypes) {
 					},
 					as: 'tracker'
 				});
+
+				order.hasMany(models.activity , {
+          as: "activities",
+          foreignKey: "object_id",
+					sourceKey: "bar_code",
+          constraints: false,
+          scope:{
+            object_type: "order"
+          }
+        });
 			}
 		}
 	});

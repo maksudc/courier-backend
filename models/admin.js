@@ -32,6 +32,22 @@ module.exports = function(sequelize , DataTypes){
 				admin.belongsTo(models.regionalBranch , { foreignKey: 'regional_branch_id' });
 				admin.belongsTo(models.subBranch , { foreignKey: 'sub_branch_id' });
 				admin.belongsTo(models.region , { foreignKey: 'region_id' });
+
+				admin.hasMany(models.activity , {
+          as: "supervisions",
+          foreignKey: "object_id",
+					sourceKey: "email",
+          constraints: false,
+          scope:{
+            object_type: "admin"
+          }
+        });
+
+				// admin.hasMany(models.activity , {
+        //   as: "activities",
+        //   foreignKey: "operator",
+				// 	sourceKey: "email"
+        // });
 			}
 		}
 	});

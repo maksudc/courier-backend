@@ -33,7 +33,52 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        // associations can be defined here
+
+        Activity.hasOne(models.scanActivity, {
+          foreignKey: "activityId",
+          as:"scanActivity"
+        });
+
+        // Activity.belongsTo(models.admin , {
+        //   foreignKey: "operator",
+        //   as:"operatedBy"
+        // });
+
+        Activity.belongsTo(models.bundle , {
+          foreignKey: "object_id",
+          constraints: false,
+          as: "bundle"
+        });
+
+        Activity.belongsTo(models.order , {
+          foreignKey: "object_id",
+          constraints: false,
+          as: "order"
+        });
+
+        Activity.belongsTo(models.item , {
+          foreignKey: "object_id",
+          constraints: false,
+          as: "item"
+        });
+
+        Activity.belongsTo(models.admin , {
+          foreignKey: "object_id",
+          constraints: false,
+          as: "operatedOn"
+        });
+
+        Activity.belongsTo(models.regionalBranch , {
+          foreignKey: "branch_id",
+          constraints: false,
+          as: 'regionalBranch'
+        });
+
+        Activity.belongsTo(models.subBranch , {
+          foreignKey: "branch_id",
+          constraints: false,
+          as: 'subBranch'
+        });
       }
     },
     indexes: [

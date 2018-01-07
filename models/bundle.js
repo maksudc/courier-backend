@@ -66,6 +66,22 @@ module.exports = function(sequelize , DataTypes){
           foreignKey: "bundleId",
           sourceKey: "id"
         });
+
+        Bundle.hasMany(models.scanActivity , {
+          as: "scanActivities",
+          foreignKey:"bundleId",
+          sourceKey:"id"
+        });
+
+        Bundle.hasMany(models.activity , {
+          as: "activities",
+          foreignKey: "object_id",
+          sourceKey: "id",
+          constraints: false,
+          scope:{
+            object_type: "bundle"
+          }
+        });
       }
     },
     indexes:[
