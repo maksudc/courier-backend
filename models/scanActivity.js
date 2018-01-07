@@ -9,7 +9,9 @@ module.exports = function(sequelize, DataTypes) {
         model:{
           tableName: "activities"
         },
-        key: "id"
+        key: "id",
+        onDelete: "cascade",
+        onUpdate: "cascade"
       }
     },
     bundleId:{
@@ -19,7 +21,9 @@ module.exports = function(sequelize, DataTypes) {
         model:{
           tableName: "bundles"
         },
-        key: "id"
+        key: "id",
+        onDelete: "cascade",
+        onUpdate: "cascade"
       }
     },
     responseCode: {

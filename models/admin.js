@@ -43,11 +43,11 @@ module.exports = function(sequelize , DataTypes){
           }
         });
 
-				// admin.hasMany(models.activity , {
-        //   as: "activities",
-        //   foreignKey: "operator",
-				// 	sourceKey: "email"
-        // });
+				admin.hasMany(models.activity , {
+          as: "activities",
+          foreignKey: "operator",
+					sourceKey: "email"
+        });
 			}
 		}
 	});

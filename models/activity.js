@@ -4,7 +4,15 @@ module.exports = function(sequelize, DataTypes) {
   var Activity = sequelize.define('activity', {
     operator: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull:false,
+      references:{
+        model:{
+          tableName: "admins"
+        },
+        key: "email",
+        onDelete: "cascade",
+        onUpdate: "cascade"
+      }
     },
     operation: {
       type: DataTypes.ENUM('create' , 'update', 'delete' , 'confirm' , 'money_receive' , 'mark_deliverable' , 'seal'),
@@ -39,10 +47,10 @@ module.exports = function(sequelize, DataTypes) {
           as:"scanActivity"
         });
 
-        // Activity.belongsTo(models.admin , {
-        //   foreignKey: "operator",
-        //   as:"operatedBy"
-        // });
+        Activity.belongsTo(models.admin , {
+          foreignKey: "operator",
+          as:"operatedBy"
+        });
 
         Activity.belongsTo(models.bundle , {
           foreignKey: "object_id",
@@ -82,11 +90,6 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     indexes: [
-      {
-        name: "activity_operator_index",
-        method: "BTREE",
-        fields: ["operator"]
-      },
       {
         name: "activity_object_operation_index",
         method: "BTREE",
