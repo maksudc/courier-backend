@@ -4,15 +4,7 @@ module.exports = function(sequelize, DataTypes) {
   var Activity = sequelize.define('activity', {
     operator: {
       type: DataTypes.STRING,
-      allowNull:false,
-      references:{
-        model:{
-          tableName: "admins"
-        },
-        key: "email",
-        onDelete: "cascade",
-        onUpdate: "cascade"
-      }
+      allowNull:false
     },
     operation: {
       type: DataTypes.ENUM('create' , 'update', 'delete' , 'confirm' , 'money_receive' , 'mark_deliverable' , 'seal'),
@@ -45,11 +37,6 @@ module.exports = function(sequelize, DataTypes) {
         Activity.hasOne(models.scanActivity, {
           foreignKey: "activityId",
           as:"scanActivity"
-        });
-
-        Activity.belongsTo(models.admin , {
-          foreignKey: "operator",
-          as:"operatedBy"
         });
 
         Activity.belongsTo(models.bundle , {

@@ -42,12 +42,6 @@ module.exports = function(sequelize , DataTypes){
             object_type: "admin"
           }
         });
-
-				admin.hasMany(models.activity , {
-          as: "activities",
-          foreignKey: "operator",
-					sourceKey: "email"
-        });
 			}
 		}
 	});
