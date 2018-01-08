@@ -2,18 +2,6 @@
 
 module.exports = function(sequelize, DataTypes) {
   var scanActivity = sequelize.define('scanActivity', {
-    activityId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references:{
-        model:{
-          tableName: "activities"
-        },
-        key: "id",
-        onDelete: "cascade",
-        onUpdate: "cascade"
-      }
-    },
     bundleId:{
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -34,7 +22,6 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
 
-        scanActivity.belongsTo(models.activity , { foreignKey: "activityId" , as:"activity" });
         scanActivity.belongsTo(models.bundle , { foreignKey: "bundleId" , as:"bundle" });
       }
     }

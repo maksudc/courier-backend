@@ -34,11 +34,6 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
 
-        Activity.hasOne(models.scanActivity, {
-          foreignKey: "activityId",
-          as:"scanActivity"
-        });
-
         Activity.belongsTo(models.bundle , {
           foreignKey: "object_id",
           constraints: false,
