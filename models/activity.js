@@ -15,13 +15,10 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     object_id: {
+      //bar_code for item and order_receipt
       type: DataTypes.STRING,
       allowNull: false
-    },
-    time: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
+    }
     branch_type: {
       type: DataTypes.ENUM('sub','regional'),
       allowNull: true
@@ -72,6 +69,11 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     indexes: [
+      {
+        name: "activity_operator_index",
+        method: "BTREE",
+        fields: ["operator"]
+      },
       {
         name: "activity_object_operation_index",
         method: "BTREE",

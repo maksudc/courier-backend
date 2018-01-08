@@ -73,6 +73,16 @@ module.exports = function(sequelize , DataTypes){
             object_type: "item"
           }
         });
+
+				item.hasMany(models.scanActivity , {
+          as: "scanActivities",
+          foreignKey: "object_id",
+					sourceKey: "bar_code",
+          constraints: false,
+          scope:{
+            object_type: "item"
+          }
+        });
 			}
 		}
 

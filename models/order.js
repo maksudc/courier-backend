@@ -109,6 +109,16 @@ module.exports = function(sequelize, DataTypes) {
             object_type: "order"
           }
         });
+
+				order.hasMany(models.activity , {
+          as: "scanActivities",
+          foreignKey: "object_id",
+					sourceKey: "bar_code",
+          constraints: false,
+          scope:{
+            object_type: "order_receipt"
+          }
+        });
 			}
 		}
 	});
