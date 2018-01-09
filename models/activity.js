@@ -18,7 +18,7 @@ module.exports = function(sequelize, DataTypes) {
       //bar_code for item and order_receipt
       type: DataTypes.STRING,
       allowNull: false
-    }
+    },
     branch_type: {
       type: DataTypes.ENUM('sub','regional'),
       allowNull: true
