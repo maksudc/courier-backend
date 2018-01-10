@@ -144,12 +144,13 @@ router.post("/" , upload.array() , function(req , res){
   })
   .then(function(placeHolderObj){
 
+    var adminActivityLogic = require("./../../logics/activity/admin");
+    var adminActivityUtils = require("./../../utils/adminActivity");
+
     return sequelize.transaction(function(t2){
         // log the activity
         var scanActivityModel = require("./../../models").sequelize.models.scanActivity;
         var scanInstance = null;
-
-        var activityModel = require("./../../models").sequelize.models.activity;
 
         return scanActivityModel.create({
 
@@ -163,14 +164,10 @@ router.post("/" , upload.array() , function(req , res){
         } , { transaction: t2 })
         .then(function(scanInstance){
 
-          return activityModel.create({
-            operator: req.user.email,
-            operation: "scan",
-            object_type: "item",
-            object_id: itemInstance.bar_code,
-            branch_type: req.user.sub_branch_id ? "sub" : "regional",
-            branch_id: req.user.sub_branch_id ? req.user.sub_branch_id : req.user.regional_branch_id,
-          } , { transaction: t2 });
+          params = adminActivityUtils.extractParams(req.user);
+          params["object_type"] = "item";
+          params["object_id"] = itemInstance.bar_code;
+          return adminActivityLogic.addAdminActivity(req.user , "scan" , params , { transaction: t2 } , null);
         });
     });
   })
