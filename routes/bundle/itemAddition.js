@@ -28,6 +28,8 @@ router.post("/" , upload.array() , function(req , res){
   var itemInstance = null;
   var orderInstance = null;
 
+  var responseCode = null;
+
   sequelize.transaction(function(t){
 
     return bundleModel
@@ -51,21 +53,27 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
       if(!bundleInstance){
-        return Promise.reject({ code: HttpStatus.BAD_REQUEST ,  message: "Bundle does not exist" });
+
+        responseCode = HttpStatus.BAD_REQUEST;
+        return Promise.reject({ code: responseCode ,  message: "Bundle does not exist" });
       }else if(!itemInstance){
-        return Promise.reject({ code: HttpStatus.BAD_REQUEST ,  message: "Item Does not exist" });
+
+        responseCode = HttpStatus.BAD_REQUEST;
+        return Promise.reject({ code: responseCode ,  message: "Item Does not exist" });
       }
     })
     .then(function(){
         return itemInstance.getOrder({
-          attributes: [ "uuid" , "status" , "bar_code" ]
+          attributes: [ "uuid" , "status" , "bar_code" ],
+          transaction: t
         });
     })
     .then(function(orderObj){
 
       orderInstance = orderObj;
       if(bundleUtils.isApplicableOrderForBundleProcessing(orderInstance.status)){
-        return Promise.reject({ code: HttpStatus.LOCKED ,  message: "Item belonging to the order is locked" });
+        responseCode = HttpStatus.LOCKED;
+        return Promise.reject({ code: responseCode ,  message: "Item belonging to the order is locked" });
       }
     })
     .then(function(){
@@ -73,16 +81,18 @@ router.post("/" , upload.array() , function(req , res){
           where: {
             id: itemInstance.exit_branch,
             branchType: itemInstance.exit_branch_type
-          }
+          },
+          transaction: t
         });
     })
     .then(function(checkBranchInstance){
       if(!checkBranchInstance || !checkBranchInstance.length){
-        return Promise.reject({ code: HttpStatus.PRECONDITION_FAILED , message: "This item does not belong to bundle"  });
+        responseCode = HttpStatus.PRECONDITION_FAILED;
+        return Promise.reject({ code: responseCode , message: "This item does not belong to bundle"  });
       }
     })
     .then(function(){
-      return bundleInstance.addAttachedItems(itemInstance);
+      return bundleInstance.addAttachedItems(itemInstance , { transaction: t });
     })
     .then(function(result){
       return branchUtils.getInclusiveBranchInstance(itemInstance.entry_branch_type , itemInstance.entry_branch);
@@ -109,16 +119,15 @@ router.post("/" , upload.array() , function(req , res){
         itemData["exit_branch_label"] = itemData["exit_branch_label"] + "," + itemInstance.exitBranch.regionalBranch.label;
       }
 
-      res.status(HttpStatus.OK);
-      res.send({ "status":"success" , item: itemData });
-    })
-    .then(function(){
-
-      var scanActivityModel = require("./../../models").sequelize.models.scanActivity;
+      responseCode = HttpStatus.OK;
     });
   })
   .then(function(result){
 
+    res.status(responseCode);
+    if(responseCode == HttpStatus.OK){
+      res.send({ "status":"success" , item: itemData });
+    }
   })
   .catch(function(err){
     if(err){
@@ -130,8 +139,46 @@ router.post("/" , upload.array() , function(req , res){
       res.status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
     res.send({ status: "error" , error: err });
-  });
 
+    return Promise.resolve({});
+  })
+  .then(function(placeHolderObj){
+
+    return sequelize.transaction(function(t2){
+        // log the activity
+        var scanActivityModel = require("./../../models").sequelize.models.scanActivity;
+        var scanInstance = null;
+
+        var activityModel = require("./../../models").sequelize.models.activity;
+
+        return scanActivityModel.create({
+
+          operator: req.user.email,
+          object_type: "item",
+          object_id: itemInstance.bar_code,
+          branch_type: req.user.sub_branch_id ? "sub" : "regional",
+          branch_id: req.user.sub_branch_id ? req.user.sub_branch_id : req.user.regional_branch_id,
+          bundleId: bundleInstance.id,
+          responseCode: responseCode
+        } , { transaction: t2 })
+        .then(function(scanInstance){
+
+          return activityModel.create({
+            operator: req.user.email,
+            operation: "scan",
+            object_type: "item",
+            object_id: itemInstance.bar_code,
+            branch_type: req.user.sub_branch_id ? "sub" : "regional",
+            branch_id: req.user.sub_branch_id ? req.user.sub_branch_id : req.user.regional_branch_id,
+          } , { transaction: t2 });
+        });
+    });
+  })
+  .then(function(result){
+
+  }).catch(function(err){
+    console.error(err);
+  });
 });
 
 module.exports = router;

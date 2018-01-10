@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull:false
     },
     operation: {
-      type: DataTypes.ENUM('create' , 'update', 'delete' , 'confirm' , 'money_receive' , 'mark_deliverable' , 'seal'),
+      type: DataTypes.ENUM('create' , 'update', 'delete' , 'confirm' , 'money_receive' , 'mark_deliverable' , 'seal' , 'scan'),
       allowNull: false
     },
     object_type: {
