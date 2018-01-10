@@ -15,6 +15,9 @@ var branchUtils = require("./../../utils/branch");
 var Promise = require("bluebird");
 var passport = require("passport");
 
+var adminActivityLogic = require("./../../logics/activity/admin");
+var scanActivityLogic = require("./../../logics/activity/scan");
+
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 router.use(passport.authenticate('basic', {session: false}));
@@ -144,30 +147,21 @@ router.post("/" , upload.array() , function(req , res){
   })
   .then(function(placeHolderObj){
 
-    var adminActivityLogic = require("./../../logics/activity/admin");
-    var adminActivityUtils = require("./../../utils/adminActivity");
-
+    // log the activity
     return sequelize.transaction(function(t2){
-        // log the activity
-        var scanActivityModel = require("./../../models").sequelize.models.scanActivity;
-        var scanInstance = null;
+        scanParams = {};
+        scanParams["object_type"] = "item";
+        scanParams["object_id"] = itemBarCode;
+        scanParams["bundleId"] = bundleId;
+        scanParams["responseCode"] = responseCode;
 
-        return scanActivityModel.create({
+        return scanActivityLogic.addScanActivity(req.user , scanParams ,{ transaction: t2 } , null )
+        .then(function(obj){
 
-          operator: req.user.email,
-          object_type: "item",
-          object_id: itemInstance.bar_code,
-          branch_type: req.user.sub_branch_id ? "sub" : "regional",
-          branch_id: req.user.sub_branch_id ? req.user.sub_branch_id : req.user.regional_branch_id,
-          bundleId: bundleInstance.id,
-          responseCode: responseCode
-        } , { transaction: t2 })
-        .then(function(scanInstance){
-
-          params = adminActivityUtils.extractParams(req.user);
-          params["object_type"] = "item";
-          params["object_id"] = itemInstance.bar_code;
-          return adminActivityLogic.addAdminActivity(req.user , "scan" , params , { transaction: t2 } , null);
+          adminActivityParams = {};
+          adminActivityParams["object_type"] = "item";
+          adminActivityParams["object_id"] = itemBarCode;
+          return adminActivityLogic.addAdminActivity(req.user , "scan" , adminActivityParams , { transaction: t2 } , null);
         });
     });
   })
