@@ -15,6 +15,9 @@ var scanActivityModel = DB.sequelize.models.scanActivity;
 var DataTableHelper = require("./../../../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../../../utils/panic");
 
+var moment = require("moment-timezone");
+var TIMEZONE_CONFIG = require("./../../../../../config/timezone");
+
 router.get('/:order_barcode', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
@@ -25,7 +28,7 @@ router.get('/:order_barcode', function(req, res){
   whereQuery = null;
   extraQuery = {
 		"object_id":{
-			"$like": req.params.order_barcode + "_" + "%"
+			"$like": req.params.order_barcode + "-" + "%"
 		}
   };
 
@@ -43,35 +46,62 @@ router.get('/:order_barcode', function(req, res){
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
 
+	resultData["data"] = [];
+
 	scanActivityModel
 		.findAndCountAll(queryParams)
 		.then(function(scanActivityDatas){
 
-				resultData["data"] = scanActivityDatas;
 				resultData["recordsTotal"] = scanActivityDatas.count;
 				resultData["recordsFiltered"] = scanActivityDatas.count;
 
-        return Promise.resolve(scanActivityDatas);
-
-				res.status(HttpStatus.OK);
-				res.send(resultData);
+        return Promise.resolve(scanActivityDatas.rows);
 		})
     .map(function(scanActivityInstance){
 
       return Promise.all([
         Promise.resolve(scanActivityInstance),
-        scanActivityInstance.getObject(),
         scanActivityInstance.getBundle(),
-        scanActivityInstance.getBranch()
+				branchUtils.getInclusiveBranchInstance(scanActivityInstance.branch_type , scanActivityInstance.branch_id , null)
+				//,scanActivityInstance.getObject(),
       ]);
     })
     .then(function(results){
 
       for(I=0; I < results.length ; I++){
 
-        complexResult = results[0];
-        scanActivityInstance = complexResult[0];
+				currentData = {};
+
+        complexResult = results[I];
+
+				scanActivityInstance = complexResult[0];
+				bundleInstance = complexResult[1];
+				branchInstance = complexResult[2];
+				//objectInstance = complexResult[3];
+
+				currentData["object_type"] = scanActivityInstance.object_type;
+				currentData["object_id"] = scanActivityInstance.object_id;
+
+				currentData["bundle"] = {};
+				currentData["bundle"]["phase"] = bundleInstance.phase;
+				currentData["bundle"]["id"] = bundleInstance.id;
+				currentData["bundle"]["name"] = bundleInstance.name;
+
+				currentData["branch"] = {};
+				currentData["branch"]["type"] = branchInstance.branchType;
+				currentData["branch"]["id"] = branchInstance.id;
+				currentData["branch"]["label"] = branchUtils.prepareLabel(branchInstance);
+
+				currentData["createdAt"] = moment.tz(scanActivityInstance.createdAt , TIMEZONE_CONFIG.COMMON_ZONE).tz(TIMEZONE_CONFIG.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
+
+				currentData["responseCode"] = scanActivityInstance.responseCode;
+				currentData["operator"] = scanActivityInstance.operator;
+
+				resultData["data"].push(currentData);
       }
+
+			res.status(HttpStatus.OK);
+			res.send(resultData);
     })
 		.catch(function(err){
 			if(err){

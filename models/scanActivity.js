@@ -68,23 +68,25 @@ module.exports = function(sequelize, DataTypes) {
         });
 
         scanActivity.belongsTo(models.bundle , { foreignKey: "bundleId" , as:"bundle" });
-      },
-      instanceMethods: {
-        getBranch: function(){
-          if(this.branch_type == "sub"){
-            return this.getSubBranch();
-          }else{
-            return this.getRegionalBranch();
-          }
-        },
-        getObject: function(){
-          if(this.object_type == "item"){
-            return this.getItem();
-          }else if(this.object_type == "order_receipt"){
-            return this.getOrder();
-          }
-          return null;
+      }
+    },
+    instanceMethods: {
+
+      getBranch: function(){
+
+        if(this.branch_type == "sub"){
+          return this.getSubBranch();
         }
+        return this.getRegionalBranch();
+      },
+
+      getObject: function(){
+        if(this.object_type == "item"){
+          return this.getItem();
+        }else if(this.object_type == "order_receipt"){
+          return this.getOrder();
+        }
+        return null;
       }
     },
     indexes:[
