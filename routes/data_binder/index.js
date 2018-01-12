@@ -17,4 +17,7 @@ router.use("/bundle" , bundleDataBinderRouter);
 var clientDataBinderRouter = require("./client");
 router.use("/client" , clientDataBinderRouter);
 
+var activityDataBinderRouter = require("./activity");
+router.use("/activity" , activityDataBinderRouter);
+
 module.exports = router;
