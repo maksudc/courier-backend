@@ -15,14 +15,9 @@ var panicUtils = require("./../../../utils/panic");
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
-	// console.log(JSON.stringify(tableHelper.getWhere()));
-	// console.log(tableHelper.getOrder());
-	// console.log(tableHelper.getOffset());
-	// console.log(tableHelper.getLimit());
 
 	userObj = tableHelper.getUser();
 
-	console.log(userObj);
 	whereQuery = null;
 
   extraQuery = {

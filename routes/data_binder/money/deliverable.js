@@ -22,7 +22,6 @@ router.get('/', function(req, res){
 
 	userObj = tableHelper.getUser();
 
-	console.log(userObj);
 	whereQuery = null;
 
 		pureMoneyOrderQuery = {

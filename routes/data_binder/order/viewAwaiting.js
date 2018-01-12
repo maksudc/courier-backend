@@ -16,14 +16,9 @@ var panicUtils = require("./../../../utils/panic");
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
-	// console.log(JSON.stringify(tableHelper.getWhere()));
-	// console.log(tableHelper.getOrder());
-	// console.log(tableHelper.getOffset());
-	// console.log(tableHelper.getLimit());
 
 	userObj = tableHelper.getUser();
 
-	console.log(userObj);
 	whereQuery = null;
 
   extraQuery = {
@@ -43,7 +38,7 @@ router.get('/', function(req, res){
       extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("regional");
 		}
 	}
-	
+
 	if(panicUtils.isPanicked(req)){
 		extraQuery = panicUtils.attachPanicQuery(extraQuery);
 	}

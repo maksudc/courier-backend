@@ -23,7 +23,6 @@ router.get('/:order_barcode', function(req, res){
 	tableHelper = new DataTableHelper(req.query);
 
 	userObj = req.user;
-  console.log(userObj);
 
   whereQuery = null;
   extraQuery = {

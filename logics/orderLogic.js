@@ -1793,8 +1793,6 @@ exports.markDeliverable = markDeliverable;
 
 var markDelivered = function(orderId , user , next){
 
-		// console.log(orderId);
-		// console.log(user);
 		var trackerInstances = [];
 		var orderObject = null;
 		var updateData = {};
