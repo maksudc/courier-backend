@@ -102,7 +102,14 @@ module.exports = function(sequelize , DataTypes){
       getBarcode: function(){
         return codeUtils.format(codeConfig.MAX_TRACKER_CODE_DIGIT , this.bar_code);
       }
-    }
+    },
+    indexes: [
+      {
+        name: "trackers_trackable",
+        method: "BTREE",
+        fields: ["trackableType" , "trackableId"]
+      }
+    ]
   });
 
   GenericTracker.hook("beforeDestroy" , function(trackerInstance , options){
