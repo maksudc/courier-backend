@@ -22,4 +22,7 @@ router.use('/incoming/view' , incomingDataBinder);
 var awaitingDataBinder = require("./viewAwaiting");
 router.use('/awaiting/view' , awaitingDataBinder);
 
+var trackerDataBinder = require("./viewTracking");
+router.use("/tracking/view" , trackerDataBinder);
+
 module.exports = router;
