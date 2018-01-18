@@ -14,7 +14,7 @@ var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
 var passport = require("passport");
 
-router.use(passport.authenticate('basic-client', {session: false}));
+//router.use(passport.authenticate('basic-client', {session: false}));
 
 router.get('/', function(req, res){
 
