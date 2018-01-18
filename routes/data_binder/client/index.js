@@ -55,4 +55,7 @@ router.get("/" , function(req , res){
 
 });
 
+var ordersRouter = require("./orders");
+router.use("/orders" , ordersRouter );
+
 module.exports = router;

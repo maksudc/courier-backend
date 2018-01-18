@@ -1,12 +1,15 @@
 var passportLocal = require('passport-local');
 var passportHTTP = require('passport-http');
 var adminLogic = require('../admin/adminLogic');
+var clientLogic = require("../clientLogic");
+var clientModel = require("../models/client");
+var Promise = require("bluebird");
 var permissionModel = require('../../models/permission');
 
 exports.setup = function(passport){
 
     passport.serializeUser(function(user, done){
-      
+
         //insert this user object to redis and then replace the user.email with redis id
         console.log("serializeUser");
         if(user.type == 'admin'){
@@ -27,7 +30,7 @@ exports.setup = function(passport){
                 }
                 else if(!admin) done("User name or password did not match");
                 else {
-        
+
                     done(null, {
                         email: admin.dataValues.email,
                         // username: admin.username,
@@ -36,7 +39,7 @@ exports.setup = function(passport){
                         role: admin.dataValues.role
                     });
                 }
-        
+
             });
         }
         else done(null, false);
@@ -45,9 +48,6 @@ exports.setup = function(passport){
 
     passport.use(new passportHTTP.BasicStrategy(function(email, password, done){
        //if the requested email is not a valid email address
-
-       console.log(email);
-       console.log(password);
 
        if(email.length == 0)
        {
@@ -64,7 +64,6 @@ exports.setup = function(passport){
        adminLogic.checkLogin(email, password, function(err, admin){
            if(err) {
               done(null);
-              //Here, user will be checked
            }
            else if(admin){
               done(null, {
@@ -76,6 +75,7 @@ exports.setup = function(passport){
                 region_id: admin.dataValues.region_id,
                 regional_branch_id: admin.dataValues.regional_branch_id,
                 sub_branch_id: admin.dataValues.sub_branch_id,
+                user_type: "admin",
                 admin: true
               });
            }
@@ -83,6 +83,43 @@ exports.setup = function(passport){
               console.log("Did not match");
               done(null, false);
           }
+       });
+    }));
+
+    passport.use("basic-client" , new passportHTTP.BasicStrategy(function(mobile, password, done){
+       //if the requested email is not a valid email address
+
+       if(!mobile || mobile.length == 0)
+       {
+           req.flash("error" , "You have to give a valid email address");
+           return done(null , false);
+       }
+
+       if(!password || password.length==0)
+       {
+           req.flash("error" , "Password cannot be blank");
+           return done(null , false);
+       }
+
+       clientModel.findOne({
+         where:{
+           mobile: mobile,
+           password: password
+         }
+       })
+       .then(function(clientObj){
+         if(!clientObj){
+           done({ "message": "Not found" });
+         }
+         done(null, {
+           mobile: client.dataValues.email,
+           authToken: client.dataValues.authToken,
+           user_type: "client",
+           admin: false
+         });
+       })
+       .catch(function(err){
+         done(err);
        });
     }));
 }
