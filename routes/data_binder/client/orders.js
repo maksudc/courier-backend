@@ -14,11 +14,11 @@ var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
 var passport = require("passport");
 
-//router.use(passport.authenticate('basic-client', {session: false}));
+router.use(passport.authenticate("basic-client-login", {session: false}));
 
 router.get('/', function(req, res){
 
-  console.log(req);
+  console.log(req.user);
 
 	tableHelper = new DataTableHelper(req.query);
 

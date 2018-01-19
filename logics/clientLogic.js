@@ -216,3 +216,46 @@ var deleteClient = function(params, next){
 };
 
 exports.deleteClient = deleteClient;
+
+var checkLogin = function(mobile, password, next){
+    clientModel.findOne({
+        where: {mobile: mobile, password: password}}
+    ).then(function(client){
+        if(client){
+            next(null, client.dataValues);
+        }
+        else{
+            next(null, false);
+        }
+    }).catch(function(err){
+        if(err){
+        	console.error(err);
+            next("Error while reading client");
+        }
+    });
+}
+
+exports.checkLogin = checkLogin;
+
+
+var findClient = function(mobile, next){
+
+    clientModel.findOne({
+        where: {mobile: mobile}}
+    ).then(function(client){
+        if(client){
+            next(null, client.dataValues);
+        }
+        else{
+            next("No client found");
+        }
+    }).catch(function(err){
+        if(err){
+        	console.error(err);
+            next("Error while reading client");
+        }
+    });
+
+exports.findClient = findClient;
+
+};

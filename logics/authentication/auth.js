@@ -1,6 +1,7 @@
 var passportLocal = require('passport-local');
 var passportHTTP = require('passport-http');
 var adminLogic = require('../admin/adminLogic');
+var clientLogic = require('../clientLogic');
 var permissionModel = require('../../models/permission');
 
 exports.setup = function(passport){
@@ -12,15 +13,16 @@ exports.setup = function(passport){
         if(user.type == 'admin'){
             done(null, {email: user.email, type: 'admin'});
         }
-        //for future use of user database
-        else if(user.type == 'user') done(null, {mobile: user.mobile, type: 'admin'});
-        else done(null, false);
+        else if(user.type == 'client'){
+            done(null, {mobile: user.mobile, type: 'client'});
+        }
     });
 
     passport.deserializeUser(function(user, done){
 
         console.log("deserializeUser");
         if(user.type == 'admin') {
+
             adminLogic.findAdmin(user.email, function(err, admin){
                 if(err) {
                     done(err, null);
@@ -35,6 +37,28 @@ exports.setup = function(passport){
                         // mobile: admin.mobile,
                         role: admin.dataValues.role
                     });
+                }
+
+            });
+        }else if(user.type == 'client') {
+            console.log("Finding client");
+            clientLogic.findClient(user.mobile, function(err, client){
+                if(err) {
+                    done(err, null);
+                }
+                else if(!client) done("User name or password did not match");
+                else {
+                    var clientData = {
+                        mobile: client.mobile,
+                        address: client.address,
+                        full_name: client.full_name,
+                        status: client.status,
+                        authToken: btoa(client.mobile + ":" + client.password),
+                        role: 'client',
+                        createdAt: client.createdAt.toDateString()
+                    };
+
+                    done(null, clientData);
                 }
 
             });
@@ -85,4 +109,33 @@ exports.setup = function(passport){
           }
        });
     }));
+
+    passport.use("basic-client-login" , new passportHTTP.BasicStrategy(function(mobile , password , done){
+
+        if(mobile.length == 0)
+        {
+            req.flash("error" , "You have to give a valid email address");
+            return done(null , false);
+        }
+
+        if(password.length==0)
+        {
+            req.flash("error" , "Password cannot be blank");
+            return done(null , false);
+        }
+
+        clientLogic.checkLogin(mobile, password, function(err, client){
+            if(err) {
+                done(err);
+            }
+            else if(client){
+                console.log("Found client!");
+                done(null, {mobile: client.mobile, type: 'client'});
+            }
+            else {
+                console.log("no client found!");
+                done(null, false);
+            }
+        });
+    } ));
 }
