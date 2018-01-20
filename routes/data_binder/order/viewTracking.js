@@ -13,15 +13,15 @@ var orderModel = DB.sequelize.models.order;
 var trackerLogModel = DB.sequelize.models.trackerLog;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
-
 var moment = require("moment-timezone");
 var TIMEZONE_CONFIG = require("./../../../config/timezone");
 
+var authMiddleware = require("./../../../middleware/auth");
 var passport = require("passport");
 
-router.use(passport.authenticate('basic', {session: false}));
+router.use(authMiddleware.hasGenericAccess);
 
-router.get('/:order_barcode', function(req, res){
+router.get('/:order_barcode' ,  function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
 
