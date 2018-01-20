@@ -18,15 +18,13 @@ router.use(passport.authenticate("basic-client-login", {session: false}));
 
 router.get('/', function(req, res){
 
-  console.log(req.user);
-
 	tableHelper = new DataTableHelper(req.query);
 
 	whereQuery = null;
 
   extraQuery = {
 		"sender":{
-			"$ne": "draft"
+			"$eq": req.user.mobile
 		}
   };
 

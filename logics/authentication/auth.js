@@ -6,72 +6,7 @@ var permissionModel = require('../../models/permission');
 
 exports.setup = function(passport){
 
-    passport.serializeUser(function(user, done){
-
-        //insert this user object to redis and then replace the user.email with redis id
-        console.log("serializeUser");
-        if(user.type == 'admin'){
-            done(null, {email: user.email, type: 'admin'});
-        }
-        else if(user.type == 'client'){
-            done(null, {mobile: user.mobile, type: 'client'});
-        }
-    });
-
-    passport.deserializeUser(function(user, done){
-
-        console.log("deserializeUser");
-        if(user.type == 'admin') {
-
-            adminLogic.findAdmin(user.email, function(err, admin){
-                if(err) {
-                    done(err, null);
-                }
-                else if(!admin) done("User name or password did not match");
-                else {
-
-                    done(null, {
-                        email: admin.dataValues.email,
-                        // username: admin.username,
-                        // nationalId: admin.nationalId,
-                        // mobile: admin.mobile,
-                        role: admin.dataValues.role
-                    });
-                }
-
-            });
-        }else if(user.type == 'client') {
-            console.log("Finding client");
-            clientLogic.findClient(user.mobile, function(err, client){
-                if(err) {
-                    done(err, null);
-                }
-                else if(!client) done("User name or password did not match");
-                else {
-                    var clientData = {
-                        mobile: client.mobile,
-                        address: client.address,
-                        full_name: client.full_name,
-                        status: client.status,
-                        authToken: btoa(client.mobile + ":" + client.password),
-                        role: 'client',
-                        createdAt: client.createdAt.toDateString()
-                    };
-
-                    done(null, clientData);
-                }
-
-            });
-        }
-        else done(null, false);
-    });
-
-
     passport.use(new passportHTTP.BasicStrategy(function(email, password, done){
-       //if the requested email is not a valid email address
-
-       console.log(email);
-       console.log(password);
 
        if(email.length == 0)
        {
@@ -100,11 +35,11 @@ exports.setup = function(passport){
                 region_id: admin.dataValues.region_id,
                 regional_branch_id: admin.dataValues.regional_branch_id,
                 sub_branch_id: admin.dataValues.sub_branch_id,
-                admin: true
+                admin: true,
+                type: "admin"
               });
            }
            else {
-              console.log("Did not match");
               done(null, false);
           }
        });
@@ -129,13 +64,21 @@ exports.setup = function(passport){
                 done(err);
             }
             else if(client){
-                console.log("Found client!");
-                done(null, {mobile: client.mobile, type: 'client'});
+                var clientData = {
+                    mobile: client.mobile,
+                    address: client.address,
+                    full_name: client.full_name,
+                    status: client.status,
+                    role: 'client',
+                    type: "client",
+                    createdAt: client.createdAt.toDateString()
+                };
+                done(null, clientData);
             }
             else {
-                console.log("no client found!");
                 done(null, false);
             }
         });
-    } ));
-}
+
+    }));
+};
