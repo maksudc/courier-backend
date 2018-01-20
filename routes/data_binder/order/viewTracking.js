@@ -64,7 +64,7 @@ router.get('/:order_barcode', function(req, res){
 	.then(function(logList){
 
 			resultData["recordsTotal"] = logList.count;
-			resultData["recordsFiltered"] = logList.rows.length;
+			resultData["recordsFiltered"] = logList.count;
 
 			return Promise.resolve(logList.rows);
 	})
