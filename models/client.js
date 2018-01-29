@@ -13,6 +13,11 @@ module.exports = function(sequelize , DataTypes){
 			type: DataTypes.ENUM('draft', 'verified'),
 			defaultValue: 'draft',
 			allowNull: false
+		},
+		has_portal_access: {
+			type: DataTypes.BOOLEAN,
+			allowNull: false,
+			defaultValue: false
 		}
 	} ,  {
 
