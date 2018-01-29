@@ -178,14 +178,13 @@ exports.findManyByMobile = findManyByMobile;
 
 var updateClient = function(params, next){
 
-	console.log(params);
 	clientModel.update({
 		mobile: params.new_mobile_no,
 		national_id: params.nid,
 		address: params.address,
-		full_name: params.full_name
+		full_name: params.full_name,
+    has_portal_access: params.has_portal_access
 	}, {where: {mobile: params.mobile}}).then(function(updatedClient){
-		console.log(updatedClient);
 		params["mobile"] = params["new_mobile_no"];
 		if(params["new_mobile_no"]) delete params["new_mobile_no"];
 		next(null, params);
