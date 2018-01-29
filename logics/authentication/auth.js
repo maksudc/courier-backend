@@ -38,6 +38,8 @@ exports.setup = function(passport){
                 admin: true,
                 type: "admin"
               });
+
+              console.log("Admin: " + admin.dataValues.email);
            }
            else {
               done(null, false);
@@ -73,6 +75,8 @@ exports.setup = function(passport){
                     type: "client",
                     createdAt: client.createdAt.toDateString()
                 };
+                console.log("Client: " + client.mobile);
+
                 done(null, clientData);
             }
             else {
