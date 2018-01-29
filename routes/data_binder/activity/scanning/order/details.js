@@ -26,14 +26,18 @@ router.get('/:order_barcode', function(req, res){
 
   whereQuery = null;
   extraQuery = {
+		"object_type": "item",
 		"object_id":{
 			"$like": req.params.order_barcode + "-" + "%"
 		}
   };
 
-	if(panicUtils.isPanicked(req)){
-		extraQuery = panicUtils.attachPanicQuery(extraQuery);
+	extraParamFilterQuery = tableHelper.getExtraFiltering();
+	console.log(extraParamFilterQuery);
+	for(key in extraParamFilterQuery){
+		extraQuery[key] = extraParamFilterQuery[key];
 	}
+
   whereQuery = tableHelper.getWhere(extraQuery);
 
 	queryParams  = {};
