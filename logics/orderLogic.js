@@ -1058,14 +1058,11 @@ var createByOperator = function(postData, operator, next){
 					contentTemplate = handlebars.compile(content.toString());
 					messageBody = null;
 
-					if(data.isNew){
-
-						console.log("Sending the sender client password through message....");
+					if(data.isNew){						
 						// send the password to the client by sms
 						// Send the sms with the password
 						messageBody = contentTemplate({ parcelInstance: order , client: client });
 					}else{
-						console.log("Sending the order verification code through message....");
 						//Only sends the verifcation code
 						messageBody = contentTemplate({ parcelInstance: order });
 					}

@@ -101,7 +101,7 @@ router.post("/password/resend" , upload.array() , function(req , res){
 		if(!clientData) res.send({"status": "success", data: null, message: "No matching mobile no"});
 		else{
 
-			if(clientData.status == "success"){
+			if(clientData.status == "success" && clientData.data.has_portal_access){
 
 				messageBody = "Welcome to OMEX COURIER & LOGISTICS LTD. Your password for " + clientData.data.mobile + " is : " + clientData.data.password + " Please log into http://omexcourier.com";
 				messageUtils.sendMessage(mobile , messageBody , function(messageResponse){
