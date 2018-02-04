@@ -24,6 +24,7 @@ module.exports = function(sequelize , DataTypes){
 		classMethods: {
 			associate: function(models){
 				client.belongsTo(models.region , { foreignKey: "regionId" });
+				client.belongsTo(models.corporation , { foreignKey: "corporationId", as:"corporation" });
 			}
 		}
 
