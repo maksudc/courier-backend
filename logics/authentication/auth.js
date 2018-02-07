@@ -85,4 +85,34 @@ exports.setup = function(passport){
         });
 
     }));
+
+    passport.use("basic-corporation-login" , new passportHTTP.BasicStrategy(function(username , password , done){
+
+        if(!username || username.length == 0)
+        {
+            req.flash("error" , "You have to give a valid username");
+            return done(null , false);
+        }
+
+        if(!password || password.length==0)
+        {
+            req.flash("error" , "Password cannot be blank");
+            return done(null , false);
+        }
+
+        corporation.checkLogin(username, password, function(err, corporation){
+            if(err) {
+                done(err);
+            }
+            else if(corporation){
+                console.log("Corporation: " + corporation.id);
+                corporation["role"] = "corporation";
+                done(null, corporation);
+            }
+            else {
+                done(null, false);
+            }
+        });
+
+    }));
 };
