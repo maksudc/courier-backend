@@ -2,6 +2,7 @@ var passportLocal = require('passport-local');
 var passportHTTP = require('passport-http');
 var adminLogic = require('../admin/adminLogic');
 var clientLogic = require('../clientLogic');
+var corporationLogic = require("../corporation/authenticationLogic");
 var permissionModel = require('../../models/permission');
 
 exports.setup = function(passport){
@@ -100,7 +101,7 @@ exports.setup = function(passport){
             return done(null , false);
         }
 
-        corporation.checkLogin(username, password, function(err, corporation){
+        corporationLogic.checkLogin(username, password, function(err, corporation){
             if(err) {
                 done(err);
             }
