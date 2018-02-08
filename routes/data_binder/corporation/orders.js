@@ -32,8 +32,6 @@ router.get('/', function(req, res){
   $startDate.subtract(clientConfig.DEFAULT_ALLOWED_TIME_WINDOW_VAL , clientConfig.DEFAULT_ALLOWED_TIME_WINDOW_UNIT);
   $startDate.set({ hour: 0, minute:0, second:0, millisecond:0 });
 
-
-
   extraQuery = {
 		"sender":{
 			"$eq": req.user.mobile
