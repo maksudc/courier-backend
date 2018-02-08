@@ -40,7 +40,8 @@ router.get('/', function(req, res){
 		attributes: ["mobile"],
 		where: {
 			corporationId: req.user.id
-		}
+		},
+		order: "mobile ASC"
 	})
 	.map(function(clientInstance){
 		return clientInstance.mobile;
