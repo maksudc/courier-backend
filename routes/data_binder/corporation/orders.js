@@ -46,11 +46,11 @@ router.get('/', function(req, res){
 	.map(function(clientInstance){
 		return clientInstance.mobile;
 	})
-	.then(function(clientMobileNumders){
+	.then(function(clientMobileNumbers){
 
 		var extraQuery = {};
 		extraQuery["sender"] = {
-			"$in": clientMobileNumders
+			"$in": clientMobileNumbers
 		};
 		filterQuery = tableHelper.getExtraFiltering();
 		for(key in filterQuery){
