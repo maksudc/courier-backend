@@ -48,19 +48,14 @@ router.get('/', function(req, res){
 	})
 	.then(function(clientMobileNumders){
 
-		var extraQuery = {
-			// "createdAt":{
-			// 	"$and":[
-			// 		{
-			// 			"$gte": $startDate.tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss")
-			// 		},
-			// 		{
-			// 			"$lte": $currentDate.tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss")
-			// 		}
-			// 	]
-			// }
+		var extraQuery = {};
+		extraQuery["sender"] = {
+			"$in": clientMobileNumders
 		};
-
+		filterQuery = tableHelper.getExtraFiltering();
+		for(key in filterQuery){
+			extraQuery[key] = filterQuery[key];
+		}
 		whereQuery = tableHelper.getWhere(extraQuery);
 
 		var queryParams  = {};
@@ -68,12 +63,6 @@ router.get('/', function(req, res){
 		queryParams["offset"] = tableHelper.getOffset();
 		queryParams["where"] = whereQuery;
 		queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
-
-		extraQuery["sender"] = {
-			"$in": clientMobileNumders
-		};
-
-		console.log(clientMobileNumders);
 
 		return orderModel.findAndCountAll(queryParams);
 	})
