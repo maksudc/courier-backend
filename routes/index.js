@@ -48,6 +48,7 @@ router.use("/client", require("./client"));
 
 router.use("/money", require("./money"));
 router.use("/report", require("./report"));
+router.use("/corporation", require("./corporation"));
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
