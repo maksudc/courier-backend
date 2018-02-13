@@ -6,6 +6,9 @@ var DB = require("./../../models/index");
 var sequelize = DB.sequelize;
 var corporationModel = sequelize.models.corporation;
 var HttpStatusCodes = require("http-status-codes");
+var multer = require("multer");
+var upload = multer();
+var bodyParser = require('body-parser');
 
 router.use(authMiddleware.hasGenericAccess);
 router.get("/:corporationId" , function(req, res){
@@ -45,4 +48,13 @@ router.get("/:corporationId" , function(req, res){
   });
 });
 
+router.put("/:corporationId", upload.array(), function(req, res){
+
+  params = req.body;
+  
+});
+
+router.delete("/:corporationId", upload.array(), function(req, res){
+
+});
 module.exports = router;
