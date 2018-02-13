@@ -27,7 +27,6 @@ router.get("/:corporationId" , function(req, res){
     ]);
   })
   .then(function(complexResult){
-    console.log(complexResult);
     corporation = complexResult[0];
     clients = complexResult[1];
 
