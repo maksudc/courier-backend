@@ -51,6 +51,8 @@ router.get("/:corporationId" , function(req, res){
 
 router.put("/:corporationId", upload.array(), function(req, res){
 
+  console.log(req.body);
+
   corporationParams = req.body.corporation;
 
   finalClientNumbers = req.body.clients;
@@ -116,7 +118,7 @@ router.put("/:corporationId", upload.array(), function(req, res){
     });
   })
   .catch(function(err){
-    res.error(err);
+    console.error(err);
 
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
     res.send(err);
