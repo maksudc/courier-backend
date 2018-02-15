@@ -43,7 +43,7 @@ router.get('/:corporationId', function(req, res){
   }
   queryParams["offset"] = tableHelper.getOffset();
   queryParams["where"] = whereQuery;
-  queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
+  queryParams["order"] = tableHelper.getOrder() || "full_name DESC";
   queryParams["attributes"] = [ 'mobile', 'full_name', 'address', 'status', 'createdAt', 'has_portal_access', 'corporationId'];
 
 	var resultData = {};
