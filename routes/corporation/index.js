@@ -14,6 +14,7 @@ var corporationClientsLogic = require("./../../logics/corporation/clients");
 var Promise = require("bluebird");
 
 router.use(authMiddleware.hasGenericAccess);
+
 router.get("/:corporationId" , function(req, res){
 
   var result = {};
@@ -46,6 +47,30 @@ router.get("/:corporationId" , function(req, res){
     if(err){
       console.error(err);
     }
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    res.send(err);
+  });
+});
+
+router.post("/", upload.array(), function(req, res){
+
+  corporationParams = req.body;
+
+  sequelize.transaction(function(t){
+      return corporationModel.create(corporationParams, { transaction: t });
+  })
+  .then(function(corporation){
+
+    res.status(HttpStatusCodes.CREATED);
+    res.send({
+      "id": corporation.dataValues["id"],
+      "name": corporation.dataValues["name"],
+      "has_portal_access": corporation.dataValues["has_portal_access"]
+    });
+  })
+  .catch(function(err){
+    console.error(err);
+
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
     res.send(err);
   });
@@ -155,7 +180,7 @@ router.patch("/:corporationId", upload.array(), function(req, res){
     })
     .catch(function(err){
       console.error(err);
-      
+
       res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
       res.send(err);
     });
