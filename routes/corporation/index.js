@@ -10,6 +10,8 @@ var HttpStatusCodes = require("http-status-codes");
 var multer = require("multer");
 var upload = multer();
 var bodyParser = require('body-parser');
+var corporationClientsLogic = require("./../../logics/corporation/clients");
+var Promise = require("bluebird");
 
 router.use(authMiddleware.hasGenericAccess);
 router.get("/:corporationId" , function(req, res){
@@ -123,6 +125,40 @@ router.put("/:corporationId", upload.array(), function(req, res){
     res.send(err);
   });
 
+});
+
+router.patch("/:corporationId", upload.array(), function(req, res){
+
+    $changeOps = req.body || [];
+    console.log($changeOps);
+
+    sequelize.transaction(function(t){
+
+      return Promise.all($changeOps)
+      .map(function($change){
+
+        if($change["path"] == "/clients"){
+          if($change["op"] == "add"){
+
+            return corporationClientsLogic.addClientToCorporation(req.params.corporationId, $change["value"], { transaction: t }, null);
+          }else if($change["op"] == "remove"){
+
+            return corporationClientsLogic.removeClientFromCorporation(req.params.corporationId, $change["value"], { transaction: t }, null);
+          }
+        }
+      });
+    })
+    .then(function(result){
+
+      res.status(HttpStatusCodes.OK);
+      res.send(result);
+    })
+    .catch(function(err){
+      console.error(err);
+      
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+      res.send(err);
+    });
 });
 
 router.delete("/:corporationId", upload.array(), function(req, res){
