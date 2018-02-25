@@ -22,7 +22,7 @@ function getOrderUpdateMap(payload){
   updateMap = {};
 
   if(payload.exit_branch_id){
-    updateMap["exit_branch_id"] = payload.exit_branch_id;
+    updateMap["exit_branch"] = payload.exit_branch_id;
   }
   if(payload.exit_branch_type){
     updateMap["exit_branch_type"] = branchUtils.desanitizeBranchType(payload.exit_branch_type);
@@ -127,7 +127,12 @@ var editOrder = function(orderUuid , user, payload , callback){
       orderInstance = orderObject;
 
       orderMap = getOrderUpdateMap(payload);
-      return orderInstance.update(orderMap , { transaction: t });
+
+      return orderModel.update(orderMap , {
+        where: { uuid: orderInstance.uuid },
+        individualHooks: true,
+        transaction: t
+      });
     })
     .then(function(){
 
