@@ -1,20 +1,5 @@
 'use strict';
-/*var sequelize = require("./connect");
-var Sequelize = require("sequelize");
-var item = require("./itemModel");
-var product = require("./productModel");
-var ShipmentModel = require("./shipmentModel");
 
-
-product.hasOne(item, { foreignKey: 'productUuid' });
-order.hasOne(item, { foreignKey: 'orderUuid'});
-ShipmentModel.hasMany(order , {foreignKey: 'shipmentUuid'});
-
-product.sync();
-order.sync();
-item.sync();
-module.exports = order;
-*/
 var _ = require("lodash");
 var Promise = require("bluebird");
 
