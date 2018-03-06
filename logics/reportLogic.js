@@ -6,7 +6,6 @@ var orderModel = sequelize.models.order;
 var regionalBranchModel = sequelize.models.regionalBranch;
 var subBranchModel = sequelize.models.subBranch;
 var adminLogic = require('./admin/adminLogic');
-var branchUtils = require('../utils/branch');
 var async = require('async');
 var _ = require('lodash');
 var moment = require('moment-timezone');

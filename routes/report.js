@@ -7,6 +7,8 @@ var async = require('async');
 
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
+parcelCashinLogic = require("./../logics/reporting/parcel/cashin");
+
 router.use(passport.authenticate('basic', {session: false}));
 router.use(middleware.checkPermission);
 
@@ -21,12 +23,10 @@ router.get("/" , function(req, res){
 });
 
 router.get("/parcel/cashin", function(req, res){
-
-	reportLogic.getOrderPaymentByBranch(req.query, req.user, function(err, reportData){
+	parcelCashinLogic.cashin(req.query, req.user, function(err, reportData){
 		if(err) res.send({"status": "error", error: err});
 		else res.send({"status": "success", data: reportData});
 	});
-
 });
 
 router.get("/parcel/sales", function(req, res){
