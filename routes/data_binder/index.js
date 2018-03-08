@@ -23,4 +23,7 @@ router.use("/corporation", corporationBinderRouter);
 var activityDataBinderRouter = require("./activity");
 router.use("/activity" , activityDataBinderRouter);
 
+var reportingDataBinderRouter = require("./reporting");
+router.use("/reporting", reportingDataBinderRouter);
+
 module.exports = router;
