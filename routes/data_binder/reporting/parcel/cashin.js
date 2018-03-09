@@ -11,7 +11,9 @@ var orderLogic = require("./../../../../logics/orderLogic");
 var DB = require("./../../../../models/index");
 var orderModel = DB.sequelize.models.order;
 var DataTableHelper = require("./../../../../utils/data_binder/dataTable");
+var passport = require("passport");
 
+router.use(passport.authenticate("basic" , {session: false}));
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
@@ -21,9 +23,7 @@ router.get('/', function(req, res){
 	whereQuery = null;
 
   extraQuery = {
-		"status":{
-			"$ne": "draft"
-		}
+    "payment_status": "paid"
   };
 
 	if(userObj){
