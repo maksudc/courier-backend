@@ -33,7 +33,6 @@ router.get('/:order_barcode', function(req, res){
   };
 
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
-	console.log(extraParamFilterQuery);
 	for(key in extraParamFilterQuery){
 		extraQuery[key] = extraParamFilterQuery[key];
 	}

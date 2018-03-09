@@ -155,7 +155,6 @@ router.put("/:corporationId", upload.array(), function(req, res){
 router.patch("/:corporationId", upload.array(), function(req, res){
 
     $changeOps = req.body || [];
-    console.log($changeOps);
 
     sequelize.transaction(function(t){
 

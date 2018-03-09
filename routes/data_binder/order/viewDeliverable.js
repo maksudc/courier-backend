@@ -51,8 +51,6 @@ router.get('/', function(req, res){
 	queryParams["where"] = whereQuery;
 	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
-	console.log(queryParams["order"]);
-
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
 

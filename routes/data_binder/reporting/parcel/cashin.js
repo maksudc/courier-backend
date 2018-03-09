@@ -10,6 +10,8 @@ var branchUtils = require("./../../../../utils/branch");
 var orderLogic = require("./../../../../logics/orderLogic");
 var DB = require("./../../../../models/index");
 var orderModel = DB.sequelize.models.order;
+var regionalBranchModel = DB.sequelize.models.regionalBranch;
+var subBranchModel = DB.sequelize.models.subBranch;
 var DataTableHelper = require("./../../../../utils/data_binder/dataTable");
 var passport = require("passport");
 
@@ -26,28 +28,21 @@ router.get('/', function(req, res){
     "payment_status": "paid"
   };
 
-	if(userObj){
-		//&& !adminUtils.isPrivileged(userObj.getRole())){
-		if(userObj.getSubBranchId()){
-			extraQuery["exit_branch"] = userObj.getSubBranchId();
-      extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("sub");
-		}
-		else if(userObj.getRegionalBranchId()){
-			extraQuery["exit_branch"] = userObj.getRegionalBranchId();
-      extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("regional");
-		}
+	extraParamFilterQuery = tableHelper.getExtraFiltering();
+	for(key in extraParamFilterQuery){
+		extraQuery[key] = extraParamFilterQuery[key];
 	}
 
-	if(panicUtils.isPanicked(req)){
-		extraQuery = panicUtils.attachPanicQuery(extraQuery);
-	}
-  whereQuery = tableHelper.getWhere(extraQuery);
+	whereQuery = tableHelper.getWhere(extraQuery);
 
 	queryParams  = {};
+	queryParams["where"] = whereQuery;
+	queryParams["order"] = tableHelper.getOrder() || "bar_code ASC";
+
+	var aggregationQueryParams = Object.assign({} , queryParams);
+
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
-	queryParams["where"] = whereQuery;
-	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
@@ -60,8 +55,36 @@ router.get('/', function(req, res){
 				resultData["recordsTotal"] = orderList.count;
 				resultData["recordsFiltered"] = orderList.count;
 
-				res.status(HttpStatus.OK);
-				res.send(resultData);
+		})
+		.then(function(){
+
+			return Promise.resolve(tableHelper.getAggregations());
+		})
+		.map(function(aggregation_obj){
+
+			if(aggregation_obj.getOperation() == "sum"){
+
+					return Promise.all([
+						aggregation_obj ,
+						orderModel.sum(aggregation_obj.getColumn() , aggregationQueryParams)
+					]);
+			}
+			return Promise.resolve(null);
+		})
+		.map(function(complexResult){
+
+			if(!complexResult){
+				return Promise.resolve(null);
+			}
+			aggregation_obj = complexResult[0];
+			aggregation_result = complexResult[1];
+
+			resultData["data"][aggregation_obj.getQueryField()] = aggregation_result;
+		})
+		.then(function(){
+
+			res.status(HttpStatus.OK);
+			res.send(resultData);
 		})
 		.catch(function(err){
 			if(err){
