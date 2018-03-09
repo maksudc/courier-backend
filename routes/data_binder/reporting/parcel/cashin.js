@@ -14,6 +14,8 @@ var regionalBranchModel = DB.sequelize.models.regionalBranch;
 var subBranchModel = DB.sequelize.models.subBranch;
 var DataTableHelper = require("./../../../../utils/data_binder/dataTable");
 var passport = require("passport");
+var moment = require("moment-timezone");
+var timezoneConfig = require("./../../../../config/timezone");
 
 router.use(passport.authenticate("basic" , {session: false}));
 router.get('/', function(req, res){
@@ -55,6 +57,26 @@ router.get('/', function(req, res){
 				resultData["recordsTotal"] = orderList.count;
 				resultData["recordsFiltered"] = orderList.count;
 
+				return Promise.all(orderList.rows);
+		})
+		.map(function(orderData){
+			orderData.dataValues.pay_time = moment.tz(orderData.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
+																						.tz(timezoneConfig.CLIENT_ZONE)
+																						.format("YYYY-MM-DD HH:mm:ss");
+      return orderData;																							
+		})
+		.map(function(orderData){
+
+			return Promise.all([
+				orderData,
+				branchUtils.getInclusiveBranchInstance(orderData.payment_hub_type , orderData.payment_hub , null)
+			]);
+		})
+		.map(function(complexResult){
+			orderData = complexResult[0];
+			aBranchData = complexResult[1];
+
+			orderData.dataValues.payment_branch = branchUtils.prepareLabel(aBranchData);
 		})
 		.then(function(){
 
