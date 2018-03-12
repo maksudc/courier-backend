@@ -1,3 +1,6 @@
+/**
+@Deprecated
+*/
 var DB = require("./../../../models/index");
 var sequelize = DB.sequelize;
 var Sequelize = DB.Sequelize;

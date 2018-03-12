@@ -9,8 +9,8 @@ router.use('/parcel/cashin', parcelCashinBinderRouter);
 //
 var moneyCashinBinderRouter = require("./money/cashin");
 router.use("/money/cashin" , moneyCashinBinderRouter);
-//
-// var moneyCashoutBinderRouter = require("./money/cashout");
-// router.use("/money/cashout" , moneyCashoutBinderRouter);
+
+var moneyCashoutBinderRouter = require("./money/cashout");
+router.use("/money/cashout" , moneyCashoutBinderRouter);
 
 module.exports = router;
