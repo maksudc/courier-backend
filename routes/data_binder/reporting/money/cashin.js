@@ -1,11 +1,6 @@
 var express = require("express");
 var router = express.Router();
-
-var multer = require("multer");
-var upload = multer();
-var bodyParser = require('body-parser');
 var HttpStatus = require("http-status-codes");
-var adminUtils = require("./../../../../utils/admin");
 var branchUtils = require("./../../../../utils/branch");
 var orderLogic = require("./../../../../logics/orderLogic");
 var DB = require("./../../../../models/index");
@@ -74,6 +69,8 @@ router.get('/', function(req, res){
 			moneyItem.dataValues.payment_time = moment.tz(moneyItem.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
 																						.tz(timezoneConfig.CLIENT_ZONE)
 																						.format("YYYY-MM-DD HH:mm:ss");
+																						
+      moneyItem.dataValues.revenue = moneyItem.dataValues.charge - moneyItem.dataValues.discount;
       return moneyItem;
 		})
     .map(function(moneyOrderData){
