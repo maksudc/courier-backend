@@ -7,8 +7,8 @@ router.use('/parcel/cashin', parcelCashinBinderRouter);
 // var parcelCashoutBinderRouter = require("./parcel/cashout");
 // router.use('/parcel/cashout' , parcelCashoutBinderRouter);
 //
-// var moneyCashinBinderRouter = require("./money/cashin");
-// router.use("/money/cashin" , moneyCashinBinderRouter);
+var moneyCashinBinderRouter = require("./money/cashin");
+router.use("/money/cashin" , moneyCashinBinderRouter);
 //
 // var moneyCashoutBinderRouter = require("./money/cashout");
 // router.use("/money/cashout" , moneyCashoutBinderRouter);
