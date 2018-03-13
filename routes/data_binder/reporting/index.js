@@ -4,6 +4,9 @@ var router = express.Router();
 var parcelCashinBinderRouter = require("./parcel/cashin");
 router.use('/parcel/cashin', parcelCashinBinderRouter);
 
+var parcelSalesBinderRouter = require("./parcel/sales");
+router.use("/parcel/sales", parcelSalesBinderRouter);
+
 // var parcelCashoutBinderRouter = require("./parcel/cashout");
 // router.use('/parcel/cashout' , parcelCashoutBinderRouter);
 //
