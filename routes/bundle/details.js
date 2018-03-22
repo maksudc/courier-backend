@@ -4,8 +4,11 @@ var branchUtils = require("./../../utils/branch");
 var DB = require("./../../models");
 var sequelize = DB.sequelize;
 var bundleModel = sequelize.models.bundle;
+var scanActivityModel = sequelize.models.scanActivity;
 var HttpStatus = require("http-status-codes");
 var Promise = require("bluebird");
+var moment = require("moment-timezone");
+var timezoneConfig = require("./../../config/timezone");
 var _ = require("underscore");
 
 router.get("/:id" , function(req , res){
@@ -68,6 +71,28 @@ router.get("/:id" , function(req , res){
       itemMap["exit_branch_label"] = itemMap["exit_branch_label"] + "," + exitBranchInstane.regionalBranch.label;
     }
 
+    return Promise.resolve(itemMap);
+  })
+  .map(function(itemMap){
+
+    return Promise.all([
+      itemMap,
+      scanActivityModel.max("createdAt",{
+        where: {
+          object_type: "item",
+          object_id: itemMap["bar_code"],
+          responseCode: 200,
+          bundleId: bundleInstance.id
+        },
+        order: "createdAt DESC"
+      })
+    ]);
+  })
+  .map(function(complexResult){
+
+    itemMap = complexResult[0];
+    lastSuccessfulScanningTimeInBundle = complexResult[1];
+    itemMap["scanningTime"] = moment.tz(lastSuccessfulScanningTimeInBundle, timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
     return Promise.resolve(itemMap);
   })
   .then(function(itemMaps){

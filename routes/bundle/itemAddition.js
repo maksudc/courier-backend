@@ -18,6 +18,9 @@ var passport = require("passport");
 var adminActivityLogic = require("./../../logics/activity/admin");
 var scanActivityLogic = require("./../../logics/activity/scan");
 
+var moment = require("moment-timezone");
+var timezoneConfig = require("./../../config/timezone");
+
 router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 router.use(passport.authenticate('basic', {session: false}));
@@ -113,6 +116,7 @@ router.post("/" , upload.array() , function(req , res){
 
       itemData = {};
       itemData["bar_code"] = itemInstance.bar_code;
+      itemData["scanningTime"] = moment.tz(timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
       itemData["entry_branch_label"] = itemInstance.entryBranch.label;
       if(itemInstance.entryBranch.regionalBranch){
         itemData["entry_branch_label"] = itemData["entry_branch_label"] + ","+ itemInstance.entryBranch.regionalBranch.label;
