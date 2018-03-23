@@ -39,7 +39,7 @@ genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
     return next();
   });
 });
-
+/*
 genericTracker.hook("beforeUpdate" , function(trackerInstance , options , next){
 
   if(trackerInstance.trackableType == "orderItem" && !moduleSettings.ENABLE_ITEM_TRACKING){
@@ -94,3 +94,4 @@ genericTracker.hook("beforeUpdate" , function(trackerInstance , options , next){
     return next();
   }
 });
+*/

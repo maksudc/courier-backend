@@ -32,6 +32,7 @@ function sanitizeBranchType(branchType){
   return ;
 }
 
+/*
 item.hook("afterUpdate" ,function(instance , options , next){
 
   var updatedInstance = instance.dataValues;
@@ -523,3 +524,4 @@ item.hook("beforeUpdate" , function(instance , options , next){
       _.assignIn(instance._changed , { next_hub_type: true });
     return next();
 });
+*/
