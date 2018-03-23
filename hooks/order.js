@@ -701,6 +701,3 @@ order.hook("beforeDestroy" , function(orderItem , options){
     }
   });
 });
-
-return order;
-};
