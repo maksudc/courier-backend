@@ -6,15 +6,10 @@ var ShipmentModel = sequelize.models.shipment;
 var RouteLogic = require("../logics/branchRouteLogic");
 var genericTracker = sequelize.models.genericTracker;
 var trackerLog = sequelize.models.trackerLog;
-var moduleSettings = require("../config/moduleSettings");
 
 var moment = require("moment");
 
-genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
-
-  if(trackerInstance.trackableType == "orderItem" && !moduleSettings.ENABLE_ITEM_TRACKING){
-    return next();
-  }
+genericTracker.hook("afterCreate" , function(trackerInstance , options){
 
   var trackerLogData = {};
   trackerLogData.action = "created";
@@ -28,15 +23,8 @@ genericTracker.hook("afterCreate" , function(trackerInstance , options , next){
   trackerLogData.updatedAt = eventDateTime;
 
   return trackerLog
-  .create(trackerLogData)
-  .then(function(trackerLogItem){
-    return next();
-  })
-  .catch(function(err){
-    if(err){
-        console.error(err.stack);
-    }
-    return next();
+  .create(trackerLogData, {
+    transaction: options.transaction
   });
 });
 /*
