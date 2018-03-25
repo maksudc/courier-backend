@@ -112,39 +112,5 @@ module.exports = function(sequelize , DataTypes){
     ]
   });
 
-  GenericTracker.hook("beforeDestroy" , function(trackerInstance , options){
-
-    if(trackerInstance.parentTrackerId){
-
-      GenericTracker
-      .findAll({ where: { parentTrackerId: trackerInstance.parentTrackerId } })
-      .then(function(siblingTrackersInclusive){
-
-        if(siblingTrackersInclusive.length === 0){
-
-          return GenericTracker.findOne({ where: { uuid: trackerInstance.parentTrackerId } });
-        }else{
-          return Promise.resolve(null);
-        }
-      })
-      .then(function(parentTrackerInstance){
-
-        if(parentTrackerInstance){
-
-          return parentTrackerInstance.update({
-            hasChild: false
-          });
-        }
-      })
-      .then(function(result){
-        console.log(result);
-      })
-      .catch(function(err){
-        console.log(err);
-      });
-
-    }
-  });
-
   return GenericTracker;
 };
