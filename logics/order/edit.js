@@ -101,13 +101,33 @@ function getVDparams(postData){
     moneyData["payParcelPrice"] = postData.vd_payBySender;
   }
 
+  if(postData.exit_branch_type && postData.exit_branch_id){
+    moneyData["source_sub_branch_id"] = parseInt(postData.exit_branch_id);
+    moneyData["source_regional_branch_id"] = parseInt(postData.exit_regional_branch_id);
+  }
+
   return moneyData;
+}
+
+function getItemUpdateMap(payload){
+  updateData = {};
+
+  if(payload.exit_branch_id){
+    updateMap["exit_branch"] = parseInt(payload.exit_branch_id);
+  }
+  if(payload.exit_branch_type){
+    updateMap["exit_branch_type"] = branchUtils.sanitizeBranchType(payload.exit_branch_type);
+  }
+
+  return updateMap;
 }
 
 var editOrder = function(orderUuid , user, payload , callback){
 
   var orderInstance = null;
   var moneyInstance = null;
+
+  var orderMap = null;
 
   var itemMaps = {};
 
@@ -131,6 +151,17 @@ var editOrder = function(orderUuid , user, payload , callback){
       return orderModel.update(orderMap , {
         where: { uuid: orderInstance.uuid },
         individualHooks: true,
+        transaction: t
+      });
+    })
+    .then(function(){
+
+      itemCommonDataMap = getItemUpdateMap(payload);
+
+      return itemModel.update(itemCommonDataMap, {
+        where: {
+          orderUuid: orderInstance.uuid
+        },
         transaction: t
       });
     })
