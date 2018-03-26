@@ -148,9 +148,7 @@ var editOrder = function(orderUuid , user, payload , callback){
 
       orderMap = getOrderUpdateMap(payload);
 
-      return orderModel.update(orderMap , {
-        where: { uuid: orderInstance.uuid },
-        individualHooks: true,
+      return orderInstance.update(orderMap , {
         transaction: t
       });
     })
@@ -220,7 +218,7 @@ var editOrder = function(orderUuid , user, payload , callback){
           newInstanceData["orderUuid"] = orderInstance.uuid;
 
           newInstanceData["entry_branch_type"] = branchUtils.sanitizeBranchType(orderInstance.entry_branch_type);
-          newInstanceData["entry_branh"] = parseInt(orderInstance.entry_branch);
+          newInstanceData["entry_branch"] = parseInt(orderInstance.entry_branch);
 
           newInstanceData["exit_branch_type"] = branchUtils.sanitizeBranchType(orderInstance.exit_branch_type);
           newInstanceData["exit_branch"] = parseInt(orderInstance.exit_branch);
