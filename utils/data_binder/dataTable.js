@@ -147,7 +147,11 @@ DataTableHelper.prototype.getWhere = function(queryWrapper){
 			columnName = columnDef["data"];
 			columnGlobalSearchQuery = {};
 			columnGlobalSearchQuery[columnName] = {};
-			columnGlobalSearchQuery[columnName][operationType] = this.config.search["value"] + "%";
+			if(operationType == "$like"){
+				columnGlobalSearchQuery[columnName][operationType] = this.config.search["value"] + "%";
+			}else{
+				columnGlobalSearchQuery[columnName][operationType] = this.config.search["value"];
+			}
 			globalSearchQuery["$or"].push(columnGlobalSearchQuery);
 		}
 	}
