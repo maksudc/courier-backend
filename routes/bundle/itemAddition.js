@@ -101,6 +101,45 @@ router.post("/" , upload.array() , function(req , res){
       return bundleInstance.addAttachedItems(itemInstance , { transaction: t });
     })
     .then(function(result){
+      if(bundleInstance.phase == "load"){
+        // Leaving the branch
+        itemInstance.set("status", "running");
+      }else if(bundleInstance.phase == "unload"){
+        // Entering into the branch
+        itemInstance.set("status", "received");
+      }
+    })
+    .then(function(){
+      itemInstance.set("current_hub", bundleInstance.createdAtBranchId);
+      itemInstance.set("current_hub_type", bundleInstance.createdAtBranchType);
+      return itemInstance.save({
+        transaction: t
+      });
+    })
+    .then(function(){
+      shouldInvokeOrderSave = false;
+      if(["reached","stocked"].indexOf(orderInstance.status) == -1){
+        if(orderInstance.current_hub != itemInstance.current_hub || orderInstance.current_hub_type != itemInstance.current_hub_type){
+          orderInstance.set("current_hub", itemInstance.current_hub);
+          orderInstance.set("current_hub_type", itemInstance.current_hub_type);
+          orderInstance.set("status", itemInstance.status);
+          shouldInvokeOrderSave = true;
+        }
+        else if(["ready", "confirmed"].indexOf(orderInstance.status) > -1){
+          if(itemInstance.status == "running"){
+            orderInstance.set("status", itemInstance.status);
+            shouldInvokeOrderSave = true;
+          }
+        }
+      }
+
+      if(shouldInvokeOrderSave){
+        return order.save({
+          transaction: t
+        });
+      }
+    })
+    .then(function(result){
       return branchUtils.getInclusiveBranchInstance(itemInstance.entry_branch_type , itemInstance.entry_branch);
     })
     .then(function(entrybranchInstance){
@@ -127,7 +166,12 @@ router.post("/" , upload.array() , function(req , res){
       }
 
       responseCode = HttpStatus.OK;
+    })
+    .then(function(){
+
+
     });
+
   })
   .then(function(result){
 
