@@ -204,8 +204,11 @@ order.hook("beforeUpdate" , function(instance , options){
     else if(snapshotInstance.status == 'stocked'){
       if(updatedInstance.status == "delivered"){
 
-      }else{
+      }
+      else{
         updatedInstance.status = snapshotInstance.status;
+        updatedInstance.current_hub = snapshotInstance.current_hub;
+        updatedInstance.current_hub_type = snapshotInstance.current_hub_type;
       }
     }
   }
@@ -253,7 +256,27 @@ order.hook("afterUpdate" , function(instance , options , next){
 
               updatedInstance.sender_verification_code = moneyOrderItem.sender_verification_code;
 
-              content = fs.readFileSync("./views/message/stocked.handlebars");
+              fs.readFile("./views/message/stocked.handlebars", "utf8", function(err, content){
+                if(err){
+                  console.error(err);
+                }else{
+                  contentTemplate = handlebars.compile(content.toString());
+                  messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
+
+                  messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
+                    console.log(data);
+                  });
+                }
+              });
+
+            }
+          });
+        }else{
+
+          fs.readFile("./views/message/stocked.handlebars", "utf8", function(err, content){
+            if(err){
+              console.error(err);
+            }else{
               contentTemplate = handlebars.compile(content.toString());
               messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
 
@@ -261,15 +284,6 @@ order.hook("afterUpdate" , function(instance , options , next){
                 console.log(data);
               });
             }
-          });
-        }else{
-
-          content = fs.readFileSync("./views/message/stocked.handlebars");
-          contentTemplate = handlebars.compile(content.toString());
-          messsageBody = contentTemplate({ parcelInstance: updatedInstance , branchInstance: messageBranchInstance });
-
-          messageUtils.sendMessage(updatedInstance.receiver , messsageBody , function(data){
-            console.log(data);
           });
         }
       });
@@ -306,14 +320,18 @@ order.hook("afterUpdate" , function(instance , options , next){
           if(updatedInstance.type == "general"){
             // General delivery
             // Send message to the sender about delivery of his/her order to the receiver
-            content = fs.readFileSync("./views/message/delivered.handlebars");
-            contentTemplate = handlebars.compile(content.toString());
-            messageBody = contentTemplate({ parcelInstance: updatedInstance });
+            fs.readFile("./views/message/delivered.handlebars", "utf8", function(err, content){
+              if(err){
+                console.error(err);
+              }else{
+                contentTemplate = handlebars.compile(content.toString());
+                messageBody = contentTemplate({ parcelInstance: updatedInstance });
 
-            messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
-              console.log(data);
+                messageUtils.sendMessage(updatedInstance.sender , messageBody , function(data){
+                  console.log(data);
+                });
+              }
             });
-
           }else{
 
           }
