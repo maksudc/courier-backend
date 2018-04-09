@@ -70,7 +70,7 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
         return itemInstance.getOrder({
-          attributes: [ "uuid" , "status" , "bar_code" ],
+          //attributes: [ "uuid" , "status" , "bar_code" ],
           transaction: t
         });
     })
@@ -118,14 +118,22 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
       shouldInvokeOrderSave = false;
-      if(["reached","stocked"].indexOf(orderInstance.status) == -1){
+      if(["reached","stocked", "delivered"].indexOf(orderInstance.status) == -1){
+        //@TODO: Include route dependency to dissolve ambiguities.
+        /**
+        * Case-1: If an item is mistakenly taken to another branch which is not on the route but has allowed destination branch in the bundle
+                  This situation can arise due to rescanning to check availability of the item in that branch
+        * Case-2: If an item is divided into bundles and one bundle is unloaded while another one is loaded simultaneously
+
+        In each case if we have a possible route definition, we can update the order to last check in branch
+        **/
         if(orderInstance.current_hub != itemInstance.current_hub || orderInstance.current_hub_type != itemInstance.current_hub_type){
           orderInstance.set("current_hub", itemInstance.current_hub);
           orderInstance.set("current_hub_type", itemInstance.current_hub_type);
           orderInstance.set("status", itemInstance.status);
           shouldInvokeOrderSave = true;
         }
-        else if(["ready", "confirmed"].indexOf(orderInstance.status) > -1){
+        else if(["ready", "confirmed", "received"].indexOf(orderInstance.status) > -1){
           if(itemInstance.status == "running"){
             orderInstance.set("status", itemInstance.status);
             shouldInvokeOrderSave = true;
@@ -134,7 +142,7 @@ router.post("/" , upload.array() , function(req , res){
       }
 
       if(shouldInvokeOrderSave){
-        return order.save({
+        return orderInstance.save({
           transaction: t
         });
       }
@@ -166,12 +174,7 @@ router.post("/" , upload.array() , function(req , res){
       }
 
       responseCode = HttpStatus.OK;
-    })
-    .then(function(){
-
-
     });
-
   })
   .then(function(result){
 
