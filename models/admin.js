@@ -23,8 +23,12 @@ module.exports = function(sequelize , DataTypes){
 	      defaultValue: 'active',
 	      allowNull: false
 	    },
-	    mobile: {type: DataTypes.STRING, allowNull: false, unique: true}
-
+	  mobile: {type: DataTypes.STRING, allowNull: false, unique: true},
+		can_move_order_in_awaiting: {
+			type: DataTypes.BOOLEAN,
+			allowNull: false,
+			defaultValue: false
+		}
 	} , {
 
 		classMethods: {

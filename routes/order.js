@@ -147,13 +147,13 @@ router.post('/createByOperator', passport.authenticate('basic', {session: false}
 	});
 });
 
-router.post("/markDelivered/:orderId" , upload.array() , function(req , res){
+router.post("/markDelivered/:orderId", passport.authenticate('basic', {session: false}), upload.array() , function(req , res){
 
 	orderLogic.markDelivered(req.params.orderId , req.user , function(data){
 		res.send(data);
 	});
 });
-router.post("/markDeliverable/:orderId" , upload.array() , function(req , res){
+router.post("/markDeliverable/:orderId", passport.authenticate('basic', {session: false}), upload.array() , function(req , res){
 
 	orderLogic.markDeliverable(req.params.orderId , req.user , function(data){
 		res.send(data);
