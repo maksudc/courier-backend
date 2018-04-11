@@ -1058,7 +1058,7 @@ var createByOperator = function(postData, operator, next){
 					contentTemplate = handlebars.compile(content.toString());
 					messageBody = null;
 
-					if(data.isNew){						
+					if(data.isNew){
 						// send the password to the client by sms
 						// Send the sms with the password
 						messageBody = contentTemplate({ parcelInstance: order , client: client });
@@ -1696,87 +1696,33 @@ exports.getAnalytics = getAnalytics;
 
 var markDeliverable = function(orderId , user  , next){
 
-		var orderObject = null;
-		var trackerInstance = null;
-		var updateData = {};
+		var orderInstance = null;
 
-		orderModel
-		.findOne({ where: { uuid: orderId }  })
-		.then(function(orderInstance){
+		sequelize.transaction(function(t){
+			return orderModel
+			.findOne({
+				where: { uuid: orderId },
+				transaction: t
+			})
+			.then(function(orderObject){
 
-			orderObject = orderInstance;
+				orderInstance = orderObject;
 
-			updateData.current_hub_type = branchUtils.sanitizeBranchType(orderObject.dataValues.exit_branch_type);
-			updateData.current_hub = orderObject.dataValues.exit_branch;
+				orderInstance.set("current_hub_type", branchUtils.sanitizeBranchType(orderInstance.get("exit_branch_type")));
+				orderInstance.set("current_hub", orderInstance.get("exit_branch"));
 
-			updateData.next_hub_type = updateData.current_hub_type;
-			updateData.next_hub = updateData.current_hub;
+				orderInstance.set("next_hub_type", orderInstance.get("current_hub_type"));
+				orderInstance.set("next_hub", orderInstance.get("current_hub"));
 
-			updateData.status = "stocked";
+				orderInstance.set("status", "stocked");
 
-			return orderModel.update(updateData , { where: { uuid: orderId }, individualHooks: true });
+				return orderInstance.save({
+					transaction: t
+				});
+			});
 		})
 		.then(function(results){
-
-			if(orderObject){
-				return itemModel.update( updateData , { where: { orderUuid: orderObject.uuid } });
-			}
-		})
-		.then(function(){
-
-			orderInstance = orderObject;
-			if(orderInstance){
-
-				return orderInstance
-				.getTracker();
-			}
-			return Promise.resolve(null);
-		})
-		.then(function(orderTrackerInstance){
-
-			trackerInstance = orderTrackerInstance;
-			if(!trackerInstance){
-				return Promise.resolve(null);
-			}
-
-			trackerUpdateData = {};
-			trackerUpdateData.previousBranchType = trackerInstance.currentBranchType;
-			trackerUpdateData.previousBranchId = trackerInstance.currentBranchId;
-
-			trackerUpdateData.currentBranchType = trackerInstance.destinationBranchType;
-			trackerUpdateData.currentBranchId = trackerInstance.destinationBranchId;
-
-			trackerUpdateData.nextBranchType = trackerInstance.destinationBranchType;
-			trackerUpdateData.nextBranchId = trackerInstance.destinationBranchId;
-
-			return genericTracker.update(trackerUpdateData , { where: { uuid: trackerInstance.uuid } });
-		})
-		.then(function(result){
-
-			return trackerLog
-						.findOne({ where: { action: "reached" , trackerId: trackerInstance.uuid } });
-		})
-		.then(function(logData){
-
-			if(!trackerInstance){ return Promise.resolve(null);  }
-
-			if(!logData){
-
-				trackerReachedLogData = {};
-				trackerReachedLogData.action = "reached";
-				trackerReachedLogData.trackerId = trackerInstance.uuid;
-				trackerReachedLogData.branchType = trackerInstance.destinationBranchType;
-				trackerReachedLogData.branchId = trackerInstance.destinationBranchId;
-				trackerReachedLogData.eventDateTime = moment.utc();
-				trackerReachedLogData.createdAt = moment.utc();
-				trackerReachedLogData.updatedAt = trackerReachedLogData.createdAt;
-
-				return Promise.all( [ trackerLog.create(trackerReachedLogData) ] );
-			}
-			return Promise.resolve([logData]);
-		})
-		.then(function(results){
-			next({ status: "success" , statusCode: 200 , data: null , message: null });
+			next({ status: "success" , statusCode: 200 , data: results , message: null });
 		})
 		.catch(function(err){
 			if(err){
@@ -1790,130 +1736,34 @@ exports.markDeliverable = markDeliverable;
 
 var markDelivered = function(orderId , user , next){
 
-		var trackerInstances = [];
-		var orderObject = null;
-		var updateData = {};
+		var orderInstance = null;
 
-		orderModel
-		.findOne({ where: { uuid: orderId }  })
-		.then(function(orderInstance){
-			orderObject = orderInstance;
+		sequelize.transaction(function(t){
 
-			updateData.current_hub_type = branchUtils.sanitizeBranchType(orderObject.dataValues.exit_branch_type);
-			updateData.current_hub = orderObject.dataValues.exit_branch;
-
-			updateData.next_hub_type = updateData.current_hub_type;
-			updateData.next_hub = updateData.current_hub;
-
-			updateData.status = "delivered";
-
-			return orderModel.update(updateData , { where: { uuid: orderId } });
-		})
-		.then(function(result){
-			if(result){
-				next({ status: "success" , statusCode: 200 , data: result , message: null });
-			}else{
-				next({ status: "error" , statusCode: 500 , data: null , message: result });
-			}
-			return Promise.resolve(result);
-		})
-		.then(function(){
-				return orderModel.findOne({ where: { uuid: orderId }  });
-		})
-		.then(function(orderInstance){
-
-			orderObject = orderInstance;
-
-			if(orderInstance){
-
-				return orderInstance
-				.getTracker()
-				.then(function(trackerInstance){
-					trackerInstances.push(trackerInstance);
+				return orderModel
+				.findOne({
+					where: { uuid: orderId },
+					transaction: t
 				})
-				.then(function(){
+				.then(function(orderObject){
+					orderInstance = orderObject;
 
-					return orderInstance
-					.getItems()
-					.map(function(itemInstance){
-						return itemInstance.getTracker();
-					})
-					.map(function(itemTrackerInstance){
-						return itemTrackerInstance;
-					})
-					.then(function(results){
-						for(I = 0 ; I< results.length ; I++){
-							trackerInstances.push(results[I]);
-						}
-						return Promise.resolve(trackerInstances);
+					orderInstance.set("current_hub_type", branchUtils.sanitizeBranchType(orderInstance.get("exit_branch_type")));
+					orderInstance.set("current_hub", orderInstance.get("exit_branch"));
+
+					orderInstance.set("next_hub_type", orderInstance.get("current_hub_type"));
+					orderInstance.set("next_hub", orderInstance.get("current_hub"));
+
+					orderInstance.set("status", "delivered");
+
+					return orderInstance.save({
+						transaction: t
 					});
 				});
-			}
-			return Promise.resolve(trackerInstances);
 		})
-		.map(function(trackerInstance){
+		.then(function(result){
 
-			var trackerLogData = {};
-
-			trackerLogData.action = "delivered";
-			trackerLogData.trackerId = trackerInstance.uuid;
-			if(trackerInstance.destinationBranchType){
-					trackerLogData.branchType = trackerInstance.destinationBranchType;
-			}
-			trackerLogData.branchId = trackerInstance.destinationBranchId;
-
-			var eventDateTime = moment.utc();
-			trackerLogData.eventDateTime = eventDateTime;
-			trackerLogData.createdAt = eventDateTime;
-			trackerLogData.updatedAt = eventDateTime;
-
-			var trackerReachedLogData = {};
-			trackerReachedLogData.action = "reached";
-			trackerReachedLogData.trackerId = trackerLogData.trackerId;
-			trackerReachedLogData.branchType = trackerLogData.branchType;
-			trackerReachedLogData.branchId = trackerLogData.branchId;
-			trackerReachedLogData.eventDateTime = eventDateTime - 2000 ;
-			trackerLogData.createdAt = trackerReachedLogData.eventDateTime;
-			trackerLogData.updatedAt = trackerReachedLogData.eventDateTime;
-
-			return trackerLog
-			.findOne({ where: { action: "delivered" , trackerId: trackerInstance.uuid } })
-			.then(function(logData){
-				if(!logData){
-					return Promise.all( [trackerLog.create(trackerLogData) ] );
-				}
-				return Promise.resolve([logData]);
-			})
-			.then(function(results){
-				return trackerLog.findOne({ where: { action: "reached" , trackerId: trackerInstance.uuid } })
-			})
-			.then(function(logData){
-				if(!logData){
-					return Promise.all( [ trackerLog.create(trackerReachedLogData) ] );
-				}
-				return Promise.resolve([logData]);
-			})
-			.then(function(results){
-
-				trackerUpdateData = {};
-
-				trackerUpdateData.previousBranchType = trackerInstance.currentBranchType;
-				trackerUpdateData.previousBranchId = trackerInstance.currentBranchId;
-
-				trackerUpdateData.currentBranchType = trackerInstance.destinationBranchType;
-				trackerUpdateData.currentBranchId = trackerInstance.destinationBranchId;
-
-				trackerUpdateData.nextBranchType = trackerInstance.destinationBranchType;
-				trackerUpdateData.nextBranchId = trackerInstance.destinationBranchId;
-
-				return genericTracker.update(trackerUpdateData , { where: { uuid: trackerInstance.uuid } });
-			});
-		})
-		.then(function(results){
-
-			if(orderObject){
-				return itemModel.update( updateData , { where: { orderUuid: orderObject.uuid } });
-			}
+			next({ status: "success" , statusCode: 200 , data: result , message: null });
 		})
 		.catch(function(err){
 			if(err){

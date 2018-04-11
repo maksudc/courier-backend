@@ -23,7 +23,7 @@ router.get('/', function(req, res){
 
   extraQuery = {
 		"status":{
-			"$ne": "draft"
+			"$notIn": ["draft", "stocked", "delivered"]
 		}
   };
 
