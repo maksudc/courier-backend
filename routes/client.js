@@ -11,11 +11,28 @@ var Promise = require("bluebird");
 var phoneUtils = require("../utils/phone");
 var json2csv = require("json2csv");
 var adminUtils = require("../utils/admin");
+var HttpStatus = require("http-status-codes");
 
 router.get('/getAll', function(req, res){
 	clientLogic.getAll(function(err, clientList){
 		if(err) res.send({status: "error", message: err});
 		else res.send({"status": "success", data: clientList});
+	});
+});
+
+router.post("/create", passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
+
+	clientLogic.createByAdmin(req.body, req.user)
+	.then(function(clientInstance){
+		res.status(HttpStatus.CREATED);
+		res.send(clientInstance.dataValues);
+	})
+	.catch(function(err){
+		if(err){
+			console.error(err.stack);
+		}
+		res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+		res.send({ message: err });
 	});
 });
 

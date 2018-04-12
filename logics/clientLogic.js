@@ -9,6 +9,7 @@ var handlebars = require("handlebars");
 var messageUtils = require("../utils/message");
 
 var _ = require('lodash');
+var Promise = require("bluebird");
 
 var exportableFields = ['mobile' , 'full_name' , 'address' , 'national_id' ];
 var exportableColumnNames = ["Phone" , "Name" , "Address" , "National Id"];
@@ -117,6 +118,18 @@ var create = function(clientData, next){
 };
 
 exports.create = create;
+
+var createByAdmin = function(clientData){
+
+  clientData["password"] = makePass();
+  clientData["verification_code"] = parseInt(makeVerficationCode());
+  
+  return sequelize.transaction(function(t){
+    return clientModel
+    .create(clientData, { transaction: t });
+  });
+}
+exports.createByAdmin = createByAdmin;
 
 
 var getAll = function(next){
