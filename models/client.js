@@ -18,6 +18,15 @@ module.exports = function(sequelize , DataTypes){
 			type: DataTypes.BOOLEAN,
 			allowNull: false,
 			defaultValue: false
+		},
+		referrer_type: {
+			type: DataTypes.ENUM('admin', 'client', 'external'),
+			defaultValue: 'admin',
+			allowNull: true
+		},
+		referrer_identifier:{
+			type: DataTypes.STRING,
+			allowNull: true
 		}
 	} ,  {
 
@@ -26,7 +35,14 @@ module.exports = function(sequelize , DataTypes){
 				client.belongsTo(models.region , { foreignKey: "regionId" });
 				client.belongsTo(models.corporation , { foreignKey: "corporationId", as:"corporation" });
 			}
-		}
+		},
+		indexes:[
+			{
+        name: "client_referrer_index",
+        method: "BTREE",
+        fields: ["referrer_type" , "referrer_identifier"]
+      }
+    ]
 
 	});
 

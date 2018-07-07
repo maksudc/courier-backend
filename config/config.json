@@ -2,7 +2,7 @@
   "development": {
     "username": "dak_harkara",
     "password": "6hNWSTUyBPrEv9hP",
-    "database": "dak_harkara_training",
+    "database": "dak_harkara_308",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
