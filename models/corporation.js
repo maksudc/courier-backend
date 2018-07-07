@@ -35,14 +35,30 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
-    }
+    },
+    referrer_type: {
+			type: DataTypes.ENUM('admin', 'client', 'external'),
+			defaultValue: 'admin',
+			allowNull: true
+		},
+		referrer_identifier:{
+			type: DataTypes.STRING,
+			allowNull: true
+		}
   }, {
     classMethods: {
       associate: function(models) {
 
         Corporation.hasMany(models.client, { foreignKey: "corporationId", as:"clients" });
       }
-    }
+    },
+    indexes:[
+			{
+        name: "corporation_referrer_index",
+        method: "BTREE",
+        fields: ["referrer_type" , "referrer_identifier"]
+      }
+    ]
   });
   return Corporation;
 };
