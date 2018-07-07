@@ -42,6 +42,26 @@ module.exports = function(sequelize , DataTypes){
             object_type: "admin"
           }
         });
+
+				admin.hasMany(models.client , {
+          as: "referredClients",
+          foreignKey: "referrer_identifier",
+					sourceKey: "email",
+          constraints: false,
+          scope:{
+            referrer_type: "admin"
+          }
+        });
+
+				admin.hasMany(models.corporation , {
+          as: "referredCorporations",
+          foreignKey: "referrer_identifier",
+					sourceKey: "email",
+          constraints: false,
+          scope:{
+            referrer_type: "admin"
+          }
+        });
 			}
 		}
 	});
