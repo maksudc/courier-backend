@@ -123,7 +123,7 @@ var createByAdmin = function(clientData){
 
   clientData["password"] = makePass();
   clientData["verification_code"] = parseInt(makeVerficationCode());
-  
+
   return sequelize.transaction(function(t){
     return clientModel
     .create(clientData, { transaction: t });
@@ -171,8 +171,6 @@ exports.getAllForExport = getAllForExport;
 
 var findManyByMobile = function(mobile, next){
 
-	console.log("Adsasdfadsf");
-
 	clientModel.findAll({where: {mobile: {$like: mobile + '%'}}}).then(function(clientList){
 
 		if(clientList) next(null, clientList);
@@ -191,13 +189,22 @@ exports.findManyByMobile = findManyByMobile;
 
 var updateClient = function(params, next){
 
-	clientModel.update({
+  updateData = {
 		mobile: params.new_mobile_no,
 		national_id: params.nid,
 		address: params.address,
 		full_name: params.full_name,
     has_portal_access: params.has_portal_access
-	}, {where: {mobile: params.mobile}}).then(function(updatedClient){
+	};
+
+  if(params.referrer_type){
+    updateData["referrer_type"] = params.referrer_type;
+  }
+  if(params.referrer_identifier){
+    updateData["referrer_identifier"] = params.referrer_identifier;
+  }
+
+	clientModel.update(updateData, {where: {mobile: params.mobile}}).then(function(updatedClient){
 		params["mobile"] = params["new_mobile_no"];
 		if(params["new_mobile_no"]) delete params["new_mobile_no"];
 		next(null, params);
