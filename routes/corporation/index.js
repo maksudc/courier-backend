@@ -21,7 +21,12 @@ router.get("/:corporationId" , function(req, res){
 
   corporationModel.findOne({
     where: { id: req.params.corporationId },
-    attributes: [ "id", "username", "name", "email", "mobile", "address", "status", "has_portal_access", "createdAt" ]
+    attributes: [
+      "id", "username", "name",
+      "email", "mobile", "address",
+      "status", "has_portal_access", "createdAt",
+      "referrer_type", "referrer_identifier"
+    ]
   })
   .then(function(corporation){
 
