@@ -50,6 +50,8 @@ router.use("/money", require("./money"));
 router.use("/report", require("./report"));
 router.use("/corporation", require("./corporation"));
 
+router.use("/referrers", require("./referrer"));
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   	res.send({"status": "In home page"});
