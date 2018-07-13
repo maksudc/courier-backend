@@ -13,7 +13,6 @@ var HttpStatusCodes = require("http-status-codes");
 router.use(passport.authenticate('basic', {session: false}));
 router.use(middleware.checkPermission);
 
-
 router.get('/', function(req, res){
 	res.send("In Admin page");
 });
@@ -180,31 +179,5 @@ router.post('/delete', upload.array(), function(req, res){
 	});
 
 });
-
-router.get("/referrers", function(req, res){
-
-	referrerLogic = require("./../../logics/admin/referrerLogic");
-	referrerLogic.getAllReferrers()
-	.then(function(results){
-
-		response = {
-			"meta":{
-				"count": results.length,
-			},
-			"objects":results
-		};
-		res.status(HttpStatusCodes.OK);
-		res.send(response);
-	})
-	.catch(function(err){
-		if(err){
-			console.error(err);
-		}
-		res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
-		res.send(err);
-	});
-});
-
-
 
 module.exports = router;
