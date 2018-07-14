@@ -19,4 +19,7 @@ router.use("/money/cashout" , moneyCashoutBinderRouter);
 var referralOrderBinderRouter = require("./referral/order");
 router.use("/referral/order", referralOrderBinderRouter);
 
+var clientOrderBinderRouter = require("./client/order");
+router.use("/client/order", clientOrderBinderRouter);
+
 module.exports = router;
