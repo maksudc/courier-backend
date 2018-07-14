@@ -23,7 +23,7 @@ router.get('/getAll', function(req, res){
 router.post("/create", passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 
 	console.log(req.body);
-	
+
 	clientLogic.createByAdmin(req.body, req.user)
 	.then(function(clientInstance){
 		res.status(HttpStatus.CREATED);
@@ -135,6 +135,39 @@ router.post("/password/resend" , upload.array() , function(req , res){
 				res.send({"status": "success", data: clientData});
 			}
 		}
+	});
+});
+
+router.get("/autocomplete_search/",passport.authenticate('basic', {session: false}), function(req, res){
+
+	autocompleteSearchLogic = require("./../logics/client/autocomplete_search");
+	autocompleteSearchLogic.search(req)
+	.map(function(searchResult){
+
+		formattedResult = {};
+		formattedResult["name"] = searchResult.dataValues["mobile"] + "--" + searchResult.dataValues["full_name"];
+		formattedResult["value"] = searchResult.dataValues["mobile"];
+		formattedResult["text"] = searchResult.dataValues["mobile"];
+		formattedResult["disabled"] = false;
+
+		return Promise.resolve(formattedResult);
+	})
+	.then(function(formattedResults){
+
+		response = {
+			"success": true,
+			"results": formattedResults
+		};
+
+		res.status(HttpStatus.OK);
+		res.send(response);
+	})
+	.catch(function(err){
+		if(err){
+			console.error(err);
+		}
+		res.status(500);
+		res.send(err);
 	});
 });
 
