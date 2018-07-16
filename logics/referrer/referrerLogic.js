@@ -32,3 +32,27 @@ var getAllReferredClients = function($referrerIdentifier){
   });
 }
 module.exports.getAllReferredClients = getAllReferredClients;
+
+
+var MIN_REFERRER_SEARCH_LENGTH = 3;
+
+var getReferrersBySearchingName = function($name){
+
+  if($name && $name.length >= MIN_REFERRER_SEARCH_LENGTH){
+
+    return adminModel.findAll({
+      attributes: [ "email", "full_name", "role", "state", "mobile" ],
+      where:{
+        full_name:{
+          "$like": "%" + $name + "%"
+        }
+      },
+      order: [
+        ['full_name', 'ASC']
+      ]
+    });
+  }
+
+  return Promise.resolve([]);
+}
+module.exports.getReferrersBySearchingName = getReferrersBySearchingName;
