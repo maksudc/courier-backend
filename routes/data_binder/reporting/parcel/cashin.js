@@ -37,6 +37,17 @@ router.get('/', function(req, res){
 
 	whereQuery = tableHelper.getWhere(extraQuery);
 
+	extraJsonComplexQuery = tableHelper.getExtraComplexJsonFiltering();
+
+	if(extraJsonComplexQuery){
+		  combinedQuery = {
+				"$and": []
+			};
+			combinedQuery["$and"].push(whereQuery);
+			combinedQuery["$and"].push(extraJsonComplexQuery);
+			whereQuery = combinedQuery;
+	}
+
 	queryParams  = {};
 	queryParams["where"] = whereQuery;
 	queryParams["order"] = tableHelper.getOrder() || "bar_code ASC";
@@ -63,7 +74,7 @@ router.get('/', function(req, res){
 			orderData.dataValues.pay_time = moment.tz(orderData.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
 																						.tz(timezoneConfig.CLIENT_ZONE)
 																						.format("YYYY-MM-DD HH:mm:ss");
-      return orderData;																							
+      return orderData;
 		})
 		.map(function(orderData){
 
