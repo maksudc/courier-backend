@@ -3,6 +3,8 @@ var router = express.Router();
 var HttpStatus = require("http-status-codes");
 var DB = require("./../../../../models/index");
 var orderModel = DB.sequelize.models.order;
+var clientModel = DB.sequelize.models.client;
+var itemModel = DB.sequelize.models.item;
 var regionalBranchModel = DB.sequelize.models.regionalBranch;
 var subBranchModel = DB.sequelize.models.subBranch;
 var branchUtils = require("./../../../../utils/branch");
@@ -31,7 +33,22 @@ router.get('/', function(req, res){
       queryParams["offset"] = req.query.offset;
     }
 
+    var clientPhoneNumber = whereQuery.sender;
+
     Promise.resolve({})
+    .then(function(){
+
+      return clientModel.findOne({
+        attributes: ["mobile", "full_name", "address", "status"],
+        where: {
+          mobile: clientPhoneNumber,
+        }
+      });
+    })
+    .then(function(clientInstance){
+
+      resultData["client"] = clientInstance;
+    })
     .then(function(){
         if(whereQuery){
           return orderModel.findAndCountAll(queryParams);
@@ -63,16 +80,19 @@ router.get('/', function(req, res){
 			return Promise.all([
 				orderData,
 				branchUtils.getInclusiveBranchInstance(orderData.entry_branch_type , orderData.entry_branch , null),
-        branchUtils.getInclusiveBranchInstance(orderData.exit_branch_type , orderData.exit_branch , null)
+        branchUtils.getInclusiveBranchInstance(orderData.exit_branch_type , orderData.exit_branch , null),
+        itemModel.count({ where: { orderUuid: orderData.dataValues.uuid } })
 			]);
 		})
 		.map(function(complexResult){
 			orderData = complexResult[0];
 			aSourceBranchData = complexResult[1];
       adestinationBranchData = complexResult[2];
+      itemCount = complexResult[3];
 
 			orderData.dataValues.entry_label = branchUtils.prepareLabel(aSourceBranchData);
       orderData.dataValues.exit_label = branchUtils.prepareLabel(adestinationBranchData);
+      orderData.dataValues.item_count = itemCount;
 		})
 		.then(function(){
 
