@@ -73,6 +73,20 @@ DataTableHelper.prototype.getExtraFiltering = function(){
 	return filtering;
 };
 
+DataTableHelper.prototype.getExtraComplexJsonFiltering = function(arguments) {
+	filtering = null;
+
+	if(this.config.extra){
+		try{
+			filtering = JSON.parse(this.config.extra.complexJsonFiltering);
+		}catch(exp){
+			//console.error(exp);
+		}
+	}
+
+	return filtering;
+};
+
 DataTableHelper.prototype.getAggregations = function(){
 	aggregations = [];
 

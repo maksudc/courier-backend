@@ -1,68 +1,48 @@
 var express = require("express");
 var router = express.Router();
-
-var multer = require("multer");
-var upload = multer();
-var bodyParser = require('body-parser');
 var HttpStatus = require("http-status-codes");
-var adminUtils = require("./../../../../utils/admin");
-var branchUtils = require("./../../../../utils/branch");
-var orderLogic = require("./../../../../logics/orderLogic");
 var DB = require("./../../../../models/index");
 var orderModel = DB.sequelize.models.order;
 var regionalBranchModel = DB.sequelize.models.regionalBranch;
 var subBranchModel = DB.sequelize.models.subBranch;
+var branchUtils = require("./../../../../utils/branch");
 var DataTableHelper = require("./../../../../utils/data_binder/dataTable");
 var passport = require("passport");
 var moment = require("moment-timezone");
 var timezoneConfig = require("./../../../../config/timezone");
+var referrerLogic = require("./../../../../logics/referrer/referrerLogic");
+var Promise = require("bluebird");
 
 router.use(passport.authenticate("basic" , {session: false}));
 router.get('/', function(req, res){
 
-	tableHelper = new DataTableHelper(req.query);
+  	var tableHelper = new DataTableHelper(req.query);
+  	var userObj = tableHelper.getUser();
+  	var whereQuery = null;
+    var extraQuery = {};
+    var resultData = {};
+    var aggregationQueryParams = {};
 
-	userObj = tableHelper.getUser();
+  	extraParamFilterQuery = tableHelper.getExtraFiltering();
+  	for(key in extraParamFilterQuery){
+  		extraQuery[key] = extraParamFilterQuery[key];
+  	}
 
-	whereQuery = null;
+    whereQuery = tableHelper.getWhere(extraQuery);
 
-  extraQuery = {
-    "payment_status": "paid"
-  };
+    queryParams  = {};
+    queryParams["where"] = whereQuery;
+    queryParams["order"] = tableHelper.getOrder() || "bar_code ASC";
 
-	extraParamFilterQuery = tableHelper.getExtraFiltering();
-	for(key in extraParamFilterQuery){
-		extraQuery[key] = extraParamFilterQuery[key];
-	}
+    aggregationQueryParams = Object.assign({} , queryParams);
 
-	whereQuery = tableHelper.getWhere(extraQuery);
+    queryParams["limit"] = tableHelper.getLimit();
+    queryParams["offset"] = tableHelper.getOffset();
 
-	extraJsonComplexQuery = tableHelper.getExtraComplexJsonFiltering();
+    resultData["draw"] = tableHelper.getDraw();
 
-	if(extraJsonComplexQuery){
-		  combinedQuery = {
-				"$and": []
-			};
-			combinedQuery["$and"].push(whereQuery);
-			combinedQuery["$and"].push(extraJsonComplexQuery);
-			whereQuery = combinedQuery;
-	}
-
-	queryParams  = {};
-	queryParams["where"] = whereQuery;
-	queryParams["order"] = tableHelper.getOrder() || "bar_code ASC";
-
-	var aggregationQueryParams = Object.assign({} , queryParams);
-
-	queryParams["limit"] = tableHelper.getLimit();
-	queryParams["offset"] = tableHelper.getOffset();
-
-	var resultData = {};
-	resultData["draw"] = tableHelper.getDraw();
-
-	orderModel
-		.findAndCountAll(queryParams)
-		.then(function(orderList){
+		orderModel.findAndCountAll(queryParams)
+    .then(function(orderList){
 
 				resultData["data"] = orderList;
 				resultData["recordsTotal"] = orderList.count;
@@ -71,7 +51,12 @@ router.get('/', function(req, res){
 				return Promise.all(orderList.rows);
 		})
 		.map(function(orderData){
-			orderData.dataValues.pay_time = moment.tz(orderData.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
+      if(orderData.dataValues.pay_time){
+        orderData.dataValues.pay_time = moment.tz(orderData.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
+                                              .tz(timezoneConfig.CLIENT_ZONE)
+                                              .format("YYYY-MM-DD HH:mm:ss");
+      }
+      orderData.dataValues.createdAt = moment.tz(orderData.dataValues.createdAt, timezoneConfig.COMMON_ZONE)
 																						.tz(timezoneConfig.CLIENT_ZONE)
 																						.format("YYYY-MM-DD HH:mm:ss");
       return orderData;
