@@ -7,6 +7,7 @@ var fs = require("fs");
 var handlebars = require("handlebars");
 
 var messageUtils = require("../utils/message");
+var commonUtils = require("../utils/common");
 
 var _ = require('lodash');
 var Promise = require("bluebird");
@@ -200,7 +201,10 @@ var updateClient = function(params, next){
   if(params.referrer_type){
     updateData["referrer_type"] = params.referrer_type;
   }
-  if(params.referrer_identifier){
+
+  if(commonUtils.isNull(params.referrer_identifier)){
+    updateData["referrer_identifier"] = null;
+  }else{
     updateData["referrer_identifier"] = params.referrer_identifier;
   }
 
