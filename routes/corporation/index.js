@@ -193,4 +193,37 @@ router.patch("/:corporationId", upload.array(), function(req, res){
 router.delete("/:corporationId", upload.array(), function(req, res){
 
 });
+
+router.get("/autocomplete_search/",passport.authenticate('basic', {session: false}), function(req, res){
+
+	autocompleteSearchLogic = require("./../logics/corporation/autocomplete_search");
+	autocompleteSearchLogic.search(req)
+	.map(function(searchResult){
+
+		formattedResult = {};
+		formattedResult["name"] = searchResult.dataValues["mobile"] + "--" + searchResult.dataValues["full_name"];
+		formattedResult["value"] = searchResult.dataValues["mobile"];
+		formattedResult["text"] = searchResult.dataValues["mobile"];
+		formattedResult["disabled"] = false;
+
+		return Promise.resolve(formattedResult);
+	})
+	.then(function(formattedResults){
+
+		response = {
+			"success": true,
+			"results": formattedResults
+		};
+
+		res.status(HttpStatus.OK);
+		res.send(response);
+	})
+	.catch(function(err){
+		if(err){
+			console.error(err);
+		}
+		res.status(500);
+		res.send(err);
+	});
+});
 module.exports = router;
