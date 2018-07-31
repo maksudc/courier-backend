@@ -4,23 +4,24 @@ var Sequelize = DB.Sequelize;
 var corporationModel = sequelize.models.corporation;
 var Promise = require("bluebird");
 
-var MIN_CHARACTER_FOR_SEARCH = 6;
+var MIN_CHARACTER_FOR_MOBILE_SEARCH = 6;
+var MIN_CHARACTER_FOR_NAME_SEARCH = 3;
 
 var search = function(req){
 
   hasQuery = false;
-
   whereQuery = {};
+
   if(req.query){
-    if(req.query.mobile && req.query.mobile.length >= MIN_CHARACTER_FOR_SEARCH){
+    if(req.query.mobile && req.query.mobile.length >= MIN_CHARACTER_FOR_MOBILE_SEARCH){
       whereQuery["mobile"] = {
         "$like": req.query.mobile + "%"
       }
       hasQuery = true;
     }
-    if(req.query.full_name && req.query.full_name.length >= MIN_CHARACTER_FOR_SEARCH){
-      whereQuery["full_name"] = {
-        "$like": req.query.full_name + "%"
+    if(req.query.name && req.query.name.length >= MIN_CHARACTER_FOR_NAME_SEARCH){
+      whereQuery["name"] = {
+        "$like": "%" + req.query.name + "%"
       }
       hasQuery = true;
     }
@@ -28,11 +29,11 @@ var search = function(req){
 
   if(hasQuery){
 
-    return clientModel.findAll({
-      attributes: ["mobile", "full_name", "status"],
+    return corporationModel.findAll({
+      attributes: ["id","name","email", "mobile", "address", "status", "has_portal_access", "referrer_type", "referrer_identifier"],
       where: whereQuery,
       order: [
-        ['mobile', "ASC"]
+        ['name', "ASC"]
       ]
     });
   }else{

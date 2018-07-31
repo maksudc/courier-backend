@@ -15,7 +15,7 @@ var Promise = require("bluebird");
 
 router.use(authMiddleware.hasGenericAccess);
 
-router.get("/:corporationId" , function(req, res){
+router.get("/:corporationId$" , function(req, res){
 
   var result = {};
 
@@ -81,7 +81,7 @@ router.post("/", upload.array(), function(req, res){
   });
 });
 
-router.put("/:corporationId", upload.array(), function(req, res){
+router.put("/:corporationId$", upload.array(), function(req, res){
 
   corporationParams = req.body.corporation;
 
@@ -99,44 +99,6 @@ router.put("/:corporationId", upload.array(), function(req, res){
 
     return corporationModel
     .update(corporationParams, corporationQuery);
-    // .then(function(result){
-    //
-    //   return clientModel.findAll({
-    //     where: {
-    //       corporationId: req.params.corporationId
-    //     },
-    //     attributes: [ "mobile", "full_name" ],
-    //     transaction: t
-    //   });
-    // })
-    // .then(function(corporateEmployees){
-    //
-    //   removableEmployees = [];
-    //   for(I=0; I < corporateEmployees.length; I++){
-    //     employee = corporateEmployees[I];
-    //     if(!finalClientSet.has(employee.dataValues["mobile"])){
-    //       removableEmployees.push(employee.dataValues["mobile"]);
-    //     }
-    //   }
-    //
-    //   existingClientSet = new Set();
-    //   for(I=0; I < corporateEmployees.length; I++){
-    //     employee = corporateEmployees[I];
-    //     existingClientSet.add(employee.dataValues["mobile"]);
-    //   }
-    //
-    //   addableEmployees = [];
-    //   for(I =0 ; I < finalClientNumbers.length; I++){
-    //     if(!existingClientSet.has(finalClientNumbers[I])){
-    //       addableEmployees.push(finalClientNumbers[I]);
-    //     }
-    //   }
-    //
-    //   return  Promise.all([
-    //     addableEmployees.length > 0 ? clientModel.update({corporationId: req.params.corporationId} , { where: { mobile:{ "$in": addableEmployees } }, transaction: t  }): [],
-    //     removableEmployees.length > 0 ? clientModel.update({corporationId: null } , { where: { mobile:{ "$in": removableEmployees } }, transaction: t  }): []
-    //   ]);
-    // });
 
   })
   .then(function(result){
@@ -157,7 +119,7 @@ router.put("/:corporationId", upload.array(), function(req, res){
 
 });
 
-router.patch("/:corporationId", upload.array(), function(req, res){
+router.patch("/:corporationId$", upload.array(), function(req, res){
 
     $changeOps = req.body || [];
 
@@ -190,20 +152,21 @@ router.patch("/:corporationId", upload.array(), function(req, res){
     });
 });
 
-router.delete("/:corporationId", upload.array(), function(req, res){
+router.delete("/:corporationId$", upload.array(), function(req, res){
 
 });
 
-router.get("/autocomplete_search/",passport.authenticate('basic', {session: false}), function(req, res){
+router.get("/search/autocomplete/",passport.authenticate('basic', {session: false}), function(req, res){
 
-	autocompleteSearchLogic = require("./../logics/corporation/autocomplete_search");
+  var autocompleteSearchLogic = require("./../../logics/corporation/autocomplete_search");
+
 	autocompleteSearchLogic.search(req)
 	.map(function(searchResult){
 
 		formattedResult = {};
-		formattedResult["name"] = searchResult.dataValues["mobile"] + "--" + searchResult.dataValues["full_name"];
-		formattedResult["value"] = searchResult.dataValues["mobile"];
-		formattedResult["text"] = searchResult.dataValues["mobile"];
+		formattedResult["name"] = searchResult.dataValues["name"];
+		formattedResult["value"] = searchResult.dataValues["id"];
+		formattedResult["text"] = searchResult.dataValues["name"];
 		formattedResult["disabled"] = false;
 
 		return Promise.resolve(formattedResult);
@@ -215,15 +178,16 @@ router.get("/autocomplete_search/",passport.authenticate('basic', {session: fals
 			"results": formattedResults
 		};
 
-		res.status(HttpStatus.OK);
+		res.status(HttpStatusCodes.OK);
 		res.send(response);
 	})
 	.catch(function(err){
 		if(err){
 			console.error(err);
 		}
-		res.status(500);
+		res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
 		res.send(err);
 	});
 });
+
 module.exports = router;
