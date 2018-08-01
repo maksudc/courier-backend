@@ -4,6 +4,7 @@ var Sequelize = DB.Sequelize;
 var adminModel = sequelize.models.admin;
 var async = require('async');
 var adminUtils = require("../../utils/admin");
+var Promise = require("bluebird");
 
 var checkLogin = function(email, password, next){
     adminModel.find({
@@ -65,7 +66,8 @@ var getAdminToChage = function(email, next){
                 address: admin.dataValues.address || '',
                 username: admin.dataValues.username || '',
                 role: admin.dataValues.role,
-                state: admin.dataValues.state
+                state: admin.dataValues.state,
+                can_move_order_in_awaiting: admin.dataValues.can_move_order_in_awaiting
             });
         }
         else{
@@ -235,46 +237,69 @@ exports.getSameBranchAdmins = getSameBranchAdmins;
 
 var updateAdmin = function(updateData, next){
 
-    adminModel.findOne({where: {email: updateData.email}})
-        .then(function(admin){
-            if(admin){
+    var admin = null;
 
-                //Condition to prevent admin to change himself. Even for super admin!
+    adminModel
+    .findOne({where: {email: updateData.email}})
+    .then(function(adminInstance){
+          admin = adminInstance;
+          if(admin){
+              //Condition to prevent admin to change himself. Even for super admin!
+              if(updateData.full_name) {
+                admin.set("full_name", updateData.full_name);
+              }
+              if(updateData.mobile){
+                admin.set("mobile", updateData.mobile);
+              }
+              if(updateData.username){
+                admin.set("username", updateData.username);
+              }
+              if(updateData.address){
+                admin.set("address", updateData.address);
+              }
+              if(updateData.state){
+                admin.set("state", updateData.state);
+              }
+              if(updateData.role){
+                admin.set("role", updateData.role);
+              }
 
-                if(updateData.full_name) admin.full_name = updateData.full_name;
-                if(updateData.mobile) admin.mobile = updateData.mobile;
-                if(updateData.username) admin.username = updateData.username;
-                if(updateData.address) admin.address = updateData.address;
-                if(updateData.state) admin.state = updateData.state;
+              if(updateData.regional_branch_id) {
+                admin.regional_branch_id = parseInt(updateData.regional_branch_id);
+              }
+              if(updateData.sub_branch_id && parseInt(updateData.sub_branch_id) >= 0){
+                admin.sub_branch_id = parseInt(updateData.sub_branch_id)
+              }else {
+                admin.sub_branch_id = null;
+              }
+              admin.set("can_move_order_in_awaiting", updateData.can_move_order_in_awaiting);
 
-                if(updateData.role) admin.role = updateData.role;
+              return admin.save();
+          }
+          else {
+            return Promise.reject({ message: "Admin not found" });
+          }
+        })
+        .then(function(result){
 
-                if(updateData.regional_branch_id) admin.regional_branch_id = parseInt(updateData.regional_branch_id);
-                if(updateData.sub_branch_id && parseInt(updateData.sub_branch_id) >= 0) admin.sub_branch_id = parseInt(updateData.sub_branch_id);
-                else admin.sub_branch_id = null;
-
-
-                admin.save();
-
-                return next(null, {
-                    full_name: admin.dataValues.full_name || '',
-                    regional_branch_id: admin.dataValues.regional_branch_id,
-                    sub_branch_id: admin.dataValues.sub_branch_id,
-                    region_id: admin.dataValues.region_id,
-                    mobile: admin.dataValues.mobile || '',
-                    national_id: admin.dataValues.national_id || '',
-                    address: admin.dataValues.address || '',
-                    username: admin.dataValues.username || '',
-                    role: admin.dataValues.role
-                });
-            }
-            else return next(null, false);
+          return next(null, {
+              full_name: admin.dataValues.full_name || '',
+              regional_branch_id: admin.dataValues.regional_branch_id,
+              sub_branch_id: admin.dataValues.sub_branch_id,
+              region_id: admin.dataValues.region_id,
+              mobile: admin.dataValues.mobile || '',
+              national_id: admin.dataValues.national_id || '',
+              address: admin.dataValues.address || '',
+              username: admin.dataValues.username || '',
+              role: admin.dataValues.role,
+              can_move_order_in_awaiting: admin.dataValues.can_move_order_in_awaiting
+          });
         })
         .catch(function(err){
             if(err){
                 console.error(err.stack);
-                return next(err);
             }
+            return next(err);
         });
 
 }
