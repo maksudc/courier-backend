@@ -39,7 +39,7 @@ router.get('/', function(req, res){
     })
     .then(function(corporation){
 
-      resultData["corporation"] = corporationInstance;
+      resultData["corporation"] = corporation;
     })
     .then(function(){
 
