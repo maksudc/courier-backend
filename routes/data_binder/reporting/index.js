@@ -25,4 +25,7 @@ router.use("/client/order", clientOrderBinderRouter);
 var printDataClientOrderBinderRouter = require("./client/printable_data");
 router.use("/client/order/print", printDataClientOrderBinderRouter);
 
+var corporationOrderBinderRouter = require("./corporation/order");
+router.use("/corporation/order", corporationOrderBinderRouter);
+
 module.exports = router;
