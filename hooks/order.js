@@ -93,6 +93,7 @@ order.hook("beforeUpdate" , function(instance , options){
 
   if(instance.changed('status')){
 
+    /*
     if(snapshotInstance.status == "ready" || snapshotInstance.status == "confirmed"){
       // can be switched to running
       if(updatedInstance.status == "running"){
@@ -201,7 +202,8 @@ order.hook("beforeUpdate" , function(instance , options){
         });
       }
     }
-    else if(snapshotInstance.status == 'stocked'){
+    else */
+    if(snapshotInstance.status == 'stocked'){
       if(updatedInstance.status == "delivered"){
 
       }
