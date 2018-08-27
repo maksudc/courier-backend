@@ -185,7 +185,6 @@ router.post("/" , upload.array() , function(req , res){
         orderInstance.set("current_hub_type", itemInstance.current_hub_type);
 
         if(itemInstance.current_hub_type == branchUtils.sanitizeBranchType(orderInstance.exit_branch_type) && itemInstance.current_hub == orderInstance.exit_branch){
-
           orderInstance.set("status", "stocked");
         }
         else if(["ready", "confirmed", "received"].indexOf(orderInstance.status) > -1){
