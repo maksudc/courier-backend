@@ -6,6 +6,8 @@ var DB = require("./../../models/index");
 var bundleUtils = require('./../../utils/bundle');
 var sequelize  = DB.sequelize;
 var itemModel = sequelize.models.item;
+var trackerLogModel = sequelize.models.trackerLog;
+var genericTrackerModel = sequelize.models.genericTracker;
 var bundleModel = sequelize.models.bundle;
 
 var HttpStatus = require("http-status-codes");
@@ -33,7 +35,7 @@ router.post("/" , upload.array() , function(req , res){
   var bundleInstance = null;
   var itemInstance = null;
   var orderInstance = null;
-
+  var orderTrackerInstance = null;
   var responseCode = null;
 
   sequelize.transaction(function(t){
@@ -70,7 +72,6 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
         return itemInstance.getOrder({
-          //attributes: [ "uuid" , "status" , "bar_code" ],
           transaction: t
         });
     })
@@ -116,37 +117,6 @@ router.post("/" , upload.array() , function(req , res){
         transaction: t
       });
     })
-    .then(function(){
-      shouldInvokeOrderSave = false;
-      if(["reached","stocked", "delivered"].indexOf(orderInstance.status) == -1){
-        //@TODO: Include route dependency to dissolve ambiguities.
-        /**
-        * Case-1: If an item is mistakenly taken to another branch which is not on the route but has allowed destination branch in the bundle
-                  This situation can arise due to rescanning to check availability of the item in that branch
-        * Case-2: If an item is divided into bundles and one bundle is unloaded while another one is loaded simultaneously
-
-        In each case if we have a possible route definition, we can update the order to last check in branch
-        **/
-        if(orderInstance.current_hub != itemInstance.current_hub || orderInstance.current_hub_type != itemInstance.current_hub_type){
-          orderInstance.set("current_hub", itemInstance.current_hub);
-          orderInstance.set("current_hub_type", itemInstance.current_hub_type);
-          orderInstance.set("status", itemInstance.status);
-          shouldInvokeOrderSave = true;
-        }
-        else if(["ready", "confirmed", "received"].indexOf(orderInstance.status) > -1){
-          if(itemInstance.status == "running"){
-            orderInstance.set("status", itemInstance.status);
-            shouldInvokeOrderSave = true;
-          }
-        }
-      }
-
-      if(shouldInvokeOrderSave){
-        return orderInstance.save({
-          transaction: t
-        });
-      }
-    })
     .then(function(result){
       return branchUtils.getInclusiveBranchInstance(itemInstance.entry_branch_type , itemInstance.entry_branch);
     })
@@ -174,6 +144,68 @@ router.post("/" , upload.array() , function(req , res){
       }
 
       responseCode = HttpStatus.OK;
+    })
+    .then(function(){
+
+      return orderInstance.getTracker();
+    })
+    .then(function(orderTrackerObj){
+      orderTrackerInstance = orderTrackerObj;
+
+      if(["stocked", "delivered"].indexOf(orderInstance.status) > -1){
+
+      }else{
+
+        action = null;
+        if(bundleInstance.phase == "load"){
+          action = "exit";
+        }else if(bundleInstance.phase == "unload"){
+          action = "entrance";
+        }
+
+        return trackerLogModel.findOrCreate({
+          where:{
+            trackerId: orderTrackerInstance.uuid,
+            branchType: itemInstance.current_hub_type,
+            branchId: itemInstance.current_hub,
+            action: action
+          },
+          defaults:{
+            trackerId: orderTrackerInstance.uuid,
+            branchType: itemInstance.current_hub_type,
+            branchId: itemInstance.current_hub,
+            action: action,
+            eventDateTime: moment.tz(timezoneConfig.COMMON_ZONE).format('YYYY-MM-DD HH:mm:ss')
+          }
+        });
+      }
+    })
+    .then(function(orderTrackLogCheckComplexResult){
+
+      if(orderTrackLogCheckComplexResult){
+
+        orderTrackLogInstance = orderTrackLogCheckComplexResult[0];
+        trackerLogNewlyCreated = orderTrackLogCheckComplexResult[1];
+
+        isBranchActivityAlreadyDone = !trackerLogNewlyCreated;
+
+        if(isBranchActivityAlreadyDone){
+          return Promise.resolve(orderTrackLogInstance);
+        }
+
+        orderInstance.set("current_hub", itemInstance.current_hub);
+        orderInstance.set("current_hub_type", itemInstance.current_hub_type);
+
+        if(itemInstance.current_hub_type == branchUtils.sanitizeBranchType(orderInstance.exit_branch_type) && itemInstance.current_hub == orderInstance.exit_branch){
+          orderInstance.set("status", "stocked");
+        }else{
+          orderInstance.set("status", "received");
+        }
+
+        return orderInstance.save({
+          transaction: t
+        });
+      }
     });
   })
   .then(function(result){
@@ -218,7 +250,8 @@ router.post("/" , upload.array() , function(req , res){
   })
   .then(function(result){
 
-  }).catch(function(err){
+  })
+  .catch(function(err){
     console.error(err);
   });
 });
