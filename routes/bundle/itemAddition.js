@@ -72,7 +72,6 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
         return itemInstance.getOrder({
-          //attributes: [ "uuid" , "status" , "bar_code" ],
           transaction: t
         });
     })
@@ -153,49 +152,54 @@ router.post("/" , upload.array() , function(req , res){
     .then(function(orderTrackerObj){
       orderTrackerInstance = orderTrackerObj;
 
-      action = null;
-      if(bundleInstance.phase == "load"){
-        action = "exit";
-      }else if(bundleInstance.phase == "unload"){
-        action = "entrance";
-      }
-
-      return trackerLogModel.count({
-        where:{
-          trackerId: orderTrackerInstance.uuid,
-          branchType: itemInstance.current_hub_type,
-          branchId: itemInstance.current_hub,
-          action: action
-        }
-      });
-    })
-    .then(function(existingTrackerLogExists){
-
-      if(existingTrackerLogExists > 0){
-        return Promise.resolve(0);
-      }
-
-      shouldInvokeOrderSave = false;
-
-      if(["reached","stocked", "delivered"].indexOf(orderInstance.status) > -1){
+      if(["stocked", "delivered"].indexOf(orderInstance.status) > -1){
 
       }else{
+
+        action = null;
+        if(bundleInstance.phase == "load"){
+          action = "exit";
+        }else if(bundleInstance.phase == "unload"){
+          action = "entrance";
+        }
+
+        return trackerLogModel.findOrCreate({
+          where:{
+            trackerId: orderTrackerInstance.uuid,
+            branchType: itemInstance.current_hub_type,
+            branchId: itemInstance.current_hub,
+            action: action
+          },
+          defaults:{
+            trackerId: orderTrackerInstance.uuid,
+            branchType: itemInstance.current_hub_type,
+            branchId: itemInstance.current_hub,
+            action: action,
+            eventDateTime: moment.tz(timezoneConfig.COMMON_ZONE).format('YYYY-MM-DD HH:mm:ss')
+          }
+        });
+      }
+    })
+    .then(function(orderTrackLogCheckComplexResult){
+
+      if(orderTrackLogCheckComplexResult){
+
+        orderTrackLogInstance = orderTrackLogCheckComplexResult[0];
+        trackerLogNewlyCreated = orderTrackLogCheckComplexResult[1];
+
+        isBranchActivityAlreadyDone = !trackerLogNewlyCreated;
+
+        if(isBranchActivityAlreadyDone){
+          return Promise.resolve(orderTrackLogInstance);
+        }
 
         orderInstance.set("current_hub", itemInstance.current_hub);
         orderInstance.set("current_hub_type", itemInstance.current_hub_type);
 
         if(itemInstance.current_hub_type == branchUtils.sanitizeBranchType(orderInstance.exit_branch_type) && itemInstance.current_hub == orderInstance.exit_branch){
           orderInstance.set("status", "stocked");
-        }
-        else if(["ready", "confirmed", "received"].indexOf(orderInstance.status) > -1){
-          if(itemInstance.status == "running"){
-            orderInstance.set("status", "running");
-          }
-        }
-        else if(["running"].indexOf(orderInstance.status) > -1){
-          if(itemInstance.status == "received"){
-            orderInstance.set("status", "received");
-          }
+        }else{
+          orderInstance.set("status", "received");
         }
 
         return orderInstance.save({
