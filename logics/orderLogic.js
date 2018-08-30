@@ -1748,17 +1748,23 @@ var markDelivered = function(orderId , user , next){
 				.then(function(orderObject){
 					orderInstance = orderObject;
 
-					orderInstance.set("current_hub_type", branchUtils.sanitizeBranchType(orderInstance.get("exit_branch_type")));
-					orderInstance.set("current_hub", orderInstance.get("exit_branch"));
+					if(orderInstance.payment_status == "paid"){
 
-					orderInstance.set("next_hub_type", orderInstance.get("current_hub_type"));
-					orderInstance.set("next_hub", orderInstance.get("current_hub"));
+						orderInstance.set("current_hub_type", branchUtils.sanitizeBranchType(orderInstance.get("exit_branch_type")));
+						orderInstance.set("current_hub", orderInstance.get("exit_branch"));
 
-					orderInstance.set("status", "delivered");
+						orderInstance.set("next_hub_type", orderInstance.get("current_hub_type"));
+						orderInstance.set("next_hub", orderInstance.get("current_hub"));
 
-					return orderInstance.save({
-						transaction: t
-					});
+						orderInstance.set("status", "delivered");
+
+						return orderInstance.save({
+							transaction: t
+						});
+					}
+					else{
+						return Promise.reject(new Error("Order can not be delivered without paying the cost first"));
+					}
 				});
 		})
 		.then(function(result){
