@@ -92,7 +92,7 @@ order.hook("beforeUpdate" , function(instance , options){
   console.log("Order Updated : " + snapshotInstance.bar_code + " Snapshot Status:  " + snapshotInstance.status + " Instance status: " + updatedInstance.status);
 
   if(instance.changed('status')){
-    
+
     if(snapshotInstance.status == 'stocked'){
       if(updatedInstance.status == "delivered"){
 
@@ -194,8 +194,8 @@ order.hook("afterUpdate" , function(instance , options , next){
 
         trackerLogData.action = "delivered";
         trackerLogData.trackerId = trackerInstance.uuid;
-        trackerLogData.branchType = trackerInstance.currentBranchType;
-        trackerLogData.branchId = trackerInstance.currentBranchId;
+        trackerLogData.branchType = branchUtils.sanitizeBranchType(updatedInstance.exit_branch_type); //trackerInstance.currentBranchType;
+        trackerLogData.branchId = updatedInstance.exit_branch; //trackerInstance.currentBranchId;
 
         var eventDateTime = moment.utc();
         trackerLogData.eventDateTime = eventDateTime;
