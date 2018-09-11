@@ -107,9 +107,9 @@ order.hook("beforeUpdate" , function(instance , options){
 
   instance.dataValues = updatedInstance;
 
-  _.assignIn(instance._changed , { status: true });
-  _.assignIn(instance._changed , { current_hub: true });
-  _.assignIn(instance._changed , { current_hub_type: true });
+  _.assignIn(instance._changed , { status: instance.changed('status') });
+  _.assignIn(instance._changed , { current_hub: instance.changed('current_hub') });
+  _.assignIn(instance._changed , { current_hub_type: instance.changed('current_hub_type') });
 
   return Promise.resolve(instance);
 });
