@@ -16,7 +16,7 @@ router.use(middleware.checkPermission);
 
 // Panic mode detection and header addition
 var panicMiddleware = require("./../middleware/panic");
-router.use(panicMiddleware);
+router.use(panicMiddleware.addPanicSettingsHeaderIfApplicable);
 
 router.post('/create', upload.array(), function(req, res){
 	moneyLogic.create(req.user, req.body, function(err, data){

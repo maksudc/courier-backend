@@ -14,6 +14,10 @@ var moment = require("moment-timezone");
 var timezoneConfig = require("./../../../../config/timezone");
 
 router.use(passport.authenticate("basic" , {session: false}));
+
+var panicMiddleware = require("./../../../../middleware/panic");
+router.use(panicMiddleware.blockIfPanicActivated);
+
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
@@ -69,7 +73,7 @@ router.get('/', function(req, res){
 			moneyItem.dataValues.payment_time = moment.tz(moneyItem.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
 																						.tz(timezoneConfig.CLIENT_ZONE)
 																						.format("YYYY-MM-DD HH:mm:ss");
-																						
+
       moneyItem.dataValues.revenue = moneyItem.dataValues.charge - moneyItem.dataValues.discount;
       return moneyItem;
 		})

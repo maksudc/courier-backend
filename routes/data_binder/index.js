@@ -3,7 +3,7 @@ var router = express.Router();
 
 // Panic mode detection and header addition
 var panicMiddleware = require("./../../middleware/panic");
-router.use(panicMiddleware);
+router.use(panicMiddleware.addPanicSettingsHeaderIfApplicable);
 
 var moneyDataBinderRouter = require("./money");
 router.use('/money', moneyDataBinderRouter);
