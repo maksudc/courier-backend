@@ -207,6 +207,23 @@ router.post("/" , upload.array() , function(req , res){
           transaction: t
         });
       }
+    })
+    .then(function(result){
+
+      scanParams = {};
+      scanParams["object_type"] = "item";
+      scanParams["object_id"] = itemBarCode;
+      scanParams["bundleId"] = bundleId;
+      scanParams["responseCode"] = responseCode;
+
+      return scanActivityLogic.addScanActivity(req.user , scanParams , { transaction: t } , null );
+    })
+    .then(function(obj){
+
+      adminActivityParams = {};
+      adminActivityParams["object_type"] = "item";
+      adminActivityParams["object_id"] = itemBarCode;
+      return adminActivityLogic.addAdminActivity(req.user , "scan" , adminActivityParams , { transaction: t } , null);
     });
   })
   .then(function(result){
@@ -226,34 +243,6 @@ router.post("/" , upload.array() , function(req , res){
       res.status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
     res.send({ status: "error" , error: err });
-
-    return Promise.resolve({});
-  })
-  .then(function(placeHolderObj){
-
-    // log the activity
-    return sequelize.transaction(function(t2){
-        scanParams = {};
-        scanParams["object_type"] = "item";
-        scanParams["object_id"] = itemBarCode;
-        scanParams["bundleId"] = bundleId;
-        scanParams["responseCode"] = responseCode;
-
-        return scanActivityLogic.addScanActivity(req.user , scanParams ,{ transaction: t2 } , null )
-        .then(function(obj){
-
-          adminActivityParams = {};
-          adminActivityParams["object_type"] = "item";
-          adminActivityParams["object_id"] = itemBarCode;
-          return adminActivityLogic.addAdminActivity(req.user , "scan" , adminActivityParams , { transaction: t2 } , null);
-        });
-    });
-  })
-  .then(function(result){
-
-  })
-  .catch(function(err){
-    console.error(err);
   });
 });
 
