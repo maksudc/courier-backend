@@ -99,7 +99,8 @@ router.post("/" , upload.array() , function(req , res){
       }
     })
     .then(function(){
-      return bundleInstance.addAttachedItems(itemInstance , { transaction: t });
+      itemInstance.set("bundleId", bundleInstance.get("id"));
+      //return bundleInstance.addAttachedItems(itemInstance , { transaction: t });
     })
     .then(function(result){
       if(bundleInstance.phase == "load"){
