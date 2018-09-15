@@ -16,6 +16,10 @@ var referrerLogic = require("./../../../../logics/referrer/referrerLogic");
 var Promise = require("bluebird");
 
 router.use(passport.authenticate("basic" , {session: false}));
+
+var panicMiddleware = require("./../../../../middleware/panic");
+router.use(panicMiddleware.blockIfPanicActivated);
+
 router.get('/', function(req, res){
 
   	var tableHelper = new DataTableHelper(req.query);

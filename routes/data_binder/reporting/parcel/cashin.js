@@ -18,6 +18,10 @@ var moment = require("moment-timezone");
 var timezoneConfig = require("./../../../../config/timezone");
 
 router.use(passport.authenticate("basic" , {session: false}));
+
+var panicMiddleware = require("./../../../../middleware/panic");
+router.use(panicMiddleware.blockIfPanicActivated);
+
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);

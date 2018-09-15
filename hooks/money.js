@@ -123,8 +123,8 @@ money.hook("afterUpdate" , function(instance , options , next){
           console.log("Parent VD order status: " + parentOrderItem.status);
           if(parentOrderItem.dataValues.status == "stocked"){
 
-            console.log("Setting the status of parent to deliverable");
-            parentOrderItem.status = "delivered";
+            console.log("Setting the status of parent to delivered");
+            parentOrderItem.set("status", "delivered");
             return parentOrderItem.save();
           }
         }
