@@ -37,6 +37,7 @@ router.post("/" , upload.array() , function(req , res){
   var orderInstance = null;
   var orderTrackerInstance = null;
   var responseCode = null;
+  var transactionErrorObj = null;
 
   sequelize.transaction(function(t){
 
@@ -143,8 +144,6 @@ router.post("/" , upload.array() , function(req , res){
       if(itemInstance.exitBranch.regionalBranch){
         itemData["exit_branch_label"] = itemData["exit_branch_label"] + "," + itemInstance.exitBranch.regionalBranch.label;
       }
-
-      responseCode = HttpStatus.OK;
     })
     .then(function(){
 
@@ -207,33 +206,49 @@ router.post("/" , upload.array() , function(req , res){
           transaction: t
         });
       }
-    })
-    .then(function(result){
-
-      scanParams = {};
-      scanParams["object_type"] = "item";
-      scanParams["object_id"] = itemBarCode;
-      scanParams["bundleId"] = bundleId;
-      scanParams["responseCode"] = responseCode;
-
-      return scanActivityLogic.addScanActivity(req.user , scanParams , { transaction: t } , null );
-    })
-    .then(function(obj){
-
-      adminActivityParams = {};
-      adminActivityParams["object_type"] = "item";
-      adminActivityParams["object_id"] = itemBarCode;
-      return adminActivityLogic.addAdminActivity(req.user , "scan" , adminActivityParams , { transaction: t } , null);
     });
   })
   .then(function(result){
-
-    res.status(responseCode);
-    if(responseCode == HttpStatus.OK){
-      res.send({ "status":"success" , item: itemData });
-    }
+    responseCode = HttpStatus.OK;
   })
   .catch(function(err){
+    if(err && err.code){
+      responseCode = err.code;
+    }else{
+      responseCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+    transactionErrorObj = err;
+  })
+  .then(function(){
+
+    scanParams = {};
+    scanParams["object_type"] = "item";
+    scanParams["object_id"] = itemBarCode;
+    scanParams["bundleId"] = bundleId;
+    scanParams["responseCode"] = responseCode;
+
+    return scanActivityLogic.addScanActivity(req.user , scanParams , {} , null );
+  })
+  .then(function(obj){
+
+    adminActivityParams = {};
+    adminActivityParams["object_type"] = "item";
+    adminActivityParams["object_id"] = itemBarCode;
+
+    return adminActivityLogic.addAdminActivity(req.user , "scan" , adminActivityParams , {} , null);
+  })
+  .then(function(){
+    if(responseCode != HttpStatus.OK){
+      return Promise.reject(transactionErrorObj);
+    }
+  })
+  .then(function(){
+
+    res.status(responseCode);
+    res.send({ "status":"success" , item: itemData });
+  })
+  .catch(function(err){
+
     if(err){
       console.error(err);
     }
