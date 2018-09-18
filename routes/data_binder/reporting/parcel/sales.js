@@ -10,7 +10,6 @@ var DataTableHelper = require("./../../../../utils/data_binder/dataTable");
 var passport = require("passport");
 var moment = require("moment-timezone");
 var timezoneConfig = require("./../../../../config/timezone");
-const Op = DB.sequelize.Op;
 router.use(passport.authenticate("basic" , {session: false}));
 
 var panicMiddleware = require("./../../../../middleware/panic");
