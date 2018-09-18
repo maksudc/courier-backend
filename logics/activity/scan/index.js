@@ -31,12 +31,12 @@ module.exports.addScanActivity = function(user, params , options , callback){
     if(callback){
       callback(null , scanActivityInstance);
     }
-  }).catch(function(err){
+  })
+  .catch(function(err){
 
     if(callback){
       callback(err , scanActivityInstance);
     }
     return Promise.reject(err);
   });
-
 };
