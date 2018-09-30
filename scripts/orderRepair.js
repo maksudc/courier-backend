@@ -104,12 +104,13 @@ module.exports.findErrorOrderBarcodes = findErrorOrderBarcodes;
 
 var deleteBarcodes = function(orderBarcodes){
 
-  orderModel.delete({
+  orderModel.destroy({
     where:{
       bar_code: {
         "$in": orderBarcodes
       }
-    }
+    },
+    individualHooks: true
   })
   .then(function(result){
     console.log(result);
@@ -124,7 +125,7 @@ module.exports.deleteBarcodes = deleteBarcodes;
 var findAndSaveInvalidOrders = function(){
 
   var BASE_LIMIT = 100;
-  var OUTPUT_FILE_PATH  = "./scripts/output/invalid_bar_codes.txt";
+  var OUTPUT_FILE_PATH  = __dirname + "/output/invalid_bar_codes.txt";
 
   return orderModel.count({
     where:{
@@ -169,6 +170,8 @@ var findAndSaveInvalidOrders = function(){
       }
       console.log("file writing done");
     });
+
+    return Promise.resolve(combinedBarcodes);
   })
   .catch(function(err){
     console.error(err);
@@ -176,3 +179,14 @@ var findAndSaveInvalidOrders = function(){
 };
 
 module.exports.findAndSaveInvalidOrders = findAndSaveInvalidOrders;
+
+var deleteInvalidOrders = function(){
+
+  return findAndSaveInvalidOrders()
+  .then(function(invalidBarCodes){
+    if(invalidBarCodes && invalidBarCodes.length > 0){
+      return deleteBarcodes(invalidBarCodes);
+    }
+  });
+};
+module.exports.deleteInvalidOrders = deleteInvalidOrders;
