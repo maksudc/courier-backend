@@ -11,24 +11,43 @@ var btoa = require("btoa");
 
 var fs = require("fs");
 
+var BASE_URL = "http://localhost:8000";
+
+var requestForOrder = function(orderInstance, options){
+
+  return request(options)
+  .then(function(response){
+    var isValid = response["status"] == "success" && response["data"] && response["data"]["orderData"];
+    return Promise.resolve([orderInstance, isValid]);
+  })
+  .catch(function(err){
+    return Promise.resolve([orderInstance, false]);
+  });
+};
+
 var findErrorOrderBarcodes = function(limit, offset){
 
   var totalOrderCount = 0;
 
   var privilegedAdmin = null;
 
-  adminModel.findAll({
+  return adminModel.findAll({
     where: {
       role: "super_admin",
     },
     limit: 1
   })
-  .then(function(admin){
-    privilegedAdmin = admin;
+  .then(function(admins){
+
+    if(admins.length > 0){
+        privilegedAdmin = admins[0];
+    }else{
+      return Promise.reject(new Error("No suitable admin found for processing"));
+    }
   })
   .then(function(){
 
-      return orderModel.findAndCountAll({
+      return orderModel.findAll({
       attributes: ["uuid", "bar_code", "status", "type"],
       where:{
         status:{
@@ -40,34 +59,23 @@ var findErrorOrderBarcodes = function(limit, offset){
       offset: offset
     });
   })
-  .then(function(result){
-
-    totalOrderCount = result.count;
-
-    return Promise.resolve(result.rows);
-  })
   .map(function(orderInstance){
+
+    encodeBuffer = new Buffer(privilegedAdmin.get('email') + ":" + privilegedAdmin.get('password'));
+    encodedAuthorization = encodeBuffer.toString("base64");
 
     var orderUuid = orderInstance.get("uuid");
 
     options = {
       method: "GET",
-      uri: "/order/getOrderView/" + orderUuid,
+      uri: BASE_URL + "/order/getOrderView/" + orderUuid,
       headers:{
-        'Authorization': 'Basic ' + btoa(privilegedAdmin.username + ":" + privilegedAdmin.password)
+        'Authorization': 'Basic ' + encodedAuthorization
       },
       json: true
     };
 
-    return request(options)
-    .then(function(response){
-      var isValid = response["status"] == "success" && response["data"] && response["data"]["orderData"];
-      return Promise.resolve([orderInstance, isValid]);
-    })
-    .catch(function(err){
-      console.error(err);
-      return Promise.resolve([orderInstance, null]);
-    });
+    return requestForOrder(orderInstance, options);
   })
   .map(function(complexResult){
 
@@ -88,7 +96,7 @@ var findErrorOrderBarcodes = function(limit, offset){
       }
     }
 
-    return Promie.resolve(invalidBarCodes);
+    return Promise.resolve(invalidBarCodes);
   });
 };
 
@@ -116,9 +124,9 @@ module.exports.deleteBarcodes = deleteBarcodes;
 var findAndSaveInvalidOrders = function(){
 
   var BASE_LIMIT = 100;
-  var OUTPUT_FILE_PATH  = "./scripts/invalid_bar_codes.txt";
+  var OUTPUT_FILE_PATH  = "./scripts/output/invalid_bar_codes.txt";
 
-  orderModel.count({
+  return orderModel.count({
     where:{
       status:{
         "$notIn": ["stocked", "delivered"]
@@ -126,6 +134,8 @@ var findAndSaveInvalidOrders = function(){
     }
   })
   .then(function(totalCount){
+
+    console.log(totalCount);
 
     searchTracker = [];
     pageCount = totalCount / BASE_LIMIT;
@@ -141,26 +151,24 @@ var findAndSaveInvalidOrders = function(){
   })
   .map(function(complexResult){
 
-    limit = complexResult[0];
-    offset = complexResult[1];
+    limit = complexResult["limit"];
+    offset = complexResult["offset"];
 
     return findErrorOrderBarcodes(limit, offset);
   })
-  .map(function(invalidBarCodes){
+  .then(function(results){
 
-    invalidBarCodeString = invalidBarCodes.join(",");
+    combinedBarcodes = [];
+    for(I=0; I < results.length; I++){
+      combinedBarcodes = combinedBarcodes.concat(results[I]);
+    }
 
-    fs.appendFile(OUTPUT_FILE_PATH, invalidBarCodeString, function(err) {
+    fs.writeFile(OUTPUT_FILE_PATH, JSON.stringify(combinedBarcodes), function(err) {
       if(err) {
           return console.error(err);
       }
-      console.log(invalidBarCodeString + " was appended");
+      console.log("file writing done");
     });
-
-    return true;
-  })
-  .then(function(results){
-    
   })
   .catch(function(err){
     console.error(err);
