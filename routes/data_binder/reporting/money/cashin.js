@@ -70,7 +70,11 @@ router.get('/', function(req, res){
 				return Promise.all(moneyList.rows);
 		})
 		.map(function(moneyItem){
-			moneyItem.dataValues.payment_time = moment.tz(moneyItem.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
+			moneyItem.dataValues.payment_time = moment.tz(moneyItem.dataValues.payment_time, timezoneConfig.COMMON_ZONE)
+																						.tz(timezoneConfig.CLIENT_ZONE)
+																						.format("YYYY-MM-DD HH:mm:ss");
+
+			moneyItem.dataValues.delivery_time = moment.tz(moneyItem.dataValues.delivery_time, timezoneConfig.COMMON_ZONE)
 																						.tz(timezoneConfig.CLIENT_ZONE)
 																						.format("YYYY-MM-DD HH:mm:ss");
 
