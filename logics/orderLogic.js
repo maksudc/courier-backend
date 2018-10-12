@@ -889,6 +889,7 @@ var createByOperator = function(postData, operator, next){
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"],
 			payment: parseInt(postData["total_price"]),
+			is_due:postData["is_due"]
 		};
 
 		if(postData.order_discount && parseFloat(postData.order_discount)){
@@ -908,6 +909,7 @@ var createByOperator = function(postData, operator, next){
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
 		if(postData.type == 'vd') draftOrder["type"] = 'value_delivery';
 		if(postData.receiver_name) draftOrder["receiver_name"] = postData.receiver_name;
+
 
 		orderModel
 		.create(draftOrder)
@@ -951,7 +953,8 @@ var createByOperator = function(postData, operator, next){
 				type: 'virtual_delivery',
 				money_order_id: order.uuid,
 				payParcelPrice: postData["vd_payBySender"],
-				parcelPrice: parseInt(order.payment)
+				parcelPrice: parseInt(order.payment),
+
 			}
 
 			moneyLogic

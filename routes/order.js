@@ -142,6 +142,7 @@ router.post('/createByOperator', passport.authenticate('basic', {session: false}
 				]
 			}
 		*/
+	//	console.log(req.body);
 	orderLogic.createByOperator(req.body, req.user, function(data){
 			res.send(data);
 	});
