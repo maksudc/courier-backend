@@ -2,12 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e507c95b-45cd-41c5-98e0-c63695e9a919" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/logics/order/edit.js" afterPath="$PROJECT_DIR$/logics/order/edit.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/logics/orderLogic.js" afterPath="$PROJECT_DIR$/logics/orderLogic.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/order.js" afterPath="$PROJECT_DIR$/routes/order.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/public/js/order/order-creation-view.js" afterPath="$PROJECT_DIR$/../courierwebclient/public/js/order/order-creation-view.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/public/styles/order/order-creation-page.css" afterPath="$PROJECT_DIR$/../courierwebclient/public/styles/order/order-creation-page.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/routes/order/create.js" afterPath="$PROJECT_DIR$/../courierwebclient/routes/order/create.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/views/segments/order/order-creation.hbs" afterPath="$PROJECT_DIR$/../courierwebclient/views/segments/order/order-creation.hbs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/public/js/order/order-details-view.js" afterPath="$PROJECT_DIR$/../courierwebclient/public/js/order/order-details-view.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/public/js/order/order-edit-view.js" afterPath="$PROJECT_DIR$/../courierwebclient/public/js/order/order-edit-view.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/views/segments/order/order-edit.hbs" afterPath="$PROJECT_DIR$/../courierwebclient/views/segments/order/order-edit.hbs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../courierwebclient/views/segments/order/view/detailed-order.hbs" afterPath="$PROJECT_DIR$/../courierwebclient/views/segments/order/view/detailed-order.hbs" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -21,28 +22,88 @@
       <file leaf-file-name="order.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/order.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4284">
-              <caret line="238" column="17" lean-forward="false" selection-start-line="238" selection-start-column="17" selection-end-line="238" selection-end-column="17" />
+            <state relative-caret-position="18">
+              <caret line="251" column="3" lean-forward="true" selection-start-line="251" selection-start-column="3" selection-end-line="251" selection-end-column="3" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="orderLogic.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/logics/orderLogic.js">
+      <file leaf-file-name="edit.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/logics/order/edit.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="191">
-              <caret line="891" column="37" lean-forward="false" selection-start-line="891" selection-start-column="37" selection-end-line="891" selection-end-column="37" />
+              <caret line="191" column="14" lean-forward="false" selection-start-line="191" selection-start-column="13" selection-end-line="191" selection-end-column="14" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="order-creation-view.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="orderLogic.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/logics/orderLogic.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="306">
+              <caret line="17" column="30" lean-forward="true" selection-start-line="17" selection-start-column="30" selection-end-line="17" selection-end-column="30" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="deliverable-order.hbs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/deliverable-order.hbs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="126">
+              <caret line="7" column="30" lean-forward="false" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="30" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="detailed-order.hbs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/detailed-order.hbs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="144">
+              <caret line="205" column="60" lean-forward="false" selection-start-line="205" selection-start-column="60" selection-end-line="205" selection-end-column="60" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="order-creation-view.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/order-creation-view.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="499" column="0" lean-forward="true" selection-start-line="499" selection-start-column="0" selection-end-line="499" selection-end-column="0" />
+            <state relative-caret-position="191">
+              <caret line="335" column="0" lean-forward="false" selection-start-line="335" selection-start-column="0" selection-end-line="343" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="order-edit-view.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/order-edit-view.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="245">
+              <caret line="828" column="13" lean-forward="true" selection-start-line="828" selection-start-column="13" selection-end-line="828" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="order-edit-page.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../courierwebclient/public/styles/order/order-edit-page.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="266">
+              <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="order-edit.hbs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/order-edit.hbs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="191">
+              <caret line="303" column="56" lean-forward="false" selection-start-line="303" selection-start-column="55" selection-end-line="303" selection-end-column="56" />
               <folding />
             </state>
           </provider>
@@ -58,48 +119,62 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="moneyLogic.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/logics/moneyLogic.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4194">
-              <caret line="233" column="35" lean-forward="false" selection-start-line="233" selection-start-column="35" selection-end-line="233" selection-end-column="35" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>order/create</find>
-      <find>createbyOperator</find>
-      <find>create</find>
-      <find>MONEYORDER</find>
-      <find>alert</find>
-      <find>IS_DUE</find>
-      <find>orderModel</find>
-      <find>ordermodel.create</find>
-      <find>vat-enable</find>
       <find>vat-</find>
       <find>vat</find>
+      <find>get_if_due()</find>
+      <find>delivery-confir</find>
+      <find>confirm</find>
+      <find>delivery-confirm</find>
+      <find>confirm deliver</find>
+      <find>delivered</find>
+      <find>delivery-conf</find>
+      <find>delivery-confirmation-btn</find>
+      <find>deliveror</find>
+      <find>get_if_due</find>
+      <find>order/ed</find>
+      <find>edit-order-btn</find>
+      <find>order/edit</find>
+      <find>updateDra</find>
+      <find>update</find>
+      <find>apply</find>
+      <find>paymen</find>
+      <find>urL :</find>
+      <find>submit</find>
+      <find>edit</find>
+      <find>var update</find>
+      <find>get_</find>
+      <find>is_d</find>
       <find>is_due</find>
+      <find>order/edi</find>
+      <find>orderModel.</find>
+      <find>prop</find>
+      <find>delivery wi</find>
     </findStrings>
     <dirStrings>
-      <dir>$PROJECT_DIR$/../courierwebclient</dir>
       <dir>$PROJECT_DIR$</dir>
+      <dir>$PROJECT_DIR$/../courierwebclient</dir>
     </dirStrings>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../courierwebclient" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/routes/order.js" />
         <option value="$PROJECT_DIR$/../courierwebclient/views/segments/order/order-creation.hbs" />
-        <option value="$PROJECT_DIR$/logics/orderLogic.js" />
+        <option value="$PROJECT_DIR$/config/config.json" />
         <option value="$PROJECT_DIR$/../courierwebclient/public/js/order/order-creation-view.js" />
+        <option value="$PROJECT_DIR$/../courierwebclient/public/js/order/order-details-view.js" />
+        <option value="$PROJECT_DIR$/../courierwebclient/views/segments/order/order-edit.hbs" />
+        <option value="$PROJECT_DIR$/../courierwebclient/public/js/order/order-edit-view.js" />
+        <option value="$PROJECT_DIR$/logics/order/edit.js" />
+        <option value="$PROJECT_DIR$/../courierwebclient/views/segments/order/view/detailed-order.hbs" />
+        <option value="$PROJECT_DIR$/logics/orderLogic.js" />
       </list>
     </option>
   </component>
@@ -125,6 +200,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -136,6 +212,17 @@
               <item name="courierwebapp" type="b2602c69:ProjectViewProjectNode" />
               <item name="courierwebapp" type="462c0819:PsiDirectoryNode" />
               <item name="logics" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="courierwebapp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="courierwebapp" type="462c0819:PsiDirectoryNode" />
+              <item name="logics" type="462c0819:PsiDirectoryNode" />
+              <item name="order" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="courierwebapp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="courierwebapp" type="462c0819:PsiDirectoryNode" />
+              <item name="routes" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="courierwebapp" type="b2602c69:ProjectViewProjectNode" />
@@ -184,11 +271,18 @@
               <item name="segments" type="462c0819:PsiDirectoryNode" />
               <item name="order" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="courierwebapp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="courierwebclient" type="462c0819:PsiDirectoryNode" />
+              <item name="views" type="462c0819:PsiDirectoryNode" />
+              <item name="segments" type="462c0819:PsiDirectoryNode" />
+              <item name="order" type="462c0819:PsiDirectoryNode" />
+              <item name="view" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -224,7 +318,7 @@
     <frame x="715" y="24" width="1303" height="780" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24980783" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25518832" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -252,6 +346,86 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/routes/order.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4284">
+          <caret line="238" column="0" lean-forward="false" selection-start-line="238" selection-start-column="0" selection-end-line="238" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logics/orderLogic.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16038">
+          <caret line="891" column="37" lean-forward="false" selection-start-line="891" selection-start-column="37" selection-end-line="891" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/deliverable-order-list-view.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/awaiting-order-list-view.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/deliverable-order.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1062">
+          <caret line="59" column="25" lean-forward="false" selection-start-line="59" selection-start-column="25" selection-end-line="59" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/awaiting-order.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="15" column="14" lean-forward="true" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/order-creation-view.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6030">
+          <caret line="335" column="21" lean-forward="false" selection-start-line="335" selection-start-column="9" selection-end-line="335" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/config.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="19" column="30" lean-forward="true" selection-start-line="19" selection-start-column="30" selection-end-line="19" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logics/moneyLogic.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4194">
+          <caret line="233" column="35" lean-forward="false" selection-start-line="233" selection-start-column="35" selection-end-line="233" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/detailed-order.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4950">
+          <caret line="275" column="37" lean-forward="true" selection-start-line="275" selection-start-column="37" selection-end-line="275" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/routes/order.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4284">
@@ -284,10 +458,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/routes/order.js">
+    <entry file="file://$PROJECT_DIR$/config/config.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4284">
-          <caret line="238" column="17" lean-forward="false" selection-start-line="238" selection-start-column="17" selection-end-line="238" selection-end-column="17" />
+        <state relative-caret-position="342">
+          <caret line="19" column="30" lean-forward="false" selection-start-line="19" selection-start-column="30" selection-end-line="19" selection-end-column="30" />
           <folding />
         </state>
       </provider>
@@ -300,6 +474,46 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/deliverable-order-list-view.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/awaiting-order-list-view.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/awaiting-order.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="15" column="14" lean-forward="false" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/order-details-view.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="235">
+          <caret line="304" column="44" lean-forward="true" selection-start-line="304" selection-start-column="44" selection-end-line="304" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/deliverable-order.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="7" column="30" lean-forward="false" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/order-creation.hbs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="209">
@@ -308,18 +522,66 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/logics/orderLogic.js">
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/order-creation-view.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="191">
-          <caret line="891" column="37" lean-forward="false" selection-start-line="891" selection-start-column="37" selection-end-line="891" selection-end-column="37" />
+          <caret line="335" column="0" lean-forward="false" selection-start-line="335" selection-start-column="0" selection-end-line="343" selection-end-column="1" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/order-creation-view.js">
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/styles/order/order-edit-page.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes/order.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="18">
-          <caret line="499" column="0" lean-forward="true" selection-start-line="499" selection-start-column="0" selection-end-line="499" selection-end-column="0" />
+          <caret line="251" column="3" lean-forward="true" selection-start-line="251" selection-start-column="3" selection-end-line="251" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logics/order/edit.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="191">
+          <caret line="191" column="14" lean-forward="false" selection-start-line="191" selection-start-column="13" selection-end-line="191" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/public/js/order/order-edit-view.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="245">
+          <caret line="828" column="13" lean-forward="true" selection-start-line="828" selection-start-column="13" selection-end-line="828" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/order-edit.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="191">
+          <caret line="303" column="56" lean-forward="false" selection-start-line="303" selection-start-column="55" selection-end-line="303" selection-end-column="56" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../courierwebclient/views/segments/order/view/detailed-order.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="205" column="60" lean-forward="false" selection-start-line="205" selection-start-column="60" selection-end-line="205" selection-end-column="60" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logics/orderLogic.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="17" column="30" lean-forward="true" selection-start-line="17" selection-start-column="30" selection-end-line="17" selection-end-column="30" />
           <folding />
         </state>
       </provider>

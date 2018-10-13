@@ -548,11 +548,13 @@ var deliverOrder = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 
+            if(orderData.data.is_due==false)
+            {
 			if(orderData.data.payment_status == 'unpaid'){
 				next({"status": "error", "message": "Sorry, please pay the cost first"});
 				return;
 			}
-			else if(orderData.data.status == 'delivered'){
+            else if(orderData.data.status == 'delivered'){
 				next({"status": "error", "message": "Sorry, this order is already delivered"});
 				return;
 			}
@@ -563,6 +565,7 @@ var deliverOrder = function(id, operator, next){
 				next({"status": "error", "message": "Sorry, this order is not of your branch!"});
 				return;
 			}
+		}
 
 			//This block will be under else if block of status == 'reached'
 			orderData.data.status = 'delivered';
