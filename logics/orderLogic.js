@@ -548,7 +548,7 @@ var deliverOrder = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 
-            if(orderData.data.is_due==false)
+            if(orderData.data.due_deliverable==false)
             {
 			if(orderData.data.payment_status == 'unpaid'){
 				next({"status": "error", "message": "Sorry, please pay the cost first"});
@@ -892,7 +892,7 @@ var createByOperator = function(postData, operator, next){
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"],
 			payment: parseInt(postData["total_price"]),
-			is_due:postData["is_due"]
+			due_deliverable:postData["due_deliverable"]
 		};
 
 		if(postData.order_discount && parseFloat(postData.order_discount)){

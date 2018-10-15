@@ -9,7 +9,7 @@ module.exports = {
       Example:
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
-    return queryInterface.addColumn("orders", "is_due", {
+    return queryInterface.addColumn("orders", "due_deliverable", {
       type: Sequelize.BOOLEAN,
       default:false,
       allowNull:false
@@ -24,6 +24,6 @@ module.exports = {
       Example:
       return queryInterface.dropTable('users');
     */
-      return queryInterface.removeColumn("orders", "is_due");
+      return queryInterface.removeColumn("orders", "due_deliverable");
   }
 };
