@@ -44,10 +44,17 @@ router.get("/:id" , function(req , res){
   })
   .map(function(itemInstance){
     itemParts = itemInstance.bar_code.split("-");
+
+    scanningTime = "";
+    if(itemInstance.get("last_scanned_at")){
+      scanningTime = moment.tz(itemInstance.get("last_scanned_at"), timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
+    }
+    
     itemMap = {
       "order_bar_code": parseInt(itemParts[0]),
       "bar_code": itemInstance.bar_code,
-      "item_no": parseInt(itemParts[1])
+      "item_no": parseInt(itemParts[1]),
+      "scanningTime": scanningTime
     };
 
     return Promise.all([
@@ -70,8 +77,6 @@ router.get("/:id" , function(req , res){
     if(exitBranchInstane.regionalBranch){
       itemMap["exit_branch_label"] = itemMap["exit_branch_label"] + "," + exitBranchInstane.regionalBranch.label;
     }
-
-    itemMap["scanningTime"] = "";
 
     return Promise.resolve(itemMap);
   })

@@ -115,6 +115,10 @@ router.post("/" , upload.array() , function(req , res){
     .then(function(){
       itemInstance.set("current_hub", bundleInstance.createdAtBranchId);
       itemInstance.set("current_hub_type", bundleInstance.createdAtBranchType);
+
+      scanningTime = moment.tz(timezoneConfig.COMMON_ZONE);
+      itemInstance.set("last_scanned_at", scanningTime);
+
       return itemInstance.save({
         transaction: t
       });
@@ -135,7 +139,7 @@ router.post("/" , upload.array() , function(req , res){
 
       itemData = {};
       itemData["bar_code"] = itemInstance.bar_code;
-      itemData["scanningTime"] = "";//moment.tz(timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      itemData["scanningTime"] = moment.tz(itemInstance.get("last_scanned_at"), timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
       itemData["entry_branch_label"] = itemInstance.entryBranch.label;
       if(itemInstance.entryBranch.regionalBranch){
         itemData["entry_branch_label"] = itemData["entry_branch_label"] + ","+ itemInstance.entryBranch.regionalBranch.label;
