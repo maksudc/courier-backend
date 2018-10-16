@@ -60,7 +60,7 @@ function getOrderUpdateMap(payload){
   }else{
       updateMap["vat"] = false;
   }
-  updateMap["is_due"]=payload.is_due;
+  updateMap["due_deliverable"]=payload.due_deliverable;
 
   return updateMap;
 }
