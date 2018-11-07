@@ -28,7 +28,12 @@ module.exports = function(sequelize , DataTypes){
 			type: DataTypes.ENUM('draft','confirmed','ready','running','received','reached','forwarded','stocked','delivered','expired'),
 			defaultValue: 'ready',
 			allowNull: false
-		}
+		},
+		
+		last_scanned_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    }
 
 	} , {
 
