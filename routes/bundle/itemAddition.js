@@ -100,10 +100,9 @@ router.post("/" , upload.array() , function(req , res){
       }
     })
     .then(function(){
+
       itemInstance.set("bundleId", bundleInstance.get("id"));
-      //return bundleInstance.addAttachedItems(itemInstance , { transaction: t });
-    })
-    .then(function(result){
+
       if(bundleInstance.phase == "load"){
         // Leaving the branch
         itemInstance.set("status", "running");
@@ -111,8 +110,7 @@ router.post("/" , upload.array() , function(req , res){
         // Entering into the branch
         itemInstance.set("status", "received");
       }
-    })
-    .then(function(){
+
       itemInstance.set("current_hub", bundleInstance.createdAtBranchId);
       itemInstance.set("current_hub_type", bundleInstance.createdAtBranchType);
 

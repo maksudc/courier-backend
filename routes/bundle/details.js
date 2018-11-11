@@ -49,7 +49,7 @@ router.get("/:id" , function(req , res){
     if(itemInstance.get("last_scanned_at")){
       scanningTime = moment.tz(itemInstance.get("last_scanned_at"), timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
     }
-    
+
     itemMap = {
       "order_bar_code": parseInt(itemParts[0]),
       "bar_code": itemInstance.bar_code,
@@ -80,28 +80,6 @@ router.get("/:id" , function(req , res){
 
     return Promise.resolve(itemMap);
   })
-  // .map(function(itemMap){
-  //
-  //   return Promise.all([
-  //     itemMap,
-  //     scanActivityModel.max("createdAt",{
-  //       where: {
-  //         object_type: "item",
-  //         object_id: itemMap["bar_code"],
-  //         responseCode: 200,
-  //         bundleId: bundleInstance.id
-  //       },
-  //       order: "createdAt DESC"
-  //     })
-  //   ]);
-  // })
-  // .map(function(complexResult){
-  //
-  //   itemMap = complexResult[0];
-  //   lastSuccessfulScanningTimeInBundle = complexResult[1];
-  //   itemMap["scanningTime"] = moment.tz(lastSuccessfulScanningTimeInBundle, timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
-  //   return Promise.resolve(itemMap);
-  // })
   .then(function(itemMaps){
 
     resultData = bundleInstance.dataValues;
