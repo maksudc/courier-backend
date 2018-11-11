@@ -16,7 +16,10 @@ var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var Promise = require("bluebird");
 var panicUtils = require("./../../../utils/panic");
 
-router.get("/" , function(req , res){
+var bundleItemsRouteHandler = require("./items");
+router.get("/:bundleId/items", bundleItemsRouteHandler);
+
+router.get("/$" , function(req , res){
 
 	tableHelper = new DataTableHelper(req.query);
 
