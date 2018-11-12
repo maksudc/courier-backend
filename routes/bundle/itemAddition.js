@@ -46,7 +46,8 @@ router.post("/" , upload.array() , function(req , res){
       where: {
         id: bundleId
       },
-      transaction: t
+      transaction: t,
+      lock: t.LOCK.SHARE
     })
     .then(function(bundleObj){
       bundleInstance = bundleObj;
@@ -54,7 +55,8 @@ router.post("/" , upload.array() , function(req , res){
     .then(function(){
       return itemModel.findOne({
         where:{ bar_code: itemBarCode },
-        transaction: t
+        transaction: t,
+        lock: t.LOCK.UPDATE
       });
     })
     .then(function(itemobj){
@@ -73,7 +75,8 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
         return itemInstance.getOrder({
-          transaction: t
+          transaction: t,
+          lock: t.LOCK.UPDATE
         });
     })
     .then(function(orderObj){
@@ -149,7 +152,10 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
 
-      return orderInstance.getTracker();
+      return orderInstance.getTracker({
+        transaction: t,
+        lock: t.LOCK.SHARE
+      });
     })
     .then(function(orderTrackerObj){
       orderTrackerInstance = orderTrackerObj;
