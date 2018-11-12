@@ -45,6 +45,7 @@ router.get("/:id" , function(req , res){
   })
   .then(function(){
     return bundleInstance.getAttachedItems({
+      attributes: ["exit_branch_type", "exit_branch", "entry_branch_type", "entry_branch", "bar_code" ],
       order: "bar_code ASC"
     });
   })
