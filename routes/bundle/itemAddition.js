@@ -6,6 +6,7 @@ var DB = require("./../../models/index");
 var bundleUtils = require('./../../utils/bundle');
 var sequelize  = DB.sequelize;
 var itemModel = sequelize.models.item;
+var orderModel = sequelize.models.order;
 var trackerLogModel = sequelize.models.trackerLog;
 var genericTrackerModel = sequelize.models.genericTracker;
 var bundleModel = sequelize.models.bundle;
@@ -30,6 +31,7 @@ router.use(passport.authenticate('basic', {session: false}));
 router.post("/" , upload.array() , function(req , res){
 
   var itemBarCode = req.body.bar_code;
+  var orderBarCode = itemBarCode.split("-")[0];
   var bundleId = req.body.bundleId;
 
   var bundleInstance = null;
@@ -74,10 +76,14 @@ router.post("/" , upload.array() , function(req , res){
       }
     })
     .then(function(){
-        return itemInstance.getOrder({
-          transaction: t,
-          lock: t.LOCK.UPDATE
-        });
+
+      return orderModel.findOne({
+        where:{
+          bar_code: orderBarCode
+        },
+        transaction: t,
+        lock: t.LOCK.UPDATE
+      });
     })
     .then(function(orderObj){
 
@@ -88,15 +94,17 @@ router.post("/" , upload.array() , function(req , res){
       }
     })
     .then(function(){
-        return bundleInstance.getDestinationSubBranches({
-          where: {
-            id: itemInstance.exit_branch,
-            branchType: itemInstance.exit_branch_type
-          },
-          transaction: t
-        });
+
+      return bundleInstance.getDestinationSubBranches({
+        where: {
+          id: itemInstance.exit_branch,
+          branchType: itemInstance.exit_branch_type
+        },
+        transaction: t
+      });
     })
     .then(function(checkBranchInstance){
+
       if(!checkBranchInstance || !checkBranchInstance.length){
         responseCode = HttpStatus.PRECONDITION_FAILED;
         return Promise.reject({ code: responseCode , message: "This item does not belong to bundle"  });
