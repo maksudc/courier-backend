@@ -548,11 +548,13 @@ var deliverOrder = function(id, operator, next){
 	findOne(id, function(orderData){
 		if(orderData.status == 'success'){
 
+            if(orderData.data.due_deliverable==false)
+            {
 			if(orderData.data.payment_status == 'unpaid'){
 				next({"status": "error", "message": "Sorry, please pay the cost first"});
 				return;
 			}
-			else if(orderData.data.status == 'delivered'){
+            else if(orderData.data.status == 'delivered'){
 				next({"status": "error", "message": "Sorry, this order is already delivered"});
 				return;
 			}
@@ -563,6 +565,7 @@ var deliverOrder = function(id, operator, next){
 				next({"status": "error", "message": "Sorry, this order is not of your branch!"});
 				return;
 			}
+		}
 
 			//This block will be under else if block of status == 'reached'
 			orderData.data.status = 'delivered';
@@ -889,6 +892,7 @@ var createByOperator = function(postData, operator, next){
 			entry_branch_type: postData["entry_branch_type"],
 			exit_branch_type: postData["exit_branch_type"],
 			payment: parseInt(postData["total_price"]),
+			due_deliverable:postData["due_deliverable"]
 		};
 
 		if(postData.order_discount && parseFloat(postData.order_discount)){
@@ -908,6 +912,7 @@ var createByOperator = function(postData, operator, next){
 		if(postData.order_vat != '0') draftOrder["vat"] = true;
 		if(postData.type == 'vd') draftOrder["type"] = 'value_delivery';
 		if(postData.receiver_name) draftOrder["receiver_name"] = postData.receiver_name;
+
 
 		orderModel
 		.create(draftOrder)
@@ -951,7 +956,8 @@ var createByOperator = function(postData, operator, next){
 				type: 'virtual_delivery',
 				money_order_id: order.uuid,
 				payParcelPrice: postData["vd_payBySender"],
-				parcelPrice: parseInt(order.payment)
+				parcelPrice: parseInt(order.payment),
+
 			}
 
 			moneyLogic
