@@ -26,6 +26,7 @@ router.post("/regional$" , upload.array() , function(req , res){
 
   postData = req.body;
 
+
   if(!postData.label){
     res.send({ status:"error" , data:null , message:"Label not specified" });
     return;

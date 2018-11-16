@@ -11,9 +11,9 @@ var findAll = function(next){
 
 	regionModel.findAll({attributes: ['id', 'name']}).then(function(regions){
 
-		regionalBranchModel.findAll({attributes: ['id', 'label', 'position', 'regionId']}).then(function(regionalBranches){
+		regionalBranchModel.findAll({attributes: ['id', 'label', 'position','address','phone', 'regionId']}).then(function(regionalBranches){
 
-			subBranchModel.findAll({attributes: ['id', 'label', 'position', 'regionalBranchId']}).then(function(subBranches){
+			subBranchModel.findAll({attributes: ['id', 'label', 'position','address','phone', 'regionalBranchId']}).then(function(subBranches){
 
 				regionalBranchList = {};
 				_.forEach(subBranches, function(singleSubBranch){
