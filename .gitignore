@@ -40,3 +40,4 @@ config.development.js
 local_config.js
 
 /scripts/output/*.*
+/config/config.json

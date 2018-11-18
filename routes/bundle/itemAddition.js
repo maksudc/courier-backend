@@ -6,6 +6,7 @@ var DB = require("./../../models/index");
 var bundleUtils = require('./../../utils/bundle');
 var sequelize  = DB.sequelize;
 var itemModel = sequelize.models.item;
+var orderModel = sequelize.models.order;
 var trackerLogModel = sequelize.models.trackerLog;
 var genericTrackerModel = sequelize.models.genericTracker;
 var bundleModel = sequelize.models.bundle;
@@ -30,6 +31,7 @@ router.use(passport.authenticate('basic', {session: false}));
 router.post("/" , upload.array() , function(req , res){
 
   var itemBarCode = req.body.bar_code;
+  var orderBarCode = itemBarCode.split("-")[0];
   var bundleId = req.body.bundleId;
 
   var bundleInstance = null;
@@ -46,7 +48,8 @@ router.post("/" , upload.array() , function(req , res){
       where: {
         id: bundleId
       },
-      transaction: t
+      transaction: t,
+      lock: t.LOCK.SHARE
     })
     .then(function(bundleObj){
       bundleInstance = bundleObj;
@@ -54,7 +57,8 @@ router.post("/" , upload.array() , function(req , res){
     .then(function(){
       return itemModel.findOne({
         where:{ bar_code: itemBarCode },
-        transaction: t
+        transaction: t,
+        lock: t.LOCK.UPDATE
       });
     })
     .then(function(itemobj){
@@ -72,9 +76,14 @@ router.post("/" , upload.array() , function(req , res){
       }
     })
     .then(function(){
-        return itemInstance.getOrder({
-          transaction: t
-        });
+
+      return orderModel.findOne({
+        where:{
+          bar_code: orderBarCode
+        },
+        transaction: t,
+        lock: t.LOCK.UPDATE
+      });
     })
     .then(function(orderObj){
 
@@ -85,25 +94,26 @@ router.post("/" , upload.array() , function(req , res){
       }
     })
     .then(function(){
-        return bundleInstance.getDestinationSubBranches({
-          where: {
-            id: itemInstance.exit_branch,
-            branchType: itemInstance.exit_branch_type
-          },
-          transaction: t
-        });
+
+      return bundleInstance.getDestinationSubBranches({
+        where: {
+          id: itemInstance.exit_branch,
+          branchType: itemInstance.exit_branch_type
+        },
+        transaction: t
+      });
     })
     .then(function(checkBranchInstance){
+
       if(!checkBranchInstance || !checkBranchInstance.length){
         responseCode = HttpStatus.PRECONDITION_FAILED;
         return Promise.reject({ code: responseCode , message: "This item does not belong to bundle"  });
       }
     })
     .then(function(){
+
       itemInstance.set("bundleId", bundleInstance.get("id"));
-      //return bundleInstance.addAttachedItems(itemInstance , { transaction: t });
-    })
-    .then(function(result){
+
       if(bundleInstance.phase == "load"){
         // Leaving the branch
         itemInstance.set("status", "running");
@@ -111,10 +121,13 @@ router.post("/" , upload.array() , function(req , res){
         // Entering into the branch
         itemInstance.set("status", "received");
       }
-    })
-    .then(function(){
+
       itemInstance.set("current_hub", bundleInstance.createdAtBranchId);
       itemInstance.set("current_hub_type", bundleInstance.createdAtBranchType);
+
+      scanningTime = moment.tz(timezoneConfig.COMMON_ZONE);
+      itemInstance.set("last_scanned_at", scanningTime);
+
       return itemInstance.save({
         transaction: t
       });
@@ -135,7 +148,7 @@ router.post("/" , upload.array() , function(req , res){
 
       itemData = {};
       itemData["bar_code"] = itemInstance.bar_code;
-      itemData["scanningTime"] = moment.tz(timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      itemData["scanningTime"] = moment.tz(itemInstance.get("last_scanned_at"), timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
       itemData["entry_branch_label"] = itemInstance.entryBranch.label;
       if(itemInstance.entryBranch.regionalBranch){
         itemData["entry_branch_label"] = itemData["entry_branch_label"] + ","+ itemInstance.entryBranch.regionalBranch.label;
@@ -147,7 +160,10 @@ router.post("/" , upload.array() , function(req , res){
     })
     .then(function(){
 
-      return orderInstance.getTracker();
+      return orderInstance.getTracker({
+        transaction: t,
+        lock: t.LOCK.SHARE
+      });
     })
     .then(function(orderTrackerObj){
       orderTrackerInstance = orderTrackerObj;
