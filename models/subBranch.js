@@ -11,6 +11,8 @@ module.exports = function(sequelize , DataTypes){
 
   var SubBranch = sequelize.define("subBranch" , {
       label: DataTypes.STRING,
+      phone: DataTypes.STRING,
+      address:DataTypes.STRING,
       branchType: DataTypes.STRING,
       position: DataTypes.GEOMETRY,
       enabled: { type: DataTypes.BOOLEAN , defaultValue: true , allowNull:false }

@@ -11,6 +11,8 @@ module.exports = function(sequelize , DataTypes){
 
   var RegionalBranch = sequelize.define("regionalBranch" ,{
       label: DataTypes.STRING,
+      address: DataTypes.STRING,
+      phone: DataTypes.STRING,
       branchType: DataTypes.STRING,
       position: DataTypes.GEOMETRY,
       enabled: { type: DataTypes.BOOLEAN , defaultValue: true , allowNull:false } 
