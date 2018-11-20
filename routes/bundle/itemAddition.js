@@ -73,6 +73,10 @@ router.post("/" , upload.array() , function(req , res){
 
         responseCode = HttpStatus.BAD_REQUEST;
         return Promise.reject({ code: responseCode ,  message: "Item Does not exist" });
+      }else if(itemInstance.get("bundleId") == bundleInstance.get("id")){
+
+        responseCode = HttpStatus.PRECONDITION_FAILED;
+        return Promise.reject({ code: responseCode ,  message: "REPEAT", tag: "repeat" });
       }
     })
     .then(function(){
@@ -261,7 +265,7 @@ router.post("/" , upload.array() , function(req , res){
   .then(function(){
 
     res.status(responseCode);
-    res.send({ "status":"success" , item: itemData });
+    res.send({ "status":"success" , "item": itemData, "responseCode": responseCode });
   })
   .catch(function(err){
 
