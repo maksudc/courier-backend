@@ -35,13 +35,18 @@ var bundleItemsRouteHandler = function(req, res){
 		}
   };
 
-  whereQuery = tableHelper.getWhere(extraQuery);
+	var barcodePattern = /^[0-9]+([\-][0-9]+)*/;
+	if(tableHelper.config.search.value && !barcodePattern.test(tableHelper.config.search.value)){
+		// whereQuery = 
+	}else{
+		whereQuery = tableHelper.getWhere(extraQuery);
+	}
 
 	queryParams  = {};
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
 	queryParams["where"] = whereQuery;
-  
+
   queryParams["order"] = tableHelper.getOrder() || "updatedAt DESC";
 
 	var resultData = {};
