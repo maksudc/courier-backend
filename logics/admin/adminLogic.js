@@ -152,7 +152,6 @@ var updateSelf = function(adminData, next){
                 emailCheck("Admin doesnot exists");
             }
             else {
-                console.log(adminData);
                 if(adminData.fullName && adminData.fullName != '')
                     admin.full_name = adminData.fullName;
                 if(adminData.nationalID && adminData.nationalID != '')
