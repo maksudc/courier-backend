@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
     up: function (queryInterface, Sequelize) {
-        return queryInterface.createTable('manualTransaction', {
+        return queryInterface.createTable('manualTransactions', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -18,6 +18,7 @@ module.exports = {
             payment_method:{type:Sequelize.ENUM("bank","bkash","direct"),allowNull:true,},
             payment_reference:{type:Sequelize.STRING,allowNull:true},
             payment_description:{type:Sequelize.STRING,allowNull:true},
+            updated_by:{type:Sequelize.STRING,allowNull:true},
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE
@@ -29,6 +30,6 @@ module.exports = {
         });
     },
     down: function (queryInterface, Sequelize) {
-        return queryInterface.dropTable('manualTransaction');
+        return queryInterface.dropTable('manualTransactions');
     }
 };

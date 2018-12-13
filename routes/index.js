@@ -18,6 +18,8 @@ router.use('/shipments' , shipmentRouter);
 
 var branchRouter = require("./branch");
 router.use("/branches" , branchRouter);
+var transactionRouter=require("./manualTransaction");
+router.use("/transactions",transactionRouter);
 
 var trackerRouter = require("./tracker");
 router.use("/trackers" , trackerRouter);

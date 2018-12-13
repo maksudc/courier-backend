@@ -39,7 +39,8 @@ router.post("/regional$" , upload.array() , function(req , res){
   regionalBranch
   .create(postData)
   .then(function(result){
-    res.send({ status:"success" , data:result , message:null });
+    console.log(result);
+    //res.send({ status:"success" , data:result , message:null });
   })
   .catch(function(err){
     if(err){
