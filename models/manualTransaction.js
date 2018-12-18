@@ -17,6 +17,7 @@ module.exports = function (sequelize, DataTypes) {
             payment_method: {type: DataTypes.ENUM("bank", "bkash", "direct"), allowNull: true,},
             payment_reference: {type: DataTypes.STRING, allowNull: true},
             payment_description: {type: DataTypes.STRING, allowNull: true},
+            created_by: {type: DataTypes.STRING, allowNull: false},
             updated_by: {type: DataTypes.STRING, allowNull: true},
             createdAt: {
                 allowNull: false,
@@ -33,6 +34,7 @@ module.exports = function (sequelize, DataTypes) {
                 associate: function (models) {
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'recieved_by'});
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'updated_by'});
+                    manualTransactions.belongsTo(models.admin, {foreignKey: 'created_by'});
 
                 }
             }

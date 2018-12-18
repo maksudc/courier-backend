@@ -2,7 +2,7 @@
 
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        queryInterface.sequelize.query(
+        return queryInterface.sequelize.query(
             " ALTER TABLE `manualTransactions` ADD CONSTRAINT `receiverFkconstraint` FOREIGN KEY (`recieved_by`) REFERENCES `admins` ( `email` ) ON DELETE SET NULL ON UPDATE CASCADE; "
         )
     },
