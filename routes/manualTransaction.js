@@ -19,7 +19,7 @@ var middleware = require(process.cwd() + '/middleware');
 router.use(passport.authenticate('basic', {session: false}));
 router.use(middleware.checkPermission);
 
-router.post("/cashin", upload.array(), function (req, res) {
+router.post("/create", upload.array(), function (req, res) {
 
     postData = {};
     postData['amount'] = req.body.amount;
