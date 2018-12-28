@@ -10,6 +10,8 @@ router.use('/money', moneyDataBinderRouter);
 
 var orderDataBinderRouter = require("./order");
 router.use('/order' , orderDataBinderRouter);
+var orderDataBinderRouter = require("./manualTransaction");
+router.use('/manualTransaction' , orderDataBinderRouter);
 
 var bundleDataBinderRouter = require("./bundle");
 router.use("/bundle" , bundleDataBinderRouter);
