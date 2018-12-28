@@ -1,11 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
-var pendingcashinDataBinder = require("./viewpendingCashin");
-router.use('/pendingcashin/view', pendingcashinDataBinder);
-
-var receivedcashinDataBinder = require("./viewreceivedCashin");
-router.use('/receivedcashin/view', receivedcashinDataBinder);
+var cashinDataBinder = require("./viewCashin");
+router.use('/cashin/view', cashinDataBinder);
 
 var cashoutDataBinder = require("./viewCashout");
 router.use('/cashout/view', cashoutDataBinder);
