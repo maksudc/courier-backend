@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+
 var multer = require("multer");
 var upload = multer();
 var bodyParser = require('body-parser');
@@ -8,20 +9,24 @@ var adminUtils = require("./../../../utils/admin");
 var branchUtils = require("./../../../utils/branch");
 var orderLogic = require("./../../../logics/orderLogic");
 var DB = require("./../../../models/index");
-var cashoutModel = DB.sequelize.models.manualTransactions;
+var cashinModel = DB.sequelize.models.manualTransactions;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
 
 router.get('/', function(req, res){
 
 	tableHelper = new DataTableHelper(req.query);
+	// console.log(JSON.stringify(tableHelper.getWhere()));
+	// console.log(tableHelper.getOrder());
+	// console.log(tableHelper.getOffset());
+	// console.log(tableHelper.getLimit());
 
 	userObj = tableHelper.getUser();
 
 	whereQuery = null;
 
   extraQuery = {
-    "transaction_type": "cashout"
+    "transaction_type": "cashin"
   };
 
 	if(userObj){
@@ -49,7 +54,7 @@ router.get('/', function(req, res){
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
 
-	cashoutModel
+	cashinModel
 		.findAndCountAll(queryParams)
 		.then(function(orderList){
 
@@ -69,5 +74,6 @@ router.get('/', function(req, res){
 	});
 
 });
+
 
 module.exports = router;
