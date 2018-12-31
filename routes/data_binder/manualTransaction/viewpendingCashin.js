@@ -20,7 +20,6 @@ router.get('/', function (req, res) {
         "status": "draft",
     };
 
-
     if (userObj) {
 
         if (userObj.getSubBranchId()) {
