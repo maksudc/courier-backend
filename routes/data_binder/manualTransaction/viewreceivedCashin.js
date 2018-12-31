@@ -18,9 +18,7 @@ router.get('/', function (req, res) {
     extraQuery = {
         "transaction_type": "cashin",
         "status": "received",
-
     };
-
 
     if (userObj) {
 
@@ -32,7 +30,6 @@ router.get('/', function (req, res) {
             extraQuery["branch_id"] = userObj.getRegionalBranchId();
             extraQuery["branch_type"] = "regional"
         }
-
     }
     if (panicUtils.isPanicked(req)) {
         extraQuery = panicUtils.attachPanicQuery(extraQuery);
@@ -68,6 +65,5 @@ router.get('/', function (req, res) {
         });
 
 });
-
 
 module.exports = router;
