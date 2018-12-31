@@ -12,27 +12,33 @@ var panicUtils = require("./../../../utils/panic");
 router.get('/', function (req, res) {
 
     tableHelper = new DataTableHelper(req.query);
+    // console.log(JSON.stringify(tableHelper.getWhere()));
+    // console.log(tableHelper.getOrder());
+    // console.log(tableHelper.getOffset());
+    // console.log(tableHelper.getLimit());
 
     userObj = tableHelper.getUser();
 
     whereQuery = null;
 
     extraQuery = {
-        "transaction_type": "cashout",
+        "transaction_type": "cashin",
+        "status": "received",
+
     };
 
 
     if (userObj) {
-        if (userObj.getRole() != "super_admin") {
-            if (userObj.getSubBranchId()) {
-                extraQuery["branch_id"] = userObj.getSubBranchId();
-                extraQuery["branch_type"] = "sub"
-            }
-            else if (userObj.getRegionalBranchId()) {
-                extraQuery["branch_id"] = userObj.getRegionalBranchId();
-                extraQuery["branch_type"] = "regional"
-            }
+
+        if (userObj.getSubBranchId()) {
+            extraQuery["branch_id"] = userObj.getSubBranchId();
+            extraQuery["branch_type"] = "sub"
         }
+        else if (userObj.getRegionalBranchId()) {
+            extraQuery["branch_id"] = userObj.getRegionalBranchId();
+            extraQuery["branch_type"] = "regional"
+        }
+
     }
     if (panicUtils.isPanicked(req)) {
         extraQuery = panicUtils.attachPanicQuery(extraQuery);

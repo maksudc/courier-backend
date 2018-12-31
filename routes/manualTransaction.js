@@ -46,6 +46,22 @@ router.post("/create", upload.array(), function (req, res) {
 
     });
 });
+router.put("/receivetransaction/:id", function (req, res) {
+    return manualTransaction.update(
+        {
+            recieved_by: req.user.email,
+            status: "received"
+        },
+        {where: {id: req.params.id}}
+    ).then(function (result) {
+        res.status(200);
+        res.send({status: "success", data: result})
+    }).catch(function (err) {
+        res.status(500);
+        res.send({status: "error", data: null, message: err})
+    });
+
+})
 
 
 module.exports = router;
