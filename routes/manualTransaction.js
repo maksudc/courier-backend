@@ -49,13 +49,10 @@ router.post("/create", upload.array(), function (req, res) {
 });
 router.put("/receivetransaction/:id", function (req, res) {
 
-    received_at = moment.tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
-
     return manualTransaction.update(
         {
-            received_by: req.user.email,
-            status: "received",
-            received_at: received_at
+            recieved_by: req.user.email,
+            status: "received"
         },
         {where: {id: req.params.id}}
     ).then(function (result) {

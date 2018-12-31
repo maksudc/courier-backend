@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
+var multer = require("multer");
 var HttpStatus = require("http-status-codes");
+var branchUtils = require("./../../../utils/branch");
 var DB = require("./../../../models/index");
 var cashinModel = DB.sequelize.models.manualTransactions;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
@@ -10,6 +12,10 @@ var panicUtils = require("./../../../utils/panic");
 router.get('/', function (req, res) {
 
     tableHelper = new DataTableHelper(req.query);
+    // console.log(JSON.stringify(tableHelper.getWhere()));
+    // console.log(tableHelper.getOrder());
+    // console.log(tableHelper.getOffset());
+    // console.log(tableHelper.getLimit());
 
     userObj = tableHelper.getUser();
 
@@ -19,6 +25,7 @@ router.get('/', function (req, res) {
         "transaction_type": "cashin",
         "status": "draft",
     };
+
 
     if (userObj) {
 
