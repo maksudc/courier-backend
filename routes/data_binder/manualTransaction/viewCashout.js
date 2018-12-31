@@ -1,72 +1,71 @@
 var express = require("express");
 var router = express.Router();
 var multer = require("multer");
-var upload = multer();
-var bodyParser = require('body-parser');
 var HttpStatus = require("http-status-codes");
-var adminUtils = require("./../../../utils/admin");
 var branchUtils = require("./../../../utils/branch");
-var orderLogic = require("./../../../logics/orderLogic");
 var DB = require("./../../../models/index");
-var cashoutModel = DB.sequelize.models.manualTransactions;
+var cashinModel = DB.sequelize.models.manualTransactions;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
 
-router.get('/', function(req, res){
 
-	tableHelper = new DataTableHelper(req.query);
+router.get('/', function (req, res) {
 
-	userObj = tableHelper.getUser();
+    tableHelper = new DataTableHelper(req.query);
 
-	whereQuery = null;
+    userObj = tableHelper.getUser();
 
-  extraQuery = {
-    "transaction_type": "cashout"
-  };
+    whereQuery = null;
 
-	if(userObj){
-		//&& !adminUtils.isPrivileged(userObj.getRole())){
-		if(userObj.getSubBranchId()){
-			extraQuery["exit_branch"] = userObj.getSubBranchId();
-      extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("sub");
-		}
-		else if(userObj.getRegionalBranchId()){
-			extraQuery["exit_branch"] = userObj.getRegionalBranchId();
-      extraQuery["exit_branch_type"] = branchUtils.desanitizeBranchType("regional");
-		}
-	}
-	if(panicUtils.isPanicked(req)){
-		extraQuery = panicUtils.attachPanicQuery(extraQuery);
-	}
-  whereQuery = tableHelper.getWhere(extraQuery);
+    extraQuery = {
+        "transaction_type": "cashout",
+    };
 
-	queryParams  = {};
-	queryParams["limit"] = tableHelper.getLimit();
-	queryParams["offset"] = tableHelper.getOffset();
-	queryParams["where"] = whereQuery;
-	queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
-	var resultData = {};
-	resultData["draw"] = tableHelper.getDraw();
+    if (userObj) {
+        if (userObj.getRole() != "super_admin") {
+            if (userObj.getSubBranchId()) {
+                extraQuery["branch_id"] = userObj.getSubBranchId();
+                extraQuery["branch_type"] = "sub"
+            }
+            else if (userObj.getRegionalBranchId()) {
+                extraQuery["branch_id"] = userObj.getRegionalBranchId();
+                extraQuery["branch_type"] = "regional"
+            }
+        }
+    }
+    if (panicUtils.isPanicked(req)) {
+        extraQuery = panicUtils.attachPanicQuery(extraQuery);
+    }
+    whereQuery = tableHelper.getWhere(extraQuery);
 
-	cashoutModel
-		.findAndCountAll(queryParams)
-		.then(function(orderList){
+    queryParams = {};
+    queryParams["limit"] = tableHelper.getLimit();
+    queryParams["offset"] = tableHelper.getOffset();
+    queryParams["where"] = whereQuery;
+    queryParams["order"] = tableHelper.getOrder() || "createdAt DESC";
 
-				resultData["data"] = orderList;
-				resultData["recordsTotal"] = orderList.count;
-				resultData["recordsFiltered"] = orderList.count;
+    var resultData = {};
+    resultData["draw"] = tableHelper.getDraw();
 
-				res.status(HttpStatus.OK);
-				res.send(resultData);
-		})
-		.catch(function(err){
-			if(err){
-				console.error(err.stack);
-			}
-			res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-			res.send({ error:"Internal Server error occured" });
-	});
+    cashinModel
+        .findAndCountAll(queryParams)
+        .then(function (orderList) {
+
+            resultData["data"] = orderList;
+            resultData["recordsTotal"] = orderList.count;
+            resultData["recordsFiltered"] = orderList.count;
+
+            res.status(HttpStatus.OK);
+            res.send(resultData);
+        })
+        .catch(function (err) {
+            if (err) {
+                console.error(err.stack);
+            }
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            res.send({error: "Internal Server error occured"});
+        });
 
 });
 
