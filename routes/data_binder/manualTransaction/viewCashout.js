@@ -19,7 +19,6 @@ router.get('/', function (req, res) {
         "transaction_type": "cashout",
     };
 
-
     if (userObj) {
         if (userObj.getRole() != "super_admin") {
             if (userObj.getSubBranchId()) {
