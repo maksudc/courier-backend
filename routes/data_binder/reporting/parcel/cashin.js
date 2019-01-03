@@ -31,12 +31,16 @@ router.get('/', function(req, res){
 	whereQuery = null;
 
   extraQuery = {
-    "payment_status": "paid"
+
   };
 
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
 	for(key in extraParamFilterQuery){
 		extraQuery[key] = extraParamFilterQuery[key];
+	}
+
+	if(extraQuery["payment_status"] && extraQuery["payment_status"] == "unpaid"){
+		extraQuery["due_deliverable"] = true;
 	}
 
 	whereQuery = tableHelper.getWhere(extraQuery);
