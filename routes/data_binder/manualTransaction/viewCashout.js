@@ -20,15 +20,13 @@ router.get('/', function (req, res) {
     };
 
     if (userObj) {
-        if (userObj.getRole() != "super_admin") {
-            if (userObj.getSubBranchId()) {
-                extraQuery["branch_id"] = userObj.getSubBranchId();
-                extraQuery["branch_type"] = "sub"
-            }
-            else if (userObj.getRegionalBranchId()) {
-                extraQuery["branch_id"] = userObj.getRegionalBranchId();
-                extraQuery["branch_type"] = "regional"
-            }
+        if (userObj.getSubBranchId()) {
+            extraQuery["branch_id"] = userObj.getSubBranchId();
+            extraQuery["branch_type"] = "sub"
+        }
+        else if (userObj.getRegionalBranchId()) {
+            extraQuery["branch_id"] = userObj.getRegionalBranchId();
+            extraQuery["branch_type"] = "regional"
         }
     }
     if (panicUtils.isPanicked(req)) {
