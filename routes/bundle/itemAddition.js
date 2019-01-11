@@ -110,7 +110,7 @@ router.post("/" , upload.array() , function(req , res){
     .then(function(checkBranchInstance){
 
       if(!checkBranchInstance || !checkBranchInstance.length){
-        responseCode = HttpStatus.PRECONDITION_FAILED;
+        responseCode = HttpStatus.BAD_REQUEST;
         return Promise.reject({ code: responseCode , message: "This item does not belong to bundle"  });
       }
     })
