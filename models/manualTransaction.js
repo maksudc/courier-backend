@@ -26,7 +26,10 @@ module.exports = function (sequelize, DataTypes) {
             updatedAt: {
                 allowNull: false,
                 type: DataTypes.DATE
-            }
+            },
+            source_branch_id: {type: DataTypes.INTEGER, allowNull: true, defaultValue: 0},
+            source_branch_type: {type: DataTypes.ENUM("regional", "sub"), allowNull: true, defaultValue: null},
+            instructed_by: {type: DataTypes.STRING, allowNull: true, defaultValue: null}
         },
         {
 

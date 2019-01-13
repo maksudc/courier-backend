@@ -31,6 +31,9 @@ router.post("/create", upload.array(), function (req, res) {
     postData['payment_reference'] = req.body.payment_reference;
     postData['payment_description'] = req.body.payment_description;
     postData['created_by'] = req.user.email;
+    postData['source_branch_id']=req.body.source_branch_id;
+    postData['source_branch_type']=req.body.source_branch_type;
+    postData['instructed_by']=req.body.instructed_by;
 
 
     sequelize.transaction(function (t) {
