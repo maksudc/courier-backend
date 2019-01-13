@@ -27,7 +27,7 @@ router.post("/create", upload.array(), function (req, res) {
     postData['branch_type'] = req.body.branch_type;
     postData['branch_id'] = req.body.branch_id;
     postData['transaction_type'] = req.body.transaction_type;
-    postData['transaction_method'] = req.body.transaction_method;
+    postData['payment_method'] = req.body.payment_method;
     postData['payment_reference'] = req.body.payment_reference;
     postData['payment_description'] = req.body.payment_description;
     postData['created_by'] = req.user.email;
