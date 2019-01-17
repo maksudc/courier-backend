@@ -30,17 +30,35 @@ router.get('/', function(req, res){
 
 	whereQuery = null;
 
-  extraQuery = {
-
-  };
+  extraQuery = {};
 
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
 	for(key in extraParamFilterQuery){
 		extraQuery[key] = extraParamFilterQuery[key];
 	}
 
-	if(extraQuery["payment_status"] && extraQuery["payment_status"] == "unpaid"){
-		extraQuery["due_deliverable"] = true;
+	if(extraQuery["payment_status"]){
+		if(extraQuery["payment_status"] == "unpaid"){
+			extraQuery["due_deliverable"] = true;
+			extraQuery["status"] = "delivered";
+		}
+	}else{
+
+		payment_query = {
+			"$or":[
+				{
+					"payment_status": "paid"
+				},
+				{
+					"payment_status": "unpaid",
+					"status": "delivered",
+					"due_deliverable": true
+				}
+			]
+		};
+
+		extraQuery = payment_query;
+
 	}
 
 	whereQuery = tableHelper.getWhere(extraQuery);
