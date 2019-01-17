@@ -9,6 +9,7 @@ var HttpStatus = require("http-status-codes");
 var DB = require("./../../../models/index");
 var bundleModel = DB.sequelize.models.bundle;
 var itemModel = DB.sequelize.models.item;
+var subBranchModel = DB.sequelize.models.subBranch;
 
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var Promise = require("bluebird");
@@ -25,94 +26,143 @@ var bundleItemsRouteHandler = function(req, res){
 
 	userObj = tableHelper.getUser();
 
-	whereQuery = null;
+	var whereQuery = null;
 
   var bundleId = req.params.bundleId;
 
-  extraQuery = {
+  var extraQuery = {
 		"bundleId":{
 			"$eq": bundleId
 		}
   };
 
-  whereQuery = tableHelper.getWhere(extraQuery);
+	var barcodePattern = /^[0-9]+([\-][0-9]+)*/;
+	var searchString = tableHelper.config.search.value;
+	var searchPromise = Promise.resolve({});
 
-	queryParams  = {};
-	queryParams["limit"] = tableHelper.getLimit();
-	queryParams["offset"] = tableHelper.getOffset();
-	queryParams["where"] = whereQuery;
-  
-  queryParams["order"] = tableHelper.getOrder() || "updatedAt DESC";
+	if(searchString && !barcodePattern.test(searchString)){
+		// if comma is given might be the regional branch is also attached to the query
+		// So we need to strip it.
+		searchString = searchString.split(",")[0];
+		var branchType = "sub";
+
+		searchPromise = branchUtils
+		.getBranchesWhereNameStartsWith(branchType, searchString, { attributes:["id"] })
+		.map(function(branchInstance){
+			return branchInstance.id
+		})
+		.then(function(branchIds){
+
+			exitEntryBranchQuery = {
+				"$or":[
+					{
+						"entry_branch":{
+							"$in": branchIds
+						},
+						"entry_branch_type": "sub"
+					},
+					{
+						"exit_branch":{
+							"$in": branchIds
+						},
+						"exit_branch_type": "sub"
+					}
+				]
+			};
+
+			whereQuery = {
+				"$and":[
+					extraQuery,
+					exitEntryBranchQuery
+				]
+			};
+
+			return whereQuery;
+		});
+	}else{
+		whereQuery = tableHelper.getWhere(extraQuery);
+		searchPromise = Promise.resolve(whereQuery);
+	}
 
 	var resultData = {};
 	resultData["draw"] = tableHelper.getDraw();
 
-  itemModel
-    .findAndCountAll(queryParams)
-		.then(function(itemList){
+	searchPromise
+	.then(function(){
 
-				resultData["data"] = itemList;
-				resultData["recordsTotal"] = itemList.count;
-				resultData["recordsFiltered"] = itemList.count;
-        resultData["extra"] = {
-          "bundleId": bundleId
-        };
+		queryParams  = {};
+		queryParams["limit"] = tableHelper.getLimit();
+		queryParams["offset"] = tableHelper.getOffset();
+		queryParams["where"] = whereQuery;
 
-        return Promise.resolve(itemList.rows);
-		})
-    .map(function(itemInstance){
+		queryParams["order"] = tableHelper.getOrder() || "updatedAt DESC";
 
-      itemParts = itemInstance.bar_code.split("-");
+		return itemModel.findAndCountAll(queryParams)
+	})
+	.then(function(itemList){
 
-      scanningTime = "";
-      if(itemInstance.get("last_scanned_at")){
-        scanningTime = moment.tz(itemInstance.get("last_scanned_at"), timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
-      }
-
-      itemMap = {
-        "order_bar_code": parseInt(itemParts[0]),
-        "bar_code": itemInstance.bar_code,
-        "item_no": parseInt(itemParts[1]),
-        "scanningTime": scanningTime
+			resultData["data"] = itemList;
+			resultData["recordsTotal"] = itemList.count;
+			resultData["recordsFiltered"] = itemList.count;
+      resultData["extra"] = {
+        "bundleId": bundleId
       };
 
-      return Promise.all([
-        Promise.resolve(itemMap),
-        branchUtils.getInclusiveBranchInstance(itemInstance.entry_branch_type , itemInstance.entry_branch),
-        branchUtils.getInclusiveBranchInstance(itemInstance.exit_branch_type , itemInstance.exit_branch)
-      ]);
-    })
-    .map(function(resultList){
+      return Promise.resolve(itemList.rows);
+	})
+  .map(function(itemInstance){
 
-      itemMap = resultList[0];
-      entryBranchInstance = resultList[1];
-      exitBranchInstane = resultList[2];
+    itemParts = itemInstance.bar_code.split("-");
 
-      itemMap["entry_branch_label"] = entryBranchInstance.label;
-      if(entryBranchInstance.regionalBranch){
-        itemMap["entry_branch_label"] = itemMap["entry_branch_label"] + "," + entryBranchInstance.regionalBranch.label;
-      }
+    scanningTime = "";
+    if(itemInstance.get("last_scanned_at")){
+      scanningTime = moment.tz(itemInstance.get("last_scanned_at"), timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss");
+    }
 
-      itemMap["exit_branch_label"] = exitBranchInstane.label;
-      if(exitBranchInstane.regionalBranch){
-        itemMap["exit_branch_label"] = itemMap["exit_branch_label"] + "," + exitBranchInstane.regionalBranch.label;
-      }
+    itemMap = {
+      "order_bar_code": parseInt(itemParts[0]),
+      "bar_code": itemInstance.bar_code,
+      "item_no": parseInt(itemParts[1]),
+      "scanningTime": scanningTime
+    };
 
-      return Promise.resolve(itemMap);
-    })
-    .then(function(itemMaps){
+    return Promise.all([
+      Promise.resolve(itemMap),
+      branchUtils.getInclusiveBranchInstance(itemInstance.entry_branch_type , itemInstance.entry_branch),
+      branchUtils.getInclusiveBranchInstance(itemInstance.exit_branch_type , itemInstance.exit_branch)
+    ]);
+  })
+  .map(function(resultList){
 
-      resultData["data"]["rows"] = getSortedItemMaps(itemMaps);
+    itemMap = resultList[0];
+    entryBranchInstance = resultList[1];
+    exitBranchInstane = resultList[2];
 
-      res.status(HttpStatus.OK);
-      res.send(resultData);
-    })
-		.catch(function(err){
-			if(err){
-				console.error(err.stack);
-			}
-			res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-			res.send({ error:"Internal Server error occured" });
+    itemMap["entry_branch_label"] = entryBranchInstance.label;
+    if(entryBranchInstance.regionalBranch){
+      itemMap["entry_branch_label"] = itemMap["entry_branch_label"] + "," + entryBranchInstance.regionalBranch.label;
+    }
+
+    itemMap["exit_branch_label"] = exitBranchInstane.label;
+    if(exitBranchInstane.regionalBranch){
+      itemMap["exit_branch_label"] = itemMap["exit_branch_label"] + "," + exitBranchInstane.regionalBranch.label;
+    }
+
+    return Promise.resolve(itemMap);
+  })
+  .then(function(itemMaps){
+
+    resultData["data"]["rows"] = getSortedItemMaps(itemMaps);
+
+    res.status(HttpStatus.OK);
+    res.send(resultData);
+  })
+	.catch(function(err){
+		if(err){
+			console.error(err.stack);
+		}
+		res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+		res.send({ error:"Internal Server error occured" });
 	});
 
 };

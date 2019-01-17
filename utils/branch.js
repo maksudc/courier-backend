@@ -99,8 +99,48 @@ var prepareLabel = function(aBranchData){
   return data;
 };
 
+var getBranchesWhereNameStartsWith = function(branchType, nameSearchString, options){
+
+  branchModel = getBranchModel(branchType);
+  queryParams = {
+    where:{
+      label:{
+        "$like": nameSearchString + "%"
+      }
+    }
+  };
+
+  if(options.attributes){
+    queryParams["attributes"] = options.attributes;
+  }
+
+  return branchModel.findAll(queryParams);
+};
+
+var getBranchModel = function(branchType){
+
+  var branchModel = null;
+
+  if(branchType){
+
+    stdBranchType = sanitizeBranchType(branchType);
+
+    if(stdBranchType == "sub"){
+      branchModel = subBranch;
+    }else if(stdBranchType == "regional"){
+      branchModel = regionalBranch;
+    }else{
+      throw new Error("no model could be chosen with given branchType " + JSON.stringify(branchType));
+    }
+  }
+
+  return branchModel;
+}
+
 exports.sanitizeBranchType = sanitizeBranchType;
 exports.desanitizeBranchType = desanitizeBranchType;
 exports.getBranchInstance = getBranchInstance;
 exports.getInclusiveBranchInstance = getInclusiveBranchInstance;
 exports.prepareLabel = prepareLabel;
+exports.getBranchesWhereNameStartsWith = getBranchesWhereNameStartsWith;
+exports.getBranchModel = getBranchModel;
