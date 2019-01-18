@@ -42,23 +42,6 @@ router.get('/', function(req, res){
 			extraQuery["due_deliverable"] = true;
 			extraQuery["status"] = "delivered";
 		}
-	}else{
-
-		payment_query = {
-			"$or":[
-				{
-					"payment_status": "paid"
-				},
-				{
-					"payment_status": "unpaid",
-					"status": "delivered",
-					"due_deliverable": true
-				}
-			]
-		};
-
-		extraQuery = payment_query;
-
 	}
 
 	whereQuery = tableHelper.getWhere(extraQuery);
