@@ -53,11 +53,14 @@ router.get('/', function (req, res) {
 
     cashinModel
         .findAndCountAll(queryParams)
-        .then(function (orderList) {
+        .then(function (cashinList) {
 
-            resultData["data"] = orderList;
+            resultData["data"] = cashinList;
+             resultData["recordsTotal"] = cashinList.count;
+            resultData["recordsFiltered"] = cashinList.count;
 
-            return Promise.resolve(orderList.rows);
+
+            return Promise.resolve(cashinList.rows);
             res.status(HttpStatus.OK);
             //  res.send(resultData);
         }).map(function (itemInstance) {
@@ -83,7 +86,7 @@ router.get('/', function (req, res) {
 
         return Promise.resolve(itemMap);
     }).then(function (itemMaps) {
-        resultData["data"]["rows"] = getSortedItemMaps(itemMaps);
+        resultData["data"]["rows"] = itemMaps;
 
         res.status(HttpStatus.OK);
         res.send(resultData);
