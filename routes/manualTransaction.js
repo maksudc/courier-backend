@@ -93,6 +93,7 @@ router.get("/details/:id", function (req, res) {
         manualtransactionDetails['created_by'] = transaction_details.created_by;
         manualtransactionDetails['creation_date'] = transaction_details.createdAt;
         manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
+        manualtransactionDetails["status"]=transaction_details.status;
         manualtransactionDetails["id"] = transaction_details.id;
         manualtransactionDetails["branch_type"] = transaction_details.source_branch_type
         manualtransactionDetails['branch_label'] = branchinfo.label;
