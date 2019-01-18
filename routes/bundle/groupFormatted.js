@@ -93,12 +93,24 @@ router.get("/:id" , function(req , res){
     resultData = bundleInstance.dataValues;
     resultData.items = itemMaps;
     resultData.branches = branchesDatas;
+    resultData.totalCountOfItem = itemMaps.length;
+
+    itemCounterDestinationSourceMapping = {};
 
     groupedItemMaps = _.groupBy(itemMaps , "exit_branch_label");
     for(dest in groupedItemMaps ){
+
+      itemCounterDestinationSourceMapping[dest] = {
+        "total": 0,
+        "branches":{}
+      };
+      totalItemCountForCurrentDestination = 0;
+
       groupedItemMaps[dest] = _.groupBy(groupedItemMaps[dest] , "entry_branch_label");
       // Cleansup unnecessary entry and exit branch reference since they are already enclosed in the proper format
       for(source in groupedItemMaps[dest]){
+
+        totalItemCountFromCurrentSourceToCurrentDestination = 0;
 
         groupedItemMaps[dest][source] = _.sortBy(groupedItemMaps[dest][source] , function(iMap){
           orderCode = parseInt(iMap["order_bar_code"]);
@@ -115,6 +127,8 @@ router.get("/:id" , function(req , res){
             return icount;
           });
 
+          totalItemCountFromCurrentSourceToCurrentDestination += groupedItemMaps[dest][source][orderCode].length;
+
           for(I=0 ; I< groupedItemMaps[dest][source][orderCode].length ; I++){
 
             delete groupedItemMaps[dest][source][orderCode][I]["exit_branch_label"];
@@ -123,10 +137,25 @@ router.get("/:id" , function(req , res){
           }
         }
 
+        itemCounterDestinationSourceMapping[dest]["branches"][source] = totalItemCountFromCurrentSourceToCurrentDestination;
+        totalItemCountForCurrentDestination += totalItemCountFromCurrentSourceToCurrentDestination;
+      }
+
+      itemCounterDestinationSourceMapping[dest]["total"] = totalItemCountForCurrentDestination;
+    }
+
+    // Calculated item counts are added to the branch names for proper display requirements
+    itemCountAddedGroupedItemMaps = {};
+    for(dest in groupedItemMaps){
+      destKey = dest + "(" + itemCounterDestinationSourceMapping[dest]["total"] + ")";
+      itemCountAddedGroupedItemMaps[destKey] = {};
+      for(source in groupedItemMaps[dest]){
+        sourceKey = source + "(" + itemCounterDestinationSourceMapping[dest]["branches"][source] + ")";
+        itemCountAddedGroupedItemMaps[destKey][sourceKey] = groupedItemMaps[dest][source];
       }
     }
 
-    resultData.items = groupedItemMaps;
+    resultData.items = itemCountAddedGroupedItemMaps;
 
     res.status(HttpStatus.OK);
     res.send({
