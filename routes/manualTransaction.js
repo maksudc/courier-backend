@@ -98,6 +98,11 @@ router.get("/details/:id", function (req, res) {
         manualtransactionDetails["branch_type"] = transaction_details.source_branch_type
         manualtransactionDetails['branch_label'] = branchinfo.label;
         manualtransactionDetails['description']=transaction_details.payment_description
+        manualtransactionDetails['received_by']=transaction_details.received_by;
+        manualtransactionDetails['received_at']=transaction_details.received_at;
+        manualtransactionDetails['amount']=transaction_details.amount;
+        manualtransactionDetails['payment_method']=transaction_details.payment_method;
+        manualtransactionDetails["payment_reference"]=transaction_details.payment_reference;
 
         res.send({data: manualtransactionDetails});
 
