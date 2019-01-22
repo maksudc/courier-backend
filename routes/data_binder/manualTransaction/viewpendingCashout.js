@@ -61,8 +61,7 @@ router.get('/', function (req, res) {
 
 
             return Promise.resolve(cashoutList.rows);
-            res.status(HttpStatus.OK);
-            //  res.send(resultData);
+
         }).map(function (itemInstance) {
 
         itemMap = {
