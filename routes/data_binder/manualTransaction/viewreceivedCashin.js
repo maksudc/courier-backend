@@ -86,7 +86,7 @@ router.get('/', function (req, res) {
 
         return Promise.resolve(itemMap);
     }).then(function (itemMaps) {
-        resultData["data"]["rows"] = getSortedItemMaps(itemMaps);
+        resultData["data"]["rows"] = itemMaps;
 
         res.status(HttpStatus.OK);
         res.send(resultData);
@@ -101,38 +101,5 @@ router.get('/', function (req, res) {
 
 });
 
-function getSortedItemMaps(itemMaps) {
-
-    sortedItemMaps = [];
-
-    orderCodeSet = new Set();
-    for (I = 0; I < itemMaps.length; I++) {
-        orderCodeSet.add(parseInt(itemMaps[I].id));
-    }
-
-    orderCodeArray = Array.from(orderCodeSet);
-    orderCodeArray.sort(function (a, b) {
-        return a - b;
-    });
-
-    itemsSortedByOrderCode = _.sortBy(itemMaps, "id");
-    itemsGroupedByOrder = _.groupBy(itemsSortedByOrderCode, "id");
-
-    var sortedItemMaps = [];
-
-    for (I = 0; I < orderCodeArray.length; I++) {
-
-        orderCode = orderCodeArray[I];
-
-        singleOrderSortedItems = _.sortBy(itemsGroupedByOrder[orderCode], function (itemDescriptor) {
-            item_code = itemDescriptor["id"];
-            return parseInt(item_code);
-        });
-
-        sortedItemMaps = sortedItemMaps.concat(singleOrderSortedItems);
-    }
-
-    return sortedItemMaps;
-}
 
 module.exports = router;
