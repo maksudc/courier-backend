@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 var HttpStatus = require("http-status-codes");
 var DB = require("./../../../models/index");
-var cashinModel = DB.sequelize.models.manualTransactions;
+var cashoutModel = DB.sequelize.models.manualTransactions;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
 var Promise = require("bluebird");
@@ -22,8 +22,8 @@ router.get('/', function (req, res) {
     whereQuery = null;
 
     extraQuery = {
-        "transaction_type": "cashin",
-        "status": "received",
+        "transaction_type": "cashout",
+        "status": "draft",
     };
 
     if (userObj) {
@@ -51,18 +51,17 @@ router.get('/', function (req, res) {
     var resultData = {};
     resultData["draw"] = tableHelper.getDraw();
 
-    cashinModel
+    cashoutModel
         .findAndCountAll(queryParams)
-        .then(function (cashinList) {
+        .then(function (cashoutList) {
 
-            resultData["data"] = cashinList;
-             resultData["recordsTotal"] = cashinList.count;
-            resultData["recordsFiltered"] = cashinList.count;
+            resultData["data"] = cashoutList;
+             resultData["recordsTotal"] = cashoutList.count;
+            resultData["recordsFiltered"] = cashoutList.count;
 
 
-            return Promise.resolve(cashinList.rows);
-            res.status(HttpStatus.OK);
-            //  res.send(resultData);
+            return Promise.resolve(cashoutList.rows);
+
         }).map(function (itemInstance) {
 
         itemMap = {
@@ -100,6 +99,7 @@ router.get('/', function (req, res) {
         });
 
 });
+
 
 
 module.exports = router;

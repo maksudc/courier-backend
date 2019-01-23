@@ -5,9 +5,15 @@ var DB = require("./../../../models/index");
 var cashinModel = DB.sequelize.models.manualTransactions;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
+var Promise = require("bluebird");
+var branchUtils = require("./../../../utils/branch");
+var moment = require("moment-timezone");
+var timezoneConfig = require("./../../../config/timezone");
+var _ = require("underscore");
 
 
 router.get('/', function (req, res) {
+
 
     tableHelper = new DataTableHelper(req.query);
 
@@ -47,15 +53,44 @@ router.get('/', function (req, res) {
 
     cashinModel
         .findAndCountAll(queryParams)
-        .then(function (orderList) {
+        .then(function (cashinList) {
 
-            resultData["data"] = orderList;
-            resultData["recordsTotal"] = orderList.count;
-            resultData["recordsFiltered"] = orderList.count;
+            resultData["data"] = cashinList;
+             resultData["recordsTotal"] = cashinList.count;
+            resultData["recordsFiltered"] = cashinList.count;
 
+
+            return Promise.resolve(cashinList.rows);
             res.status(HttpStatus.OK);
-            res.send(resultData);
-        })
+            //  res.send(resultData);
+        }).map(function (itemInstance) {
+
+        itemMap = {
+            "id": itemInstance.id,
+            "createdAt": moment.tz(itemInstance.createdAt, timezoneConfig.COMMON_ZONE).tz(timezoneConfig.CLIENT_ZONE).format("YYYY-MM-DD HH:mm:ss"),
+            "created_by": itemInstance.created_by,
+            "instructed_by": itemInstance.instructed_by,
+
+        };
+
+        return Promise.all([
+            Promise.resolve(itemMap),
+            branchUtils.getInclusiveBranchInstance(itemInstance.source_branch_type, itemInstance.source_branch_id),
+
+        ]);
+    }).map(function (resultwithbranch) {
+
+        itemMap = resultwithbranch[0];
+        branchInstance = resultwithbranch[1];
+        itemMap["source_branch_type"] = branchInstance.label;
+
+        return Promise.resolve(itemMap);
+    }).then(function (itemMaps) {
+        resultData["data"]["rows"] = itemMaps;
+
+        res.status(HttpStatus.OK);
+        res.send(resultData);
+    })
         .catch(function (err) {
             if (err) {
                 console.error(err.stack);
@@ -65,5 +100,6 @@ router.get('/', function (req, res) {
         });
 
 });
+
 
 module.exports = router;
