@@ -41,7 +41,7 @@ router.get('/', function(req, res){
 
 	parcelOrderQuery = {
 		model: orderModel,
-		as: "parcelOrder",
+		as: "vd_order",
 		where:{
 			status:{
 				$ne:'draft'
@@ -75,25 +75,24 @@ router.get('/', function(req, res){
 				return Promise.all(orderList.rows);
 		})
 		.map(function(moneyOrderData){
+
       if(moneyOrderData.dataValues.pay_time){
         moneyOrderData.dataValues.payment_time = moment.tz(moneyOrderData.dataValues.pay_time, timezoneConfig.COMMON_ZONE)
                                               .tz(timezoneConfig.CLIENT_ZONE)
                                               .format("YYYY-MM-DD HH:mm:ss");
       }
+
+			if(moneyOrderData.dataValues.delivery_time){
+				moneyOrderData.dataValues.delivery_time = moment.tz(moneyOrderData.dataValues.delivery_time, timezoneConfig.COMMON_ZONE)
+                                              .tz(timezoneConfig.CLIENT_ZONE)
+                                              .format("YYYY-MM-DD HH:mm:ss");
+			}
+
       moneyOrderData.dataValues.createdAt = moment.tz(moneyOrderData.dataValues.createdAt, timezoneConfig.COMMON_ZONE)
 																						.tz(timezoneConfig.CLIENT_ZONE)
 																						.format("YYYY-MM-DD HH:mm:ss");
-      return orderData;
-		})
-		.map(function(moneyOrderData){
 
-
-		})
-		.map(function(complexResult){
-			orderData = complexResult[0];
-			aBranchData = complexResult[1];
-
-			orderData.dataValues.payment_branch = branchUtils.prepareLabel(aBranchData);
+			return moneyOrderData;
 		})
 		.then(function(){
 

@@ -31,4 +31,7 @@ router.use("/corporation/order", corporationOrderBinderRouter);
 var printDataCorporationOrderBinderRouter = require("./corporation/printable_data");
 router.use("/corporation/order/print", printDataCorporationOrderBinderRouter);
 
+var vdSalesReportBinderRouter = require("./vd/sales");
+router.use("/vd/sales", vdSalesReportBinderRouter);
+
 module.exports = router;
