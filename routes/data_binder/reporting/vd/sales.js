@@ -57,6 +57,7 @@ router.get('/', function(req, res){
 	];
 
 	var aggregationQueryParams = Object.assign({} , queryParams);
+	aggregationQueryParams["group"] = "uuid"
 
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
@@ -104,7 +105,7 @@ router.get('/', function(req, res){
 
 					return Promise.all([
 						aggregation_obj ,
-						orderModel.sum(aggregation_obj.getColumn() , aggregationQueryParams)
+						moneyModel.sum(aggregation_obj.getColumn() , aggregationQueryParams)
 					]);
 			}
 			return Promise.resolve(null);
