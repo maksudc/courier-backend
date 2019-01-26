@@ -29,9 +29,17 @@ router.get('/', function(req, res){
 	};
 
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
+	console.log(extraParamFilterQuery);
+
 	for(key in extraParamFilterQuery){
-		extraQuery[key] = extraParamFilterQuery[key];
+		if(key == "paid"){
+			extraQuery["paid"] = extraParamFilterQuery["paid"] == "paid" ? 1 : 0;
+		}else{
+			extraQuery[key] = extraParamFilterQuery[key];
+		}
 	}
+
+	console.log(extraQuery);
 
 	whereQuery = tableHelper.getWhere(extraQuery);
 
@@ -57,7 +65,7 @@ router.get('/', function(req, res){
 	];
 
 	var aggregationQueryParams = Object.assign({} , queryParams);
-	aggregationQueryParams["group"] = "uuid"
+	aggregationQueryParams["group"] = "money.type"
 
 	queryParams["limit"] = tableHelper.getLimit();
 	queryParams["offset"] = tableHelper.getOffset();
@@ -92,6 +100,31 @@ router.get('/', function(req, res){
       moneyOrderData.dataValues.createdAt = moment.tz(moneyOrderData.dataValues.createdAt, timezoneConfig.COMMON_ZONE)
 																						.tz(timezoneConfig.CLIENT_ZONE)
 																						.format("YYYY-MM-DD HH:mm:ss");
+
+			return moneyOrderData;
+		})
+		.map(function(moneyOrderData){
+
+			return Promise.all([
+				moneyOrderData,
+				moneyOrderData.vd_order.dataValues.entry_branch_label = branchUtils.getInclusiveBranchInstance(
+					moneyOrderData.vd_order.get("entry_branch_type"),
+					moneyOrderData.vd_order.get("entry_branch")
+				),
+				moneyOrderData.vd_order.dataValues.entry_branch_label = branchUtils.getInclusiveBranchInstance(
+					moneyOrderData.vd_order.get("exit_branch_type"),
+					moneyOrderData.vd_order.get("exit_branch")
+				)
+			]);
+		})
+		.map(function(complexResult){
+
+			moneyOrderData = complexResult[0];
+			entry_branch_label = branchUtils.prepareLabel(complexResult[1]);
+			exit_branch_label = branchUtils.prepareLabel(complexResult[2]);
+
+			moneyOrderData.vd_order.dataValues.entry_branch_label = entry_branch_label;
+			moneyOrderData.vd_order.dataValues.exit_branch_label = exit_branch_label;
 
 			return moneyOrderData;
 		})
