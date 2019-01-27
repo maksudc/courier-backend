@@ -30,7 +30,11 @@ router.get('/', function(req, res){
 
 	whereQuery = null;
 
-  extraQuery = {};
+  extraQuery = {
+		status:{
+			"$ne": "draft"
+		}
+	};
 
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
 	for(key in extraParamFilterQuery){
@@ -40,7 +44,6 @@ router.get('/', function(req, res){
 	if(extraQuery["payment_status"]){
 		if(extraQuery["payment_status"] == "unpaid"){
 			extraQuery["due_deliverable"] = true;
-			extraQuery["status"] = "delivered";
 		}
 	}
 
