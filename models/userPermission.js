@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
-    var userPermissions = sequelize.define('userPermissions', {
+    var userPermissions = sequelize.define('userPermission', {
       admin: {
         type: DataTypes.STRING,
         allowNull: false
@@ -8,13 +8,21 @@ module.exports = function (sequelize, DataTypes) {
       business_permission_id: {
         type: DataTypes.INTEGER,
         allowNull: false
+      },
+      createdAt: {
+          allowNull: false,
+          type: DataTypes.DATE
+      },
+      updatedAt: {
+          allowNull: false,
+          type: DataTypes.DATE
       }
     },
     {
       classMethods: {
         associate: function (models) {
-            manualTransactions.belongsTo(models.admin, {foreignKey: 'admin'});
-            manualTransactions.belongsTo(models.businessPermission, {foreignKey: 'business_permission_id'});
+            // userPermissions.belongsTo(models.admin, {foreignKey: 'admin'});
+            // manualTransactions.belongsTo(models.businessPermission, {foreignKey: 'business_permission_id'});
         }
       }
     });

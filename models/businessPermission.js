@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
-    var businessPermissions = sequelize.define('businessPermissions', {
+    var businessPermissions = sequelize.define('businessPermission', {
       id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
@@ -11,6 +11,14 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
+      },
+      createdAt: {
+          allowNull: false,
+          type: DataTypes.DATE
+      },
+      updatedAt: {
+          allowNull: false,
+          type: DataTypes.DATE
       }
     });
     return businessPermissions;

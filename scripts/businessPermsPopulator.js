@@ -19,7 +19,7 @@ var populate = function(){
       defaults:{
         name: permObj["name"]
       }
-    })
+    });
   })
   .map(function(complexResult){
     permission = complexResult[0];
