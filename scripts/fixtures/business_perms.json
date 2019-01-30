@@ -1,0 +1,17 @@
+[
+  {
+    "name": "view_manual_transaction"
+  },
+  {
+    "name": "create_manual_transaction"
+  },
+  {
+    "name": "update_manual_transaction"
+  },
+  {
+    "name": "delete_manual_transaction"
+  },
+  {
+    "name": "view_manual_transaction_report"
+  }
+]
