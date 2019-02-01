@@ -12,7 +12,11 @@ router.use("/parcel/sales", parcelSalesBinderRouter);
 //
 var moneyCashinBinderRouter = require("./money/cashin");
 router.use("/money/cashin" , moneyCashinBinderRouter);
+var manualCashinBinderRouter = require("./manualTransaction/cashin");
+router.use("/manualTransaction/cashin" , manualCashinBinderRouter);
 
+var manualCashoutBinderRouter = require("./manualTransaction/cashout");
+router.use("/manualTransaction/cashout" , manualCashoutBinderRouter);
 var moneyCashoutBinderRouter = require("./money/cashout");
 router.use("/money/cashout" , moneyCashoutBinderRouter);
 
