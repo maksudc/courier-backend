@@ -1,17 +1,32 @@
 [
   {
-    "name": "view_manual_transaction"
+    "name": "view_manual_cashin"
   },
   {
-    "name": "create_manual_transaction"
+    "name": "view_manual_cashout"
   },
   {
-    "name": "update_manual_transaction"
+    "name": "create_manual_cashin"
   },
   {
-    "name": "delete_manual_transaction"
+    "name": "create_manual_cashout"
   },
   {
-    "name": "view_manual_transaction_report"
+    "name": "receive_manual_cashin"
+  },
+  {
+    "name": "receive_manual_cashout"
+  },
+  {
+    "name": "update_manual_cashin"
+  },
+  {
+    "name": "update_manual_cashout"
+  },
+  {
+    "name": "delete_manual_cashin"
+  },
+  {
+    "name": "delete_manual_cashout"
   }
 ]

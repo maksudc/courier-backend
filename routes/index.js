@@ -1,9 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-//Other routes
-// var order = require("./order");
-// router.use('/order', order);
 var product = require("./product");
 router.use('/product', product);
 
