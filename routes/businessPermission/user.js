@@ -4,28 +4,22 @@ var router = express.Router();
 var passport = require("passport");
 var authMiddleware  = require("./../../middleware/auth");
 var permissionLogic = require("./../../logics/businessPermissionLogic");
-var DB = require("./../../models");
-var adminModel = DB.sequelize.models.admin;
+var adminLogic = require("./../../logics/admin/adminLogic");
 
 var HttpStatusCodes = require("http-status-codes");
 var Promise = require("bluebird");
-
-var bodyParser = require('body-parser');
-
 
 router.get("/acl/", passport.authenticate('basic', {session: false}), function(req, res){
 
   var paramUser = null;
 
-  adminModel.findOne({
-    where: {
-      email: req.query.email
-    }
-  })
+  adminLogic.findUniqueAdmin(req.query.email)
   .then(function(user){
     paramUser = user;
   })
-  permissionLogic.getPermissionEntries()
+  .then(function(){
+    return permissionLogic.getPermissionEntries();
+  })
   .map(function(permission){
     return Promise.all([
       permission,
@@ -58,6 +52,65 @@ router.get("/acl/", passport.authenticate('basic', {session: false}), function(r
       message: err_message
     });
   })
+});
+
+router.post("/change/", passport.authenticate('basic', {session: false}), function(req, res){
+  /**
+  {
+    "email": "",
+    "permissionMatrix":[
+      {
+        "id": "permissionId",
+        "name": "permissionName",
+        allowed: true, // false ?
+      }
+    ]
+  }
+  **/
+  var params = req.body;
+  var paramAdminEmail = params["email"];
+  var paramUser = null;
+
+  adminLogic.findUniqueAdmin(paramAdminEmail)
+  .then(function(user){
+    paramUser = user;
+  })
+  .then(function(){
+    return Promise.resolve(params.permissionMatrix);
+  })
+  .map(function(permissionDescriptor){
+    return Promise.all([
+      Promise.resolve(permissionDescriptor),
+      permissionLogic.getPermissionEntity(permissionDescriptor["id"])
+    ]);
+  })
+  .map(function(complexResult){
+    permissionDescriptor = complexResult[0];
+    permissionEntity = complexResult[1];
+
+    if(permissionDescriptor["allowed"]){
+      return permissionLogic.allowPermissionForUser(permissionEntity, paramUser);
+    }else{
+      return permissionLogic.denyPermissionForUser(permissionEntity, paramUser);
+    }
+  })
+  .then(function(complexResult){
+
+    res.status(HttpStatusCodes.OK);
+    res.send(complexResult);
+  })
+  .catch(function(err){
+    err_message = null;
+    if(err){
+      console.error(err);
+      err_message  = err.message;
+    }
+
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    res.send({
+      message: err_message
+    });
+  });
 });
 
 module.exports = router;

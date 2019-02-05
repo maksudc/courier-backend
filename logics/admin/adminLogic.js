@@ -31,13 +31,19 @@ var findAdmin = function(email, next){
     adminModel.find({
         where: {email: email}}
     ).then(function(admin){
+
+      if(next){
         if(admin){
             next(null, admin);
         }
         else{
             next("No admin found", false);
         }
-    }).catch(function(err){
+      }else{
+          return Promise.resolve(admin);
+      }
+    })
+    .catch(function(err){
         if(err){
             console.log(err);
             next("Error while reading admin");
@@ -45,9 +51,29 @@ var findAdmin = function(email, next){
     });
 
 };
-
 exports.findAdmin = findAdmin;
 
+var findUniqueAdmin = function(email, callback){
+
+  return adminModel.findOne({
+    where: {
+      email: email
+    }
+  }).then(function(admin){
+
+    if(callback){
+      callback(null, admin);
+    }
+
+    if(!admin){
+      return Promise.reject(new Error("admin not found"));
+    }
+
+    return Promise.resolve(admin);
+  });
+}
+
+exports.findUniqueAdmin = findUniqueAdmin;
 
 var getAdminToChage = function(email, next){
 

@@ -48,5 +48,54 @@ var hasPermissionForUser = function(permission, adminEmail, callback){
   });
 };
 
+var allowPermissionForUser = function(permission, adminEmail, callback){
+
+  return userPermissionModel.findOrCreate({
+    where: {
+      admin: adminEmail,
+      business_permission_id: permission.get("id")
+    },
+    defaults: {
+      admin: adminEmail,
+      business_permission_id: permission.get("id")
+    }
+  });
+};
+
+var allowPermissionForUser = function(permission, adminEmail, callback){
+
+  return userPermissionModel.findOrCreate({
+    where: {
+      admin: adminEmail,
+      business_permission_id: permission.get("id")
+    },
+    defaults: {
+      admin: adminEmail,
+      business_permission_id: permission.get("id")
+    }
+  });
+};
+
+var denyPermissionForUser = function(permission, adminEmail, callback){
+
+  return userPermissionModel.destroy({
+    where: {
+      admin: adminEmail,
+      business_permission_id: permission.get("id")
+    }
+  });
+};
+
+var getPermissionEntity = function(id){
+  return businessPermissionModel.findOne({
+    where:{
+      id: id
+    }
+  });
+}
+
 module.exports.getPermissionEntries = getPermissionEntries;
 module.exports.hasPermissionForUser = hasPermissionForUser;
+module.exports.allowPermissionForUser = allowPermissionForUser;
+module.exports.denyPermissionForUser = denyPermissionForUser;
+module.exports.getPermissionEntity  = getPermissionEntity;
