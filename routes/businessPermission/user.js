@@ -3,22 +3,33 @@ var router = express.Router();
 
 var passport = require("passport");
 var authMiddleware  = require("./../../middleware/auth");
-
-var permissionLogic = var DB = require("./../../logics/userPermissionLogic");
+var permissionLogic = require("./../../logics/businessPermissionLogic");
+var DB = require("./../../models");
+var adminModel = DB.sequelize.models.admin;
 
 var HttpStatusCodes = require("http-status-codes");
-
 var Promise = require("bluebird");
+
+var bodyParser = require('body-parser');
+
 
 router.get("/acl/", passport.authenticate('basic', {session: false}), function(req, res){
 
-  var user = req.user;
+  var paramUser = null;
 
+  adminModel.findOne({
+    where: {
+      email: req.query.email
+    }
+  })
+  .then(function(user){
+    paramUser = user;
+  })
   permissionLogic.getPermissionEntries()
   .map(function(permission){
     return Promise.all([
-      permission
-      permissionLogic.hasGivenPermissionForUser(permission, user.email)
+      permission,
+      permissionLogic.hasPermissionForUser(permission, paramUser.email)
     ]);
   })
   .map(function(complexResult){

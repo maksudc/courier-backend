@@ -42,7 +42,7 @@ router.use("/siteSetting" , siteSettingRouter);
 router.use("/admin", require("./admin"));
 
 router.use("/permission", require("./permission"));
-
+router.use("/businessPermission", require("./businessPermission"));
 router.use("/client", require("./client"));
 
 router.use("/money", require("./money"));

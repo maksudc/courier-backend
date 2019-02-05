@@ -51,9 +51,11 @@ exports.findAdmin = findAdmin;
 
 var getAdminToChage = function(email, next){
 
-    adminModel.find({
+    adminModel
+    .find({
         where: {email: email}}
-    ).then(function(admin){
+    )
+    .then(function(admin){
         if(admin){
             console.log(admin.dataValues);
             next(null, {
@@ -73,7 +75,8 @@ var getAdminToChage = function(email, next){
         else{
             next("No admin found", false);
         }
-    }).catch(function(err){
+    })
+    .catch(function(err){
         if(err){
             console.error(err.stack);
             next("Error while reading admin");

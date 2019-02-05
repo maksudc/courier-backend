@@ -29,7 +29,7 @@ var getPermissionEntries = function(callback){
   })
 }
 
-var hasGivenPermissionForUser = function(permission, adminEmail, callback){
+var hasPermissionForUser = function(permission, adminEmail, callback){
 
   return userPermissionModel.count({
     where: {
@@ -49,4 +49,4 @@ var hasGivenPermissionForUser = function(permission, adminEmail, callback){
 };
 
 module.exports.getPermissionEntries = getPermissionEntries;
-module.exports.hasGivenPermissionForUser = hasGivenPermissionForUser;
+module.exports.hasPermissionForUser = hasPermissionForUser;
