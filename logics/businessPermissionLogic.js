@@ -62,20 +62,6 @@ var allowPermissionForUser = function(permission, adminEmail, callback){
   });
 };
 
-var allowPermissionForUser = function(permission, adminEmail, callback){
-
-  return userPermissionModel.findOrCreate({
-    where: {
-      admin: adminEmail,
-      business_permission_id: permission.get("id")
-    },
-    defaults: {
-      admin: adminEmail,
-      business_permission_id: permission.get("id")
-    }
-  });
-};
-
 var denyPermissionForUser = function(permission, adminEmail, callback){
 
   return userPermissionModel.destroy({

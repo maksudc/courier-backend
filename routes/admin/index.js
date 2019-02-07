@@ -86,10 +86,9 @@ router.get('/types', function(req, res){
 
 router.post('/create', function(req, res){
 
-	console.log("Hitting here!!!");
 
 	var adminData = req.body;
-	console.log(adminData);
+
 	if(!adminData.email) return res.send({"err": JSON.stringify({"message": "Must have email"})});
 	else if(!adminData.password) return res.send({"err": JSON.stringify({"message": "Must set password"})});
 	else if(!adminData.username) return res.send({"err": JSON.stringify({"message": "Must have user name"})});
@@ -126,7 +125,6 @@ router.get('/update', function(req, res){
 	*/
 
 	if(req.user.role != config.adminTypes.super_admin.type) return res.send(401);
-	console.log(req.user);
 
 	adminLogic.getAdminsToChange(function(err, adminList){
 		if(err) return res.send({"status": "error", error: err});
@@ -148,7 +146,6 @@ router.get('/update/:email', function(req, res){
 	*/
 
 	if(req.user.role != config.adminTypes.super_admin.type) return res.send(401);
-	console.log(req.user);
 
 	adminLogic.getAdminToChage(req.params.email, function(err, admin){
 		if(err) return res.send({"status": "error", error: err});

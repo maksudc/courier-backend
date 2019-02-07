@@ -55,18 +55,7 @@ router.get("/acl/", passport.authenticate('basic', {session: false}), function(r
 });
 
 router.post("/change/", passport.authenticate('basic', {session: false}), function(req, res){
-  /**
-  {
-    "email": "",
-    "permissionMatrix":[
-      {
-        "id": "permissionId",
-        "name": "permissionName",
-        allowed: true, // false ?
-      }
-    ]
-  }
-  **/
+
   var params = req.body;
   var paramAdminEmail = params["email"];
   var paramUser = null;
@@ -89,15 +78,15 @@ router.post("/change/", passport.authenticate('basic', {session: false}), functi
     permissionEntity = complexResult[1];
 
     if(permissionDescriptor["allowed"]){
-      return permissionLogic.allowPermissionForUser(permissionEntity, paramUser);
+      return permissionLogic.allowPermissionForUser(permissionEntity, paramUser.email);
     }else{
-      return permissionLogic.denyPermissionForUser(permissionEntity, paramUser);
+      return permissionLogic.denyPermissionForUser(permissionEntity, paramUser.email);
     }
   })
   .then(function(complexResult){
 
     res.status(HttpStatusCodes.OK);
-    res.send(complexResult);
+    res.send({});
   })
   .catch(function(err){
     err_message = null;

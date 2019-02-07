@@ -1,6 +1,11 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
     var userPermissions = sequelize.define('userPermission', {
+      id:{
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
       admin: {
         type: DataTypes.STRING,
         allowNull: false

@@ -45,7 +45,7 @@ var findAdmin = function(email, next){
     })
     .catch(function(err){
         if(err){
-            console.log(err);
+            console.error(err);
             next("Error while reading admin");
         }
     });
@@ -83,7 +83,7 @@ var getAdminToChage = function(email, next){
     )
     .then(function(admin){
         if(admin){
-            console.log(admin.dataValues);
+
             next(null, {
                 full_name: admin.dataValues.full_name || '',
                 regional_branch_id: admin.dataValues.regional_branch_id,
