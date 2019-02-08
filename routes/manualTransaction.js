@@ -24,7 +24,6 @@ var middleware = require(process.cwd() + '/middleware');
 
 
 router.use(passport.authenticate('basic', {session: false}));
-router.use(middleware.checkPermission);
 
 router.post("/create", upload.array(), function (req, res) {
 
