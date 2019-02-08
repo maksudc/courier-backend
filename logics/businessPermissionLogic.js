@@ -78,10 +78,21 @@ var getPermissionEntity = function(id){
       id: id
     }
   });
-}
+};
+
+var getPermissionEntitiesByName = function(names){
+  return businessPermissionModel.findAll({
+    where:{
+      name: {
+        "$in": names
+      }
+    }
+  });
+};
 
 module.exports.getPermissionEntries = getPermissionEntries;
 module.exports.hasPermissionForUser = hasPermissionForUser;
 module.exports.allowPermissionForUser = allowPermissionForUser;
 module.exports.denyPermissionForUser = denyPermissionForUser;
 module.exports.getPermissionEntity  = getPermissionEntity;
+module.exports.getPermissionEntitiesByName = getPermissionEntitiesByName;

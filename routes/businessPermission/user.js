@@ -102,4 +102,76 @@ router.post("/change/", passport.authenticate('basic', {session: false}), functi
   });
 });
 
+router.get("/can_access/", passport.authenticate('basic', {session: false}), function(req, res){
+
+  /**
+    "email": "",
+    "permissions": [],
+    "association": "or" // "and"
+  **/
+
+  var paramUser = null;
+  var selectedAdminEmail = req.query.email;
+  var permissionNames = JSON.parse(req.query.permissions);
+
+  var association = "and";
+  if(req.query.association){
+    association = req.query.association;
+  }
+
+  adminLogic.findUniqueAdmin(selectedAdminEmail)
+  .then(function(user){
+    paramUser = user;
+  })
+  .then(function(){
+    return permissionLogic.getPermissionEntitiesByName(permissionNames);
+  })
+  .map(function(permission){
+    return permissionLogic.hasPermissionForUser(permission, paramUser.email);
+  })
+  .then(function(results){
+
+    hasAccess = false;
+
+    if(association == "or"){
+
+      for(I=0; I < results.length; I++){
+        if(results[I]){
+          hasAccess = true;
+          break;
+        }else{
+          hasAccess = false;
+        }
+      }
+    }else{
+
+      for(I=0; I < results.length; I++){
+        if(!results[I]){
+          hasAccess = false;
+          break;
+        }else{
+          hasAccess = true;
+        }
+      }
+    }
+
+    res.status(HttpStatusCodes.OK);
+    res.send({
+      allowed: hasAccess
+    });
+  })
+  .catch(function(err){
+    err_message = null;
+    if(err){
+      console.error(err);
+      err_message  = err.message;
+    }
+
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    res.send({
+      message: err_message
+    });
+  });
+});
+
 module.exports = router;
