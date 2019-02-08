@@ -28,5 +28,11 @@
   },
   {
     "name": "delete_manual_cashout"
+  },
+  {
+    "name": "view_manual_cashin_reporting"
+  },
+  {
+    "name": "view_manual_cashout_reporting"
   }
 ]
