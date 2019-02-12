@@ -152,8 +152,18 @@ router.patch("/:corporationId$", upload.array(), function(req, res){
     });
 });
 
-router.delete("/:corporationId$", upload.array(), function(req, res){
-
+router.delete("/:corporationId$", function (req, res) {
+    corporationModel.destroy({
+        where: {
+            "id": req.params.corporationId
+        }
+    }).then(function (response) {
+        res.status(200)
+        res.send({status: "success", data: response, message: "deleted"})
+    }).catch(function (err) {
+        res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+        res.send({status: "error", data: null, message: err});
+    });
 });
 
 router.get("/search/autocomplete/",passport.authenticate('basic', {session: false}), function(req, res){
@@ -178,16 +188,17 @@ router.get("/search/autocomplete/",passport.authenticate('basic', {session: fals
 			"results": formattedResults
 		};
 
-		res.status(HttpStatusCodes.OK);
+
 		res.send(response);
 	})
 	.catch(function(err){
 		if(err){
 			console.error(err);
 		}
-		res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+
 		res.send(err);
 	});
 });
+
 
 module.exports = router;
