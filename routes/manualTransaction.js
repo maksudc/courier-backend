@@ -21,6 +21,7 @@ router.use(bodyParser.urlencoded({extended: true})); // for parsing application/
 
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
+var aclMiddleware = require(process.cwd() + '/middleware/acl');
 
 
 router.use(passport.authenticate('basic', {session: false}));
@@ -103,6 +104,7 @@ router.get("/details/:id", function (req, res) {
         manualtransactionDetails['payment_method'] = transaction_details.payment_method;
         manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
 
+        res.status(200);
         res.send({data: manualtransactionDetails});
 
     }).catch(function (err) {
@@ -112,5 +114,30 @@ router.get("/details/:id", function (req, res) {
 
 })
 
+router.delete("/cashin/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashin"]), function(req, res){
+
+  manualTransaction.destroy({
+    where:{
+      id: req.params.id,
+      transaction_type: "cashin"
+    }
+  })
+  .then(function(result){
+
+    res.status(200).send({
+      message: "Successful"
+    });
+  })
+  .catch(function(err){
+
+    message = "";
+    if(err){
+      message = err.message;
+      console.error(err.stack);
+    }
+    res.status(500);
+    res.send(message);
+  });
+});
 
 module.exports = router;
