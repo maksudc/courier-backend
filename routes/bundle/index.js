@@ -26,6 +26,10 @@ router.use("/remove/items" , itemRemovalRouter);
 var sealRouter = require("./seal");
 router.use("/seal" , sealRouter);
 
+var archiveRouter = require("./archive");
+router.use("/archive" , archiveRouter);
+
+
 var groupFormattedRouter = require("./groupFormatted");
 router.use("/formatted" , groupFormattedRouter);
 

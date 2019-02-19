@@ -48,6 +48,36 @@ var hasPermissionForUser = function(permission, adminEmail, callback){
   });
 };
 
+var hasMultiplePermissionsForUser = function(permissions, adminEmail, association, callback){
+
+  if(!association){
+    association = "and";
+  }
+
+  whereQuery = {};
+  associationKey = "$" + association;
+  whereQuery[associationKey] = [];
+  for(I=0; I < permissions.length; I++){
+    whereQuery[associationKey].push({
+      admin: adminEmail,
+      business_permission_id: permissions[I].get("id")
+    });
+  }
+
+  return userPermissionModel.count({
+    where: whereQuery
+  })
+  .then(function(count){
+    
+    hasPerm = count > 0;
+
+    if(callback){
+      callback(null, hasPerm);
+    }
+    return Promise.resolve(hasPerm);
+  });
+};
+
 var allowPermissionForUser = function(permission, adminEmail, callback){
 
   return userPermissionModel.findOrCreate({
@@ -96,3 +126,4 @@ module.exports.allowPermissionForUser = allowPermissionForUser;
 module.exports.denyPermissionForUser = denyPermissionForUser;
 module.exports.getPermissionEntity  = getPermissionEntity;
 module.exports.getPermissionEntitiesByName = getPermissionEntitiesByName;
+module.exports.hasMultiplePermissionsForUser = hasMultiplePermissionsForUser;

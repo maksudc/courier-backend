@@ -26,9 +26,11 @@ router.get("/$" , function(req , res){
 	userObj = tableHelper.getUser();
   whereQuery = null;
 
-	extraQuery = {
-
-	};
+    extraQuery = {
+        "archived": {
+            "$eq": "0"
+        }
+    };
 	if(userObj){
 
     if(userObj.getSubBranchId()){

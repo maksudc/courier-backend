@@ -21,6 +21,7 @@ router.use(bodyParser.urlencoded({extended: true})); // for parsing application/
 
 var passport = require('passport');
 var middleware = require(process.cwd() + '/middleware');
+var aclMiddleware = require(process.cwd() + '/middleware/acl');
 
 
 router.use(passport.authenticate('basic', {session: false}));
@@ -102,7 +103,9 @@ router.get("/details/:id", function (req, res) {
         manualtransactionDetails['amount'] = transaction_details.amount;
         manualtransactionDetails['payment_method'] = transaction_details.payment_method;
         manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
+        manualtransactionDetails["transaction_type"] = transaction_details.transaction_type;
 
+        res.status(200);
         res.send({data: manualtransactionDetails});
 
     }).catch(function (err) {
@@ -112,5 +115,67 @@ router.get("/details/:id", function (req, res) {
 
 })
 
+router.delete("/cashin/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashin"]), function(req, res){
+
+  manualTransaction.destroy({
+    where:{
+      id: req.params.id,
+      transaction_type: "cashin"
+    }
+  })
+  .then(function(result){
+
+    if(result > 0){
+      res.status(200).send({
+        message: "Successful"
+      });
+    }else{
+      res.status(404).send({
+        message: "Not found"
+      });
+    }
+  })
+  .catch(function(err){
+
+    message = "";
+    if(err){
+      message = err.message;
+      console.error(err.stack);
+    }
+    res.status(500);
+    res.send(message);
+  });
+});
+
+router.delete("/cashout/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashout"]), function(req, res){
+
+  manualTransaction.destroy({
+    where:{
+      id: req.params.id,
+      transaction_type: "cashout"
+    }
+  })
+  .then(function(result){
+    if(result > 0){
+      res.status(200).send({
+        message: "Successful"
+      });
+    }else{
+      res.status(404).send({
+        message: "Not found"
+      });
+    }
+  })
+  .catch(function(err){
+
+    message = "";
+    if(err){
+      message = err.message;
+      console.error(err.stack);
+    }
+    res.status(500);
+    res.send(message);
+  });
+});
 
 module.exports = router;
