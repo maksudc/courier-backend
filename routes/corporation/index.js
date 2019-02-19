@@ -188,17 +188,16 @@ router.get("/search/autocomplete/",passport.authenticate('basic', {session: fals
 			"results": formattedResults
 		};
 
-
+		res.status(HttpStatusCodes.OK);
 		res.send(response);
 	})
 	.catch(function(err){
 		if(err){
 			console.error(err);
 		}
-
+		res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
 		res.send(err);
 	});
 });
-
 
 module.exports = router;
