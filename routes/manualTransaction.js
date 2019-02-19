@@ -103,6 +103,7 @@ router.get("/details/:id", function (req, res) {
         manualtransactionDetails['amount'] = transaction_details.amount;
         manualtransactionDetails['payment_method'] = transaction_details.payment_method;
         manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
+        manualtransactionDetails["transaction_type"] = transaction_details.transaction_type;
 
         res.status(200);
         res.send({data: manualtransactionDetails});
