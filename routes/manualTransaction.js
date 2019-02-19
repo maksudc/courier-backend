@@ -124,9 +124,46 @@ router.delete("/cashin/:id", aclMiddleware.isUserAllowedForPermissions(["delete_
   })
   .then(function(result){
 
-    res.status(200).send({
-      message: "Successful"
-    });
+    if(result > 0){
+      res.status(200).send({
+        message: "Successful"
+      });
+    }else{
+      res.status(404).send({
+        message: "Not found"
+      });
+    }
+  })
+  .catch(function(err){
+
+    message = "";
+    if(err){
+      message = err.message;
+      console.error(err.stack);
+    }
+    res.status(500);
+    res.send(message);
+  });
+});
+
+router.delete("/cashout/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashout"]), function(req, res){
+
+  manualTransaction.destroy({
+    where:{
+      id: req.params.id,
+      transaction_type: "cashout"
+    }
+  })
+  .then(function(result){
+    if(result > 0){
+      res.status(200).send({
+        message: "Successful"
+      });
+    }else{
+      res.status(404).send({
+        message: "Not found"
+      });
+    }
   })
   .catch(function(err){
 
