@@ -90,17 +90,22 @@ router.get("/details/:id", function (req, res) {
         transaction_details = transactionDetails;
         return branchUtils.getInclusiveBranchInstance(transactionDetails.source_branch_type, transactionDetails.source_branch_id);
     }).then(function (branchinfo) {
+        console.log(branchinfo);
+        manualtransactionDetails["branch_info"]=branchinfo;
         manualtransactionDetails['created_by'] = transaction_details.created_by;
         manualtransactionDetails['creation_date'] = transaction_details.createdAt;
         manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
         manualtransactionDetails["status"] = transaction_details.status;
         manualtransactionDetails["id"] = transaction_details.id;
-        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type
+        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type;
+         manualtransactionDetails["target_branch_type"] = transaction_details.branch_type;
+
         manualtransactionDetails['branch_label'] = branchinfo.label;
         manualtransactionDetails['description'] = transaction_details.payment_description
         manualtransactionDetails['received_by'] = transaction_details.received_by;
         manualtransactionDetails['received_at'] = transaction_details.received_at;
         manualtransactionDetails['amount'] = transaction_details.amount;
+        manualtransactionDetails['branch_id']=transaction_details.branch_id.toString();
         manualtransactionDetails['payment_method'] = transaction_details.payment_method;
         manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
         manualtransactionDetails["transaction_type"] = transaction_details.transaction_type;
