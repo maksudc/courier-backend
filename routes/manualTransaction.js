@@ -57,6 +57,33 @@ router.post("/create", upload.array(), function (req, res) {
     });
 });
 
+router.put("/cashin/update/:id", function (req, res) {
+    return manualTransaction.update(req.body,
+        {where: {id: req.params.id}, individualHooks: true}
+    ).then(function (result) {
+        res.send({status: "success", data: result});
+
+    }).catch(function (err) {
+        res.status(500);
+        res.send({status: "error", data: null, message: err});
+
+
+    })
+});
+router.put("/cashout/update/:id", function (req, res) {
+    return manualTransaction.update(req.body,
+        {where: {id: req.params.id}, individualHooks: true}
+    ).then(function (result) {
+        res.send({status: "success", data: result});
+
+    }).catch(function (err) {
+        res.status(500);
+        res.send({status: "error", data: null, message: err});
+
+
+    })
+});
+
 router.put("/receivetransaction/:id", function (req, res) {
 
     received_at = moment.tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
@@ -90,22 +117,17 @@ router.get("/details/:id", function (req, res) {
         transaction_details = transactionDetails;
         return branchUtils.getInclusiveBranchInstance(transactionDetails.source_branch_type, transactionDetails.source_branch_id);
     }).then(function (branchinfo) {
-        console.log(branchinfo);
-        manualtransactionDetails["branch_info"]=branchinfo;
         manualtransactionDetails['created_by'] = transaction_details.created_by;
         manualtransactionDetails['creation_date'] = transaction_details.createdAt;
         manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
         manualtransactionDetails["status"] = transaction_details.status;
         manualtransactionDetails["id"] = transaction_details.id;
-        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type;
-         manualtransactionDetails["target_branch_type"] = transaction_details.branch_type;
-
+        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type
         manualtransactionDetails['branch_label'] = branchinfo.label;
         manualtransactionDetails['description'] = transaction_details.payment_description
         manualtransactionDetails['received_by'] = transaction_details.received_by;
         manualtransactionDetails['received_at'] = transaction_details.received_at;
         manualtransactionDetails['amount'] = transaction_details.amount;
-        manualtransactionDetails['branch_id']=transaction_details.branch_id.toString();
         manualtransactionDetails['payment_method'] = transaction_details.payment_method;
         manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
         manualtransactionDetails["transaction_type"] = transaction_details.transaction_type;
@@ -120,67 +142,101 @@ router.get("/details/:id", function (req, res) {
 
 })
 
-router.delete("/cashin/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashin"]), function(req, res){
+router.get("/edit/:id", function (req, res) {
 
-  manualTransaction.destroy({
-    where:{
-      id: req.params.id,
-      transaction_type: "cashin"
-    }
-  })
-  .then(function(result){
+    return manualTransaction.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then(function (transactionDetails) {
+        transaction_details = transactionDetails;
+        return branchUtils.getInclusiveBranchInstance(transactionDetails.branch_type, transactionDetails.branch_id);
+    }).then(function (branchinfo) {
+        manualtransactionDetails["branch_info"] = branchinfo;
+        manualtransactionDetails['created_by'] = transaction_details.created_by;
+        manualtransactionDetails['creation_date'] = transaction_details.createdAt;
+        manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
+        manualtransactionDetails["status"] = transaction_details.status;
+        manualtransactionDetails["id"] = transaction_details.id;
+        manualtransactionDetails["branch_type"] = transaction_details.branch_type;
+        manualtransactionDetails['description'] = transaction_details.payment_description
+        manualtransactionDetails['amount'] = transaction_details.amount;
+        manualtransactionDetails['branch_id'] = transaction_details.branch_id;
+        manualtransactionDetails['payment_method'] = transaction_details.payment_method;
+        manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
 
-    if(result > 0){
-      res.status(200).send({
-        message: "Successful"
-      });
-    }else{
-      res.status(404).send({
-        message: "Not found"
-      });
-    }
-  })
-  .catch(function(err){
+        res.status(200);
+        res.send({data: manualtransactionDetails});
 
-    message = "";
-    if(err){
-      message = err.message;
-      console.error(err.stack);
-    }
-    res.status(500);
-    res.send(message);
-  });
+    }).catch(function (err) {
+        res.status(500);
+        res.send({status: "error", data: null, message: err})
+    });
+
+})
+
+
+router.delete("/cashin/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashin"]), function (req, res) {
+
+    manualTransaction.destroy({
+        where: {
+            id: req.params.id,
+            transaction_type: "cashin"
+        }
+    })
+        .then(function (result) {
+
+            if (result > 0) {
+                res.status(200).send({
+                    message: "Successful"
+                });
+            } else {
+                res.status(404).send({
+                    message: "Not found"
+                });
+            }
+        })
+        .catch(function (err) {
+
+            message = "";
+            if (err) {
+                message = err.message;
+                console.error(err.stack);
+            }
+            res.status(500);
+            res.send(message);
+        });
 });
 
-router.delete("/cashout/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashout"]), function(req, res){
+router.delete("/cashout/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashout"]), function (req, res) {
 
-  manualTransaction.destroy({
-    where:{
-      id: req.params.id,
-      transaction_type: "cashout"
-    }
-  })
-  .then(function(result){
-    if(result > 0){
-      res.status(200).send({
-        message: "Successful"
-      });
-    }else{
-      res.status(404).send({
-        message: "Not found"
-      });
-    }
-  })
-  .catch(function(err){
+    manualTransaction.destroy({
+        where: {
+            id: req.params.id,
+            transaction_type: "cashout"
+        }
+    })
+        .then(function (result) {
+            if (result > 0) {
+                res.status(200).send({
+                    message: "Successful"
+                });
+            } else {
+                res.status(404).send({
+                    message: "Not found"
+                });
+            }
+        })
+        .catch(function (err) {
 
-    message = "";
-    if(err){
-      message = err.message;
-      console.error(err.stack);
-    }
-    res.status(500);
-    res.send(message);
-  });
+            message = "";
+            if (err) {
+                message = err.message;
+                console.error(err.stack);
+            }
+            res.status(500);
+            res.send(message);
+        });
 });
 
 module.exports = router;
