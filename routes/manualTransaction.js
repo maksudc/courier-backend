@@ -106,8 +106,9 @@ router.put("/receivetransaction/:id", function (req, res) {
 })
 var manualtransactionDetails = {};
 var transaction_details = null;
-router.get("/details/:id", function (req, res) {
+var source_branch_info = null;
 
+router.get("/details/:id", function (req, res) {
 
     return manualTransaction.findOne({
         where: {
@@ -116,15 +117,22 @@ router.get("/details/:id", function (req, res) {
     }).then(function (transactionDetails) {
         transaction_details = transactionDetails;
         return branchUtils.getInclusiveBranchInstance(transactionDetails.source_branch_type, transactionDetails.source_branch_id);
-    }).then(function (branchinfo) {
+    }).then(function (source_branchinfo) {
+        source_branch_info = source_branchinfo;
+        return branchUtils.getInclusiveBranchInstance(transaction_details.branch_type, transaction_details.branch_id)
+
+    }).then(function (target_branchinfo) {
         manualtransactionDetails['created_by'] = transaction_details.created_by;
         manualtransactionDetails['creation_date'] = transaction_details.createdAt;
         manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
         manualtransactionDetails["status"] = transaction_details.status;
         manualtransactionDetails["id"] = transaction_details.id;
-        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type
-        manualtransactionDetails['branch_label'] = branchinfo.label;
-        manualtransactionDetails['description'] = transaction_details.payment_description
+        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type;
+        manualtransactionDetails["target_branch_type"] = transaction_details.branch_type
+        manualtransactionDetails['branch_label'] = source_branch_info.label;
+        manualtransactionDetails['branch_info'] = target_branchinfo;
+        manualtransactionDetails['description'] = transaction_details.payment_description;
+        manualtransactionDetails['branch_id'] = transaction_details.branch_id;
         manualtransactionDetails['received_by'] = transaction_details.received_by;
         manualtransactionDetails['received_at'] = transaction_details.received_at;
         manualtransactionDetails['amount'] = transaction_details.amount;
@@ -141,40 +149,6 @@ router.get("/details/:id", function (req, res) {
     });
 
 })
-
-router.get("/edit/:id", function (req, res) {
-
-    return manualTransaction.findOne({
-        where: {
-            id: req.params.id
-        }
-    }).then(function (transactionDetails) {
-        transaction_details = transactionDetails;
-        return branchUtils.getInclusiveBranchInstance(transactionDetails.branch_type, transactionDetails.branch_id);
-    }).then(function (branchinfo) {
-        manualtransactionDetails["branch_info"] = branchinfo;
-        manualtransactionDetails['created_by'] = transaction_details.created_by;
-        manualtransactionDetails['creation_date'] = transaction_details.createdAt;
-        manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
-        manualtransactionDetails["status"] = transaction_details.status;
-        manualtransactionDetails["id"] = transaction_details.id;
-        manualtransactionDetails["branch_type"] = transaction_details.branch_type;
-        manualtransactionDetails['description'] = transaction_details.payment_description
-        manualtransactionDetails['amount'] = transaction_details.amount;
-        manualtransactionDetails['branch_id'] = transaction_details.branch_id;
-        manualtransactionDetails['payment_method'] = transaction_details.payment_method;
-        manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
-
-        res.status(200);
-        res.send({data: manualtransactionDetails});
-
-    }).catch(function (err) {
-        res.status(500);
-        res.send({status: "error", data: null, message: err})
-    });
-
-})
-
 
 router.delete("/cashin/:id", aclMiddleware.isUserAllowedForPermissions(["delete_manual_cashin"]), function (req, res) {
 
