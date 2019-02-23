@@ -47,13 +47,12 @@ router.post("/create", upload.array(), function (req, res) {
     }).then(function (result) {
         res.status(201);
         res.send({status: "success", data: result, message: postData});
-
-
     }).catch(function (err) {
+        if(err){
+          console.error(err.stack);
+        }
         res.status(500);
         res.send({status: "error", data: null, message: err});
-        throw new Error();
-
     });
 });
 
