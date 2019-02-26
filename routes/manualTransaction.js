@@ -47,41 +47,49 @@ router.post("/create", upload.array(), function (req, res) {
     }).then(function (result) {
         res.status(201);
         res.send({status: "success", data: result, message: postData});
-
-
     }).catch(function (err) {
+        if(err){
+          console.error(err.stack);
+        }
         res.status(500);
         res.send({status: "error", data: null, message: err});
-        throw new Error();
-
     });
 });
 
 router.put("/cashin/update/:id", function (req, res) {
     return manualTransaction.update(req.body,
-        {where: {id: req.params.id}, individualHooks: true}
+        {
+          where: {
+            id: req.params.id,
+            transaction_type: "cashin"
+          },
+          individualHooks: true
+        }
     ).then(function (result) {
         res.send({status: "success", data: result});
 
     }).catch(function (err) {
         res.status(500);
         res.send({status: "error", data: null, message: err});
-
-
-    })
+    });
 });
+
 router.put("/cashout/update/:id", function (req, res) {
     return manualTransaction.update(req.body,
-        {where: {id: req.params.id}, individualHooks: true}
+        {
+          where: {
+            id: req.params.id,
+            transaction_type: "cashout"
+          },
+          individualHooks: true
+        }
     ).then(function (result) {
         res.send({status: "success", data: result});
 
     }).catch(function (err) {
         res.status(500);
         res.send({status: "error", data: null, message: err});
-
-
-    })
+    });
 });
 
 router.put("/receivetransaction/:id", function (req, res) {
