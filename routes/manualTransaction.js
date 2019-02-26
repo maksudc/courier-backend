@@ -127,12 +127,12 @@ router.get("/details/:id", function (req, res) {
         manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
         manualtransactionDetails["status"] = transaction_details.status;
         manualtransactionDetails["id"] = transaction_details.id;
-        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type;
+        manualtransactionDetails["source_branch_type"] = transaction_details.source_branch_type;
         manualtransactionDetails["target_branch_type"] = transaction_details.branch_type
-        manualtransactionDetails['branch_label'] = source_branch_info.label;
-        manualtransactionDetails['branch_info'] = target_branchinfo;
+        manualtransactionDetails['source_branch_label'] = source_branch_info.label;
+        manualtransactionDetails['target_branch_info'] = target_branchinfo;
         manualtransactionDetails['description'] = transaction_details.payment_description;
-        manualtransactionDetails['branch_id'] = transaction_details.branch_id;
+        manualtransactionDetails['target_branch_id'] = transaction_details.branch_id;
         manualtransactionDetails['received_by'] = transaction_details.received_by;
         manualtransactionDetails['received_at'] = transaction_details.received_at;
         manualtransactionDetails['amount'] = transaction_details.amount;
