@@ -13,6 +13,7 @@ module.exports = function(sequelize , DataTypes){
       label: DataTypes.STRING,
       phone: DataTypes.STRING,
       address:DataTypes.STRING,
+      vd_disabled:DataTypes.BOOLEAN,
       branchType: DataTypes.STRING,
       position: DataTypes.GEOMETRY,
       enabled: { type: DataTypes.BOOLEAN , defaultValue: true , allowNull:false }

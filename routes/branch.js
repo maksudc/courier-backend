@@ -82,6 +82,16 @@ router.get("/:branchType" , function(req , res){
   });
 });
 
+router.get("/:branchType/vdEnabled", function (req, res) {
+
+    branchLogic.vdEnabledBranch(req.params.branchType, req.query, function (data) {
+        if (data.statusCode) {
+            res.status(data.statusCode);
+        }
+        res.send(data);
+    });
+});
+
 router.get("/:branchType/:branchId" , function(req , res){
 
   branchLogic.getBranch(req.params.branchType ,req.params.branchId , function(data){
@@ -91,6 +101,8 @@ router.get("/:branchType/:branchId" , function(req , res){
     res.send(data);
   });
 });
+
+
 
 router.put("/:branchType/:branchId" , upload.array() , function(req , res){
 
