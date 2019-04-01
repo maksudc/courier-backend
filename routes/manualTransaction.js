@@ -125,22 +125,22 @@ router.get("/details/:id", function (req, res) {
     }).then(function (transactionDetails) {
         transaction_details = transactionDetails;
         return branchUtils.getInclusiveBranchInstance(transactionDetails.source_branch_type, transactionDetails.source_branch_id);
-    }).then(function (source_branchinfo) {
-        source_branch_info = source_branchinfo;
+    }).then(function (sourcebranchinfo) {
+        source_branch_info =sourcebranchinfo;
         return branchUtils.getInclusiveBranchInstance(transaction_details.branch_type, transaction_details.branch_id)
 
-    }).then(function (target_branchinfo) {
+    }).then(function (target_branch_info) {
         manualtransactionDetails['created_by'] = transaction_details.created_by;
         manualtransactionDetails['creation_date'] = transaction_details.createdAt;
         manualtransactionDetails['instructed_by'] = transaction_details.instructed_by;
         manualtransactionDetails["status"] = transaction_details.status;
         manualtransactionDetails["id"] = transaction_details.id;
-        manualtransactionDetails["branch_type"] = transaction_details.source_branch_type;
+        manualtransactionDetails["source_branch_type"] = transaction_details.source_branch_type;
         manualtransactionDetails["target_branch_type"] = transaction_details.branch_type
-        manualtransactionDetails['branch_label'] = source_branch_info.label;
-        manualtransactionDetails['branch_info'] = target_branchinfo;
+        manualtransactionDetails['source_branch_info'] = source_branch_info;
+        manualtransactionDetails['target_branch_info'] = target_branch_info;
         manualtransactionDetails['description'] = transaction_details.payment_description;
-        manualtransactionDetails['branch_id'] = transaction_details.branch_id;
+        manualtransactionDetails['target_branch_id'] = transaction_details.branch_id;
         manualtransactionDetails['received_by'] = transaction_details.received_by;
         manualtransactionDetails['received_at'] = transaction_details.received_at;
         manualtransactionDetails['amount'] = transaction_details.amount;
