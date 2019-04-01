@@ -80,20 +80,20 @@ var getBranches = function(branchType , params , next){
   });
 };
 
-var getVdEnabledBranches = function(branchType , params , next){
+var getVdEnabledBranches = function (branchType, params, next) {
 
-  branchModel = getBranchModel(branchType);
-  branchModel
-  .findAll({where:{vd_disabled : 0 }})
-  .then(function(branchItems){
-    next(branchItems);
-  })
-  .catch(function(err){
-    if(err){
-      console.error(err.stack);
-    }
-    next({ status: "error" , statusCode: HttpStatus.INTERNAL_SERVER_ERROR , data:null , message:err });
-  });
+    branchModel = getBranchModel(branchType);
+    branchModel
+        .findAll({where: {vd_disabled: 0}})
+        .then(function (branchItems) {
+            next(branchItems);
+        })
+        .catch(function (err) {
+            if (err) {
+                console.error(err.stack);
+            }
+            next({status: "error", statusCode: HttpStatus.INTERNAL_SERVER_ERROR, data: null, message: err});
+        });
 };
 
 var deleteBranch = function(branchType , branchId , next){

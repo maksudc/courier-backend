@@ -82,14 +82,14 @@ router.get("/:branchType" , function(req , res){
   });
 });
 
-router.get("/:branchType/vdEnabled" , function(req , res){
+router.get("/:branchType/vdEnabled", function (req, res) {
 
-  branchLogic.vdEnabledBranch(req.params.branchType , req.query , function(data){
-    if(data.statusCode){
-      res.status(data.statusCode);
-    }
-    res.send(data);
-  });
+    branchLogic.vdEnabledBranch(req.params.branchType, req.query, function (data) {
+        if (data.statusCode) {
+            res.status(data.statusCode);
+        }
+        res.send(data);
+    });
 });
 
 router.get("/:branchType/:branchId" , function(req , res){
