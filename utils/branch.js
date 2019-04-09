@@ -137,6 +137,17 @@ var getBranchModel = function(branchType){
   return branchModel;
 }
 
+var getSubBranchesUnderRegionalBranch = function(regionalBranchId, options){
+
+  query = options;
+  if(!query["where"]){
+    query["where"] = {};
+  }
+  query["where"]["regionalBranchId"] = regionalBranchId;
+
+  return subBranch.findAll(query);
+}
+
 exports.sanitizeBranchType = sanitizeBranchType;
 exports.desanitizeBranchType = desanitizeBranchType;
 exports.getBranchInstance = getBranchInstance;
@@ -144,3 +155,4 @@ exports.getInclusiveBranchInstance = getInclusiveBranchInstance;
 exports.prepareLabel = prepareLabel;
 exports.getBranchesWhereNameStartsWith = getBranchesWhereNameStartsWith;
 exports.getBranchModel = getBranchModel;
+exports.getSubBranches = getSubBranchesUnderRegionalBranch;
