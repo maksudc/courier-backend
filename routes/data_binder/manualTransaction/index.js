@@ -17,4 +17,7 @@ router.use('/receivedcashout/view', receivedcashoutDataBinder);
 var cashoutDataBinder = require("./viewCashout");
 router.use('/cashout/view', cashoutDataBinder);
 
+var sumOfTransactions = require("./sumOfTransactions");
+router.use("/sumOfTransactions", sumOfTransactions);
+
 module.exports = router;

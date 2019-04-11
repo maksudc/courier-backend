@@ -156,3 +156,4 @@ exports.prepareLabel = prepareLabel;
 exports.getBranchesWhereNameStartsWith = getBranchesWhereNameStartsWith;
 exports.getBranchModel = getBranchModel;
 exports.getSubBranches = getSubBranchesUnderRegionalBranch;
+exports.getSubBranchesUnderRegionalBranch = getSubBranchesUnderRegionalBranch;
