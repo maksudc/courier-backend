@@ -72,6 +72,28 @@ function getWhereQuery(params){
     }
   })
   .then(function(){
+    if(params.datetime_range_start || params.datetime_range_end){
+      whereQuery["received_at"] = {};
+
+      if(params.datetime_range_start){
+        whereQuery["received_at"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.CLIENT_ZONE).tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      }
+
+      if(params.datetime_range_end){
+        whereQuery["received_at"]["$lte"] = moment.tz(params.datetime_range_end, timezoneConfig.CLIENT_ZONE).tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      }
+
+      if(params.datetime_range_start && params.datetime_range_end){
+        whereQuery["received_at"]["$between"] = [];
+        whereQuery["received_at"]["$between"].push(whereQuery["received_at"]["$gte"]);
+        whereQuery["received_at"]["$between"].push(whereQuery["received_at"]["$lte"]);
+
+        delete whereQuery["received_at"]["$gte"];
+        delete whereQuery["received_at"]["$lte"];
+      }
+    }
+  })
+  .then(function(){
     return whereQuery;
   });
 }
