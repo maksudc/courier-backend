@@ -12,17 +12,25 @@ var _ = require("underscore");
 
 router.get("/", function(req, res){
 
-  getWhereQuery(req.query)
-  .then(function(whereQuery){
+  var result = {
+      "manual_cashin":0,
+      "manual_cashout": 0
+  };
 
-    return manualTransactionModel.sum("amount", {
-      where: whereQuery
-    });
+  Promise.resolve(["cashin", "cashout"])
+  .map(function(transactionType){
+
+    params = Object.assign({}, req.query);
+    params["transaction_type"] = transactionType;
+
+    return getManualTransactionSummary(params);
   })
-  .then(function(totalAmount){
-    res.status(HttpStatus.OK).send({
-      "sum": totalAmount
-    });
+  .then(function(manualTransactionAmounts){
+
+    result["manual_cashin"] = manualTransactionAmounts[0] || 0;
+    result["manual_cashout"] = manualTransactionAmounts[1] || 0;
+
+    res.status(HttpStatus.OK).send(result);
   })
   .catch(function(err){
     errorMessage = "";
@@ -37,7 +45,18 @@ router.get("/", function(req, res){
   });
 });
 
-function getWhereQuery(params){
+function getManualTransactionSummary(params){
+
+  return getManualTransactionWhereQuery(params)
+  .then(function(whereQuery){
+
+    return manualTransactionModel.sum("amount", {
+      where: whereQuery
+    });
+  });
+}
+
+function getManualTransactionWhereQuery(params){
 
   var whereQuery = {};
 
