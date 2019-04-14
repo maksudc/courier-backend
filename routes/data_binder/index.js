@@ -29,4 +29,7 @@ router.use("/activity" , activityDataBinderRouter);
 var reportingDataBinderRouter = require("./reporting");
 router.use("/reporting", reportingDataBinderRouter);
 
+var branchDataBinderRouter = require("./branch");
+router.use("/branch", branchDataBinderRouter);
+
 module.exports = router;
