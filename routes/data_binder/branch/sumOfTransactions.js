@@ -14,7 +14,9 @@ router.get("/", function(req, res){
 
   var result = {
       "manual_cashin":0,
-      "manual_cashout": 0
+      "manual_cashout": 0,
+      "order_cashin": 0,
+      "order_cashout": 0
   };
 
   Promise.resolve(["cashin", "cashout"])
@@ -26,9 +28,10 @@ router.get("/", function(req, res){
     return getManualTransactionSummary(params);
   })
   .then(function(manualTransactionAmounts){
-
     result["manual_cashin"] = manualTransactionAmounts[0] || 0;
     result["manual_cashout"] = manualTransactionAmounts[1] || 0;
+  })
+  .then(function(){
 
     res.status(HttpStatus.OK).send(result);
   })
