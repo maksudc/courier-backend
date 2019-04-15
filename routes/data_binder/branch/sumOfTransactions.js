@@ -4,7 +4,7 @@ var HttpStatus = require("http-status-codes");
 var DB = require("./../../../models/index");
 var manualTransactionModel = DB.sequelize.models.manualTransactions;
 var orderModel = DB.sequelize.models.order;
-var money = DB.sequelize.models.money;
+var moneyModel = DB.sequelize.models.money;
 var panicUtils = require("./../../../utils/panic");
 var Promise = require("bluebird");
 var branchUtils = require("./../../../utils/branch");
@@ -45,7 +45,13 @@ router.get("/", function(req, res){
     result["parcel_cashin"] = totalParcelCashin;
   })
   .then(function(){
-
+    params = Object.assign({}, req.query);
+    return getVDCashin(params);
+  })
+  .then(function(totalCashin){
+    result["vd_cashin"] = totalCashin;
+  })
+  .then(function(){
     res.status(HttpStatus.OK).send(result);
   })
   .catch(function(err){
@@ -111,11 +117,11 @@ function getManualTransactionWhereQuery(params){
       whereQuery["received_at"] = {};
 
       if(params.datetime_range_start){
-        whereQuery["received_at"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.CLIENT_ZONE).tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+        whereQuery["received_at"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
       }
 
       if(params.datetime_range_end){
-        whereQuery["received_at"]["$lte"] = moment.tz(params.datetime_range_end, timezoneConfig.CLIENT_ZONE).tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+        whereQuery["received_at"]["$lte"] = moment.tz(params.datetime_range_end, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
       }
 
       if(params.datetime_range_start && params.datetime_range_end){
@@ -181,11 +187,11 @@ function getParcelCashinWhereQuery(params){
       whereQuery["pay_time"] = {};
 
       if(params.datetime_range_start){
-        whereQuery["pay_time"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.CLIENT_ZONE).tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+        whereQuery["pay_time"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
       }
 
       if(params.datetime_range_end){
-        whereQuery["pay_time"]["$lte"] = moment.tz(params.datetime_range_end, timezoneConfig.CLIENT_ZONE).tz(timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+        whereQuery["pay_time"]["$lte"] = moment.tz(params.datetime_range_end, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
       }
 
       if(params.datetime_range_start && params.datetime_range_end){
@@ -202,6 +208,76 @@ function getParcelCashinWhereQuery(params){
     return whereQuery;
   });
 }
+
+function getVDCashin(params){
+
+  return getVDCashinWhereQuery(params)
+  .then(function(whereQuery){
+    return moneyModel.sum("payable", {
+      where: whereQuery
+    });
+  })
+}
+
+function getVDCashinWhereQuery(params){
+
+  var whereQuery = {
+    "type": "virtual_delivery",
+    "paid": 1
+  };
+
+  return Promise.resolve({})
+  .then(function(){
+    if(params){
+
+      if(params.branch_type && params.branch_id){
+
+        if(params.branch_type == "sub" && params.branch_id){
+          return Promise.resolve([params.branch_id]);
+
+        }else if(params.branch_type == "regional" && params.branch_id){
+          return getSubBranchIdsUnderRegionalBranch(params.branch_id);
+        }
+      }
+    }
+  })
+  .then(function(subBranchIds){
+
+    if(subBranchIds){
+
+      whereQuery["source_sub_branch_id"] = {
+        "$in": subBranchIds
+      };
+    }
+  })
+  .then(function(){
+    if(params.datetime_range_start || params.datetime_range_end){
+      whereQuery["payment_time"] = {};
+
+      if(params.datetime_range_start){
+        whereQuery["payment_time"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      }
+
+      if(params.datetime_range_end){
+        whereQuery["payment_time"]["$lte"] = moment.tz(params.datetime_range_end, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      }
+
+      if(params.datetime_range_start && params.datetime_range_end){
+        whereQuery["payment_time"]["$between"] = [];
+        whereQuery["payment_time"]["$between"].push(whereQuery["payment_time"]["$gte"]);
+        whereQuery["payment_time"]["$between"].push(whereQuery["payment_time"]["$lte"]);
+
+        delete whereQuery["payment_time"]["$gte"];
+        delete whereQuery["payment_time"]["$lte"];
+      }
+    }
+  })
+  .then(function(){
+    return whereQuery;
+  });
+}
+
+// function getVDCashout
 
 var getSubBranchIdsUnderRegionalBranch = function(regionalBranchId){
 
