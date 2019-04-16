@@ -59,6 +59,13 @@ router.get("/", function(req, res){
     result["vd_cashout"] = totalCashout;
   })
   .then(function(){
+    params = Object.assign({}, req.query);
+    return getMoneyCashin(params);
+  })
+  .then(function(totalCashin){
+    result["money_cashin"] = totalCashin;
+  })
+  .then(function(){
     res.status(HttpStatus.OK).send(result);
   })
   .catch(function(err){
@@ -351,6 +358,75 @@ function getVDCashoutWhereQuery(params){
     return whereQuery;
   });
 }
+
+function getMoneyCashin(params){
+
+  return getMoneyCashinWhereQuery(params)
+  .then(function(whereQuery){
+    return moneyModel.sum("payable", {
+      where: whereQuery
+    });
+  });
+}
+
+function getMoneyCashinWhereQuery(params){
+
+  var whereQuery = {
+    "type": "general",
+    "paid": 1
+  };
+
+  return Promise.resolve({})
+  .then(function(){
+    if(params){
+
+      if(params.branch_type && params.branch_id){
+
+        if(params.branch_type == "sub" && params.branch_id){
+          return Promise.resolve([params.branch_id]);
+
+        }else if(params.branch_type == "regional" && params.branch_id){
+          return getSubBranchIdsUnderRegionalBranch(params.branch_id);
+        }
+      }
+    }
+  })
+  .then(function(subBranchIds){
+
+    if(subBranchIds){
+
+      whereQuery["source_sub_branch_id"] = {
+        "$in": subBranchIds
+      };
+    }
+  })
+  .then(function(){
+    if(params.datetime_range_start || params.datetime_range_end){
+      whereQuery["payment_time"] = {};
+
+      if(params.datetime_range_start){
+        whereQuery["payment_time"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      }
+
+      if(params.datetime_range_end){
+        whereQuery["payment_time"]["$lte"] = moment.tz(params.datetime_range_end, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
+      }
+
+      if(params.datetime_range_start && params.datetime_range_end){
+        whereQuery["payment_time"]["$between"] = [];
+        whereQuery["payment_time"]["$between"].push(whereQuery["payment_time"]["$gte"]);
+        whereQuery["payment_time"]["$between"].push(whereQuery["payment_time"]["$lte"]);
+
+        delete whereQuery["payment_time"]["$gte"];
+        delete whereQuery["payment_time"]["$lte"];
+      }
+    }
+  })
+  .then(function(){
+    return whereQuery;
+  });
+}
+
 
 var getSubBranchIdsUnderRegionalBranch = function(regionalBranchId){
 
