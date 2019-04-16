@@ -52,6 +52,13 @@ router.get("/", function(req, res){
     result["vd_cashin"] = totalCashin;
   })
   .then(function(){
+    params = Object.assign({}, req.query);
+    return getVDCashout(params);
+  })
+  .then(function(totalCashout){
+    result["vd_cashout"] = totalCashout;
+  })
+  .then(function(){
     res.status(HttpStatus.OK).send(result);
   })
   .catch(function(err){
@@ -281,7 +288,7 @@ function getVDCashout(params){
 
   return getVDCashoutWhereQuery(params)
   .then(function(whereQuery){
-    return moneyModel.sum("payable", {
+    return moneyModel.sum("amount", {
       where: whereQuery
     });
   });
@@ -320,7 +327,7 @@ function getVDCashoutWhereQuery(params){
   })
   .then(function(){
     if(params.datetime_range_start || params.datetime_range_end){
-      whereQuery["delivery_time"] = {};
+      whereQuery["payment_time"] = {};
 
       if(params.datetime_range_start){
         whereQuery["payment_time"]["$gte"] = moment.tz(params.datetime_range_start, timezoneConfig.COMMON_ZONE).format("YYYY-MM-DD HH:mm:ss");
