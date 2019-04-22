@@ -11,6 +11,9 @@ var branchUtils = require("./../../../utils/branch");
 var moment = require("moment-timezone");
 var timezoneConfig = require("./../../../config/timezone");
 var _ = require("underscore");
+var passport = require("passport");
+
+router.use(passport.authenticate("basic" , {session: false}));
 
 router.get("/", function(req, res){
 
