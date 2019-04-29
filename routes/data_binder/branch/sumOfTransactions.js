@@ -235,12 +235,35 @@ function getParcelCashinWhereQuery(params){
 
 function getVDCashin(params){
 
+  var query = {};
+  var summation = 0;
+
   return getVDCashinWhereQuery(params)
   .then(function(whereQuery){
-    return moneyModel.sum("payable", {
-      where: whereQuery
+    query = whereQuery;
+
+    return moneyModel.sum("amount", {
+      where: query
     });
-  });
+  })
+  .then(function(totalAmount){
+
+    if(totalAmount){
+      summation += totalAmount;
+    }
+
+    return moneyModel.sum("charge", {
+      where: query
+    });
+  })
+  .then(function(totalCharge){
+
+    if(totalCharge){
+      summation += totalCharge;
+    }
+
+    return Promise.resolve(summation);
+  })
 }
 
 function getVDCashinWhereQuery(params){
@@ -315,7 +338,8 @@ function getVDCashoutWhereQuery(params){
 
   var whereQuery = {
     "type": "virtual_delivery",
-    "paid": 1
+    "paid": 1,
+    "status": "delivered"
   };
 
   return Promise.resolve({})
@@ -451,7 +475,8 @@ function getMoneyCashoutWhereQuery(params){
 
   var whereQuery = {
     "type": "general",
-    "paid": 1
+    "paid": 1,
+    "status": "delivered"
   };
 
   return Promise.resolve({})
