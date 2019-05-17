@@ -154,7 +154,7 @@ router.post("/markDelivered/:orderId", passport.authenticate('basic', {session: 
 	});
 });
 
-router.post("/incrementprintcounter/:orderId", passport.authenticate('basic', {session: false}), upload.array() , function(req , res){
+router.post("/increment_print_counter/:orderId", passport.authenticate('basic', {session: false}), upload.array() , function(req , res){
 
 	orderLogic.incrementprintcounter(req.params.orderId , req.user , function(data){
 		res.send(data);

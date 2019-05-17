@@ -1810,7 +1810,7 @@ var incrementPrintCounter = function(orderId , user , next) {
             })
             .then(function (result) {
 
-                next({status: "success", statusCode: 200, data: result.printcounter, message: null});
+                next({status: "success", statusCode: 200, count: result.printcounter, message: null});
             })
             .catch(function (err) {
                 if (err) {
@@ -1821,7 +1821,8 @@ var incrementPrintCounter = function(orderId , user , next) {
 
     })
 }
-module.exports.incrementprintcounter=incrementPrintCounter;
+
+exports.incrementprintcounter=incrementPrintCounter;
 var checkTrackingHealth = function(bar_code){
 
 	//Check whether it has tracker id properly or not
