@@ -7,7 +7,7 @@
     "dialect": "mysql",
     "retry": {
       "max": 1,
-      "timeout": 2000,
+      "timeout": 4000,
       "backoffBase": 1000,
       "backoffExponent": 1.5,
       "name": "Global Retry Message Handler"
@@ -21,7 +21,7 @@
     "dialect": "mysql",
     "retry": {
       "max": 1,
-      "timeout": 2000,
+      "timeout": 4000,
       "backoffBase": 1000,
       "backoffExponent": 1.5,
       "name": "Global Retry Message Handler"
@@ -36,7 +36,7 @@
     "logging": false,
     "retry": {
       "max": 1,
-      "timeout": 2000,
+      "timeout": 4000,
       "backoffBase": 1000,
       "backoffExponent": 1.5,
       "name": "Global Retry Message Handler"
@@ -51,7 +51,7 @@
     "logging": false,
     "retry": {
       "max": 1,
-      "timeout": 2000,
+      "timeout": 4000,
       "backoffBase": 1000,
       "backoffExponent": 1.5,
       "name": "Global Retry Message Handler"
