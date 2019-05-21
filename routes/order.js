@@ -153,6 +153,14 @@ router.post("/markDelivered/:orderId", passport.authenticate('basic', {session: 
 		res.send(data);
 	});
 });
+
+router.post("/increment_print_counter/:orderId", passport.authenticate('basic', {session: false}), upload.array() , function(req , res){
+
+	orderLogic.incrementprintcounter(req.params.orderId , req.user , function(data){
+		res.send(data);
+	});
+});
+
 router.post("/markDeliverable/:orderId", passport.authenticate('basic', {session: false}), upload.array() , function(req , res){
 
 	orderLogic.markDeliverable(req.params.orderId , req.user , function(data){
