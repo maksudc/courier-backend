@@ -1795,10 +1795,14 @@ var incrementPrintCounter = function(orderId , user , next) {
 
         return orderModel
             .findOne({
-                where: {uuid: orderId},
-                transaction: t
+                where: {
+									uuid: orderId
+								},
+                transaction: t,
+								lock: t.LOCK.UPDATE
             })
             .then(function (orderObject) {
+
                 orderInstance = orderObject;
                 printcountervalue = orderInstance.printcounter + 1;
                 orderInstance.set("printcounter", printcountervalue);
@@ -1806,23 +1810,21 @@ var incrementPrintCounter = function(orderId , user , next) {
                 return orderInstance.save({
                     transaction: t
                 })
-
-            })
-            .then(function (result) {
-
-                next({status: "success", statusCode: 200, count: result.printcounter, message: null});
-            })
-            .catch(function (err) {
-                if (err) {
-                    console.error(err.stack);
-                }
-                next({status: "error", statusCode: 500, data: null, message: err});
             });
-
     })
+		.then(function (result) {
+				next({status: "success", statusCode: 200, count: result.printcounter, message: null});
+		})
+		.catch(function (err) {
+				if (err) {
+						console.error(err.stack);
+				}
+				next({status: "error", statusCode: 500, data: null, message: err});
+		});
 }
 
 exports.incrementprintcounter=incrementPrintCounter;
+
 var checkTrackingHealth = function(bar_code){
 
 	//Check whether it has tracker id properly or not
