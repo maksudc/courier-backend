@@ -142,7 +142,7 @@ var editOrder = function(orderUuid , user, payload , callback){
 
   sequelize.transaction(function(t){
 
-    return orderModel.findOne({ where: { uuid: orderUuid } , transaction: t }) //, { transaction: t })
+    return orderModel.findOne({ where: { uuid: orderUuid } , transaction: t, lock: t.LOCK.UPDATE }) //, { transaction: t })
     .then(function(orderObject){
 
       orderInstance = orderObject;
@@ -176,7 +176,8 @@ var editOrder = function(orderUuid , user, payload , callback){
 
       return moneyModel.findOne({
           where: { type: "virtual_delivery", money_order_id: orderUuid },
-          transaction: t
+          transaction: t,
+          lock: t.LOCK.UPDATE
         }
       );
     })

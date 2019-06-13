@@ -4,14 +4,28 @@
     "password": "j9iETVlbMnqIDJyq",
     "database": "dak_harkara_local",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "retry": {
+      "max": 1,
+      "timeout": 4000,
+      "backoffBase": 1000,
+      "backoffExponent": 1.5,
+      "name": "Global Retry Message Handler"
+    }
   },
   "test": {
     "username": "dak_harkara",
     "password": "6hNWSTUyBPrEv9hP",
     "database": "dak_harkara_test",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "retry": {
+      "max": 1,
+      "timeout": 4000,
+      "backoffBase": 1000,
+      "backoffExponent": 1.5,
+      "name": "Global Retry Message Handler"
+    }
   },
   "production": {
     "username": "dak_harkara",
@@ -19,7 +33,14 @@
     "database": "dak_harkara",
     "host": "139.162.38.146",
     "dialect": "mysql",
-    "logging": false
+    "logging": false,
+    "retry": {
+      "max": 1,
+      "timeout": 4000,
+      "backoffBase": 1000,
+      "backoffExponent": 1.5,
+      "name": "Global Retry Message Handler"
+    }
   },
   "training": {
     "username": "training_dak",
@@ -27,6 +48,13 @@
     "database": "training_dak_harkara",
     "host": "139.162.38.146",
     "dialect": "mysql",
-    "logging": false
+    "logging": false,
+    "retry": {
+      "max": 1,
+      "timeout": 4000,
+      "backoffBase": 1000,
+      "backoffExponent": 1.5,
+      "name": "Global Retry Message Handler"
+    }
   }
 }

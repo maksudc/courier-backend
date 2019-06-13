@@ -1787,6 +1787,43 @@ var markDelivered = function(orderId , user , next){
 };
 exports.markDelivered = markDelivered;
 
+var incrementPrintCounter = function(orderId , user , next) {
+
+    var orderInstance = null;
+
+    sequelize.transaction(function (t) {
+
+        return orderModel
+            .findOne({
+                where: {
+									uuid: orderId
+								},
+                transaction: t,
+								lock: t.LOCK.UPDATE
+            })
+            .then(function (orderObject) {
+
+                orderInstance = orderObject;
+                printcountervalue = orderInstance.printcounter + 1;
+                orderInstance.set("printcounter", printcountervalue);
+
+                return orderInstance.save({
+                    transaction: t
+                })
+            });
+    })
+		.then(function (result) {
+				next({status: "success", statusCode: 200, count: result.printcounter, message: null});
+		})
+		.catch(function (err) {
+				if (err) {
+						console.error(err.stack);
+				}
+				next({status: "error", statusCode: 500, data: null, message: err});
+		});
+}
+
+exports.incrementprintcounter=incrementPrintCounter;
 
 var checkTrackingHealth = function(bar_code){
 
