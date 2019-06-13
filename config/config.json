@@ -17,7 +17,7 @@
     "username": "dak_harkara",
     "password": "6hNWSTUyBPrEv9hP",
     "database": "dak_harkara",
-    "host": "127.0.0.1",
+    "host": "139.162.38.146",
     "dialect": "mysql",
     "logging": false
   },
@@ -25,7 +25,7 @@
     "username": "training_dak",
     "password": "A98D5QRZNYenjPtD",
     "database": "training_dak_harkara",
-    "host": "127.0.0.1",
+    "host": "139.162.38.146",
     "dialect": "mysql",
     "logging": false
   }
