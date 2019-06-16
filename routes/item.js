@@ -3,6 +3,7 @@ var router = express.Router();
 var Sequelize = require("sequelize");
 var multer = require("multer");
 var upload = multer();
+var passport = require('passport');
 var productLogic = require("../logics/productLogic");
 var itemLogic = require("../logics/itemLogic");
 
@@ -31,6 +32,12 @@ router.post('/create', upload.array(), function(req, res){
 		else res.send({"status": "error", "message": "Cannot create item", "data": null});
 	});
 
+});
+router.post("/increment_print_counter/:itemId", passport.authenticate('basic', {session: false}), upload.array() , function(req , res){
+
+	itemLogic.incrementprintcounter(req.params.itemId, req.user , function(data){
+		res.send(data);
+	});
 });
 
 router.post('/update', upload.array(), function(req, res){

@@ -25,4 +25,10 @@ router.use('/awaiting/view' , awaitingDataBinder);
 var trackerDataBinder = require("./viewTracking");
 router.use("/tracking/view" , trackerDataBinder);
 
+var printTrackerItemLogs=require("./viewMultiplePrintedItems");
+router.use("/printTrackerItemLogs",printTrackerItemLogs);
+
+var printTrackerOrderLogs=require("./viewMultiplePrintedOrders");
+router.use("/printTrackerOrderLogs",printTrackerOrderLogs);
+
 module.exports = router;
