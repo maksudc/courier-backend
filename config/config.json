@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": "root",
-    "password": "root",
-    "database": "dak_harkara",
+    "username": "dak_harkara",
+    "password": "j9iETVlbMnqIDJyq",
+    "database": "dak_harkara_local",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "retry": {
@@ -31,7 +31,7 @@
     "username": "dak_harkara",
     "password": "6hNWSTUyBPrEv9hP",
     "database": "dak_harkara",
-    "host": "127.0.0.1",
+    "host": "139.162.38.146",
     "dialect": "mysql",
     "logging": false,
     "retry": {
