@@ -20,7 +20,7 @@ var aclMiddleware = require(process.cwd() + '/middleware/acl');
 router.use(passport.authenticate('basic', {session: false}));
 
 router.post("/create", upload.array(), function (req, res) {
-    console.log("request parameters"+req.body);
+
     postData = {};
     postData['uuid'] = req.body.uuid;
     postData['print_type'] = req.body.print_type;
@@ -28,8 +28,7 @@ router.post("/create", upload.array(), function (req, res) {
     postData['printed_by'] = req.body.printed_by;
     postData['printed_at'] = req.body.printed_at;
 
-  //  sequelize.transaction(function (t) {
-        return printTrackerLog.create(postData).then(function (result) {
+    return printTrackerLog.create(postData).then(function (result) {
         console.log(postData);
         res.status(201);
         res.send({status: "success", data: result, message: postData});
