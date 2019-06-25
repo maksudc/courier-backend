@@ -24,10 +24,10 @@ router.get('/', function(req, res){
 	whereQuery = null;
 
   extraQuery = {
- status:{
-	 $ne:'draft'
- }
-}
+		 status:{
+			 $ne:'draft'
+		 }
+	};
 
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
 	for(key in extraParamFilterQuery){
