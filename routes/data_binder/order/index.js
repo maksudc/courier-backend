@@ -31,4 +31,7 @@ router.use("/printTrackerItemLogs",printTrackerItemLogs);
 var printTrackerOrderLogs=require("./viewMultiplePrintedOrders");
 router.use("/printTrackerOrderLogs",printTrackerOrderLogs);
 
+var printTrackerOrderLogsOrderwise=require("./multiplePrintedOrdersOrderwise");
+router.use("/printTrackerOrderLogsOrderwise",printTrackerOrderLogsOrderwise);
+
 module.exports = router;

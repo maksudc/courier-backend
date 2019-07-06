@@ -25,8 +25,10 @@ router.post("/create", upload.array(), function (req, res) {
     postData['uuid'] = req.body.uuid;
     postData['print_type'] = req.body.print_type;
     postData['print_no'] = req.body.print_no;
+    postData['bar_code']=req.body.bar_code;
     postData['printed_by'] = req.body.printed_by;
     postData['printed_at'] = req.body.printed_at;
+
 
     return printTrackerLog.create(postData).then(function (result) {
         console.log(postData);
