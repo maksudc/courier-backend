@@ -29,7 +29,6 @@ router.get('/', function(req, res){
 	};
 
 	extraParamFilterQuery = tableHelper.getExtraFiltering();
-	console.log(extraParamFilterQuery);
 
 	for(key in extraParamFilterQuery){
 		if(key == "paid"){
@@ -38,8 +37,6 @@ router.get('/', function(req, res){
 			extraQuery[key] = extraParamFilterQuery[key];
 		}
 	}
-
-	console.log(extraQuery);
 
 	whereQuery = tableHelper.getWhere(extraQuery);
 

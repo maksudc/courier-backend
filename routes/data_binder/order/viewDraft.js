@@ -27,12 +27,12 @@ router.get('/', function(req, res){
 	if(userObj){
 		//&& !adminUtils.isPrivileged(userObj.getRole())){
 		if(userObj.getSubBranchId()){
-			extraQuery["current_hub"] = userObj.getSubBranchId();
-      extraQuery["current_hub_type"] = "sub";
+			extraQuery["entry_branch"] = userObj.getSubBranchId();
+      extraQuery["entry_branch_type"] = "sub-branch";
 		}
 		else if(userObj.getRegionalBranchId()){
-			extraQuery["current_hub"] = userObj.getRegionalBranchId();
-      extraQuery["current_hub_type"] = "regional"
+			extraQuery["entry_branch"] = userObj.getRegionalBranchId();
+      extraQuery["entry_branch_type"] = "regional-branch"
 		}
 	}
 	if(panicUtils.isPanicked(req)){
