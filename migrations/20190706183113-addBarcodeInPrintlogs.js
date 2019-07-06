@@ -3,9 +3,9 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.addColumn('printTrackerLogs','bar_code',{
-      type:Sequelize.INTEGER,
+      type:Sequelize.STRING,
       allowNull:false,
-      default:0
+      default:"0"
     })
     /*
       Add altering commands here.

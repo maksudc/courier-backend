@@ -12,7 +12,7 @@ var printTrackerLogs = DB.sequelize.models.printTrackerLogs;
 var DataTableHelper = require("./../../../utils/data_binder/dataTable");
 var panicUtils = require("./../../../utils/panic");
 const Op = DB.sequelize.op;
-router.get('/:barcode', function (req, res) {
+router.get('/:barcode/:type', function (req, res) {
 
     tableHelper = new DataTableHelper(req.query);
 
@@ -21,8 +21,10 @@ router.get('/:barcode', function (req, res) {
     whereQuery = null;
 
     extraQuery = {
-        "print_type": "order",
-        "bar_code": req.params.barcode + "-" + "%",
+        "print_type": req.params.type,
+        "bar_code": {
+            "$like": req.params.barcode + "%"
+        },
         "print_no": {
             gt: 1
         }

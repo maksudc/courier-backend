@@ -12,7 +12,7 @@ module.exports = function (sequelize, DataTypes) {
             print_type: {type: DataTypes.ENUM("item", "order"), allowNull: false},
             printed_by: {type: DataTypes.STRING, allowNull: true, defaultValue: null},
             printed_at: {type: DataTypes.STRING, allowNull: true, defaultValue: null},
-            bar_code:{type:DataTypes.INTEGER,allowNull:false,default:0},
+            bar_code:{type:DataTypes.STRING,allowNull:false,default:"0"},
 
             createdAt: {
                 allowNull: false,
