@@ -57,6 +57,44 @@ var findOneByParams = function(params, next){
 
 exports.findOneByParams = findOneByParams;
 
+var incrementPrintCounter = function (itemId, user, next) {
+
+    var itemInstance = null;
+
+    sequelize.transaction(function (t) {
+
+        return itemModel
+            .findOne({
+                where: {
+                    uuid: itemId
+                },
+                transaction: t,
+                lock: t.LOCK.UPDATE
+            })
+            .then(function (itemObject) {
+
+                itemInstance = itemObject;
+                printcountervalue = itemInstance.printcounter + 1;
+                itemInstance.set("printcounter", printcountervalue);
+
+                return itemInstance.save({
+                    transaction: t
+                })
+            });
+    })
+        .then(function (result) {
+            next({status: "success", statusCode: 200, count: result.printcounter, message: null});
+        })
+        .catch(function (err) {
+            if (err) {
+                console.error(err.stack);
+            }
+            next({status: "error", statusCode: 500, data: null, message: err});
+        });
+}
+
+exports.incrementprintcounter = incrementPrintCounter;
+
 
 var findManyByIds = function(ids, next){
 

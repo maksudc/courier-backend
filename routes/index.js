@@ -45,7 +45,7 @@ router.use("/admin", require("./admin"));
 router.use("/permission", require("./permission"));
 router.use("/businessPermission", require("./businessPermission"));
 router.use("/client", require("./client"));
-
+router.use("/printTrackerLogs",require("./printTrackerLogs"));
 router.use("/money", require("./money"));
 router.use("/report", require("./report"));
 router.use("/corporation", require("./corporation"));
