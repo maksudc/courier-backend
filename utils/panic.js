@@ -7,6 +7,7 @@ module.exports.attachPanicQuery = function(query){
 
   var currentDateZoned = moment.tz(timezoneConfig.CLIENT_ZONE);
   var cappedStartDateZoned =  moment.tz(timezoneConfig.CLIENT_ZONE).subtract(panicModeSettings.DATA_DAY_VISIBLITY_WINDOW , "day");
+
   cappedStartDateZoned.set({
     "hour": 0,
     "minute": 0,
@@ -14,8 +15,8 @@ module.exports.attachPanicQuery = function(query){
     "milisecond":0
   });
 
-  var utcCurrentDate = currentDateZoned.utc();
-  var utcCappedStartDateZoned = cappedStartDateZoned.utc();
+  var utcCurrentDate = currentDateZoned.tz(timezoneConfig.COMMON_ZONE);
+  var utcCappedStartDateZoned = cappedStartDateZoned.tz(timezoneConfig.COMMON_ZONE);
 
   query["createdAt"] = {
     "$gte": utcCappedStartDateZoned.format("YYYY-MM-DD HH:mm:ss"),
