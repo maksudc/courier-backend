@@ -10,7 +10,7 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER
             },
-            expenditureType:
+            name:
                 {
                     type: Sequelize.STRING,
                     allowNull: false
