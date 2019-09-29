@@ -39,7 +39,7 @@ module.exports = function (sequelize, DataTypes) {
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'received_by'});
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'updated_by'});
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'created_by'});
-                    manualTransactions.belongsTo(models.expenditureType, {foreignKey: 'expenditure_Type'});
+                    manualTransactions.belongsTo(models.expenditureTypes, {foreignKey: 'expenditure_Type'});
 
                 }
             }

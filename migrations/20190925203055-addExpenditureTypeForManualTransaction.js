@@ -9,7 +9,7 @@ module.exports = {
             allowNull: true
         }).then(function () {
             queryInterface.sequelize.query(
-                " ALTER TABLE `manualTransactions` ADD CONSTRAINT `expenditureTypeFK` FOREIGN KEY (`expenditure_Type`) REFERENCES `expenditureType` ( `id` ) ON DELETE SET NULL ON UPDATE CASCADE; "
+                " ALTER TABLE `manualTransactions` ADD CONSTRAINT `expenditureTypeFK` FOREIGN KEY (`expenditure_Type`) REFERENCES `expenditureTypes` ( `id` ) ON DELETE SET NULL ON UPDATE CASCADE; "
             );
         });
     },

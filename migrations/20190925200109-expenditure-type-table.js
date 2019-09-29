@@ -3,7 +3,7 @@
 module.exports = {
     up: (queryInterface, Sequelize) => {
 
-        return queryInterface.createTable('expenditureType', {
+        return queryInterface.createTable('expenditureTypes', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -44,7 +44,7 @@ module.exports = {
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable('expenditureType');
+        return queryInterface.dropTable('expenditureTypes');
         /*
           Add reverting commands here.
           Return a promise to correctly handle asynchronicity.

@@ -51,6 +51,7 @@ router.use("/report", require("./report"));
 router.use("/corporation", require("./corporation"));
 
 router.use("/referrers", require("./referrer"));
+router.use("/expenditureType", require("./expenditureType"));
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

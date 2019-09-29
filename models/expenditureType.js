@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
-    var expenditureType = sequelize.define('expenditureType', {
+    var expenditureType = sequelize.define('expenditureTypes', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
