@@ -4,7 +4,6 @@ var multer = require("multer");
 var upload = multer();
 var DB = require("../models/index");
 var sequelize = DB.sequelize;
-var manualTransaction = sequelize.models.manualTransactions;
 var passport = require('passport');
 var bodyParser = require('body-parser');
 var expenditureType = sequelize.models.expenditureTypes;
@@ -19,7 +18,8 @@ router.get('/',function(req,res)
 {
    return expenditureType.findAll().then(function(result)
    {
-       res.send(result);
+
+       res.send({status:"success",data:result,message:"found"});
    }).catch(function(err)
    {
        res.sendStatus(500).send(err.stack)
