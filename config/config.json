@@ -62,13 +62,6 @@
           "username": "training_dak",
           "password": "A98D5QRZNYenjPtD",
           "database": "training_dak_harkara",
-          "host": "139.162.38.146",
-          "port": 3306
-        },
-        {
-          "username": "training_dak",
-          "password": "A98D5QRZNYenjPtD",
-          "database": "training_dak_harkara",
           "host": "172.104.167.246",
           "port": 3306
         }
