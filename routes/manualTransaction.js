@@ -135,7 +135,6 @@ router.get("/details/:id", function (req, res) {
         id: req.params.id
         },
     }).then(function (transactionDetails) {
-        console.log(transactionDetails);
         transaction_details = transactionDetails;
         return branchUtils.getInclusiveBranchInstance(transactionDetails.source_branch_type, transactionDetails.source_branch_id);
     }).then(function (sourcebranchinfo) {
