@@ -18,18 +18,18 @@ module.exports = {
             createdBy:
                 {
                     type: Sequelize.STRING,
-                    allowNull: false,
+                    allowNull: true,
                 },
             updatedBy: {
                 type: Sequelize.STRING,
                 allowNull: true,
             },
             createdAt: {
-                allowNull: false,
+                allowNull: true,
                 type: Sequelize.DATE
             },
             updatedAt: {
-                allowNull: false,
+                allowNull: true,
                 type: Sequelize.DATE
             }
 

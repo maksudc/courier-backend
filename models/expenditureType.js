@@ -15,18 +15,18 @@ module.exports = function (sequelize, DataTypes) {
             createdBy:
                 {
                     type: DataTypes.STRING,
-                    allowNull: false,
+                    allowNull: true,
                 },
             updatedBy: {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
             createdAt: {
-                allowNull: false,
+                allowNull: true,
                 type: DataTypes.DATE
             },
             updatedAt: {
-                allowNull: false,
+                allowNull: true,
                 type: DataTypes.DATE
             }
         },
