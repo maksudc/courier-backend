@@ -14,7 +14,7 @@ module.exports = function (sequelize, DataTypes) {
           date_end: { type: DataTypes.DATE, allowNull:false },
 
           balance: {type: DataTypes.INTEGER, allowNull: false, defaultValue: 0},
-          cumulative_balance: {type: DataTypes.INTEGER, allowNull: false, defaultValue: 0},
+          closing_balance: {type: DataTypes.INTEGER, allowNull: false, defaultValue: 0},
 
           createdAt: {
               allowNull: false,

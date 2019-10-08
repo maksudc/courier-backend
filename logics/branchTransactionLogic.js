@@ -3,6 +3,7 @@ var manualTransactionModel = DB.sequelize.models.manualTransactions;
 var orderModel = DB.sequelize.models.order;
 var moneyModel = DB.sequelize.models.money;
 var branchUtils = require("./../utils/branch");
+var Promise = require("bluebird");
 var moment = require("moment-timezone");
 var timezoneConfig = require("./../config/timezone");
 
@@ -19,7 +20,7 @@ function getBranchTransactionHistory(query){
       "money_cashout": 0
   };
 
-  Promise.resolve(["cashin", "cashout"])
+  return Promise.resolve(["cashin", "cashout"])
   .map(function(transactionType){
 
     params = Object.assign({}, query);
@@ -36,35 +37,35 @@ function getBranchTransactionHistory(query){
     return getParcelCashin(params);
   })
   .then(function(totalParcelCashin){
-    result["parcel_cashin"] = totalParcelCashin;
+    result["parcel_cashin"] = totalParcelCashin || 0;
   })
   .then(function(){
     params = Object.assign({}, query);
     return getVDCashin(params);
   })
   .then(function(totalCashin){
-    result["vd_cashin"] = totalCashin;
+    result["vd_cashin"] = totalCashin || 0;
   })
   .then(function(){
     params = Object.assign({}, query);
     return getVDCashout(params);
   })
   .then(function(totalCashout){
-    result["vd_cashout"] = totalCashout;
+    result["vd_cashout"] = totalCashout || 0;
   })
   .then(function(){
     params = Object.assign({}, query);
     return getMoneyCashin(params);
   })
   .then(function(totalCashin){
-    result["money_cashin"] = totalCashin;
+    result["money_cashin"] = totalCashin || 0;
   })
   .then(function(){
     params = Object.assign({}, query);
     return getMoneyCashout(params);
   })
   .then(function(totalCashout){
-    result["money_cashout"] = totalCashout;
+    result["money_cashout"] = totalCashout || 0;
   })
   .then(function(){
     return Promise.resolve(result);

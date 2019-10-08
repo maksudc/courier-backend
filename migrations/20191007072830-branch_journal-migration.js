@@ -3,7 +3,7 @@
 module.exports = {
   up: function (queryInterface, Sequelize) {
 
-    return queryInterface.createTable('branchTransactionHistory', {
+    return queryInterface.createTable('branchTransactionHistories', {
         id: {
             allowNull: false,
             autoIncrement: true,
@@ -32,6 +32,6 @@ module.exports = {
 
   down: function (queryInterface, Sequelize) {
 
-      return queryInterface.dropTable('branchTransactionHistory');
+      return queryInterface.dropTable('branchTransactionHistories');
   }
 };
