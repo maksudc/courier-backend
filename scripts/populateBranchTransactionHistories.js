@@ -125,9 +125,6 @@ function getTotalCashout(branchSummary){
   return total;
 }
 
-//@TODO: Populate dates from cutoff date to today
-//@TODO: Calculate closing_balance
-
 var populateFromStart = function(){
 
   startDayStr = moduleSettings.BRANCH_SUMMARY_START_DATE;
