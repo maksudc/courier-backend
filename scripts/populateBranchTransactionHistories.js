@@ -13,6 +13,7 @@ var branchUtils = require("./../utils/branch");
 var branchTransactionLogic = require("./../logics/branchTransactionLogic");
 
 var moduleSettings = require("./../config/moduleSettings");
+var async = require("async");
 
 var populateForDate = function(dayStr){
 
@@ -135,7 +136,7 @@ var populateFromStart = function(){
   startDate = moment.tz(startDayStr + startTimeStr, timezoneConfig.CLIENT_ZONE);
   endDate = moment.tz(timezoneConfig.CLIENT_ZONE).hours(0).minutes(0).seconds(0);
 
-  dates = generateDatesWithinRange();
+  dates = generateDatesWithinRange(startDate, endDate);
 
   return Promise.all(dates)
   .map(function(currentDayStr){
@@ -150,26 +151,77 @@ var populateFromStart = function(){
   });
 };
 
-var adjustClosingBalance = function(startDate, endDate){
+var adjustClosingBalanceWithinRange = function(startDate, endDate){
 
-  dates = generateDatesWithinRange(startDate, endDate);
+  var dates = generateDatesWithinRange(startDate, endDate);
 
-  return Promise.resolve(dates)
-  .map(function(dayStr){
+  return subBranchModel.findAll()
+  .map(function(branchInstance){
 
-    dateTimeStr = dayStr + " 06:00:00";
+    return Promise.mapSeries(dates, function(dayStr, index, arrayLength){
 
-    utcWindowStartDate = moment.tz(dateTimeStr, timezoneConfig.CLIENT_ZONE)
-                    .tz(timezoneConfig.COMMON_ZONE);
+      dateTimeStr = dayStr + " 06:00:00";
 
-    utcWindowEndDate =  moment.tz(dateTimeStr, timezoneConfig.CLIENT_ZONE)
-                    .add(1, 'days')
-                    .subtract(1, 'seconds')
-                    .tz(timezoneConfig.COMMON_ZONE);
+      var utcWindowStartDate = moment.tz(dateTimeStr, timezoneConfig.CLIENT_ZONE)
+                      .tz(timezoneConfig.COMMON_ZONE);
 
-    //@TODO: Adjust balance incrementally
+      var utcWindowEndDate =  moment.tz(dateTimeStr, timezoneConfig.CLIENT_ZONE)
+                      .add(1, 'days')
+                      .subtract(1, 'seconds')
+                      .tz(timezoneConfig.COMMON_ZONE);
+      var query = {
+        "branch_type": branchInstance.get("branchType"),
+        "branch_id": branchInstance.get("id"),
+        "date_start": {
+          "$gte": utcWindowStartDate.format("YYYY-MM-DD HH:mm:ss"),
+        },
+        "date_end": {
+          "$lte": utcWindowEndDate.format("YYYY-MM-DD HH:mm:ss")
+        }
+      };
+
+      return Promise.resolve(query);
+    });
+  })
+  .map(function(queries){
+
+    return Promise.resolve(queries)
+    .map(function(query){
+
+      return branchTransactionHistoryModel.findOne({
+        where: query
+      });
+    });
+  })
+  .map(function(branchTransactionHistoryEntries){
+
+    return Promise.mapSeries(branchTransactionHistoryEntries, function(branchTransactionHistoryEntry, index, length){
+      if(index == 0){
+        branchTransactionHistoryEntry.set("closing_balance", branchTransactionHistoryEntry.get("balance"));
+      }else{
+        branchTransactionHistoryEntry.set("closing_balance", branchTransactionHistoryEntry.get("balance") + branchTransactionHistoryEntries[index-1].get("closing_balance"));
+      }
+      return branchTransactionHistoryEntry.save();
+    });
+  })
+  .map(function(results){
+    return Promise.resolve(true);
+  })
+  .then(function(results){
+    console.log("branch updated count: " + results.length);
+  })
+  .catch(function(err){
+    console.error(err.stack);
   });
 };
+
+var calculateClosingBalanceFromStart = function(){
+
+  startDate = moment.tz(moduleSettings.BRANCH_SUMMARY_START_DATE + " 00:00:00", timezoneConfig.CLIENT_ZONE);
+  endDate = moment.tz(timezoneConfig.CLIENT_ZONE).hours(0).minutes(0).seconds(0);
+
+  return adjustClosingBalanceWithinRange(startDate, endDate);
+}
 
 function generateDatesWithinRange(startDate, endDate){
 
@@ -192,3 +244,5 @@ function getTransactionHistoryEntry(query){
 
 module.exports.populateForDate = populateForDate;
 module.exports.populateFromStart = populateFromStart;
+module.exports.adjustClosingBalanceWithinRange = adjustClosingBalanceWithinRange;
+module.exports.calculateClosingBalanceFromStart = calculateClosingBalanceFromStart;
