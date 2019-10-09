@@ -59,10 +59,10 @@
     "replication":{
       "read": [
         {
-          "username": "training_dak",
-          "password": "A98D5QRZNYenjPtD",
+          "username": "service",
+          "password": "478zG8H3TcnXyBb",
           "database": "training_dak_harkara",
-          "host": "139.162.38.146",
+          "host": "172.104.167.246",
           "port": 3306
         }
       ],
