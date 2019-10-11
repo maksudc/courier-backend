@@ -37,7 +37,6 @@ router.post("/$" , upload.array() , function(req , res){
 
   var bundleInstance = null;
   var postData = req.body;
-  console.log(postData);
 
   branchIds = postData["destinationBranchIds"] || [];
   if(!branchIds.length){

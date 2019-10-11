@@ -22,8 +22,6 @@ router.get('/getAll', function(req, res){
 
 router.post("/create", passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
 
-	console.log(req.body);
-
 	clientLogic.createByAdmin(req.body, req.user)
 	.then(function(clientInstance){
 		res.status(HttpStatus.CREATED);

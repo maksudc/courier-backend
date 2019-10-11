@@ -114,7 +114,6 @@ module.exports = function(sequelize, DataTypes) {
         .create(trackerData)
         .then(function(trackerItem){
 
-          console.log(" Tracker Attached to shipment with uuid:  " + trackerItem.uuid);
         });
       }
     });
@@ -134,13 +133,12 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		})
 		.then(function(result){
-			//console.log(result);
+
 		})
 		.catch(function(err){
       if(err){
         console.error(err.stack);
       }
-      //console.log(err);
 		});
 	});
 

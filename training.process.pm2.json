@@ -24,7 +24,7 @@
       "log_date_format" : "YYYY-MM-DD HH:mm Z",
       "max_memory_restart": "300M",
       "exec_mode":"cluster",
-      "instances": 1
+      "instances": 2
     }
   ]
 }

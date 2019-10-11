@@ -1,5 +1,6 @@
 # Omex Courier & Logistics Api Server
 
+Node version: `6.9.5`
 
 # Temporary scripts for data management
 

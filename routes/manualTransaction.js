@@ -6,6 +6,7 @@ var DB = require("../models/index");
 var sequelize = DB.sequelize;
 var branchUtils = require("./../utils/branch");
 var manualTransaction = sequelize.models.manualTransactions;
+var expenditureType = sequelize.models.expenditureTypes;
 var passport = require('passport');
 var bodyParser = require('body-parser');
 var moment = require("moment-timezone");
@@ -40,6 +41,7 @@ router.post("/create", upload.array(), function (req, res) {
     postData['source_branch_id'] = req.body.source_branch_id;
     postData['source_branch_type'] = req.body.source_branch_type;
     postData['instructed_by'] = req.body.instructed_by;
+    postData['expenditure_Type']=req.body.expenditureType;
 
 
     sequelize.transaction(function (t) {
@@ -119,9 +121,19 @@ var source_branch_info = null;
 router.get("/details/:id", function (req, res) {
 
     return manualTransaction.findOne({
-        where: {
-            id: req.params.id
-        }
+
+
+
+    include: [{
+        model: expenditureType,
+        attributes:['name'],
+        as: "expenditureType"
+
+    }],
+        where:
+    {
+        id: req.params.id
+        },
     }).then(function (transactionDetails) {
         transaction_details = transactionDetails;
         return branchUtils.getInclusiveBranchInstance(transactionDetails.source_branch_type, transactionDetails.source_branch_id);
@@ -147,6 +159,9 @@ router.get("/details/:id", function (req, res) {
         manualtransactionDetails['payment_method'] = transaction_details.payment_method;
         manualtransactionDetails["payment_reference"] = transaction_details.payment_reference;
         manualtransactionDetails["transaction_type"] = transaction_details.transaction_type;
+        manualtransactionDetails["expenditureType"] = transaction_details.expenditure_Type;
+        manualtransactionDetails["expenditureName"] = transaction_details.expenditureType.name;
+
 
         res.status(200);
         res.send({data: manualtransactionDetails});

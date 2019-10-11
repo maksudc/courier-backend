@@ -7,7 +7,6 @@ var upload = require('multer')();
 router.post('/',
   passport.authenticate('basic', { session: false }),
   function(req, res) {
-  	console.log(req.body);
     // If this function gets called, authentication was successful.
     // req.user` contains the authenticated user.
     res.send({"status": "success"});
@@ -16,7 +15,6 @@ router.post('/',
 
 
 router.get('/success', passport.authenticate('basic', {session: false}), function(req, res){
-  console.log(req.isAuthenticated());
 	res.send("Log in successfull!!!");
 });
 

@@ -18,7 +18,6 @@ var findOneById = function(id, next){
 				if(regionalBranch){
 					var branchData = branch.dataValues;
 					branchData["regionalBranch"] = regionalBranch.dataValues;
-					console.log(branchData);
 					return next({"status": "success", data: branchData});
 				}
 				else return next({"status": "success", data: branch.dataValues});
@@ -48,16 +47,12 @@ var findByIdList = function(idList, next){
 	})
 	.map(function(branchItem){
 
-			console.log("Inside map of regional branch...");
-			console.log(branchItem.regionalBranchId);
-
 			if(branchItem.regionalBranchId){
 
 				return RegionalBranchModel
 				.findOne({ where:{ id: branchItem.regionalBranchId } })
 				.then(function(regionalBranchItem){
 
-					console.log();
 					branchItem.regionalBranch = regionalBranchItem;
 					return branchItem;
 				});

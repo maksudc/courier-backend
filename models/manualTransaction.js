@@ -19,6 +19,7 @@ module.exports = function (sequelize, DataTypes) {
             payment_description: {type: DataTypes.STRING, allowNull: true},
             created_by: {type: DataTypes.STRING, allowNull: false},
             updated_by: {type: DataTypes.STRING, allowNull: true},
+            expenditure_Type: {type: DataTypes.STRING, allowNull: false},
             createdAt: {
                 allowNull: false,
                 type: DataTypes.DATE
@@ -38,6 +39,7 @@ module.exports = function (sequelize, DataTypes) {
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'received_by'});
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'updated_by'});
                     manualTransactions.belongsTo(models.admin, {foreignKey: 'created_by'});
+                    manualTransactions.belongsTo(models.expenditureTypes, {foreignKey: 'expenditure_Type'});
 
                 }
             }

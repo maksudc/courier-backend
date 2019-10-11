@@ -95,8 +95,7 @@ var calculatePrice = function(id, amount, next){
 exports.calculatePrice = calculatePrice;
 
 var calculateMultiplePrice = function(data, next){
-	//must create array of ids
-	console.log("This is called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
 	var ids = [];
 	_.forEach(data, function(item){
 		if(ids.indexOf(item.product_id) < 0)
