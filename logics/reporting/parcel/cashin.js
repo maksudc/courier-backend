@@ -104,8 +104,6 @@ var cashin = function(params, operator, next){
 	})
 	.then(function(){
 
-		console.log(whereParams);
-
 		return orderModel.findAll({
 			where: {
 				"$and": whereParams

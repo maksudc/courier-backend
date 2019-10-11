@@ -59,9 +59,6 @@ router.get('/getOrder/:id', function(req, res){
 
 router.get('/showAll', function(req, res){
 
-	console.log("Calling all received orders");
-	console.log(req.query);
-
 	orderLogic.findAllOrders(req.query, function(data){
 		res.send(data);
 	});
@@ -203,7 +200,6 @@ router.post('/orderDetail/:id', function(req, res){
 
 
 router.post('/confirmOrder', passport.authenticate('basic', {session: false}), upload.array(), function(req, res){
-	console.log(req.body);
 
 	orderLogic.confirmOrder(req.body.id, req.body.code, function(data){
 		res.send(data);

@@ -42,8 +42,6 @@ exports.create = create;
 
 var update = function(data, next){
 
-	console.log(data.url);
-
 	if(!data.url){
 		next("url required");
 	}
@@ -52,7 +50,7 @@ var update = function(data, next){
 			next(err);
 		}
 		else if(!permission){
-			console.log("No permission found!!!!");
+
 			next("No permission found by this url");
 		}
 		else{
@@ -81,8 +79,6 @@ exports.update = update;
 
 var deletedPermission = function(data, next){
 
-	console.log(data.url);
-
 	if(!data.url){
 		next("url required");
 	}
@@ -92,7 +88,7 @@ var deletedPermission = function(data, next){
 			next(err);
 		}
 		else if(!permission){
-			console.log("No permission found!!!!");
+
 			next("No permission found by this url");
 		}
 		else{
@@ -116,7 +112,7 @@ exports.deletedPermission = deletedPermission;
 
 
 var findByURL = function(url, next){
-	console.log(url);
+
 	permissionModel.findOne({where: {url: url}}).then(function(permission){
 
 		if(permission) next(null, permission);

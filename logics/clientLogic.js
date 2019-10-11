@@ -41,7 +41,6 @@ function makeVerficationCode()
 
 var findOneByMobile = function(mobile, next){
 
-	//console.log("*****************Hitting API findOneByMobile**************");
 	clientModel.findOne({where: {mobile: mobile}}).then(function(client){
 
 		if(client){
@@ -224,9 +223,8 @@ exports.updateClient = updateClient;
 
 var deleteClient = function(params, next){
 
-	console.log(params);
 	clientModel.findOne({where: {mobile: params.mobile}}).then(function(client){
-		console.log(client);
+
 		client.destroy();
 		next(null);
 

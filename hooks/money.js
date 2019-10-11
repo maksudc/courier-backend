@@ -120,10 +120,9 @@ money.hook("afterUpdate" , function(instance , options , next){
       .then(function(parentOrderItem){
 
         if(parentOrderItem){
-          console.log("Parent VD order status: " + parentOrderItem.status);
+
           if(parentOrderItem.dataValues.status == "stocked"){
 
-            console.log("Setting the status of parent to delivered");
             parentOrderItem.set("status", "delivered");
             return parentOrderItem.save();
           }

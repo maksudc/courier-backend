@@ -31,7 +31,6 @@ router.post("/create", upload.array(), function (req, res) {
 
 
     return printTrackerLog.create(postData).then(function (result) {
-        console.log(postData);
         res.status(201);
         res.send({status: "success", data: result, message: postData});
     }).catch(function (err) {

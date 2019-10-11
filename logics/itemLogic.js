@@ -181,49 +181,15 @@ exports.createOne = createOne;
 
 var createMany = function(data, next){
 
-
-	//final release: items will be created with predefined price
 	var missingIndex = _.findIndex(data, function(item){
-		//console.log(item);
+
 		return !item.amount || !item.product_name || !item.orderUuid;
 	});
 
 	if(missingIndex > -1) {
-		console.log(data[missingIndex]);
 		next({"status": "error", "message": "amount or id is missing at index " + missingIndex.toString() + " of item list"});
 		return;
 	};
-
-
-
-	//Product model is not needed
-	/*
-	productLogic.calculateMultiplePrice(data, function(priceData){
-		if(priceData.status != 'success'){
-			next(data);
-		}
-		else{
-			console.log(priceData.data);
-			itemModel.bulkCreate(priceData.data).catch(function(err){
-				if(err){
-					next({"status": "error", "message": "error while creating items"});
-					return;
-				}
-			}).then(function(items){
-				if(items){
-					var tempItems = [];
-					_.forEach(items, function(tempItem){
-						tempItems.push(tempItem.dataValues);
-					});
-					next({"status": "success", data: tempItems});
-				}
-				else {
-					next({"status": "errror", "message": "cannot create these items. Check them properly"});
-				}
-			});
-		}
-	});
-	*/
 
 	itemModel.bulkCreate(data , { individualHooks:true })
 	.then(function(items){
@@ -262,7 +228,7 @@ var create = function(data, next){
 			next({"status": "error", "message": "Zero items not acceptable"});
 		}
 		else if(data.length == 1){
-			console.log("Create one");
+
 			createOne(data[0], function(itemData){
 				next(itemData);
 			});
@@ -413,7 +379,7 @@ var addItems = function(data, next){
 			create(data.item_list, function(createdItemList){
 
 				if(createdItemList){
-					//console.log(createdItemList);
+
 					next({"status": "success", data: createdItemList.data});
 				}
 				else{
@@ -439,17 +405,6 @@ var updateItemStatus = function(params, next){
 
 	async.series([function(getItem){
 
-		console.log("Get item by id");
-		/*
-		findOneById(id, function(data){
-			if(data.status == "success") {
-				item = data.data;
-				getItem(null);
-			}
-			else getItem("Error finding item by given id");
-		});
-		*/
-
 		findOneByParams(findParams, function(data){
 			if(data.status == "success") {
 				item = data.data;
@@ -460,24 +415,13 @@ var updateItemStatus = function(params, next){
 
 	}, function(getRoute){
 
-		console.log("Get route");
 		getRoute(null);
-
-		/*
-			Route checking is not needed right now. This will be added later.
-			This check will be regional branch and sub branch check of operator
-			and current regional/sub branch
-		*/
 
 	}, function(setStatus){
 
-		console.log("Setting status");
 
 		item.status = params["status"];
 		item.save().then(function(newItem){
-
-			console.log(newItem.dataValues.status);
-			console.log("Item updated");
 
 			getRemainingItems(newItem.dataValues.orderUuid, params["status"] , newItem.dataValues.status , function(err, itemCredential){
 				if(err){
@@ -516,15 +460,12 @@ var setItemRunning  = function(params, next){
 	if(params["id"]) findParams["uuid"] = params["id"];
 	if(params["bar_code"]) findParams["bar_code"] = params["bar_code"];
 
-	console.log(findParams);
-
 	itemModel.findOne({where: findParams}).then(function(item){
 		if(item == null){
 			console.error("Not found the item.. with params " + JSON.stringify(findParams) );
 			return null;
 		}
 
-		console.log(item);
 		if(item.dataValues.status == 'received' || item.dataValues.status == 'reached'){
 			item.status = 'running';
 			item.save().then(function(newItem){
@@ -537,10 +478,6 @@ var setItemRunning  = function(params, next){
 				}
 			});
 		}
-		else {
-			console.log("Fadsfjakhfa");
-		}
-
 	}).catch(function(err){
 		if(err) {
 			console.error(err.stack);
@@ -558,7 +495,6 @@ var updateOrderWithBranch = function(id, next){
 		if(itemList){
 			var refItem = itemList[0].dataValues;
 
-			console.log("***********************************************************");
 			var index = _.findIndex(itemList, function(singleItem){
 				return refItem.current_hub != singleItem.dataValues.current_hub || refItem.next_hub != singleItem.dataValues.next_hub;
 			});
@@ -631,8 +567,6 @@ var getRemainingItems = function(orderId, updatedStatus , finalItemStatus , next
 
 				notUpdatedItemList = itemList;
 
-				console.log("Transitioning order from : " + rootOrder.dataValues.status + " to " + updatedStatus);
-
 				if(rootOrder.dataValues.status == "running" && rootOrder.dataValues.status != updatedStatus && notUpdatedItemList.length == 0){
 
 					rootOrder.dataValues.status = updatedStatus;
@@ -642,15 +576,10 @@ var getRemainingItems = function(orderId, updatedStatus , finalItemStatus , next
 
 					return rootOrder.save();
 				}
-				/*else if(rootOrder.dataValues.status == updatedStatus && notUpdatedItemList.length == 0){
-					return sequelize.Promise.resolve(rootOrder);
-				}*/
 
 				return sequelize.Promise.resolve(rootOrder);
 			})
 			.then(function(savedOrderItem){
-
-				console.log("Status Changed :" + savedOrderItem.changed("status"));
 
 				next(null, {
 					"remainingItemCount": notUpdatedItemList.length,
@@ -666,58 +595,6 @@ var getRemainingItems = function(orderId, updatedStatus , finalItemStatus , next
 				}
 			});
 	});
-
-	/*
-	itemModel.findAll({where:
-	{
-		orderUuid: orderId,
-		status: {
-			$not: updatedStatus
-		}
-	}}).then(function(itemList){
-
-		notUpdatedItemList = itemList;
-
-		orderLogic.findOne(orderId, function(orderData){
-
-			var orderUpdated = false;
-
-			if(orderData.data){
-				if(orderData.data.dataValues.status != updatedStatus && itemList.length == 0){
-					orderData.data.status = updatedStatus;
-					orderData.data.save();
-					orderUpdated = true;
-				}
-				else if(orderData.data.dataValues.status == updatedStatus && itemList.length == 0){
-					orderUpdated = true;
-				}
-
-				next(null, {
-					"remainingItemCount": itemList.length,
-					"orderUpdated": orderUpdated,
-					"orderData": orderData.data.dataValues
-				});
-			}
-			else next(null, {
-				"remainingItemCount": itemList.length,
-				"error": true,
-				"errorMessage": "Error while update order. No order found!",
-				"orderUpdated": false
-			});
-
-		});
-
-	})
-	.then(function(){
-
-	})
-	.catch(function(err){
-		if(err){
-			console.log(err);
-			next(err);
-		}
-	});
-	*/
 };
 
 var getItemCount = function(orderUuid, next){

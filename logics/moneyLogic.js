@@ -17,8 +17,6 @@ var adminUtils = require("../utils/admin");
 var Promise = require("bluebird");
 
 var create = function(operator, moneyData, next){
-	//console.log(moneyData);
-	//console.log(operator);
 
 	if(!operator.regional_branch_id || !operator.sub_branch_id){
 		next("Missing required operator data");
@@ -67,8 +65,6 @@ var create = function(operator, moneyData, next){
 
 	if(moneyData.vat == '1.15') postData["vat"] = true;
 	else postData["vat"] = false;
-
-	//console.log("Creating moeny order right now!");
 
 	moneyModel
 	.create(postData)
@@ -270,11 +266,6 @@ var findById = function(id, next){
 								source_branch_id = moneyOrder.source_regional_branch_id;
 							}
 
-							//console.log(moneyOrder);
-
-							//console.log(source_branch_type);
-							//console.log(source_branch_id);
-
 							return branchUtils
 							.getInclusiveBranchInstance(source_branch_type , source_branch_id , null)
 							.then(function(sourceBranchInstance){
@@ -319,16 +310,9 @@ var findById = function(id, next){
 							source_branch_id = moneyOrder.source_regional_branch_id;
 						}
 
-						//console.log(moneyOrder);
-
-						//console.log(source_branch_type);
-						//console.log(source_branch_id);
-
 						branchUtils
 						.getInclusiveBranchInstance(source_branch_type , source_branch_id , null)
 						.then(function(sourceBranchInstance){
-
-							//console.log(sourceBranchInstance);
 
 							branchData = {};
 							if(sourceBranchInstance){
@@ -393,29 +377,24 @@ var receiveOrder = function(id, verification_code, operator, next){
 		}
 		else if(!moneyOrder) next("No order found by this error");
 		else{
-			//Here, verification will be checked
 
-			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'draft'){
 
 				moneyOrder.paid = true;
 				moneyOrder.payment_time = new Date();
-				// @issue: https://trello.com/c/F6RFn7Fn/226-money-vd-confirm-in-popup-ux
-				// moneyOrder.status = 'received';
-				// moneyOrder.payment_receiver_operator = operator.email;
 
 				moneyOrder.status = 'deliverable';
 				moneyOrder.payment_receiver_operator = operator.email;
 
 				if(moneyOrder.dataValues.type == 'virtual_delivery'){
-					
+
 					orderLogic.receiveVDPayment({id: moneyOrder.dataValues.money_order_id}, operator, function(orderPaymentStatus){
 						if(orderPaymentStatus.status == 'success'){
 							moneyOrder.save();
 							next(null, moneyOrder);
 						}
 						else if(orderPaymentStatus.status == 'paid'){
-							//console.log("It is already paid!!!!!");
+
 							moneyOrder.save();
 							next(null, moneyOrder);
 						}
@@ -429,7 +408,6 @@ var receiveOrder = function(id, verification_code, operator, next){
 
 			}
 			else{
-				//Not in desired state
 				next("Cannot set this status bcause of money order logic");
 			}
 		}
@@ -448,8 +426,6 @@ var confirmOrder = function(id, operator, next){
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
-			//console.log(moneyOrder);
-
 			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'received'){
 
@@ -482,8 +458,6 @@ var deliverOrder = function(id, verification_code, operator, next){
 		else if(!moneyOrder) next("No order found by this error");
 		else{
 			//Here, verification will be checked
-			//console.log(moneyOrder);
-
 			//if verification passes, receive this order
 			if(moneyOrder.dataValues.status == 'deliverable'){
 
@@ -564,8 +538,6 @@ var deleteMoneyOrder = function(operator, id, next){
 			}
 			else if(!newMoneyOrder) createMoneyOrder("Could not create money order");
 			else {
-				//console.log(moneyOrder);
-				//console.log("Money order redirected!");
 				newOrderId = moneyOrder.id;
 				createMoneyOrder(null);
 			}
@@ -641,8 +613,6 @@ exports.destroy = destroy;
 
 var updateVDPrice = function(moneyData, next){
 
-	//console.log(moneyData);
-
 	moneyModel.findOne({
 		where: {id: moneyData.id}
 	}).then(function(moneyOrderData){
@@ -664,14 +634,10 @@ var updateVDPrice = function(moneyData, next){
 			}
 			updateData["payParcelPrice"] = moneyData.newPayParcelPrice;
 
-			//console.log(updateData);
-
 			moneyOrderData.amount = updateData.amount;
 			moneyOrderData.charge = updateData.charge;
 			moneyOrderData.discount = updateData.discount;
 			moneyOrderData.payable = updateData.payable;
-
-			//console.log(updateData.payParcelPrice);
 
 			if(updateData.payParcelPrice && updateData.payParcelPrice != '')
 				moneyOrderData.payParcelPrice = updateData.payParcelPrice;
