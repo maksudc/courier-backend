@@ -53,8 +53,6 @@ router.delete("/:id$" , upload.array() , function(req , res){
 **/
 router.put("/:id$" , upload.array() , function(req , res){
 
-    console.log(req.body);
-
     shipmentLogic.shipmentUpdate(req.params.id , req.body , function(data){
       if(data.statusCode){
         res.status(data.statusCode);
@@ -77,8 +75,6 @@ router.put("/:id$" , upload.array() , function(req , res){
 **/
 router.post("/" , upload.array() , function(req , res){
 
-  console.log(req.body);
-  
   shipmentLogic.createShipmentWithOrders(req.body , function(data){
     if(data.statusCode){
       res.status(data.statusCode);
@@ -103,7 +99,7 @@ router.post("/" , upload.array() , function(req , res){
 router.get("/:id$" , function(req , res){
 
   queryVars = req.query;
-  //console.log(queryVars);
+
   shipmentLogic.getShipmentDetails(req.params.id , queryVars , function(data){
     if(data.statusCode){
       res.status(data.statusCode);
@@ -133,7 +129,6 @@ router.get("/:id$" , function(req , res){
 router.get("/" , function(req , res){
 
   queryVars = req.query;
-  console.log(queryVars);
 
   shipmentLogic.getShipments(queryVars , function(data){
     if(data.statusCode){

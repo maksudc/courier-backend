@@ -148,7 +148,7 @@ var adjustMissingPaymentBranch = function(next){
     }
   })
   .map(function(orderInstance){
-    console.log(orderInstance.uuid);
+
     operator_email = orderInstance.payment_operator;
     return Promise.all([
       orderInstance,
@@ -160,7 +160,7 @@ var adjustMissingPaymentBranch = function(next){
     ]);
   })
   .map(function(bundle){
-    console.log(bundle.length);
+
     orderInstance = bundle[0];
     adminInstance = bundle[1];
 
@@ -199,7 +199,7 @@ var adjustMissingPaymentBranch = function(next){
     return Promise.all([orderInstance.save() , Promise.resolve(adminInstance)]);
   })
   .then(function(results){
-    console.log(results.length);
+
     if(next){
       next({ statusCode: HttpStatus.OK , status:"success", message:"Successfully Adjusted" , count: results.length });
     }

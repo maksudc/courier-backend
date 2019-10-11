@@ -118,8 +118,6 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
           //instance.previousBranchType = instance.currentBranchType;
           //instance.previousBranchId = instance.currentBranchId;
 
-          console.log("Inside processor");
-
           updatedInstance.currentBranchType = snapshotInstance.nextBranchType;
           updatedInstance.currentBranchId = snapshotInstance.nextBranchId;
 
@@ -139,8 +137,6 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
 
             if(trackerItem){
 
-              console.log("Got the tracker Item: "+ trackerItem.uuid);
-
               trackerItem.currentBranchType = updatedInstance.currentBranchType;
               trackerItem.currentBranchId = updatedInstance.currentBranchId;
 
@@ -155,8 +151,6 @@ ShipmentModel.hook("beforeUpdate" , function(instance , options , next){
             return sequelize.Promise.resolve(0);
           })
           .then(function(updatedResult){
-
-            console.log("Returning to saving shipment");
 
             instance.dataValues = updatedInstance;
             _.assignIn(instance._changed , { status: true });

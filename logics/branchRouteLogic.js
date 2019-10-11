@@ -31,47 +31,19 @@ var getDefinedRoutes = function(next){
 
 var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSubBranchId , next){
 
-    /*Promise.map([ sourceSubBranchId , destinationSubBranchId ] , function(currentSubBranchId){
-
-        return
-        SubBranchModel
-        .findOne({where:{ id: currentSubBranchId }})
-        .catch(function(err){
-            console.log(err);
-        })
-    })  */
-
     var sourceSubBranchItem = null;
     var destinationSubBranchItem = null;
 
      var p1 = SubBranchModel
     .findOne({where:{ id: sourceSubBranchId }});
-    /*.then(function(resultSourceSubBranchItem){
-
-        sourceSubBranchItem = resultSourceSubBranchItem;
-        console.log(resultSourceSubBranchItem.id);
-
-        return Promise.resolve(resultSourceSubBranchItem);
-    });*/
 
     var p2 =
 
     SubBranchModel
     .findOne({ where:{ id: destinationSubBranchId } });
 
-    /*.then(function(resultDestinationSubBranchItem){
-
-            console.log(resultDestinationSubBranchItem);
-            //console.log(sourceSubBranchItem);
-            destinationSubBranchItem = resultDestinationSubBranchItem;
-    });*/
-
-
 
     Promise.all([p1 , p2]).then(function(results){
-
-        console.log(results[0].regionalBranchId);
-        console.log(results[1].regionalBranchId);
 
         RouteModel.findOne({
             where: {
@@ -82,19 +54,14 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
         })
         .then(function(routeItem){
 
-            console.log(" Found Route Item ");
-            //console.log(routeItem);
-
             if(routeItem){
 
                 midNodes = routeItem.midNodes;
 
-                console.log(" MidNodes ");
                 if(midNodes){
 
                     midNodes = JSON.parse(midNodes);
                 }
-                //console.log(midNodes);
 
                 return Promise.resolve(midNodes);
             }
@@ -102,9 +69,6 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
             return ;
         })
         .then(function(midNodeIds){
-
-            console.log("Working on a single Midnode");
-            console.log(midNodeIds);
 
             promises = [];
             for(I = 0 ; I< midNodeIds.length ; I++){
@@ -115,9 +79,6 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
 
             Promise.all(promises)
             .then(function(midNodesExpanded){
-
-                console.log(" Almost complete  ");
-                //console.log(midNodesExpanded);
 
                 next(midNodesExpanded);
             });
@@ -133,28 +94,10 @@ var getFullRouteBetweenSubBranches = function(sourceSubBranchId , destinationSub
             }
         });
     });
- /*   .spread(function(sourceRegionalBranchId , destinationRegionalBranchId){
-
-
-        return
-        RouteModel.findOne({
-            where: {
-
-                sourceId: sourceRegionalBranchId,
-                destinationId: destinationSubBranchId,
-            }
-        })
-    })*/
 };
 
 var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBranchType , destinationBranchId ,next){
 
-  /*if(sourceBranchType == 'sub' && destinationBranchType=='sub'){
-    getFullRouteBetween(sourceBranchId , destinationBranchId , next);
-    return;
-  }*/
-  console.log(sourceBranchType);
-  console.log(destinationBranchType);
   var p1 = Promise.resolve(null);
   var p2 = Promise.resolve(null);
 
@@ -175,7 +118,6 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
     sourceSubBranchItem = null;
     destinationSubBranchItem = null;
 
-    //console.log("partial queries results are: "+ JSON.stringify(results));
     if(results.length > 0 && results[0] !== null){
         sourceSubBranchItem = results[0];
     }
@@ -195,9 +137,6 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
       destinationRegionalBranchId = destinationBranchId;
     }
 
-    console.log("Source Regional Branch Id: " + sourceRegionalBranchId);
-    console.log("Destination Regional Branch Id: " + destinationRegionalBranchId);
-
     return RouteModel.findOne({
         where: {
 
@@ -210,16 +149,11 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
 
       if(routeItem){
 
-        console.log(" Found Route Item ");
-        console.log(routeItem.id);
-
           var midNodes = [];
 
-          //console.log(" MidNodes ");
           if(routeItem.midNodes){
               midNodes = JSON.parse(routeItem.midNodes);
           }
-          console.log(midNodes);
 
           // Check whether it is a direct route or not
           if(midNodes.length == 1){
@@ -245,16 +179,9 @@ var getRouteBetween = function(sourceBranchType , sourceBranchId , destinationBr
   })
   .map(function(midNodeId){
 
-      console.log("Working on a single Midnode");
-      console.log(midNodeId);
-
       return RegionalBranchModel.findOne({ where: { id: midNodeId } });
   })
   .then(function(midNodesExpanded){
-
-      console.log(" Almost complete  ");
-      //console.log(midNodesExpanded);
-      console.log("Expanded mid nodes number: " + midNodesExpanded.length);
 
       //next(midNodesExpanded);
       if(next){
@@ -280,8 +207,6 @@ var newRoute = function(postData , next){
 
   var sourceId = postData.sourceId;
   var destinationId = postData.destinationId;
-
-  console.log(postData);
 
   if(!sourceId || !destinationId || !postData.midNodes){
 

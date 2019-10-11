@@ -12,9 +12,6 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 
 router.get("/from/:sourceSubBranchId/to/:destinationSubBranchId" , function(req , res){
 
-    //console.log(req.params.sourceSubBranchId);
-    //console.log(req.params.de`stinationSubBranchId);
-
     branchRouteLogic.getFullRouteBetween(req.params.sourceSubBranchId , req.params.destinationSubBranchId , function(data){
        if(data){
            res.send(data);
@@ -26,9 +23,6 @@ router.get("/from/:sourceSubBranchId/to/:destinationSubBranchId" , function(req 
 
 router.get("/get" , function(req , res){
 
-    //console.log(req.params.sourceSubBranchId);
-    //console.log(req.params.de`stinationSubBranchId);
-
     branchRouteLogic.getRouteBetween(req.query.sourceBranchType , req.query.sourceBranchId , req.query.destinationBranchType , req.query.destinationBranchId , function(data){
        if(data){
            res.send(data);
@@ -39,8 +33,6 @@ router.get("/get" , function(req , res){
 });
 
 router.post("/" , upload.array(), function(req , res){
-
-  console.log(req.body);
 
   branchRouteLogic.newRoute(req.body , function(data){
     res.send(data);

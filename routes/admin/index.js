@@ -102,7 +102,6 @@ router.post('/create', function(req, res){
 			res.send({"err": {"message": JSON.stringify(err)}});
 		}
 		else if(admin){
-			console.log("Admin created");
 			res.send({"data": JSON.stringify(admin)});
 		}
 	});

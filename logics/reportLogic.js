@@ -241,8 +241,6 @@ var getOrderPaymentByBranch = function(params, operator, next){
 	})
 	.then(function(){
 
-		console.log(whereParams);
-
 		return orderModel.findAll({
 			where: {
 				"$and": whereParams
@@ -374,8 +372,6 @@ var  getSalesDataByBranch = function(params, operator, next){
 		}
 	})
 	.then(function(){
-
-		console.log(whereParams);
 
 		return orderModel.findAll({
 			where: {
@@ -692,9 +688,6 @@ var findMoneyCashOut = function(params, adminData, next){
 			]
 		}
 	}
-
-	console.log("search params: " + searchParams);
-
 
 	moneyModel.findAll({
 		where: {

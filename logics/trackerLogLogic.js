@@ -26,8 +26,6 @@ function extractParams(params){
 
 var getTrackerLogs = function(params , next){
 
-  console.log(params);
-
   trackerLog
   .findAll()
   .map(function(result){
@@ -105,8 +103,6 @@ var getTrackerLogsForOrder  = function(params , next){
   if(params.bar_code){
     whereQuery.bar_code = params.bar_code;
   }
-
-  console.log(params);
 
   order
   .findOne({ where: whereQuery })

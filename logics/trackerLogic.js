@@ -41,7 +41,6 @@ var getTrackerForTrackable = function(params , next){
   .then(function(result){
 
     if(result){
-        console.log( "Tracker Id: " + result.uuid);
         next({ status:"success" , data:result , message:null });
     }else{
       next({ status:"error" , data:{} , message:"No tracker attached for this trackable" });
@@ -61,8 +60,6 @@ var getTrackers = function(params , next){
     limit: 10,
     offset:0
   };
-
-  console.log(params);
 
   if(params.limit){
     paginationClause.limit = parseInt(params.limit);
@@ -97,8 +94,6 @@ var getTrackers = function(params , next){
   queryParam = {};
   _.assignIn(queryParam , paginationClause);
   _.assignIn(queryParam , { where:whereClause });
-
-  console.log(queryParam);
 
   genericTracker
   .findAll(queryParam)

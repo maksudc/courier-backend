@@ -122,12 +122,10 @@ var createAdmin = function(data, next){
         findAdmin(data.email, function(err, admin){
 
             if((!err || err == "No admin found") && !admin){
-                console.log("No admin by this email found. Proceeding to create admin section");
                 emailCheck(null);
             }
             else {
                 console.error(err);
-                console.error("error occurred in admin");
                 emailCheck("This email is taken already!");
             }
         });
@@ -177,7 +175,6 @@ var updateSelf = function(adminData, next){
         findAdmin(adminData.email, function(err, admin){
 
             if(err || !admin){
-                // console.log("No admin by this email found. Proceeding to create admin section");
                 emailCheck("Admin doesnot exists");
             }
             else {

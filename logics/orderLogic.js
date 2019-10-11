@@ -39,13 +39,10 @@ var findOne = function(id, next){
 
 		if(order) {
 			if(order.dataValues.type == 'value_delivery'){
-				console.log("Value delivery");
+
 				order.getMoney_order().then(function(moneyOrder){
-					console.log("Money order");
 
 					if(moneyOrder){
-						console.log(moneyOrder.id);
-						console.log("Money order found");
 						order.dataValues["vd_status"] = moneyOrder.dataValues.status;
 						order.dataValues["vd_id"] = moneyOrder.dataValues.id;
 						next({"status": "success", "data": order});
@@ -95,7 +92,6 @@ var findAllOrders = function(params, next){
 
 			    	if(!orderList[count].entry_branch || !orderList[count].exit_branch
 			    		|| !orderList[count].entry_branch_type || !orderList[count].exit_branch_type){
-			    		console.log("*******************Invalid entry or exit************************");
 			    		count++;
 			    		return callback(null);
 			    	}
@@ -113,15 +109,12 @@ var findAllOrders = function(params, next){
 			    	async.series([function(findEntryBranch){
 
 			    		if(branchList[entryType][entry_branch_id]){
-			    			//console.log("Found entry branch");
 
-							findEntryBranch(null);
+								findEntryBranch(null);
 			    		}
 			    		else branchLogic.getBranch(entryType, parseInt(entry_branch_id), function(branchData){
-			    			//console.log("Fetching entry branch");
 
-			    			if(branchData.status == 'error'  || !branchData.data || !branchData.data.dataValues){
-			    				console.log("No information found for entry branch: " + entry_branch_id);
+			    			if(branchData.status == 'error'  || !branchData.data || !branchData.data.dataValues){			    
 			    				branchList[entryType][entry_branch_id] = "No information about this branch";
 			    				findEntryBranch(null);
 			    			}
@@ -152,15 +145,12 @@ var findAllOrders = function(params, next){
 			    	}, function(findExitBranch){
 
 			    		if(branchList[exitType][exit_branch_id]){
-			    			//console.log("Found exit branch");
 
 			    			findExitBranch(null);
 			    		}
 			    		else branchLogic.getBranch(exitType, parseInt(exit_branch_id), function(branchData){
-			    			console.log("Fetching exit branch");
 
 			    			if(branchData.status == 'error' || !branchData.data || !branchData.data.dataValues){
-			    				console.log("No inforamtion found for exit branch: " + exit_branch_id);
 			    				branchList[exitType][exit_branch_id] = "No information about this branch";
 			    				findExitBranch(null);
 			    			}
@@ -184,10 +174,8 @@ var findAllOrders = function(params, next){
 
 			    	}, function(setExitBranch){
 
-			    		orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
+			    	orderList[count].dataValues.exit_branch = branchList[exitType][exit_branch_id];
 						orderList[count].dataValues["exit_branch_id"] = exit_branch_id;
-
-						//console.log("Setting exit branch");
 
 						count++;
 		    			callback(null);
@@ -561,7 +549,6 @@ var deliverOrder = function(id, operator, next){
 			else if( (orderData.data.dataValues.exit_branch_type == 'sub-branch' && parseInt(orderData.data.dataValues.exit_branch)!= operator.sub_branch_id)
 				|| (orderData.data.dataValues.exit_branch_type == 'regional-branch' && parseInt(orderData.data.dataValues.exit_branch)!= operator.regional_branch_id)
 			){
-				console.log("Other branch's order");
 				next({"status": "error", "message": "Sorry, this order is not of your branch!"});
 				return;
 			}
@@ -692,30 +679,24 @@ var receivePayment = function(paymentData, operator, next){
 				}
 				else if(orderData.data.dataValues.type == 'value_delivery'){
 					orderData.data.getMoney_order().then(function(moneyOrderData){
-						console.log("***************************************************");
 						if(moneyOrderData){
-							console.log("Pay parcel price by: " + moneyOrderData.dataValues.payParcelPrice);
 							if(moneyOrderData.dataValues.payParcelPrice == 'seller'){
 								moneyOrderData.payParcelPrice = null;
 								moneyOrderData.amount = parseInt(moneyOrderData.dataValues.amount) +
 									parseInt(orderData.data.dataValues.payment);
-								console.log("Saving seller price: " + moneyOrderData.amount);
 							}
 							else if(moneyOrderData.dataValues.payParcelPrice == 'buyer'){
 								moneyOrderData.payParcelPrice = null;
 								moneyOrderData.payable = parseInt(moneyOrderData.dataValues.payable) -
 									parseInt(orderData.data.dataValues.payment);
-								console.log("Saving buyer price: " + moneyOrderData.payable);
 							}
 
 							moneyOrderData.save();
 							checkCurrentStatus(null);
 						}
 						else {
-							console.log("No money order found");
 							return next({"status": "error", message: "Cannot update money order!"});
 						}
-						console.log("***************************************************");
 					});
 				}
 				else if(parseFloat(orderData.data.payment) != parseFloat(paymentData.payment)){
@@ -807,7 +788,6 @@ var createByOperator = function(postData, operator, next){
 	async.series([
 	function(setOperatorCredentials){
 
-		console.log("Reading admins");
 		if(!postData.admin) postData["admin"] = 'tariqul.isha@gmail.com';
 
 		if(operator) {
@@ -847,18 +827,12 @@ var createByOperator = function(postData, operator, next){
 		In future, exit_branch_id may come from regionalBranch or subBranch table. If anything wrong happens
 		then, blame munna
 		*/
-		console.log("Setting branches");
 
 		branchLogic.getBranch(postData["exit_branch_type"], postData["exit_branch_id"], function(branchData){
 			if(branchData.status == 'success'){
 				postData["exit_branch_type"] = postData["exit_branch_type"] + '-branch';
 				exitBranch = branchData.data.dataValues;
 
-				if(exitBranch){
-						console.log("Exit branch**********");
-						console.log(exitBranch.label);
-						console.log("**********************");
-				}
 				testBranches(null);
 			}
 			else{
@@ -867,7 +841,6 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	},function(createDraft){
-		console.log("Creating order");
 
 		var message = "";
 
@@ -971,14 +944,13 @@ var createByOperator = function(postData, operator, next){
 					createMoneyOrder("No money order created");
 				}
 				else {
-					console.log("Money order created corresponding to vd");
+
 					createMoneyOrder(null);
 				}
 			});
 		}
 
 	},function(addItems){
-		console.log("Adding items");
 
 		var seperateItems = [];
 		var barCode = order.bar_code.toString() + '-';
@@ -1041,7 +1013,6 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	}, function(createClient){
-		console.log("Creating Sender client");
 
 		var clientData = {};
 		var client  = null;
@@ -1082,7 +1053,6 @@ var createByOperator = function(postData, operator, next){
 		});
 
 	}, function(createReceiverClient){
-		console.log("Creating Receiver client");
 
 		clientData = {};
 		var client = null;
@@ -1159,9 +1129,6 @@ var orderDetail = function(id, next){
 		var entry_branch_id = parseInt(orderDetails.data.orderData.dataValues.entry_branch);
 		var entry_branch_type = orderDetails.data.orderData.dataValues.entry_branch_type == 'regional-branch'? 'regional' : 'sub';
 
-		console.log(entry_branch_type);
-		console.log(entry_branch_id);
-
 		if(!entry_branch_id){
 			orderDetails.data.orderData.dataValues["entry_branch_label"] = 'No Entry branch!';
 			getEntryBranch(null);
@@ -1204,9 +1171,6 @@ var orderDetail = function(id, next){
 		var exit_branch_type = orderDetails.data.orderData.dataValues.exit_branch_type == 'regional-branch'? 'regional' : 'sub';
 		var exit_branch_id = parseInt(orderDetails.data.orderData.dataValues.exit_branch);
 
-		console.log(exit_branch_type);
-		console.log(exit_branch_id);
-
 		if(!exit_branch_id){
 			orderDetails.data.orderData.dataValues["exit_branch_label"] = 'No Entry branch!';
 			getExitBranch(null);
@@ -1241,20 +1205,9 @@ var orderDetail = function(id, next){
 				}
 				getExitBranch(err);
 			});
-		// 	branchLogic.getBranch(exit_branch_type, exit_branch_id, function(branchData){
-		//
-		// 	console.log(branchData);
-		//
-		// 	if(branchData.status == 'success') orderDetails.data.orderData.dataValues["exit_branch_label"] = branchData.data.dataValues.label;
-		// 	else orderDetails.data.orderData.dataValues["exit_branch_label"] = 'Error while getting entry branch';
-		// 	//return next(orderDetails);
-		// 	getExitBranch(null);
-		// });
 	}
 
 	}, function(getClient){
-
-		console.log("Get client name");
 
 		clientLogic.findNameByMobile(orderDetails.data.orderData.dataValues.sender, function(err, full_name){
 			if(err){
@@ -1441,7 +1394,6 @@ exports.updateStatus = updateStatus;
 
 var addItem = function(additionalData, operator, next){
 
-	console.log(additionalData);
 	var parentOrder, newPrice, existingItemCount;
 
 	async.series(
@@ -1484,7 +1436,6 @@ var addItem = function(additionalData, operator, next){
 			});
 
 		}, function(addItems){
-			console.log("Adding items");
 
 			var seperateItems = [];
 
@@ -1643,20 +1594,11 @@ var getAnalytics = function(params , next){
 			endTimeObject = new Date(parseInt(endTime));
 		}
 
-		console.log(JSON.stringify(startTime));
-		console.log(JSON.stringify(endTime));
-
-		//console.log(JSON.stringify(startTimeObject));
-		//console.log(JSON.stringify(endTimeObject));
-
 		if(startTimeObject && endTimeObject){
-
-			// @TODO add validation for ending time > starting time
 
 				whereQuery.createdAt = {
 					$gte: startTimeObject,
 					$lte: endTimeObject
-					//$between:[ startTimeObject , endTimeObject ]
 				};
 		}else if(startTimeObject){
 
