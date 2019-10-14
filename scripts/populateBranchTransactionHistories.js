@@ -17,11 +17,12 @@ var async = require("async");
 
 var populateForDate = function(dayStr){
 
-  dayStartTimeStr = dayStr + " 06:00:00";
-  utcDateStart = moment.tz(dayStartTimeStr, timezoneConfig.CLIENT_ZONE)
+  var dayStartTimeStr = dayStr + " 06:00:00";
+
+  var utcDateStart = moment.tz(dayStartTimeStr, timezoneConfig.CLIENT_ZONE)
                   .tz(timezoneConfig.COMMON_ZONE);
 
-  utcDateEnd = moment.tz(dayStartTimeStr, timezoneConfig.CLIENT_ZONE)
+  var utcDateEnd = moment.tz(dayStartTimeStr, timezoneConfig.CLIENT_ZONE)
                 .add(1, 'days')
                 .subtract(1, 'seconds')
                 .tz(timezoneConfig.COMMON_ZONE);
@@ -61,8 +62,8 @@ var populateForDate = function(dayStr){
         "branch_type": branchInstance.get("branchType"),
         "branch_id": branchInstance.get("id"),
 
-        "date_start": commonParams["datetime_range_start"],
-        "date_end": commonParams["datetime_range_end"],
+        "date_start": utcDateStart,
+        "date_end": utcDateEnd,
       };
 
       payload = Object.assign({}, whereQuery);
@@ -170,10 +171,10 @@ var adjustClosingBalanceWithinRange = function(startDate, endDate){
         "branch_type": branchInstance.get("branchType"),
         "branch_id": branchInstance.get("id"),
         "date_start": {
-          "$gte": utcWindowStartDate.format("YYYY-MM-DD HH:mm:ss"),
+          "$gte": utcWindowStartDate,
         },
         "date_end": {
-          "$lte": utcWindowEndDate.format("YYYY-MM-DD HH:mm:ss")
+          "$lte": utcWindowEndDate
         }
       };
 

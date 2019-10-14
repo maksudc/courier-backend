@@ -2,6 +2,7 @@ var DB = require("./../models/index");
 var manualTransactionModel = DB.sequelize.models.manualTransactions;
 var orderModel = DB.sequelize.models.order;
 var moneyModel = DB.sequelize.models.money;
+var branchTransactionHistoryModel = DB.sequelize.models.branchTransactionHistory;
 var branchUtils = require("./../utils/branch");
 var Promise = require("bluebird");
 var moment = require("moment-timezone");
@@ -546,6 +547,29 @@ var getSubBranchIdsUnderRegionalBranch = function(regionalBranchId){
   });
 }
 
+function getBranchHistoryForDay(branchType, branchId, dayStr){
+
+  dateStr = dayStr + " 06:00:00";
+
+  startDate = moment.tz(dateStr, timezoneConfig.CLIENT_ZONE);
+  endDate = startDate.clone().add(1, 'days').subtract(1, 'seconds');
+
+  utcStartDate = startDate.clone().utc();//.format("YYYY-MM-DD HH:mm:ss");
+  utcEndDate = endDate.clone().utc();//.format("YYYY-MM-DD HH:mm:ss");
+
+  utcStartDateStr = utcStartDate.format("YYYY-MM-DD HH:mm:ss");
+  utcEndDateStr = utcEndDate.format("YYYY-MM-DD HH:mm:ss");
+
+  return branchTransactionHistoryModel.findOne({
+    where: {
+      branch_type: branchType,
+      branch_id: branchId,
+      date_start: utcStartDate,
+      date_end: utcEndDate
+    }
+  });
+};
+
 module.exports.getBranchTransactionHistory = getBranchTransactionHistory;
 module.exports.getManualTransactionSummary = getManualTransactionSummary;
 module.exports.getManualTransactionWhereQuery = getManualTransactionWhereQuery;
@@ -560,3 +584,4 @@ module.exports.getMoneyCashinWhereQuery = getMoneyCashinWhereQuery;
 module.exports.getMoneyCashout = getMoneyCashout;
 module.exports.getMoneyCashoutWhereQuery = getMoneyCashoutWhereQuery;
 module.exports.getSubBranchIdsUnderRegionalBranch = getSubBranchIdsUnderRegionalBranch;
+module.exports.getBranchHistoryForDay = getBranchHistoryForDay;
