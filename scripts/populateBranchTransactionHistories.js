@@ -149,6 +149,11 @@ var populateFromStart = function(){
   });
 };
 
+var adjustCumulativeBalanceForDay = function(dayStr){
+
+
+};
+
 var adjustClosingBalanceWithinRange = function(startDate, endDate){
 
   var dates = generateDatesWithinRange(startDate, endDate);
@@ -244,3 +249,4 @@ module.exports.populateForDate = populateForDate;
 module.exports.populateFromStart = populateFromStart;
 module.exports.adjustClosingBalanceWithinRange = adjustClosingBalanceWithinRange;
 module.exports.calculateClosingBalanceFromStart = calculateClosingBalanceFromStart;
+module.exports.adjustCumulativeBalanceForDay = adjustCumulativeBalanceForDay;
