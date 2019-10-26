@@ -14,6 +14,7 @@ var branchTransactionLogic = require("./../logics/branchTransactionLogic");
 
 var moduleSettings = require("./../config/moduleSettings");
 var async = require("async");
+var _lodash_ = require("lodash");
 
 var populateForDate = function(dayStr){
 
@@ -40,7 +41,7 @@ var populateForDate = function(dayStr){
     })
     .map(function(branchInstance){
 
-      params = Object.assign({}, commonParams);
+      params = _lodash_.extend({}, commonParams);
       params["branch_type"] = branchInstance.get("branchType");
       params["branch_id"] = branchInstance.get("id");
 
@@ -62,11 +63,11 @@ var populateForDate = function(dayStr){
         "branch_type": branchInstance.get("branchType"),
         "branch_id": branchInstance.get("id"),
 
-        "date_start": utcDateStart,
-        "date_end": utcDateEnd,
+        "date_start": utcDateStart.format("YYYY-MM-DD HH:mm:ss"),
+        "date_end": utcDateEnd.format("YYYY-MM-DD HH:mm:ss"),
       };
 
-      payload = Object.assign({}, whereQuery);
+      payload = _lodash_.extend({}, whereQuery);
       payload["balance"] = balance;
 
       return branchTransactionHistoryModel.findOrCreate({
@@ -98,7 +99,7 @@ function getTotalCashin(branchSummary){
     "money_cashin"
   ];
 
-  for(let I=0; I < cashinKeys.length; I++){
+  for(I=0; I < cashinKeys.length; I++){
 
     key = cashinKeys[I];
     total += branchSummary[key];
@@ -118,7 +119,7 @@ function getTotalCashout(branchSummary){
     "money_cashout"
   ];
 
-  for(let I=0; I < cashoutKeys.length; I++){
+  for(I=0; I < cashoutKeys.length; I++){
 
     key = cashoutKeys[I];
     total += branchSummary[key];
@@ -176,10 +177,10 @@ var adjustClosingBalanceWithinRange = function(startDate, endDate){
         "branch_type": branchInstance.get("branchType"),
         "branch_id": branchInstance.get("id"),
         "date_start": {
-          "$gte": utcWindowStartDate,
+          "$gte": utcWindowStartDate.format("YYYY-MM-DD HH:mm:ss"),
         },
         "date_end": {
-          "$lte": utcWindowEndDate
+          "$lte": utcWindowEndDate.format("YYYY-MM-DD HH:mm:ss")
         }
       };
 
@@ -230,7 +231,7 @@ function generateDatesWithinRange(startDate, endDate){
 
   dates = [];
 
-  for(let currentDate = startDate.clone(); currentDate.isBefore(endDate); ){
+  for(currentDate = startDate.clone(); currentDate.isBefore(endDate); ){
 
     dates.push(currentDate.format("YYYY-MM-DD"));
 

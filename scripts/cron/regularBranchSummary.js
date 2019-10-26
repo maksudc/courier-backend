@@ -7,7 +7,7 @@ var generationStartDate = currentDate.clone().subtract(1, 'days');
 
 populateBranchTransactionHistories.populateForDate(generationStartDate.format("YYYY-MM-DD"))
 .then(function(){
-    return populateBranchTransactionHistories.calculateClosingBalanceFromStart();
+    // return populateBranchTransactionHistories.calculateClosingBalanceFromStart();
 })
 .then(function(res){
   console.log("Day job completed for generating accounting report");

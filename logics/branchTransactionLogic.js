@@ -7,6 +7,7 @@ var branchUtils = require("./../utils/branch");
 var Promise = require("bluebird");
 var moment = require("moment-timezone");
 var timezoneConfig = require("./../config/timezone");
+var _lodash_ = require("lodash");
 
 function getBranchTransactionHistory(query){
 
@@ -24,7 +25,7 @@ function getBranchTransactionHistory(query){
   return Promise.resolve(["cashin", "cashout"])
   .map(function(transactionType){
 
-    params = Object.assign({}, query);
+    params = _lodash_.extend({}, query);
     params["transaction_type"] = transactionType;
 
     return getManualTransactionSummary(params);
@@ -34,35 +35,35 @@ function getBranchTransactionHistory(query){
     result["manual_cashout"] = manualTransactionAmounts[1] || 0;
   })
   .then(function(){
-    params = Object.assign({}, query);
+    params = _lodash_.extend({}, query);
     return getParcelCashin(params);
   })
   .then(function(totalParcelCashin){
     result["parcel_cashin"] = totalParcelCashin || 0;
   })
   .then(function(){
-    params = Object.assign({}, query);
+    params = _lodash_.extend({}, query);
     return getVDCashin(params);
   })
   .then(function(totalCashin){
     result["vd_cashin"] = totalCashin || 0;
   })
   .then(function(){
-    params = Object.assign({}, query);
+    params = _lodash_.extend({}, query);
     return getVDCashout(params);
   })
   .then(function(totalCashout){
     result["vd_cashout"] = totalCashout || 0;
   })
   .then(function(){
-    params = Object.assign({}, query);
+    params = _lodash_.extend({}, query);
     return getMoneyCashin(params);
   })
   .then(function(totalCashin){
     result["money_cashin"] = totalCashin || 0;
   })
   .then(function(){
-    params = Object.assign({}, query);
+    params = _lodash_.extend({}, query);
     return getMoneyCashout(params);
   })
   .then(function(totalCashout){
