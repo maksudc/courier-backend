@@ -40,8 +40,6 @@ router.get('/', function(req, res){
 		extraQuery[key] = extraParamFilterQuery[key];
 	}
 
-
-
 	whereQuery = tableHelper.getWhere(extraQuery);
 
 	extraJsonComplexQuery = tableHelper.getExtraComplexJsonFiltering();
