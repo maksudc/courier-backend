@@ -43,7 +43,27 @@
       "backoffExponent": 1.5,
       "name": "Global Retry Message Handler"
     },
-    "timezone": "+0:00"
+    "timezone": "+0:00",
+    "replication":{
+      "read": [
+        {
+          "username": "service",
+          "password": "478zG8H3TcnXyBb",
+          "database": "dak_harkara",
+          "host": "172.104.167.246",
+          "port": 3306,
+          "timezone": "+0:00"
+        }
+      ],
+      "write": {
+        "username": "dak_harkara",
+        "password": "6hNWSTUyBPrEv9hP",
+        "database": "dak_harkara",
+        "host": "139.162.38.146",
+        "port": 3306,
+        "timezone": "+0:00"
+      }
+    }
   },
   "training": {
     "username": "training_dak",
