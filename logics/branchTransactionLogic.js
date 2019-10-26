@@ -565,8 +565,8 @@ function getBranchHistoryForDay(branchType, branchId, dayStr){
     where: {
       branch_type: branchType,
       branch_id: branchId,
-      date_start: utcStartDate,
-      date_end: utcEndDate
+      date_start: utcStartDateStr,
+      date_end: utcEndDateStr
     }
   });
 };
