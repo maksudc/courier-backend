@@ -150,14 +150,18 @@ var populateFromStart = function(){
   });
 };
 
-var adjustCumulativeBalanceForDay = function(dayStr){
+var adjustClosingBalanceWithinRange = function(startDate, endDate, mode){
 
+  /**
 
-};
-
-var adjustClosingBalanceWithinRange = function(startDate, endDate){
-
+  @arg mode: str (optional) absolute|relative
+        Absolute means the beginning of given startDate's balance is taken as closing balance and carried overs
+        `relative` means only cumulative addition of closing_balance functions need to be calculated over the given range
+  **/
   var dates = generateDatesWithinRange(startDate, endDate);
+
+  mode = mode || "absolute";
+  console.log(mode);
 
   return subBranchModel.findAll()
   .map(function(branchInstance){
@@ -201,7 +205,9 @@ var adjustClosingBalanceWithinRange = function(startDate, endDate){
 
     return Promise.mapSeries(branchTransactionHistoryEntries, function(branchTransactionHistoryEntry, index, length){
       if(index == 0){
-        branchTransactionHistoryEntry.set("closing_balance", branchTransactionHistoryEntry.get("balance"));
+        if(mode == "absolute"){
+          branchTransactionHistoryEntry.set("closing_balance", branchTransactionHistoryEntry.get("balance"));
+        }
       }else{
         branchTransactionHistoryEntry.set("closing_balance", branchTransactionHistoryEntry.get("balance") + branchTransactionHistoryEntries[index-1].get("closing_balance"));
       }
@@ -225,7 +231,7 @@ var calculateClosingBalanceFromStart = function(){
   endDate = moment.tz(timezoneConfig.CLIENT_ZONE).hours(0).minutes(0).seconds(0);
 
   return adjustClosingBalanceWithinRange(startDate, endDate);
-}
+};
 
 function generateDatesWithinRange(startDate, endDate){
 
@@ -250,4 +256,3 @@ module.exports.populateForDate = populateForDate;
 module.exports.populateFromStart = populateFromStart;
 module.exports.adjustClosingBalanceWithinRange = adjustClosingBalanceWithinRange;
 module.exports.calculateClosingBalanceFromStart = calculateClosingBalanceFromStart;
-module.exports.adjustCumulativeBalanceForDay = adjustCumulativeBalanceForDay;
