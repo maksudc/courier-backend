@@ -2,7 +2,7 @@
   "development": {
     "username": "dak_harkara",
     "password": "j9iETVlbMnqIDJyq",
-    "database": "dak_harkara_local",
+    "database": "dak_harkara_main",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "retry": {
@@ -43,7 +43,7 @@
       "backoffExponent": 1.5,
       "name": "Global Retry Message Handler"
     },
-    "timezone": "+0:00"    
+    "timezone": "+0:00"
   },
   "training": {
     "username": "training_dak",

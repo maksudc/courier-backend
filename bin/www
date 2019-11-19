@@ -88,3 +88,9 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+/*
+* Setting Default timezone of the process
+*/
+var timezoneConfig = require("./../config/timezone");
+process.env.TZ = timezoneConfig.COMMON_ZONE;

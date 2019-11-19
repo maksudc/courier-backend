@@ -1,0 +1,184 @@
+{
+    "main": [
+        {
+            "Branch": "B.Baria",
+            "Person": "Mr. Morshed",
+            "Date": "10/16/2019",
+            "ClosingBalance": "12276.00"
+        },
+        {
+            "Branch": "Banglabazar",
+            "Person": "Shohidul Islam",
+            "Date": "7/31/2019",
+            "ClosingBalance": "15028.00"
+        },
+        {
+            "Branch": "Barishal",
+            "Person": "Md firoz",
+            "Date": "4/15/2019",
+            "ClosingBalance": "88.00"
+        },
+        {
+            "Branch": "Bijoynagar",
+            "Person": "Md Nasir Uddin",
+            "Date": "8/31/2019",
+            "ClosingBalance": "86716.00"
+        },
+        {
+            "Branch": "Bogra",
+            "Person": "Md. Azad",
+            "Date": "9/4/2019",
+            "ClosingBalance": "133839.00"
+        },
+        {
+            "Branch": "Chowmohoni",
+            "Person": "Md Ajgor ",
+            "Date": "4/30/2019",
+            "ClosingBalance": "9526.00"
+        },
+        {
+            "Branch": "Comilla",
+            "Person": "Md Fozlu karim",
+            "Date": "5/26/2019",
+            "ClosingBalance": "14942.00"
+        },
+        {
+            "Branch": "Faridpur",
+            "Person": "Mr. Kawser",
+            "Date": "1/25/2019",
+            "ClosingBalance": "0.00"
+        },
+        {
+            "Branch": "Feni",
+            "Person": "Md Saiful Islam",
+            "Date": "6/22/2019",
+            "ClosingBalance": "26295.00"
+        },
+        {
+            "Branch": "Gawsia",
+            "Person": "Mr. Hasan",
+            "Date": "10/25/2019",
+            "ClosingBalance": "14750.00"
+        },
+        {
+            "Branch": "Jessore",
+            "Person": "Mr. Sharif",
+            "Date": "4/28/2019",
+            "ClosingBalance": "24241.00"
+        },
+        {
+            "Branch": "Kodomtoli",
+            "Person": "Mr. Yeamin/Kayes",
+            "Date": "3/10/2019",
+            "ClosingBalance": "62830.00"
+        },
+        {
+            "Branch": "Kustia",
+            "Person": "Md. Ebrahim Khalil",
+            "Date": "2/9/2019",
+            "ClosingBalance": "0.00"
+        },
+        {
+            "Branch": "Laksham",
+            "Person": "Md Emran Proromanik",
+            "Date": "4/6/2019",
+            "ClosingBalance": "4125.00"
+        },
+        {
+            "Branch": "Laxmipur",
+            "Person": "Md Rasedul Islam",
+            "Date": "9/15/2019",
+            "ClosingBalance": "6000.00"
+        },
+        {
+            "Branch": "Maizdi",
+            "Person": "Md Shapon",
+            "Date": "6/30/2019",
+            "ClosingBalance": "0.00"
+        },
+        {
+            "Branch": "Mogbazaar",
+            "Person": "Mr. Liton",
+            "Date": "10/13/2019",
+            "ClosingBalance": "0.00"
+        },
+        {
+            "Branch": "Mohammadpur",
+            "Person": "Mr. Robi",
+            "Date": "10/22/2019",
+            "ClosingBalance": "38234.00"
+        },
+        {
+            "Branch": "Moulvibazar",
+            "Person": "Saidur Rahman ( Hira)",
+            "Date": "5/6/2019",
+            "ClosingBalance": "30270.00"
+        },
+        {
+            "Branch": "Muradpur",
+            "Person": "Md Zihadul Islam",
+            "Date": "4/9/2019",
+            "ClosingBalance": "12557.00"
+        },
+        {
+            "Branch": "Nandankanon",
+            "Person": "Mr. Khalid Hossain",
+            "Date": "11/10/2019",
+            "ClosingBalance": "29749.00"
+        },
+        {
+            "Branch": "Natore",
+            "Person": " Robiul Isalm",
+            "Date": "4/10/2019",
+            "ClosingBalance": "32.00"
+        },
+        {
+            "Branch": "Newmarket_Khulna",
+            "Person": "Mr. Sharif",
+            "Date": "9/30/2019",
+            "ClosingBalance": "0.00"
+        },
+        {
+            "Branch": "Rajshahi",
+            "Person": " Md Joynal Abedin",
+            "Date": "7/12/2019",
+            "ClosingBalance": "98011.00"
+        },
+        {
+            "Branch": "Shayestaganj",
+            "Person": "Lutfor",
+            "Date": "7/14/2019",
+            "ClosingBalance": "12932.00"
+        },
+        {
+            "Branch": "Srimangal",
+            "Person": "Mr. Monir",
+            "Date": "9/3/2019",
+            "ClosingBalance": "14605.00"
+        },
+        {
+            "Branch": "Subhani Ghat",
+            "Person": "Md. Nazim uddin",
+            "Date": "6/13/2019",
+            "ClosingBalance": "2764.00"
+        },
+        {
+            "Branch": "TangaIl",
+            "Person": "Mr. Rony",
+            "Date": "11/8/2019",
+            "ClosingBalance": "15267.00"
+        },
+        {
+            "Branch": "Tipu Sultan",
+            "Person": "Mr. Hafiz",
+            "Date": "10/15/2019",
+            "ClosingBalance": "68.00"
+        },
+        {
+            "Branch": "Urdu Road",
+            "Person": "Md Jahangir khan",
+            "Date": "8/31/2019",
+            "ClosingBalance": "0.00"
+        }
+    ]
+}

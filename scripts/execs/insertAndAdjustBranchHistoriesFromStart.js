@@ -1,11 +1,12 @@
 var populateBranchTransactionHistories = require("./../populateBranchTransactionHistories");
 
-populateBranchTransactionHistories.populateFromStart().then(function(res){
-  return populateBranchTransactionHistories.calculateClosingBalanceFromStart();
-})
-.then(function(res){
-  console.log("Eveerything run");
+populateBranchTransactionHistories.parseBranchAdjustments()
+.then(function(results){
+  console.log("Successfully Completed Addition and adjustments");
 })
 .catch(function(err){
   console.error(err);
+  if(err){
+      console.error(err.stack);
+  }
 });
