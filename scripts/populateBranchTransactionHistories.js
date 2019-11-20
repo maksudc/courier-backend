@@ -207,10 +207,11 @@ function cumulativeAdjustmentForBranchWithinRange(branchInstance, startDate, end
     return Promise.mapSeries(branchTransactionHistoryEntries, function(branchTransactionHistoryEntry, index, length){
       if(index == 0){
 
-      }else{
+      }else if(branchTransactionHistoryEntries[index-1] && branchTransactionHistoryEntry){
         branchTransactionHistoryEntry.set("closing_balance", branchTransactionHistoryEntry.get("balance") + branchTransactionHistoryEntries[index-1].get("closing_balance"));
+        return branchTransactionHistoryEntry.save();
       }
-      return branchTransactionHistoryEntry.save();
+      return Promise.resolve(true);
     });
   })
   .map(function(results){
@@ -320,6 +321,11 @@ function parseBranchAdjustments(){
   });
 };
 
+function getBranches(){
+  return subBranchModel.findAll();
+}
+
+module.exports.getBranches = getBranches;
 module.exports.parseBranchAdjustments = parseBranchAdjustments;
 module.exports.getTransactionHistoryEntry = getTransactionHistoryEntry;
 module.exports.generateDatesWithinRange = generateDatesWithinRange;

@@ -8,9 +8,18 @@ var dayAfterGeneration = currentDate.clone().hours(6).minutes(0).seconds(0);
 var generationStartDate = dayAfterGeneration.clone().subtract(1, 'days');
 var dayBeforeGeneration = generationStartDate.clone().subtract(1, 'days');
 
-populateBranchTransactionHistories.populateForDate(generationStartDate.format("YYYY-MM-DD"))
-.then(function(){
-    return populateBranchTransactionHistories.adjustClosingBalanceWithinRange(dayBeforeGeneration, dayAfterGeneration, "relative");
+
+populateBranchTransactionHistories.getBranches()
+.map(function(branchInstance){
+
+  return Promise.all([
+    populateBranchTransactionHistories.populateSingleBranchForDate(branchInstance, generationStartDate),
+    Promise.resolve(branchInstance)
+  ]);
+}).map(function(complexResult){
+
+  branchInstance = complexResult[1];
+  return populateBranchTransactionHistories.cumulativeAdjustmentForBranchWithinRange(branchInstance, dayBeforeGeneration, dayAfterGeneration)
 })
 .then(function(res){
   console.log("Day job completed for generating accounting report");
